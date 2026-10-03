@@ -32,7 +32,11 @@ export const getCoverage = () => call("/api/coverage");
  *  URL, and so in every log, which is why there is no call for one. */
 export const checkPoint = (payload) => call("/api/point", payload);
 export const ask = (payload) => call("/api/ask", payload);
+/** A spoken question: a WAV data: URL in the body; the answer carries the words Gemini heard. */
+export const askVoice = (payload) => call("/api/voice", payload);
 export const sendPhoto = (payload) => call("/api/photo", payload);
+export const sendStock = (payload) => call("/api/stock", payload);
+export const writePlan = (payload) => call("/api/plan", payload);
 export const getRain = (areaId) => call(`/api/rain?area=${area(areaId)}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);

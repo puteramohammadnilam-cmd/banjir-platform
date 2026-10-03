@@ -4,6 +4,13 @@ Banjir Check shows a small business how much river flood water a place could get
 
 You pick a business on the map, or check any point in Malaysia by dropping a pin or using GPS. You see the modelled water depth for a 10, 100 and 500 year flood. A form turns that into a rough ringgit loss. An assistant powered by Gemini answers questions about it in Bahasa Melayu or English. It reads its numbers from the data through tools, and never does the sums itself.
 
+What Gemini does here:
+- **Chat with tools:** function calling over the flood data, the cost engine, Google Weather and Google Maps.
+- **Voice:** ask out loud in Bahasa Melayu or English; Gemini writes down the question and the answer is read back.
+- **Photos:** a shop-front photo gives the floor height; a photo of the stock inside gives a list of what would sit under the water, with rough values, to fill in the cost form.
+- **A one-page flood plan** in Bahasa Melayu or English, written from this tool's own figures, ready to print.
+- **Flood news** grounded on Google Search, with sources.
+
 Honest wording matters here. Every depth is "in the model". This is a global river flood model at 90 m squares, not an official Malaysian flood map. It does not say a place is safe, and it does not say a place will flood.
 
 ## Quick start
@@ -100,12 +107,15 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 | POST `/api/point` | Body `{lat, lon, source: "pin" or "gps"}`. Returns `{coverage, region, place, blocks, cells}`. `coverage` is `covered`, `not_loaded` or `outside`. Only a covered point has a place (its depths, its square, its area if it lies in one), and the wet squares around it in `blocks` and `cells`. If a neighbouring flood tile cannot be read, `blocks` and `cells` are null but the place is still returned. |
 | POST `/api/ask` | `{question, place, area_id, history}`. The chat answer. `place` is a business or point id (`business_id` is accepted as an older name). |
 | POST `/api/photo` | `{place, image}`. Gemini reads floor height from a shop-front photo (JPEG, PNG or WebP, 4 MB at most). |
+| POST `/api/stock` | `{place, image, floor_height_cm}`. Gemini lists the stock and equipment in a photo of the shop's inside, with rough value ranges; the server works out which of it sits under the modelled water in each flood size (`app/stock.py`) and suggests a value for the cost form. |
+| POST `/api/plan` | `{place, language: "ms" or "en", …the owner's figures if any}`. A one-page flood plan: our facts (`app/plan.py`), Gemini's steps written from them (links and phone numbers it adds are dropped), and our contacts. |
+| POST `/api/voice` | `{audio, place, area_id, history}`. A spoken question as 16 kHz mono WAV (30 s, 1 MB at most). Gemini writes down the words, which are then asked like a typed question. Returns `{question, language, answer}`. |
 | POST `/api/estimate` | `{place, …the owner's figures}`. The ringgit estimate, no AI. |
 | POST `/api/news` | `{area_id}`. Gemini grounded on Google Search: the latest flood news for the area, with sources. The question is fixed in code. |
 | GET `/api/rain?area=` | Rain expected in the next 12 hours, from Google Weather, at the area's centre |
 | GET `/api/place/{id}` | How Google Maps lists a mapped business. 404 for a point id. |
 
-`/api/point`, `/api/ask`, `/api/photo`, `/api/estimate` and `/api/news` take only POST. A GET to them is a 405. Input that does not fit is a 422 with a plain message that does not repeat what was sent.
+`/api/point`, `/api/ask`, `/api/photo`, `/api/stock`, `/api/plan`, `/api/voice`, `/api/estimate` and `/api/news` take only POST. A GET to them is a 405. Input that does not fit is a 422 with a plain message that does not repeat what was sent.
 
 `/api/rain`, `/api/place/{id}` and `/api/point` send `Cache-Control: no-store`.
 
@@ -113,7 +123,7 @@ Rate limits, per visitor in each 5 minute window, counted in memory by each serv
 
 | Limit | Applies to |
 |---|---|
-| 20 | `/api/ask`, `/api/photo`, `/api/news`: each one is a Gemini call |
+| 20 | `/api/ask`, `/api/photo`, `/api/stock`, `/api/plan`, `/api/news`: each one is a Gemini call. `/api/voice` counts twice (the words, then the answer). |
 | 60 | `/api/rain` and `/api/place/{id}`: Google Maps lookups |
 | 120 | `/api/estimate` |
 | 120 | `/api/point` |
@@ -129,12 +139,14 @@ These are the claims this app makes about your location, and what backs each one
 - The server does not write a point to its logs. `tests/test_place_ai.py` runs a full point flow with log capture and checks that no point or coordinate appears.
 - A point's square goes in the link only after the `#`. Browsers do not send that part to any server.
 - `Referrer-Policy: strict-origin` means a request carries only this site's address as its referrer, not the full page link.
-- `Permissions-Policy: geolocation=(self)` lets this page ask for GPS and no frame. Camera and microphone are off.
+- `Permissions-Policy: geolocation=(self), microphone=(self)` lets this page, and no frame, ask for GPS and the microphone. The camera is off (photos come from the file picker, which can open the camera on a phone).
 - Gemini gets the label "the selected point", the area's name, the modelled depths, and the nearest relief centre with its distance. It never gets coordinates or the square's id.
 - Rain: for a point outside the listed areas, Google Weather gets the square's centre rounded to 0.01 degrees, about 1 km. Inside an area, it gets the area's centre.
 - Google Places is asked only about mapped businesses, by OpenStreetMap name and coordinates. It is never asked about a point.
 - The map tiles come from OpenStreetMap's servers, which see the map area you view. After a GPS fix the map opens at street level (zoom 17), where one tile is about 300 m wide.
-- A photo you upload is sent to Gemini to read the floor height. This app does not save it. Google's Gemini API terms apply to it.
+- A photo you upload (of the shop front, or of the stock inside) is sent to Gemini to be read. This app does not save it. Google's Gemini API terms apply to it.
+- A voice question is recorded only while the Speak button is on, sent to Gemini as audio to write down the words, and not saved or logged by this app (`tests/test_voice.py`). Answers to spoken questions are read aloud by your browser's own speech voice (some browsers use an online voice for this).
+- The flood plan is written by Gemini from facts this app gives it: for a point you picked, the same as the chat gets, never coordinates.
 
 ## Coverage and limits
 

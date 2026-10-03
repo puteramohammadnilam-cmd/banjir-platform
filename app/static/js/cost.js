@@ -1,5 +1,6 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
 import { SCENARIOS, depthText, h, icon, ringgit } from "./dom.js";
+import { createStockCard } from "./stock.js";
 
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
 const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, closed_days: 365, raise_cm: 300, measure_cost_rm: 50_000_000 };
@@ -82,6 +83,7 @@ function buildFields() {
     size,
     sizeBox: h("label", { class: "input-label", for: size.id, hidden: true }, "My shop is", size),
     floorNote: h("p", { class: "hint" }, FLOOR_NOTE),
+    valueNote: h("p", { class: "hint", "aria-live": "polite" }),
     measure: h("details", {}, h("summary", {}, "Test a measure: raise my stock"),
       h("p", { class: "hint" }, "Optional. Needs the value above, and both figures."),
       h("div", { class: "pair" }, raise.node, measureCost.node)),
@@ -116,7 +118,7 @@ function readFigures(form, { numbers, size }) {
 
 /** The form: stock, shop, lost trade and the optional measure. Submitting checks it and calls onEstimate(figures). */
 function buildForm(fields, onEstimate) {
-  const { numbers, sizeBox, floorNote, measure, error, submit } = fields;
+  const { numbers, sizeBox, floorNote, valueNote, measure, error, submit } = fields;
   const modeChoice = (mode, text, checked) => h("label", { class: "choice" },
     h("input", { type: "radio", name: "mode", value: mode, checked, onchange: () => setMode(fields, mode) }), text);
   const form = h("form", { class: "surface cost-form", onsubmit: (event) => {
@@ -130,7 +132,7 @@ function buildForm(fields, onEstimate) {
     h("p", { class: "hint" }, "What water could reach: goods, machines, furniture and fittings."),
     modeChoice("value", "I know roughly what it is worth", true),
     modeChoice("size", "I don't know: use a typical figure for my shop size", false),
-    numbers.value.node, sizeBox),
+    numbers.value.node, valueNote, sizeBox),
   h("fieldset", {}, h("legend", {}, "Your shop"), numbers.floor.node, floorNote),
   h("fieldset", {}, h("legend", {}, "Lost trade"),
     h("p", { class: "hint" }, "Optional. Without it, 30% of the damage is added for cleaning up and lost trade."),
@@ -142,10 +144,10 @@ function buildForm(fields, onEstimate) {
 
 /** What was typed for each place, by its id, so going to another business or point and back never mixes figures up. */
 function createDrafts(form, fields) {
-  const { numbers, size, measure, floorNote, error } = fields;
+  const { numbers, size, measure, floorNote, valueNote, error } = fields;
   const drafts = new Map();
   const snapshot = () => ({
-    mode: form.elements.mode.value, size: size.value, open: measure.open, note: floorNote.textContent,
+    mode: form.elements.mode.value, size: size.value, open: measure.open, note: floorNote.textContent, valueNote: valueNote.textContent,
     touched: numbers.floor.input.dataset.touched === "true",
     ...Object.fromEntries(Object.entries(numbers).map(([key, field]) => [key, field.input.value])),
   });
@@ -158,29 +160,45 @@ function createDrafts(form, fields) {
     if (draft?.touched) numbers.floor.input.dataset.touched = "true";
     else delete numbers.floor.input.dataset.touched;
     floorNote.textContent = draft?.note ?? FLOOR_NOTE;
+    valueNote.textContent = draft?.valueNote ?? "";
     error.textContent = "";
   }
   return { save: (id) => drafts.set(id, snapshot()), restore: (id) => restore(drafts.get(id)) };
 }
 
-/** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up. */
-export function createCost(panel, { onEstimate }) {
+/** "Use these figures" from the stock photo: the value goes in the form, said to be Gemini's guess, and focus goes to
+ *  it so the owner sees what changed. */
+function useStockValue(form, fields, value) {
+  form.elements.mode.value = "value";
+  setMode(fields, "value");
+  fields.numbers.value.input.value = String(value);
+  fields.valueNote.textContent = "Filled in from your stock photo: Gemini's rough guess. Change it if you know better.";
+  fields.numbers.value.input.focus();
+}
+
+/** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up.
+ *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form. */
+export function createCost(panel, { onEstimate, onStockPhoto = () => {} }) {
   const title = h("h1", { class: "view-title" });
   const depths = h("p", { class: "muted" });
   const fields = buildFields();
   const { numbers, floorNote, error, submit } = fields;
   const form = buildForm(fields, onEstimate);
+  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value) });
   const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": "Your estimate" });
   panel.replaceChildren(
     h("header", { class: "view-head" }, h("p", { class: "kicker" }, "Flood cost"), title, depths),
+    stock.node,
     h("div", { class: "cost-grid" }, form, output));
   const drafts = createDrafts(form, fields);
   let shownId = null;
   let shownEstimate;
 
   return {
-    /** photoFloorCm fills the floor field unless the owner has typed their own for this place. */
-    render(place, photoFloorCm, estimate) {
+    /** photoFloorCm fills the floor field unless the owner has typed their own for this place. stockState is the
+     *  place's stock photo ({busy, result, error}) and rp the flood size on show. */
+    render(place, photoFloorCm, estimate, stockState, rp = "100") {
+      stock.render(stockState, rp);
       const isNewPlace = place.id !== shownId;
       if (isNewPlace) {
         if (shownId) drafts.save(shownId);

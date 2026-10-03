@@ -37,6 +37,12 @@ export class FakeElement {
     return this.attrs.get(name) ?? null;
   }
 
+  removeAttribute(name) {
+    this.attrs.delete(name);
+    if (name === "hidden") this.hidden = false;
+    if (name === "disabled") this.disabled = false;
+  }
+
   get placeholder() {
     return this.getAttribute("placeholder") ?? "";
   }

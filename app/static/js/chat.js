@@ -1,6 +1,7 @@
 import * as api from "./api.js";
 import { h, icon } from "./dom.js";
 import { areaOf } from "./point.js";
+import * as realVoice from "./voice.js";
 
 const SUGGESTIONS = Object.freeze([
   "Kedai ni kena air tak kalau banjir besar?",
@@ -126,17 +127,59 @@ function wireQuestionForm({ form, input, button, send }) {
   });
 }
 
+export const VOICE_WORDS = Object.freeze({
+  speak: "Speak", stop: "Stop", label: "Record a question", listening: "Listening to your question…",
+  wait: "Please wait for the answer, then ask again.", stopReading: "Stop reading",
+  blocked: "The microphone is blocked or not there. Type your question instead.",
+  unreadable: "That recording could not be read. Please try again.",
+  note: "Speak: your recording goes to Google Gemini to write down the question, and is not saved by this tool.",
+});
+
+/** The microphone button: press to record, press again (or wait 30 s) to send. record() starts a recording
+ *  ({stop, done}, voice.js startRecording); send(audio) asks the question; isBusy() says a typed question is still
+ *  being answered. Its name stays "Record a question"; whether it is recording is in aria-pressed. */
+function voiceButton({ record, send, add, isBusy }) {
+  let recording = null;
+  let isStarting = false;   // the browser may be asking for the microphone: a second press must not start another
+  const mic = h("button", { type: "button", class: "btn btn-secondary mic", "aria-pressed": "false", "aria-label": VOICE_WORDS.label });
+  const show = (isOn) => {
+    mic.setAttribute("aria-pressed", String(isOn));
+    mic.replaceChildren(icon("mic"), isOn ? VOICE_WORDS.stop : VOICE_WORDS.speak);
+  };
+  show(false);
+  mic.addEventListener("click", async () => {
+    if (recording) return recording.stop();
+    if (mic.disabled || isStarting) return undefined;
+    if (isBusy()) return add("error", VOICE_WORDS.wait);
+    isStarting = true;
+    try {
+      recording = await record();
+    } catch {
+      return add("error", VOICE_WORDS.blocked);
+    } finally {
+      isStarting = false;
+    }
+    show(true);
+    const audio = await recording.done.catch(() => null);
+    recording = null;
+    show(false);
+    return audio ? send(audio) : add("error", VOICE_WORDS.unreadable);
+  });
+  return mic;
+}
+
 /** getPlaceRef gives the selected place's id (a business or a point) when a question is sent. areaId and areaName are
  *  the area the page shows (its id and short name from config, which change only with a new page); areas are the listed
  *  areas, to tell which one a point lies in. render(place) is called as the selection changes and shows the chips, the
  *  question box's words and the flood news that fit it: until then, and for a business, the chat is the business chat. */
-export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, areaName, areas = [] }) {
+export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, areaName, areas = [], voice = realVoice }) {
   let history = [];
   const button = form.querySelector("button");
   const page = { id: areaId, name: areaName };
   const showNews = newsBlock(news);
   const businessPlaceholder = input.placeholder;   // as index.html has it
-  let shown = { chips: SUGGESTIONS, news: newsFor(null, page, areas) };   // what the chips and the news button are built for
+  let shown = { chips: SUGGESTIONS, news: newsFor(null, page, areas) };
+  let shownPlaceId;   // what the chips and the news button are built for
   const add = (kind, text) => addMessage(messages, kind, text);
 
   async function send(question) {
@@ -145,11 +188,40 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
       add, control: button, userText: question, waitText: "Checking the flood data…",
       call: () => api.ask({ question, place: getPlaceRef(), area_id: areaId, history }),
       show: ({ answer }) => {
-        history = [...history, { role: "user", text: question }, { role: "model", text: answer.slice(0, MAX_TURN_CHARS) }].slice(-10);
+        remember(question, answer);
         add("model", answer);
       },
     });
   }
+
+  const remember = (question, answer) => {
+    history = [...history, { role: "user", text: question }, { role: "model", text: answer.slice(0, MAX_TURN_CHARS) }].slice(-10);
+  };
+
+  /** A spoken question: the words heard go in the conversation as the user's, then the answer, read aloud. */
+  async function sendVoice(audio) {
+    if (button.disabled) return;
+    const waiting = add("wait", VOICE_WORDS.listening);
+    button.disabled = true;
+    mic.disabled = true;
+    try {
+      const { question, language, answer } = await api.askVoice({ audio, place: getPlaceRef(), area_id: areaId, history });
+      waiting.remove();
+      add("user", question);
+      add("model", answer).append(h("button", { type: "button", class: "btn btn-secondary stop-reading", onclick: voice.stopSpeaking }, VOICE_WORDS.stopReading));
+      remember(question, answer);
+      voice.speak(answer, language);
+    } catch (error) {
+      waiting.remove();
+      add("error", error.message);
+    } finally {
+      button.disabled = false;
+      mic.disabled = false;
+    }
+  }
+  const mic = voice.canRecord() ? voiceButton({ record: voice.startRecording, send: sendVoice, add, isBusy: () => button.disabled }) : null;
+  if (mic) form.after(h("p", { class: "fineprint voice-note" }, VOICE_WORDS.note));
+  if (mic) form.append(mic);
 
   async function sendNews() {
     const target = shown.news;
@@ -168,6 +240,8 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
   add("model", GREETING);
   return {
     render(place) {
+      if (place?.id !== shownPlaceId) voice.stopSpeaking?.();   // an answer about another place is not read on
+      shownPlaceId = place?.id;
       input.placeholder = place?.is_point ? POINT_PLACEHOLDER : businessPlaceholder;
       const next = { chips: chipsFor(place, page, areas), news: newsFor(place, page, areas) };
       if (next.chips !== shown.chips) showChips(chips, next.chips, send);

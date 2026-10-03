@@ -6,6 +6,7 @@ import { createCost } from "./cost.js";
 import { h } from "./dom.js";
 import { createOverview } from "./overview.js";
 import { createPin } from "./pin.js";
+import { createPlanCard } from "./plan.js";
 import { businessPlace, isPoint, parseRef, readUrl, snapToGrid, writeUrl } from "./place.js";
 
 const PHOTO_MAX_EDGE = 1280;
@@ -133,6 +134,9 @@ function initialState(url, start, linked) {
     points: place.is_point ? { [place.id]: place } : {},   // points checked on this visit, by id
     squares: linked?.squares ? { [place.id]: linked.squares } : {},   // {blocks, cells} that came with the latest point, by its id
     photos: {},    // by place id: { busy, preview, estimate, water_above_floor_m, error }
+    stocks: {},    // by place id: { busy, result, error }: the photo of the stock (POST /api/stock)
+    plans: {},     // by place id: { busy, result, error }: the flood plan (POST /api/plan)
+    planLanguage: "ms",
     listings: {},  // by business id: { busy } | { configured, place } | { error }
     estimates: {}, // by place id: { busy, result } | { result } | { error, result }
     rain: start.status.maps_ready ? { busy: true, configured: true } : { configured: false },
@@ -229,6 +233,62 @@ async function sendPhoto(app, file) {
   }
 }
 
+/** A photo of the stock inside: Gemini lists it, the server says what is under the modelled water. The last result
+ *  stays on show while a new photo is read, and if reading it fails. */
+async function sendStock(app, file, floorCm) {
+  const { store } = app;
+  const id = store.state.placeKey;
+  if (store.state.stocks[id]?.busy) return;
+  const before = store.state.stocks[id];
+  const setStock = (value) => store.update({ stocks: { ...store.state.stocks, [id]: value } });
+  setStock({ result: before?.result, busy: true });
+  try {
+    const image = await shrinkPhoto(file).catch(() => { throw new Error("That file could not be read as a photo."); });
+    setStock({ result: await api.sendStock({ place: id, image, floor_height_cm: floorCm }) });
+  } catch (error) {
+    setStock({ result: before?.result, error: error.message });
+  }
+}
+
+/** The figures the plan is written from: the owner's last estimate for this place, else the floor from the shop-front
+ *  photo, else none. */
+function planFigures(state, id) {
+  const inputs = state.estimates[id]?.result?.inputs;
+  if (inputs) return inputs;
+  const photo = state.photos[id]?.estimate;
+  return photo?.is_shop_front ? { floor_height_cm: photo.floor_height_cm } : {};
+}
+
+async function writePlan(app, language) {
+  const { store } = app;
+  const id = store.state.placeKey;
+  if (store.state.plans[id]?.busy) return;
+  const before = store.state.plans[id];
+  const setPlan = (value) => store.update({ plans: { ...store.state.plans, [id]: value } });
+  setPlan({ result: before?.result, busy: true });
+  try {
+    setPlan({ result: await api.writePlan({ place: id, language, ...planFigures(store.state, id) }) });
+  } catch (error) {
+    setPlan({ result: before?.result, error: error.message });
+  }
+}
+
+/** Prints the plan alone: a copy goes in #print-root, a child of the body, and views.css prints only that while it
+ *  holds something. It is emptied after printing; where the browser never says so (iOS), the screen is unchanged
+ *  anyway, as #print-root is never shown on screen. */
+function printPlan() {
+  const sheet = document.querySelector(".plan-sheet");
+  if (!sheet) return;
+  let root = $("print-root");
+  if (!root) {
+    root = h("div", { id: "print-root" });
+    document.body.append(root);
+    window.addEventListener("afterprint", () => root.replaceChildren());
+  }
+  root.replaceChildren(sheet.cloneNode(true));
+  window.print();
+}
+
 async function sendEstimate(app, figures) {
   const { store } = app;
   const id = store.state.placeKey;
@@ -310,7 +370,13 @@ function createViews(app) {
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
   });
-  const cost = createCost($("panel-cost"), { onEstimate: (figures) => sendEstimate(app, figures) });
+  const plan = createPlanCard({
+    onWrite: (language) => writePlan(app, language), onPrint: printPlan, onLanguage: (planLanguage) => store.update({ planLanguage }),
+  });
+  $("panel-business").append(plan.node);
+  const cost = createCost($("panel-cost"), {
+    onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm),
+  });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
   wireFinder(start.premises, (id) => open(app, id), (needle) => {   // nothing matched: show the filtered list instead
     $("directory-filter").value = needle;
@@ -322,7 +388,7 @@ function createViews(app) {
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
   });
-  return { overview, business, cost, chat, showTab, pin };
+  return { overview, business, cost, chat, showTab, pin, plan };
 }
 
 function render(app, views, state, previous) {
@@ -331,7 +397,9 @@ function render(app, views, state, previous) {
   views.showTab(state.tab);
   views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey] });
-  views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey]);
+  views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
+    state.stocks[state.placeKey], state.rp);
+  views.plan.render(state.plans[state.placeKey], state.planLanguage);
   views.chat.render(place);   // the chips, the question box and the flood news that fit the place
   $("ask-business").textContent = place.is_point ? "this point" : place.name;
   views.pin.render({ tab: state.tab, place, squares: state.squares[state.placeKey] });   // ends aim mode off the Area overview; puts a point's pin and its squares on the map

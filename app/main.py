@@ -24,10 +24,10 @@ from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
-from pydantic import AliasChoices, BaseModel, Field, StringConstraints  # noqa: E402
+from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, floodtools, googlemaps, places, raster  # noqa: E402
+from . import ai, areas, floodtools, googlemaps, places, plan, raster, stock  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -37,6 +37,9 @@ MAX_TURNS = 12
 MAX_PHOTO_BYTES = 4 * 1024 * 1024
 MAX_BODY_BYTES = 6 * 1024 * 1024   # a 4 MB photo as base64, plus headroom
 PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_AUDIO_BYTES = 1_000_000   # 30 s of 16 kHz mono 16-bit WAV, as voice.js records it
+AUDIO_TYPES = {"audio/wav"}   # the page turns every recording into WAV, a format Gemini takes on every platform
+NOT_HEARD = "Sorry, I could not hear a question in that recording. Try again, a little closer to the phone."
 RATE_LIMIT = 20             # chat, photo and news: each one is a Gemini call
 MAPS_RATE_LIMIT = 60        # rain and open-or-closed lookups: cheap, and fired as visitors click round the map
 CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no Google call
@@ -60,10 +63,10 @@ SECURITY_HEADERS = {
     # Referer holds the origin only, even on requests to this site, so no request repeats the page's address in a log;
     # OSM's tile servers still get the origin
     "Referrer-Policy": "strict-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",   # GPS for this page, never for a frame
+    "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",   # GPS and voice for this page, no frame
 }
 NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point")   # Google results may not be cached; a point is personal
-POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/news", "/api/point")
+POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
 # business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
 # {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
 PLACE_NAMES = AliasChoices("place", "business_id")
@@ -76,6 +79,9 @@ VALIDATION_WORDS = (   # (path prefix, message) for a request body or path that 
     ("/api/point", POINT_WORDS),
     ("/api/news", "Please reload the page and ask for the news again."),
     ("/api/photo", "The photo could not be sent. Please choose it again."),
+    ("/api/plan", "Please choose Bahasa Melayu or English, and check the figures."),
+    ("/api/voice", "The recording could not be sent. Please try again."),
+    ("/api/stock", "The photo could not be sent. Please choose it again, and check the floor height (0 to 300 cm)."),
 )
 PLACE_ERRORS = {"malformed": (422, POINT_WORDS), "unknown": (404, "Unknown business.")}   # else NOT_COVERED_WORDS
 # FastAPI's 400 for a body json.loads cannot read without a JSONDecodeError: bad UTF-8, an integer of more than 4,300
@@ -109,6 +115,20 @@ class NewsIn(BaseModel):
 class PhotoIn(BaseModel):
     place: str = Field(max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
     image: str = Field(min_length=32, description="data: URL, base64. Size is capped by MAX_BODY_BYTES and decode_photo.")
+
+
+class VoiceIn(BaseModel):
+    """A spoken question: a WAV recording as a data: URL, with the same selection and history as a typed one."""
+    audio: str = Field(min_length=32)
+    place: str | None = Field(default=None, max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
+    area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
+    history: list[Turn] = Field(default_factory=list, max_length=MAX_TURNS)
+
+
+class StockIn(PhotoIn):
+    """A photo of the shop's inside, and the floor height above the street if known (from the shop-front photo or the
+    owner)."""
+    floor_height_cm: float = Field(default=0, ge=0, le=300, allow_inf_nan=False)
 
 
 class EstimateIn(BaseModel):
@@ -234,6 +254,23 @@ def decode_photo(data_url: str) -> tuple[bytes, str]:
     return raw, mime
 
 
+def decode_audio(data_url: str) -> tuple[bytes, str]:
+    """The recording's bytes and type from a data: URL; 415 for a type other than WAV, 413 over MAX_AUDIO_BYTES."""
+    header, _, payload = data_url.partition(",")
+    mime = header.removeprefix("data:").split(";")[0]
+    if not header.endswith(";base64") or mime not in AUDIO_TYPES:
+        raise HTTPException(415, "Please record again: the recording must be WAV audio.")
+    try:
+        raw = base64.b64decode(payload, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise HTTPException(400, "The recording could not be read.") from exc
+    if len(raw) > MAX_AUDIO_BYTES:
+        raise HTTPException(413, "That recording is too long. Keep a question under 30 seconds.")
+    if raw[:4] != b"RIFF" or raw[8:12] != b"WAVE":
+        raise HTTPException(415, "Please record again: the recording must be WAV audio.")
+    return raw, mime
+
+
 def call_ai(fn, *args):
     """Run an AI call; turn provider failures into clean HTTP errors without leaking details."""
     try:
@@ -242,6 +279,9 @@ def call_ai(fn, *args):
         raise HTTPException(503, "The AI assistant is not set up yet. Add a Gemini key to .env.") from exc
     except raster.RasterError:
         raise   # damaged flood model files are model_unreadable's 503, not a failure of the AI provider
+    except ValidationError as exc:   # the model's answer broke its schema; the error would repeat what it wrote
+        log.error("AI call failed: %s: ValidationError", fn.__name__)
+        raise HTTPException(502, "The AI assistant could not answer just now. Please try again.") from exc
     except Exception as exc:  # provider SDK raises many types; all mean "upstream failed"
         log.exception("AI call failed: %s", fn.__name__)
         raise HTTPException(502, "The AI assistant could not answer just now. Please try again.") from exc
@@ -344,6 +384,23 @@ def ask(body: AskIn) -> dict:
     return ok({"answer": call_ai(ai.ask, body.question, body.place, history, area)})
 
 
+@app.post("/api/voice", dependencies=[Depends(rate_limit)])
+def voice(body: VoiceIn, request: Request) -> dict:
+    """A spoken question: Gemini writes down the words (ai.transcribe), which are then asked like typed ones. It is two
+    Gemini calls, so a recording that can be used counts twice in the AI bucket. Neither the recording nor the words
+    are logged."""
+    area = question_area(body.area_id, body.place)
+    raw, mime = decode_audio(body.audio)
+    rate_limit(request)
+    heard = call_ai(ai.transcribe, raw, mime)
+    question = heard.text.strip()[:MAX_QUESTION_CHARS]
+    if not heard.is_speech or not question:
+        raise HTTPException(422, NOT_HEARD)
+    history = [turn.model_dump() for turn in body.history]
+    return ok({"question": question, "language": heard.language,
+               "answer": call_ai(ai.ask, question, body.place, history, area)})
+
+
 @app.post("/api/photo", dependencies=[Depends(rate_limit)])
 def photo(body: PhotoIn) -> dict:
     place = known_place(body.place)
@@ -353,6 +410,19 @@ def photo(body: PhotoIn) -> dict:
     above_floor = {rp: (None if depth is None else round(max(0.0, depth - floor_m), 2))
                    for rp, depth in place["depth_m"].items()}
     return ok({"estimate": estimate.model_dump(), "water_above_floor_m": above_floor})
+
+
+@app.post("/api/stock", dependencies=[Depends(rate_limit)])
+def stock_photo(body: StockIn) -> dict:
+    """Gemini lists the stock and equipment in the photo with rough value ranges; stock.summarise says which of it is
+    under the modelled water in each flood size. A photo that is not a shop's inside gets no figures."""
+    place = known_place(body.place)
+    raw, mime = decode_photo(body.image)
+    estimate = call_ai(ai.read_stock_photo, raw, mime)
+    found = stock.summarise([item.model_dump() for item in estimate.items], place["depth_m"], body.floor_height_cm)
+    if not estimate.is_shop_inside:
+        found = {"total": None, "suggested_value_rm": None, "per_flood": None}
+    return ok({"estimate": estimate.model_dump(), "floor_height_cm": body.floor_height_cm, **found})
 
 
 # floodtools words its errors for the AI model, which knows the argument names; the form shows them to people.
@@ -378,6 +448,35 @@ def estimate(body: EstimateIn) -> dict:
     if "error" in result:
         raise HTTPException(422, for_people(result["error"]))
     return ok(result)
+
+
+class PlanIn(EstimateIn):
+    """The place, the language, and the owner's figures if they have given any (the same as the cost form's)."""
+    language: Literal["ms", "en"]
+    floor_height_cm: float = Field(default=0, ge=0, le=300, allow_inf_nan=False)   # used even with no other figure
+
+
+def plan_estimate(place: dict, body: PlanIn) -> dict | None:
+    """The cost estimate for the plan's facts when the owner has given a value or a shop size, else None."""
+    figures = body.model_dump(exclude={"place", "language"})
+    if not (body.value_at_risk_rm or body.shop_size or body.raise_cm or body.measure_cost_rm):
+        return None
+    found = floodtools.estimate_for(place, **figures)
+    if "error" in found:
+        raise HTTPException(422, for_people(found["error"]))
+    return found
+
+
+@app.post("/api/plan", dependencies=[Depends(rate_limit)])
+def flood_plan(body: PlanIn) -> dict:
+    """A one-page flood plan: our facts and contacts, and the steps Gemini writes from the facts (plan.clean drops
+    any link or phone number it adds)."""
+    place = known_place(body.place)
+    area = places.area_of(place)
+    facts = plan.facts(place, area, body.floor_height_cm, plan_estimate(place, body))
+    written = call_ai(ai.write_plan, facts, body.language)
+    return ok({"language": body.language, "plan": plan.clean(written, facts, body.language), "facts": facts,
+               "contacts": plan.contacts(area)})
 
 
 def call_maps(fn, *args):
