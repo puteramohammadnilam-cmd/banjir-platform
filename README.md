@@ -49,7 +49,7 @@ Gemini key, the Weather API and Places API Text Search.
 
 ```bash
 .venv/bin/python -m pytest -q
-node --test tests/dom.test.mjs   # depth bands, depth words, flood chance, flood list (Node 18+, no packages)
+node --test tests/dom.test.mjs   # depth bands, depth words, flood chance, flood list (Node 22.7+ or 20.19+, no packages)
 ```
 
 ## Where things are
@@ -60,8 +60,8 @@ node --test tests/dom.test.mjs   # depth bands, depth words, flood chance, flood
 | `app/floodtools.py` | Data lookups. Gemini calls these as tools, so its numbers come from the data. |
 | `app/googlemaps.py` | Google Weather and Places calls, server side only. |
 | `app/costs.py` | The ringgit loss arithmetic. No AI, no I/O. See "How the cost estimate works". |
-| `app/main.py` | Web server: page, data, `/api/ask`, `/api/photo`, limits and security headers. |
-| `app/static/` | The page. Plain HTML, CSS and JavaScript, no build step. |
+| `app/main.py` | Web server: page, data, `/api/ask`, `/api/photo`, `/api/estimate`, limits and security headers. |
+| `app/static/` | The page, in four tabs: area overview, my business, flood cost, ask AI. Plain HTML, CSS and JavaScript, no build step. |
 | `app/data/` | Built data: 204 businesses and 1,575 flood squares around Taman Sri Muda, Shah Alam. |
 | `tools/build_data.py` | Rebuilds `app/data` from the raw files in `../05_Raw_Data_Sources`. To move the study area, change `VIEW` and the two input files. |
 
@@ -152,9 +152,10 @@ repo.
 - Nobody has checked the 204 businesses on the ground. Banks, clinics and fuel stations are left out.
 - The study area was Kota Tinggi, Johor until 2 October 2026. A copy of that build is in
   `../11_Platform_Draft_kota_tinggi_2026-10-02.zip`.
-- The cost estimate is reachable through the chat only. There is no form for it on the page yet, and the
-  chat does not know the floor height from the photo unless the owner repeats it.
-- The cost estimate has not been tried against a live Gemini key. The sums and the tool schema are tested.
+- The cost estimate has a form on the Flood cost tab, which fills in the floor height from the photo. The chat
+  can also run it, but does not know the floor height from the photo unless the owner repeats it.
+- The cost estimate has not been tried through the chat with a live Gemini key. The sums, the form's endpoint and
+  the tool schema are tested.
 - The Google Weather, Places and Search calls are tested against recorded response shapes, not live keys. Check
   them once the keys are in. Whether Google Weather covers Shah Alam and how well Places matches local shop
   names are unknown until then.

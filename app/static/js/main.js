@@ -1,23 +1,14 @@
 import * as api from "./api.js";
-import { renderCard } from "./card.js";
+import { createBusiness } from "./card.js";
 import { createChat } from "./chat.js";
-import { BANDS, SCENARIOS, band, chanceWithin, h } from "./dom.js";
-import { renderHistory } from "./history.js";
-import { createMap } from "./map.js";
+import { createCost } from "./cost.js";
+import { SCENARIOS, h } from "./dom.js";
+import { createOverview } from "./overview.js";
 
+const TABS = ["overview", "business", "cost", "ask"];
 const PHOTO_MAX_EDGE = 1280;
 const PHOTO_QUALITY = 0.85;
-const CHANCE_YEARS = 10;   // about one shop lease
 const $ = (id) => document.getElementById(id);
-
-function renderLegend(element, hasShelters) {
-  const items = [
-    ...BANDS.map((b, i) => h("li", {}, h("span", { class: `swatch band-${i + 1}` }), b.words, h("span", { class: "muted" }, b.range))),
-    h("li", {}, h("span", { class: "dot dot-dry" }), "No water in the model"),
-    hasShelters && h("li", {}, h("span", { class: "shelter-pin" }), "Flood relief centre"),
-  ];
-  element.replaceChildren(...items.filter(Boolean));
-}
 
 /** Shrink and re-encode in the browser: smaller upload, and location data in the file is dropped. */
 async function shrinkPhoto(file) {
@@ -31,44 +22,121 @@ async function shrinkPhoto(file) {
   return canvas.toDataURL("image/jpeg", PHOTO_QUALITY);
 }
 
+/** Tabs as in the ARIA pattern: arrow keys, Home and End move between them; only the chosen one is in the tab order. */
+function wireTabs(onPick) {
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => onPick(tab.dataset.tab));
+    tab.addEventListener("keydown", (event) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: tabs.length - 1 - i }[event.key];
+      if (step === undefined) return;
+      event.preventDefault();
+      const next = tabs[(i + step + tabs.length) % tabs.length];
+      next.focus();
+      onPick(next.dataset.tab);
+    });
+  });
+  return (current) => {
+    for (const tab of tabs) {
+      const selected = tab.dataset.tab === current;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      $(tab.getAttribute("aria-controls")).hidden = !selected;
+    }
+  };
+}
+
+/** The header search: the browser's own suggestion list, one entry per business, made unique with its road. */
+function wireFinder(premises, onOpen, onNoMatch) {
+  const ids = new Map();
+  for (const p of [...premises].sort((a, b) => a.name.localeCompare(b.name))) {
+    let text = `${p.name} · ${p.road.name}`;
+    for (let n = 2; ids.has(text); n += 1) text = `${p.name} · ${p.road.name} (${n})`;
+    ids.set(text, p.id);
+  }
+  $("business-names").replaceChildren(...[...ids.keys()].map((text) => h("option", { value: text })));
+  const input = $("finder-input");
+  const open = (id) => { input.value = ""; input.blur(); onOpen(id); };
+  input.addEventListener("input", () => { if (ids.has(input.value)) open(ids.get(input.value)); });
+  $("finder").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const needle = input.value.trim().toLowerCase();
+    if (!needle) return;
+    const hit = [...ids].find(([text]) => text.toLowerCase().includes(needle));
+    if (hit) open(hit[1]);
+    else onNoMatch(needle);
+  });
+}
+
 function start({ premises, town }, status) {
   const params = new URLSearchParams(location.search);
   const byId = new Map(premises.map((p) => [p.id, p]));
+  const shop = byId.has(params.get("shop")) ? params.get("shop") : null;
   let state = {
+    tab: TABS.includes(params.get("tab")) ? params.get("tab") : shop ? "business" : "overview",
     rp: SCENARIOS.includes(params.get("rp")) ? params.get("rp") : "100",
-    selectedId: byId.has(params.get("shop")) ? params.get("shop") : premises[0].id,
-    photos: {},   // by premise id: { busy, preview, estimate, water_above_floor_m, error }
-    listings: {}, // by premise id: { busy } | { configured, place } | { error }
+    selectedId: shop ?? premises[0].id,
+    photos: {},    // by premise id: { busy, preview, estimate, water_above_floor_m, error }
+    listings: {},  // by premise id: { busy } | { configured, place } | { error }
+    estimates: {}, // by premise id: { busy, result } | { result } | { error, result }
+    rain: status.maps_ready ? { busy: true, configured: true } : { configured: false },
   };
 
-  const map = createMap($("map"), town, premises, (id) => update({ selectedId: id }));
-  const ledgerRows = new Map(premises.map((p) => {
-    const row = h("button", { type: "button", onclick: () => update({ selectedId: p.id }) },
-      h("span", { class: "name" }, p.name),
-      SCENARIOS.map((rp) => {
-        const level = band(p.depth_m[rp]);
-        return h("span", { class: `cell${level ? ` band-${level}` : ""}`, title: `1 in ${rp} years` }, level ? p.depth_m[rp].toFixed(1) : "–");
-      }));
-    return [p.id, row];
-  }));
-  $("ledger-heading").textContent = `All ${premises.length} businesses`;
-  renderLegend($("legend"), town.shelters.length > 0);
-  $("ledger").replaceChildren(...[...ledgerRows.values()].map((row) => h("li", {}, row)));
+  const pickRp = (rp) => update({ rp });
+  /** Switch tab from a button inside the page, and take keyboard focus to the new tab's heading. */
+  const goto = (tab, change = {}) => {
+    update({ tab, ...change });
+    const panel = $(`panel-${tab}`);
+    const heading = panel.querySelector("h1") ?? panel;
+    if (heading !== panel) heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  };
+  // picking a shop is what loads its Google Maps listing, so picking it again after an error retries
+  const select = (id) => { update({ selectedId: id }); loadListing(id); };
+  const open = (id) => { goto("business", { selectedId: id }); loadListing(id); };
+  const overview = createOverview({ premises, town, onSelect: select, onOpen: open, onPick: pickRp });
+  const business = createBusiness($("panel-business"), {
+    onPhoto, onPick: pickRp, goto,
+    showOnMap: () => { goto("overview"); overview.map.focus(state.selectedId); },
+  });
+  const cost = createCost($("panel-cost"), { onEstimate });
+  const showTab = wireTabs((tab) => update({ tab }));   // the tab bar keeps focus on the tab itself
+  wireFinder(premises, open, (needle) => {   // nothing matched: show the filtered list instead
+    $("directory-filter").value = needle;
+    $("directory-filter").dispatchEvent(new Event("input"));
+    goto("overview");
+    $("directory-filter").scrollIntoView({ block: "center" });
+  });
 
   async function onPhoto(file) {
     const id = state.selectedId;
     if (!file || state.photos[id]?.busy) return;
     const setPhoto = (photo) => update({ photos: { ...state.photos, [id]: photo } });
-    setPhoto({ busy: true });
+    const before = state.photos[id];   // kept until the new photo is read, and if reading it fails
+    setPhoto({ ...before, busy: true, error: null });
     try {
       const image = await shrinkPhoto(file).catch(() => { throw new Error("That file could not be read as a photo."); });
-      setPhoto({ busy: true, preview: image });
+      setPhoto({ ...before, busy: true, error: null, preview: image });
       setPhoto({ preview: image, ...(await api.sendPhoto({ business_id: id, image })) });
     } catch (error) {
-      setPhoto({ error: error.message });
+      setPhoto({ ...before, busy: false, error: error.message });
     }
-    // the card was rebuilt, so put keyboard focus back on the photo picker
-    if (state.selectedId === id) $("card").querySelector("input[type=file]")?.focus();
+    // the details were rebuilt; if focus fell to the page, put it back on the photo picker
+    if (state.selectedId === id && document.activeElement === document.body) {
+      $("panel-business").querySelector("input[type=file]")?.focus();
+    }
+  }
+
+  async function onEstimate(figures) {
+    const id = state.selectedId;
+    const setEstimate = (estimate) => update({ estimates: { ...state.estimates, [id]: estimate } });
+    const shown = state.estimates[id]?.result;
+    setEstimate({ busy: true, result: shown });
+    try {
+      setEstimate({ result: await api.estimate({ business_id: id, ...figures }) });
+    } catch (error) {
+      setEstimate({ error: error.message, result: shown });
+    }
   }
 
   async function loadListing(id) {
@@ -82,59 +150,41 @@ function start({ premises, town }, status) {
     }
   }
 
-  function render() {
+  function render(previous) {
     const premise = byId.get(state.selectedId);
-    map.show(state.rp, state.selectedId);
-    renderCard($("card"), premise, state.rp, state.photos[state.selectedId], onPhoto, state.listings[state.selectedId]);
-    for (const button of document.querySelectorAll(".scenario button")) {
-      button.setAttribute("aria-pressed", String(button.dataset.rp === state.rp));
+    const photo = state.photos[state.selectedId];
+    showTab(state.tab);
+    overview.render(state);
+    business.render({ premise, rp: state.rp, photo, listing: state.listings[state.selectedId] });
+    cost.render(premise, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.selectedId]);
+    $("ask-business").textContent = premise.name;
+    if (previous && previous.tab !== state.tab) {
+      if (state.tab === "overview") overview.map.refresh();   // the map was measured while its tab was hidden
+      window.scrollTo({ top: 0 });
     }
-    for (const [id, row] of ledgerRows) row.setAttribute("aria-current", String(id === state.selectedId));
-    const wet = premises.filter((p) => band(p.depth_m[state.rp])).length;
-    $("tally").replaceChildren(h("strong", {}, `${wet} of ${premises.length}`), ` businesses get water in the model in a 1 in ${state.rp} years flood.`);
-    history.replaceState(null, "", `?shop=${encodeURIComponent(state.selectedId)}&rp=${state.rp}`);
+    history.replaceState(null, "", `?tab=${state.tab}&shop=${encodeURIComponent(state.selectedId)}&rp=${state.rp}`);
   }
 
   function update(change) {
+    const previous = state;
     state = { ...state, ...change };
-    render();
-    loadListing(state.selectedId);
+    render(previous);
   }
 
-  for (const button of document.querySelectorAll(".scenario button")) {
-    const chance = Math.round(chanceWithin(Number(button.dataset.rp), CHANCE_YEARS) * 100);
-    button.querySelector(".chance").textContent = `${chance}% chance in ${CHANCE_YEARS} years`;
-    button.addEventListener("click", () => update({ rp: button.dataset.rp }));
-  }
   createChat({ messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"), getSelectedId: () => state.selectedId });
   if (!status.ai_ready) {
     $("ai-status").textContent = "The AI assistant is not connected yet. Add a Gemini key to the .env file and restart.";
     $("ai-status").hidden = false;
   }
-  render();
+  render(null);
   loadListing(state.selectedId);
-  if (status.maps_ready) showRain();
-}
-
-const RAIN_TIME = { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" };
-
-async function showRain() {
-  try {
-    const { rain } = await api.getRain();
-    if (!rain) return;
-    const time = (iso) => new Date(iso).toLocaleTimeString("en-MY", RAIN_TIME);
-    const when = rain.wettest?.start ? ` Heaviest around ${time(rain.wettest.start)}.` : "";
-    const asOf = rain.first_hour ? ` Forecast from ${time(rain.first_hour)}.` : "";
-    $("rain").replaceChildren(h("strong", {}, `Next ${rain.hours} hours: about ${rain.total_mm} mm of rain`),
-      ` around Taman Sri Muda, chance up to ${rain.max_chance_pct}%.${when} `,
-      h("span", { class: "muted" }, `Google Weather forecast, not a flood warning.${asOf}`));
-    $("rain").hidden = false;
-  } catch {
-    // the banner is extra: if the forecast is down the rest of the page still works
+  if (status.maps_ready) {
+    api.getRain().then(
+      ({ configured, rain }) => update({ rain: { configured, data: rain } }),
+      () => update({ rain: { configured: true, error: true } }));
   }
 }
 
-renderHistory($("history"));   // needs no data from the server
 try {
   start(...(await Promise.all([api.getData(), api.getStatus()])));
 } catch (error) {

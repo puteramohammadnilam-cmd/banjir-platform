@@ -222,3 +222,54 @@ def test_tool_estimates_closure_alone():
 ])
 def test_tool_rejects_bad_input_with_an_error_the_model_can_relay(args):
     assert "error" in floodtools.damage_estimate(*args)
+
+
+# ---------- the same estimate as a form on the page
+
+def estimate_body(**change):
+    return {"business_id": WET["id"], "value_at_risk_rm": 50_000, "shop_size": "", "floor_height_cm": 30,
+            "daily_takings_rm": 800, "closed_days": 5, "raise_cm": 50, "measure_cost_rm": 1_500, **change}
+
+
+@pytest.fixture
+def client():
+    from fastapi.testclient import TestClient
+
+    from app import main
+    main._hits.clear()
+    return TestClient(main.app)
+
+
+def test_estimate_endpoint_returns_the_tool_result(client):
+    body = client.post("/api/estimate", json=estimate_body()).json()
+
+    assert body["success"] is True
+    assert body["data"] == floodtools.damage_estimate(**estimate_body())
+
+
+def test_estimate_endpoint_fills_missing_fields_with_zero(client):
+    data = client.post("/api/estimate", json={"business_id": WET["id"], "shop_size": "small"}).json()["data"]
+
+    assert data["inputs"]["shop_size"] == "small" and data["expected_yearly_loss_rm"] > 0
+
+
+@pytest.mark.parametrize("change, status", [
+    ({"raise_cm": 50, "measure_cost_rm": 0}, 422),   # the tool's own rule, passed on as its message
+    ({"floor_height_cm": 301}, 422),
+    ({"value_at_risk_rm": "a lot"}, 422),
+    ({"business_id": "node-nope"}, 404),
+])
+def test_estimate_endpoint_rejects_bad_input(client, change, status):
+    response = client.post("/api/estimate", json=estimate_body(**change))
+
+    assert response.status_code == status and response.json()["success"] is False
+
+
+def test_estimate_errors_are_worded_for_people_not_the_model(client):
+    typo = client.post("/api/estimate", json=estimate_body(value_at_risk_rm="a lot")).json()["error"]
+    pair = client.post("/api/estimate", json=estimate_body(measure_cost_rm=0)).json()["error"]
+    size = client.post("/api/estimate", json=estimate_body(value_at_risk_rm=0, shop_size="huge")).json()["error"]
+
+    assert "figures" in typo and "Questions" not in typo
+    assert "raise" in pair and "raise_cm" not in pair and "measure_cost_rm" not in pair
+    assert size.startswith("The shop size") and "Ask the owner" not in size

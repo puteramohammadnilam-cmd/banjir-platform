@@ -8,7 +8,7 @@ export const FLOODS = [
   { when: "2001", year: 2001.5, account: true, what: "One resident recalls her house was flooded for four days.", source: "Free Malaysia Today, 14 Apr 2025, one person's account" },
   { when: "17 Oct 2019", year: 2019.79, what: "The river rose over the bund and most homes and shops flooded, after more than 150 mm of rain.", source: "Sinar Harian, 18 Oct 2019" },
   { when: "29 Jan 2020", year: 2020.08, what: "Flash flood.", source: "Malaysia Gazette, 29 Jan 2020" },
-  { when: "18 to 19 Dec 2021", year: 2021.96, what: "The big flood. Depth was reported as over six feet, and later as over 4 m. No survey was published.", source: "Malaysiakini, 21 Dec 2021; The Star, 6 Aug 2024" },
+  { when: "18 to 19 Dec 2021", year: 2021.96, what: "The big flood. Depth was reported as over six feet, and later as over 4 m. We found no published survey.", source: "Malaysiakini, 21 Dec 2021; The Star, 6 Aug 2024" },
   { when: "24 Jan 2022", year: 2022.06, what: "Streets flooded 0.1 to 0.3 m.", source: "Rosmadi and others 2025, quoting MBSA's flood report for 2022" },
   { when: "20 Aug 2022", year: 2022.63, what: "Streets flooded 0.1 to 0.3 m.", source: "Rosmadi and others 2025, quoting MBSA's flood report for 2022" },
   { when: "8 Nov 2022", year: 2022.85, what: "Streets flooded 0.1 to 0.3 m.", source: "Rosmadi and others 2025, quoting MBSA's flood report for 2022" },
@@ -40,13 +40,17 @@ function strip() {
     s("line", { class: "axis", x1: "1%", x2: "99%", y1: AXIS_Y, y2: AXIS_Y }), ticks, dots);
 }
 
-export function renderHistory(element) {
+export function floodCounts() {
   const dated = FLOODS.filter((f) => !f.account);
-  const recent = dated.filter((f) => f.year >= RECENT_FROM).length;
+  return { dated: dated.length, recent: dated.filter((f) => f.year >= RECENT_FROM).length, since: FIRST_YEAR, recentFrom: RECENT_FROM };
+}
+
+export function renderHistory(element) {
+  const { dated, recent } = floodCounts();
   element.replaceChildren(
     h("h2", { id: "history-heading" }, "Floods recorded here"),
-    h("p", { class: "history-lead" }, h("strong", {}, `${dated.length} dated floods`), ` at Taman Sri Muda since ${FIRST_YEAR}, `,
-      h("strong", {}, `${recent} of them since ${RECENT_FROM}`), "."),
+    h("p", { class: "history-lead" }, h("strong", {}, `${dated} dated floods`), ` at Taman Sri Muda since ${FIRST_YEAR} in the sources we checked, `,
+      h("strong", {}, `${recent} of them since ${RECENT_FROM}`), ". Not a complete record."),
     strip(),
     h("p", { class: "fineprint" }, "The map shows river floods expected once in 10 years or less often. Smaller, more frequent floods ",
       "and flash floods from heavy rain are not on it. A hollow dot is one resident's memory, not a dated report."),

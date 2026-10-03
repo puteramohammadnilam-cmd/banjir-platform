@@ -20,3 +20,4 @@ export const sendPhoto = (payload) => call("/api/photo", payload);
 export const getRain = () => call("/api/rain");
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);
+export const estimate = (payload) => call("/api/estimate", payload);

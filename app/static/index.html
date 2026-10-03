@@ -3,75 +3,128 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Banjir Check · Shah Alam shop flood check</title>
-  <meta name="description" content="See how deep a modelled flood gets at each shop around Taman Sri Muda, Shah Alam, and ask an AI assistant about it in Bahasa Melayu or English.">
+  <title>Banjir Check · flood risk for shops in Taman Sri Muda, Shah Alam</title>
+  <meta name="description" content="See how deep a modelled flood gets at each business around Taman Sri Muda, Shah Alam, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="vendor/leaflet.css">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/app.css">
+  <link rel="stylesheet" href="styles/views.css">
 </head>
 <body>
-  <header class="masthead">
-    <p class="overline">Shah Alam · Selangor · test build</p>
-    <h1>Banjir Check</h1>
-    <p class="strap">How deep would the water get at your shop? Pick a business, then ask in Bahasa Melayu or English.</p>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 13c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 18c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 10v10h16V10"/><path d="M3 10 5 4h14l2 6"/><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v.01M18 14.5v.01"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20l1.2-4.3A7.5 7.5 0 1 1 20 12.5z"/><path d="M9 12h.01M12.5 12h.01M16 12h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-road" viewBox="0 0 24 24"><path d="M6 20 10 4M18 20 14 4M12 6.5v2M12 11.5v2M12 16.5v2"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7 10 4.5h4L15.5 7"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15.5a4 4 0 0 1 .4-8 5.5 5.5 0 0 1 10.3 1.4A3.4 3.4 0 0 1 17.5 15.5z"/><path d="m8.5 18.5-1 2M12.5 18.5l-1 2M16.5 18.5l-1 2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <a class="brand" href="./">
+      <span class="brand-mark"><svg class="icon"><use href="#i-wave"/></svg></span>
+      <span class="brand-name">Banjir Check</span>
+    </a>
+    <span class="place">Taman Sri Muda · Shah Alam</span>
+    <form class="finder" id="finder" role="search">
+      <label class="visually-hidden" for="finder-input">Find your business</label>
+      <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="finder-input" type="search" list="business-names" placeholder="Find your business" autocomplete="off" enterkeyhint="go">
+      <datalist id="business-names"></datalist>
+    </form>
+    <span class="badge" title="Depths come from a global model, not an official flood map">Test build</span>
   </header>
 
-  <p class="notice" role="note"><strong>This is a test.</strong> Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods.</p>
-  <p class="notice notice-error" id="load-error" role="alert" hidden></p>
-  <p class="notice notice-rain" id="rain" role="status" hidden></p>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span>Area overview</span></button>
+    <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span>My business</span></button>
+    <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span>Flood cost</span></button>
+    <button type="button" role="tab" id="tab-ask" aria-controls="panel-ask" data-tab="ask"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span>Ask AI</span></button>
+  </nav>
 
   <main>
-    <section class="history" id="history" aria-labelledby="history-heading"></section>
-    <div class="workspace">
-    <section class="map-panel" aria-labelledby="map-heading">
-      <div class="panel-head">
-        <h2 id="map-heading">Taman Sri Muda and nearby</h2>
-        <div class="scenario" role="group" aria-label="Size of flood">
-          <button type="button" data-rp="10" aria-pressed="false">1 in 10 years <span class="chance"></span></button>
-          <button type="button" data-rp="100" aria-pressed="false">1 in 100 years <span class="chance"></span></button>
-          <button type="button" data-rp="500" aria-pressed="false">1 in 500 years <span class="chance"></span></button>
-        </div>
+    <p class="alert" id="load-error" role="alert" hidden></p>
+
+    <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
+      <div class="kpis" id="kpis" aria-live="polite"></div>
+      <div class="overview-grid">
+        <section class="surface map-surface" aria-labelledby="map-heading">
+          <div class="surface-head">
+            <div>
+              <h2 id="map-heading">Flood model</h2>
+              <p class="muted small">Modelled water depth at each business. Tap a dot for details.</p>
+            </div>
+            <div class="scenario-slot" data-scenario></div>
+          </div>
+          <div id="map" role="application" aria-label="Map of Taman Sri Muda, Shah Alam, with modelled flood depth at each business"></div>
+          <ul class="legend" id="legend" aria-label="Water depth at each business"></ul>
+        </section>
+        <section class="surface" id="history" aria-labelledby="history-heading"></section>
       </div>
-      <div id="map" role="application" aria-label="Map of Taman Sri Muda, Shah Alam, with modelled flood depth and businesses"></div>
-      <ul class="legend" id="legend" aria-label="Map legend: water depth at each business"></ul>
-      <p class="tally" id="tally" aria-live="polite"></p>
-      <p class="fineprint">Chance: of at least one flood that size in the next 10 years, if the model is right.
-        Heights are typical: a counter about 0.9 m, an adult about 1.65 m, a door 2.1 m.</p>
+      <section class="surface directory" aria-labelledby="directory-heading">
+        <div class="surface-head">
+          <h2 id="directory-heading">All businesses</h2>
+          <label class="visually-hidden" for="directory-filter">Filter businesses</label>
+          <input id="directory-filter" class="field" type="search" placeholder="Filter by name or type" autocomplete="off">
+        </div>
+        <div class="directory-head" aria-hidden="true"><span>Business</span><span>1 in 10</span><span>1 in 100</span><span>1 in 500</span></div>
+        <ol id="directory"></ol>
+        <p class="muted small" id="directory-empty" hidden>No business matches that filter.</p>
+      </section>
     </section>
 
-    <div class="side">
-      <article class="card" id="card" aria-live="polite"></article>
+    <section class="panel" id="panel-business" role="tabpanel" aria-labelledby="tab-business" tabindex="-1" hidden></section>
 
-      <section class="chat" aria-labelledby="chat-heading">
-        <h2 id="chat-heading">Ask about this shop</h2>
-        <p class="notice notice-inline" id="ai-status" hidden></p>
-        <ol class="messages" id="messages" aria-live="polite"></ol>
-        <div class="chips" id="chips"></div>
-        <button type="button" class="news-button" id="news">Latest flood news <span class="muted">· Google Search</span></button>
-        <form id="ask-form" autocomplete="off">
-          <label class="visually-hidden" for="question">Your question</label>
-          <input id="question" name="question" type="text" maxlength="500" required placeholder="Tanya apa-apa pasal banjir di kedai ini">
-          <button type="submit">Ask</button>
-        </form>
-        <p class="fineprint">Answers come from Google Gemini reading this tool's data, Google Weather and Google Maps. News answers are grounded on Google Search and list their sources. Check anything urgent with <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a> or call 999.</p>
-      </section>
-    </div>
-    </div>
+    <section class="panel" id="panel-cost" role="tabpanel" aria-labelledby="tab-cost" tabindex="-1" hidden></section>
 
-    <section class="ledger" aria-labelledby="ledger-heading">
-      <h2 id="ledger-heading">All businesses</h2>
-      <p class="fineprint">Depth in metres at the mapped point. A dash means no water in the model.</p>
-      <ol id="ledger"></ol>
+    <section class="panel" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" tabindex="-1" hidden>
+      <header class="view-head">
+        <p class="kicker">Ask AI</p>
+        <h1>Ask about <span id="ask-business"></span></h1>
+        <p class="muted">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
+      </header>
+      <div class="ask-grid">
+        <section class="surface chat" aria-label="Conversation">
+          <p class="alert alert-inline" id="ai-status" hidden></p>
+          <ol class="messages" id="messages" aria-live="polite"></ol>
+          <form id="ask-form" class="ask-form" autocomplete="off">
+            <label class="visually-hidden" for="question">Your question</label>
+            <input id="question" class="field" name="question" type="text" maxlength="500" required placeholder="Tanya apa-apa pasal banjir di kedai ini">
+            <button type="submit" class="btn btn-primary">Ask</button>
+          </form>
+        </section>
+        <aside class="ask-side">
+          <section class="surface">
+            <h2 class="small-heading">Try asking</h2>
+            <div class="chips" id="chips"></div>
+          </section>
+          <section class="surface">
+            <h2 class="small-heading">Flood news</h2>
+            <p class="muted small">Gemini searches Google for recent news and lists its sources.</p>
+            <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Latest flood news</button>
+          </section>
+          <p class="fineprint">Check anything urgent with <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a> or call 999.</p>
+        </aside>
+      </div>
     </section>
   </main>
 
-  <footer>
+  <footer class="about" id="about">
+    <h2>About this data</h2>
+    <p><strong>This is a test build.</strong> Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</p>
     <p>Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
-    <p>River flood forecasts: <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer">Google Flood Hub</a>. Live river levels and warnings: <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a>.</p>
-    <p>Businesses are points on a public map. Nobody has checked whether they are open or whether they are SMEs. Ringgit figures in the chat are rough estimates, not a valuation: from the values you give and an Asia-wide damage curve, or from a JPS guideline figure by shop size if you do not know your own.</p>
+    <p>River flood forecasts: <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer">Google Flood Hub</a>. Live river levels and warnings: <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a>. In an emergency call 999.</p>
+    <p>Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
   </footer>
 
   <script src="vendor/leaflet.js"></script>

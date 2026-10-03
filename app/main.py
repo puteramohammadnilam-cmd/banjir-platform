@@ -32,6 +32,7 @@ MAX_BODY_BYTES = 6 * 1024 * 1024   # a 4 MB photo as base64, plus headroom
 PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
 RATE_LIMIT = 20             # chat, photo and news: each one is a Gemini call
 MAPS_RATE_LIMIT = 60        # rain and open-or-closed lookups: cheap, and fired as visitors click round the map
+CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no Google call
 RATE_WINDOW_S = 300
 MAX_TRACKED_CLIENTS = 10_000
 SECURITY_HEADERS = {
@@ -68,6 +69,18 @@ class PhotoIn(BaseModel):
     image: str = Field(min_length=32, description="data: URL, base64. Size is capped by MAX_BODY_BYTES and decode_photo.")
 
 
+class EstimateIn(BaseModel):
+    """The owner's own figures. Ranges and the rules between fields are checked in one place: floodtools.damage_estimate."""
+    business_id: str = Field(max_length=40)
+    value_at_risk_rm: float = 0
+    shop_size: str = Field(default="", max_length=20)
+    floor_height_cm: float = 0
+    daily_takings_rm: float = 0
+    closed_days: float = 0
+    raise_cm: float = 0
+    measure_cost_rm: float = 0
+
+
 def ok(data: dict) -> dict:
     return {"success": True, "data": data, "error": None}
 
@@ -102,6 +115,10 @@ def rate_limit(request: Request) -> None:
 
 def maps_limit(request: Request) -> None:
     _limit(request, "maps", MAPS_RATE_LIMIT)
+
+
+def calc_limit(request: Request) -> None:
+    _limit(request, "calc", CALC_RATE_LIMIT)
 
 
 def known_business(business_id: str) -> dict:
@@ -154,8 +171,11 @@ async def http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_error(_: Request, __: RequestValidationError) -> JSONResponse:
-    message = f"Please check your input and try again. Questions can be up to {MAX_QUESTION_CHARS} characters."
+async def validation_error(request: Request, __: RequestValidationError) -> JSONResponse:
+    if request.url.path == "/api/estimate":
+        message = "Please check the figures. Use plain numbers, such as 50000."
+    else:
+        message = f"Please check your input and try again. Questions can be up to {MAX_QUESTION_CHARS} characters."
     return JSONResponse({"success": False, "data": None, "error": message}, status_code=422)
 
 
@@ -186,6 +206,31 @@ def photo(body: PhotoIn) -> dict:
     above_floor = {rp: (None if depth is None else round(max(0.0, depth - floor_m), 2))
                    for rp, depth in premise["depth_m"].items()}
     return ok({"estimate": estimate.model_dump(), "water_above_floor_m": above_floor})
+
+
+# floodtools words its errors for the AI model, which knows the argument names; the form shows them to people.
+FORM_WORDS = (
+    ("value_at_risk_rm", "the value of stock and equipment"), ("floor_height_cm", "the floor height in cm"),
+    ("daily_takings_rm", "the takings per day"), ("closed_days", "the days closed"),
+    ("raise_cm", "how far to raise the stock"), ("measure_cost_rm", "what that costs"), ("shop_size", "the shop size"),
+    ("Ask the owner which one fits.", "Choose the one that fits."), ("the owner's own", "your own"),
+    ("Ask for that value.", "Give that value."), ("Ask for the value", "Give the value"),
+)
+
+
+def for_people(message: str) -> str:
+    for model_words, people_words in FORM_WORDS:
+        message = message.replace(model_words, people_words)
+    return message[:1].upper() + message[1:]
+
+
+@app.post("/api/estimate", dependencies=[Depends(calc_limit)])
+def estimate(body: EstimateIn) -> dict:
+    known_business(body.business_id)
+    result = floodtools.damage_estimate(**body.model_dump())
+    if "error" in result:
+        raise HTTPException(422, for_people(result["error"]))
+    return ok(result)
 
 
 def call_maps(fn, *args):

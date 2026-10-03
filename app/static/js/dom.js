@@ -53,3 +53,30 @@ export function depthWords(depth) {
 export const chanceWithin = (returnPeriod, years) => 1 - (1 - 1 / returnPeriod) ** years;
 
 export const depthText = (depth) => (band(depth) ? `${depth.toFixed(2)} m` : "no water in the model");
+
+/** An icon from the sprite in index.html. Decorative, so screen readers skip it. */
+export const icon = (name) => s("svg", { class: "icon", "aria-hidden": "true" }, s("use", { href: `#i-${name}` }));
+
+export const CHANCE_YEARS = 10;   // about one shop lease
+
+/** The three flood sizes as one control, each with its chance of happening at least once in CHANCE_YEARS. */
+export function scenarioPicker(rp, onPick) {
+  return h("div", { class: "scenario", role: "group", "aria-label": "Size of flood" },
+    SCENARIOS.map((key) => {
+      const chance = `${Math.round(chanceWithin(Number(key), CHANCE_YEARS) * 100)}% chance in ${CHANCE_YEARS} years`;
+      return h("button", { type: "button", "aria-pressed": String(key === rp), "aria-label": `1 in ${key} years, ${chance}`, onclick: () => onPick(key) },
+        `1 in ${key} years`, h("span", { class: "chance" }, chance));
+    }));
+}
+
+/** Put a fresh picker in `slot`, keeping keyboard focus on the chosen size if the old picker had it. */
+export function renderPicker(slot, rp, onPick) {
+  const hadFocus = slot.contains(document.activeElement);
+  slot.replaceChildren(scenarioPicker(rp, onPick));
+  if (hadFocus) slot.querySelector('[aria-pressed="true"]')?.focus();
+}
+
+const RINGGIT = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 });
+export const ringgit = (value) => RINGGIT.format(value);
+
+export const kindText = (premise) => `${premise.sector === "eatery" ? "Eatery" : "Shop"}${premise.kind ? ` · ${premise.kind.replaceAll("_", " ")}` : ""}`;
