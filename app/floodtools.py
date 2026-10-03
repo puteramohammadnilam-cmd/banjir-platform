@@ -61,7 +61,7 @@ def find_business(name: str) -> list[dict]:
         have several outlets with the same name: ask which road if it is not clear. Use the id
         with flood_check.
     """
-    needle = name.strip().lower()
+    needle = name.strip().lower() if isinstance(name, str) else ""
     hits = [p for p in premises() if needle and (needle in p["name"].lower() or needle in p["kind"].lower())]
     return [{"id": p["id"], "name": p["name"], "type": p["sector"], "kind": p["kind"], "near": p["road"]["name"]}
             for p in hits[:MAX_MATCHES]]
@@ -79,7 +79,7 @@ def flood_check(business_id: str) -> dict:
         tool has no list for the area), and the limits of the data. Returns an error if the id
         is unknown.
     """
-    p = get(business_id)
+    p = get(business_id) if isinstance(business_id, str) else None
     if p is None:
         return {"error": f"No business with id {business_id!r}. Call find_business first."}
     return {**p, "scenarios": SCENARIOS, "limits": LIMITS}

@@ -23,7 +23,7 @@ log = logging.getLogger("banjir")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
 MAX_HISTORY_TURNS = 10
 TIMEOUT_MS = 30_000
-MAX_TOOL_ROUNDS = 5          # model requests: e.g. find_business, flood_check, business_status, then the answer, plus a retry
+MAX_MODEL_REQUESTS = 5       # per question: e.g. find_business, flood_check, business_status, then the answer, plus a retry
 MAX_OUTPUT_TOKENS = 2048     # includes the model's thinking, so keep some headroom
 TOOLS_BY_NAME = {tool.__name__: tool for tool in floodtools.TOOLS}
 
@@ -119,15 +119,18 @@ def ask(question: str, business_id: str | None, history: list[dict]) -> str:
         response = _ask_model(contents, context)
     finally:
         floodtools.end_question(token)
-    return (response.text or "").strip() or "Sorry, I could not produce an answer. Please try again."
+    # a reply that still calls a tool ran out of requests: text beside the call is not an answer
+    answer = "" if response.function_calls else (response.text or "").strip()
+    return answer or "Sorry, I could not produce an answer. Please try again."
 
 
-def _ask_model(contents: list, context: str):
-    """Ask Gemini and run the tools it calls, in at most MAX_TOOL_ROUNDS requests.
+def _ask_model(contents: list, context: str) -> types.GenerateContentResponse:
+    """Ask Gemini and run the tools it calls, in at most MAX_MODEL_REQUESTS requests.
 
-    The tool loop is here rather than in the SDK's automatic function calling, whose sync path skips a call
-    that arrives without an args object (Gemini may send that for rain_forecast and town_summary, which take
-    no arguments) and raises on a tool name it does not know. Either way the chat ended without an answer."""
+    The tool loop is here rather than in the SDK's automatic function calling, which broke every tool here: its
+    sync path skips a call that arrives without an args object (Gemini may send that for rain_forecast and
+    town_summary, which take no arguments), it fails every call with arguments because floodtools uses string
+    annotations (from __future__ import annotations), and it raises on a tool name it does not know."""
     send = partial(_client().models.generate_content, model=MODEL, config=types.GenerateContentConfig(
         # the selection goes in the system text so a user message cannot fake it
         system_instruction=f"{SYSTEM}\n\n{context}", tools=floodtools.TOOLS, temperature=0.2,
@@ -135,7 +138,7 @@ def _ask_model(contents: list, context: str):
         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
     ))
     response = send(contents=contents)
-    for _ in range(MAX_TOOL_ROUNDS - 1):   # each round sends the tool results back in one more request
+    for _ in range(MAX_MODEL_REQUESTS - 1):   # each round sends the tool results back in one more request
         calls = response.function_calls
         if not calls:
             break
@@ -147,15 +150,19 @@ def _ask_model(contents: list, context: str):
 
 
 def _run_tool(call: types.FunctionCall) -> types.Part:
-    """Run one tool call. A failure goes back to the model as data, so it can correct the call."""
+    """Run one tool call. A failure goes back to the model as data, so the chat goes on."""
     tool = TOOLS_BY_NAME.get(call.name or "")
     try:
         if tool is None:
             raise LookupError(f"There is no tool called {call.name!r}.")
         result = {"result": tool(**(call.args or {}))}   # no args object means no arguments
-    except Exception as exc:   # bad arguments from the model must not end the chat
-        log.warning("Tool call %s failed: %s", call.name, exc)
+    except (TypeError, LookupError) as exc:   # unknown tool or wrong arguments: say what, so the model can fix it
+        # %r escapes newlines, so a name or argument from the model cannot forge log lines
+        log.warning("Tool call %.80r failed: %.200r", call.name, exc)
         result = {"error": str(exc)}
+    except Exception:   # a fault in our code: the details stay in the server log
+        log.exception("Tool call %.80r crashed", call.name)
+        result = {"error": "This tool failed. Answer without it and suggest trying again later."}
     return types.Part(function_response=types.FunctionResponse(id=call.id, name=call.name, response=result))
 
 

@@ -39,6 +39,7 @@ def test_find_business_matches_name_and_ignores_blank():
     assert [b["name"] for b in matches] == ["KFC", "KFC"]
     assert all(b["near"] for b in matches)   # two outlets share a name; the road tells them apart
     assert floodtools.find_business("  ") == []
+    assert floodtools.find_business(5) == []   # Gemini sent something other than text
 
 
 def test_no_shelter_is_claimed_without_a_cited_list():
@@ -50,6 +51,7 @@ def test_no_shelter_is_claimed_without_a_cited_list():
 def test_flood_check_returns_limits_and_reports_unknown_id():
     assert "not an official" in floodtools.flood_check(KNOWN_ID)["limits"]
     assert "error" in floodtools.flood_check("nope")
+    assert "error" in floodtools.flood_check(["node-1"])
 
 
 def test_town_summary_counts_add_up():
@@ -149,12 +151,37 @@ def test_tools_without_arguments_run_when_gemini_sends_no_args(monkeypatch):
     assert answers["rain_forecast"]["result"]["total_mm"] == 3.0
 
 
-def test_tool_rounds_stop_at_the_limit_and_tool_errors_go_back_to_gemini(monkeypatch):
-    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "no_such_tool", "args": {}}}))
+def test_tool_calls_with_arguments_reach_the_tools(monkeypatch):
+    # The SDK's own function calling failed every call with arguments here: floodtools uses string annotations.
+    estimate = {"business_id": KNOWN_ID, "value_at_risk_rm": 5000.0, "shop_size": "", "floor_height_cm": 0,
+                "daily_takings_rm": 0, "closed_days": 0, "raise_cm": 0, "measure_cost_rm": 0}
+    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "flood_check", "args": {"business_id": KNOWN_ID}}},
+                                                          {"functionCall": {"name": "damage_estimate", "args": estimate}})
+                       if n == 1 else gemini_says({"text": "Ok."}))
 
-    assert ai.ask("hi", None, []).startswith("Sorry")
-    assert len(sent) == ai.MAX_TOOL_ROUNDS
-    assert "error" in tool_answers(sent[1])["no_such_tool"]
+    assert ai.ask("Berapa rugi kalau banjir?", KNOWN_ID, []) == "Ok."
+    answers = tool_answers(sent[1])
+    assert answers["flood_check"]["result"]["id"] == KNOWN_ID
+    assert answers["damage_estimate"]["result"]["inputs"]["value_at_risk_rm"] == 5000
+
+
+def test_a_misbehaving_tool_loop_stays_bounded_and_ends_politely(monkeypatch, caplog):
+    runs = []
+
+    def crash():
+        runs.append(1)
+        raise RuntimeError("internal detail")
+
+    monkeypatch.setitem(ai.TOOLS_BY_NAME, "crash", crash)
+    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"text": "Let me check."}, {"functionCall": {"name": "crash"}},
+                                                          {"functionCall": {"name": "no_such_tool\nFORGED", "args": {}}}))
+
+    assert ai.ask("hi", None, []).startswith("Sorry")   # not the half-done "Let me check."
+    assert len(sent) == ai.MAX_MODEL_REQUESTS and len(runs) == ai.MAX_MODEL_REQUESTS - 1
+    answers = tool_answers(sent[1])
+    assert "internal detail" not in answers["crash"]["error"]   # our own failures stay in the server log
+    assert "no_such_tool" in answers["no_such_tool\nFORGED"]["error"]   # a bad call is explained, so Gemini can fix it
+    assert caplog.records and all("\n" not in r.getMessage() for r in caplog.records)   # names cannot forge log lines
 
 
 def test_vertex_flag_set_to_false_is_not_configured(monkeypatch):
