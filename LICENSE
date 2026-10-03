@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----------------------------------------------------------------------------------------------------------------
+
+Data. The MIT licence above covers the code. The data is under its own licences:
+
+- app/data/areas/* (the built premises, roads and relief-centre data) is derived from OpenStreetMap:
+  (c) OpenStreetMap contributors, Open Database License (ODbL) 1.0, https://opendatacommons.org/licenses/odbl/1-0/
+- The JRC flood depth rasters (app/data/rasters/*.tif) are not in this repository. They are European Commission JRC
+  global river flood hazard maps v2.1, CC BY 4.0, https://creativecommons.org/licenses/by/4.0/ (see
+  app/data/rasters/SOURCES.txt).

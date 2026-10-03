@@ -117,6 +117,15 @@ def _plain(text: str) -> str:
     return re.sub(r"[\x00-\x1f\x7f]", " ", text)[:MAX_NAME_CHARS].strip()
 
 
+def _listing(p: dict) -> tuple[float, float, str] | None:
+    """A listing's point and name, or None when Google sends either as null or leaves part of it out."""
+    location, shown = p.get("location") or {}, p.get("displayName") or {}
+    plat, plon, text = location.get("latitude"), location.get("longitude"), shown.get("text")
+    if not (isinstance(plat, (int, float)) and isinstance(plon, (int, float)) and isinstance(text, str)):
+        return None
+    return plat, plon, text
+
+
 def place_status(name: str, lat: float, lon: float) -> dict | None:
     """The Google Maps listing with a matching name within MATCH_RADIUS_M of a mapped business, else None.
 
@@ -130,15 +139,14 @@ def place_status(name: str, lat: float, lon: float) -> dict | None:
                               "high": {"latitude": lat + dlat, "longitude": lon + dlon}}}},
                  {"X-Goog-Api-Key": _key(), "X-Goog-FieldMask": PLACE_FIELDS})
     wanted = _words(name)
-    found = [(_metres(lat, lon, p["location"]["latitude"], p["location"]["longitude"]), p)
-             for p in data.get("places", [])
-             if p.get("location") and wanted & _words(p.get("displayName", {}).get("text", ""))]
+    listings = [(p, got) for p in data.get("places") or [] if (got := _listing(p))]   # a broken listing is skipped
+    found = [(_metres(lat, lon, plat, plon), p, text) for p, (plat, plon, text) in listings if wanted & _words(text)]
     near = min(found, key=lambda f: f[0], default=None)
     if near is None or near[0] > MATCH_RADIUS_M:
         return None
-    distance, p = near
+    distance, p, text = near
     raw = p.get("businessStatus", "")
     return {"status": STATUS.get(raw, "unknown"), "google_status": raw or None,
-            "name": _plain(p.get("displayName", {}).get("text", "")),
+            "name": _plain(text),
             "maps_uri": p["googleMapsUri"] if str(p.get("googleMapsUri", "")).startswith("https://") else None,
             "distance_m": round(distance), "source": "Google Maps"}

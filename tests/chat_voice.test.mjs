@@ -11,15 +11,17 @@ import { installFakeDom } from "./fake_dom.mjs";
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 const AUDIO = "data:audio/wav;base64,UklGRg==";
 
-function mount({ canRecord = true, record = null, reply = { question: "Kedai ni kena air tak?", language: "ms", answer: "Dalam model, 1.88 m." } } = {}) {
+function mount({ canRecord = true, record = null, gate = null, reply = { question: "Kedai ni kena air tak?", language: "ms", answer: "Dalam model, 1.88 m." } } = {}) {
   installFakeDom();
   const asked = [];
   globalThis.fetch = async (path, init) => {
     asked.push([path, JSON.parse(init.body)]);
+    await gate;
     const answer = reply instanceof Error ? { success: false, data: null, error: reply.message } : { success: true, data: reply, error: null };
     return { json: async () => answer };
   };
   const spoken = [];
+  let primed = 0;
   let stops = 0;
   let stopRecording = () => {};
   const voice = {
@@ -30,6 +32,7 @@ function mount({ canRecord = true, record = null, reply = { question: "Kedai ni 
       stopRecording = () => finish(AUDIO);
       return { stop: () => stopRecording(), done };
     }),
+    primeSpeech: () => { primed += 1; },
     speak: (text, language) => spoken.push([text, language]),
     stopSpeaking: () => { stops += 1; },
   };
@@ -40,7 +43,7 @@ function mount({ canRecord = true, record = null, reply = { question: "Kedai ni 
   const chat = createChat({ messages, chips: h("div"), form, input, news: h("button"), getPlaceRef: () => "node-1", areaId: "home", areaName: "Home", voice });
   const mic = form.querySelectorAll("button").find((b) => b.getAttribute("class")?.includes("mic"));
   const said = () => messages.children.map((item) => [item.getAttribute("class"), item.textContent]);
-  return { chat, mic, asked, spoken, said, page, form, stopped: () => stops };
+  return { chat, mic, asked, spoken, said, page, form, input, ask: form.querySelector("button"), primed: () => primed, stopped: () => stops };
 }
 
 test("there is no microphone button where the browser cannot record", () => {
@@ -102,12 +105,14 @@ test("a blocked microphone, an unreadable recording and a server refusal each sa
 
 // ---------- review fixes ----------
 
-test("the button keeps one name, and its state is in aria-pressed", async () => {
+test("the button's name is its visible words (no aria-label to differ from them), and its state is in aria-pressed", async () => {
   const { mic } = mount();
-  assert.equal(mic.getAttribute("aria-label"), VOICE_WORDS.label);
+  assert.equal(mic.getAttribute("aria-label"), null);
+  assert.equal(VOICE_WORDS.label, undefined);
   mic.click();
   await settle();
-  assert.equal(mic.getAttribute("aria-label"), VOICE_WORDS.label);
+  assert.equal(mic.getAttribute("aria-label"), null);
+  assert.equal(mic.textContent, VOICE_WORDS.stop);
   assert.equal(mic.getAttribute("aria-pressed"), "true");
 });
 
@@ -139,4 +144,90 @@ test("moving to another place stops reading the last answer aloud", () => {
   assert.equal(stopped(), before, "the same place: reading goes on");
   chat.render({ id: "node-2", is_point: false });
   assert.equal(stopped(), before + 1);
+});
+
+// ---------- review batch 3 ----------
+
+test("while recording, the Ask button and the question box are off, so a typed question cannot eat the recording", async () => {
+  const { mic, asked, said, form, input, ask } = mount();
+  mic.click();
+  await settle();
+  assert.equal(ask.disabled, true);
+  assert.equal(input.disabled, true);
+  input.value = "typed meanwhile";
+  form.dispatch("submit");
+  await settle();
+  assert.deepEqual(asked, [], "nothing is sent by the form while recording");
+  mic.click();
+  await settle();
+  await settle();
+  assert.equal(asked.length, 1);
+  assert.equal(asked[0][0], "/api/voice", "the recording is sent, not lost");
+  assert.equal(said().some(([kind]) => kind === "msg-error"), false);
+  assert.equal(ask.disabled, false);
+  assert.equal(input.disabled, false);
+});
+
+test("the Ask button and the box are on again when the microphone is refused or the recording is unreadable", async () => {
+  const blocked = mount({ record: async () => { throw new Error("NotAllowedError"); } });
+  blocked.mic.click();
+  await settle();
+  assert.equal(blocked.ask.disabled, false);
+  assert.equal(blocked.input.disabled, false);
+
+  const broken = mount({ record: async () => ({ stop() {}, done: Promise.reject(new Error("decode")) }) });
+  broken.mic.click();
+  await settle();
+  await settle();
+  assert.equal(broken.ask.disabled, false);
+  assert.equal(broken.input.disabled, false);
+});
+
+test("starting a recording primes speech inside the click, once, and stopping does not", async () => {
+  const { mic, primed } = mount();
+  mic.click();
+  assert.equal(primed(), 1, "before the microphone prompt is even answered");
+  await settle();
+  mic.click();
+  await settle();
+  await settle();
+  assert.equal(primed(), 1);
+});
+
+test("the microphone button gets focus back after the spoken question was sent, if the page took it", async () => {
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  const { mic } = mount({ gate });
+  const body = {};
+  globalThis.document.body = body;
+  mic.focus = () => { globalThis.document.activeElement = mic; };
+  mic.click();
+  await settle();
+  mic.click();
+  await settle();
+  assert.equal(mic.disabled, true);
+  globalThis.document.activeElement = body;   // a disabled button loses focus to the page
+  release();
+  await settle();
+  await settle();
+  assert.equal(mic.disabled, false);
+  assert.equal(globalThis.document.activeElement, mic);
+});
+
+test("focus is left alone where the user moved it meanwhile", async () => {
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  const { mic } = mount({ gate });
+  const elsewhere = h("a");
+  globalThis.document.body = {};
+  mic.focus = () => { globalThis.document.activeElement = mic; };
+  mic.click();
+  await settle();
+  mic.click();
+  await settle();
+  globalThis.document.activeElement = elsewhere;
+  release();
+  await settle();
+  await settle();
+  assert.equal(globalThis.document.activeElement, elsewhere);
 });

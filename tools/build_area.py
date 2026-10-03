@@ -22,7 +22,7 @@ import argparse
 import json
 import math
 import sys
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -158,9 +158,22 @@ def check_premises(premises: list[dict]) -> None:
         raise ValueError(f"a bigger flood wets fewer businesses: wet counts {wet}")
 
 
+def check_placement(view: View, businesses: list[dict], taken_ids: Collection[str]) -> None:
+    """Refuse a business outside the view, or one whose id another installed area already uses: either builds cleanly
+    and then stops the server at start-up (areas.check_built, areas._businesses)."""
+    west, south, east, north = view
+    for row in businesses:
+        if not (west <= row["lon"] <= east and south <= row["lat"] <= north):
+            raise ValueError(f"{row['id']} is outside the view; fetch the businesses for the view only")
+        if row["id"] in taken_ids:
+            raise ValueError(f"{row['id']} is already used by another area; business ids must be unique across areas")
+
+
 def build(view: View, businesses: list[dict], roads: list[dict], shelters: list[dict],
-          depth_set: raster.DepthSet) -> tuple[list[dict], dict]:
-    """(premises, town) for one area: the view's wet squares first, so a view the rasters do not cover fails fast."""
+          depth_set: raster.DepthSet, taken_ids: Collection[str] = ()) -> tuple[list[dict], dict]:
+    """(premises, town) for one area: the view's wet squares first, so a view the rasters do not cover fails fast.
+    taken_ids are the business ids of the other installed areas."""
+    check_placement(view, businesses, taken_ids)
     cells = depth_set.view_cells(view)
     proj = Projection.for_view(view)
     premises = [_premise(row, proj, roads, shelters, depth_set) for row in businesses]
@@ -220,8 +233,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit(f"no depth rasters (JRC ID..._RP10_depth.tif and friends) in {depth_set.folder}")
     view = tuple(args.view)
     proj = Projection.for_view(view)
+    taken_ids = {p["id"] for area in areas.load_all() if area.id != args.area for p in areas.premises(area.id)}
     premises, town = build(view, load_businesses(args.pois), load_roads(args.roads, proj),
-                           load_shelters(args.shelters), depth_set)
+                           load_shelters(args.shelters), depth_set, taken_ids)
     write_area(out, premises, town)
     wet = {rp: sum(1 for p in premises if p["depth_m"][str(rp)]) for rp in RETURN_PERIODS}
     print(f"{len(premises)} premises, {len(town['cells'])} flood cells, wet counts {wet}")

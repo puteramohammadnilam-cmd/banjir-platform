@@ -16,20 +16,21 @@ REGION=${REGION:-asia-southeast1}
 SERVICE=${SERVICE:-banjir-check}
 DOMAIN=${DOMAIN:-}   # optional: a domain you own, to map to the service
 
-# The flood depth rasters are not in git (about 77 MB), but the service needs them. Stop here, before anything in
-# Google Cloud is touched, if one of the three return periods is missing.
-for pattern in \
-  'app/data/rasters/*_RP10_depth.tif' \
-  'app/data/rasters/*_RP100_depth.tif' \
-  'app/data/rasters/*_RP500_depth.tif'; do
-  if ! compgen -G "$pattern" >/dev/null; then
-    echo "Missing flood depth raster: $pattern" >&2
-    echo "Put the three JRC files in app/data/rasters/ first. Where to get them: app/data/rasters/SOURCES.txt." >&2
-    echo "If you hold the project's raw data folder, copy them from there:" >&2
-    echo "  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID211_N10_E100_RP*_depth.tif app/data/rasters/" >&2
-    exit 1
-  fi
+# The flood depth rasters are not in git (9 files, about 77 MB), but the service needs all of them: three grids
+# (Peninsula, Sabah and Sarawak, Langkawi) with one file for each return period. Stop here, before anything in Google
+# Cloud is touched, and name every file that is missing. The names and download links are in SOURCES.txt.
+missing=()
+for grid in ID211_N10_E100 ID220_N10_E110 ID202_N10_E90; do
+  for rp in 10 100 500; do
+    [ -f "app/data/rasters/${grid}_RP${rp}_depth.tif" ] || missing+=("${grid}_RP${rp}_depth.tif")
+  done
 done
+if [ "${#missing[@]}" -gt 0 ]; then
+  echo "Missing flood depth raster(s) in app/data/rasters/:" >&2
+  printf '  %s\n' "${missing[@]}" >&2
+  echo "app/data/rasters/SOURCES.txt says where to download each file (JRC portal) and its SHA-256." >&2
+  exit 1
+fi
 
 # --- smoke test ---
 # A point in Taman Sri Muda. Its 90 m square has the id pt:3.02998,101.53667 (SCALE_UP_PLAN section 6A).
@@ -101,15 +102,29 @@ done
 RUNNER="${SERVICE}-run@${PROJECT}.iam.gserviceaccount.com"
 gcloud iam service-accounts describe "$RUNNER" >/dev/null 2>&1 \
   || gcloud iam service-accounts create "${SERVICE}-run" --display-name="Banjir Check on Cloud Run"
+# A new account can take a few seconds to be visible to IAM, so the first binding may be refused. Retry a few times.
+IAM_RETRY_SLEEP=${IAM_RETRY_SLEEP:-5}
+bind_secret() {
+  local secret=$1 attempt
+  for attempt in 1 2 3 4 5; do
+    if gcloud secrets add-iam-policy-binding "$secret" --quiet \
+      --member="serviceAccount:${RUNNER}" --role=roles/secretmanager.secretAccessor >/dev/null; then
+      return 0
+    fi
+    echo "Could not give $RUNNER access to $secret (try $attempt of 5); waiting for IAM." >&2
+    sleep "$IAM_RETRY_SLEEP"
+  done
+  echo "Could not give $RUNNER access to $secret after 5 tries. Run the script again in a minute." >&2
+  return 1
+}
 for secret in gemini-api-key maps-api-key; do
-  gcloud secrets add-iam-policy-binding "$secret" --quiet \
-    --member="serviceAccount:${RUNNER}" --role=roles/secretmanager.secretAccessor >/dev/null
+  bind_secret "$secret"
 done
 
 gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated \
   --service-account "$RUNNER" \
   --set-secrets GOOGLE_API_KEY=gemini-api-key:latest,GOOGLE_MAPS_API_KEY=maps-api-key:latest \
-  --max-instances 2 --memory 512Mi --timeout 60
+  --max-instances 2 --memory 512Mi --timeout 300 --cpu-boost --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
 URL=${URL%/}

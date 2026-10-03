@@ -68,6 +68,12 @@ function addMessage(messages, kind, text) {
   return item;
 }
 
+/** Puts focus back on a control that was switched off and on, when switching it off dropped focus to the page. */
+function restoreFocus(control) {
+  const active = document.activeElement;
+  if (active === control || active === document.body) control.focus();
+}
+
 /** One exchange: the user's words, a wait note while `call` runs, then `show` for what came back or the error in
  *  plain words. The control (a button) is off meanwhile, so a second exchange cannot start. */
 async function exchange({ add, control, userText, waitText, call, show }) {
@@ -83,6 +89,7 @@ async function exchange({ add, control, userText, waitText, call, show }) {
     add("error", error.message);
   } finally {
     control.disabled = false;
+    restoreFocus(control);
   }
 }
 
@@ -125,18 +132,20 @@ function wireQuestionForm({ form, input, button, send }) {
 }
 
 export const VOICE_WORDS = Object.freeze({
-  speak: t("voice.speak"), stop: t("voice.stop"), label: t("voice.label"), listening: t("voice.listening"),
+  speak: t("voice.speak"), stop: t("voice.stop"), listening: t("voice.listening"),
   wait: t("voice.wait"), stopReading: t("voice.stopReading"), blocked: t("voice.blocked"),
   unreadable: t("voice.unreadable"), note: t("voice.note"),
 });
 
 /** The microphone button: press to record, press again (or wait 30 s) to send. record() starts a recording
  *  ({stop, done}, voice.js startRecording); send(audio) asks the question; isBusy() says a typed question is still
- *  being answered. Its name stays "Record a question"; whether it is recording is in aria-pressed. */
-function voiceButton({ record, send, add, isBusy }) {
+ *  being answered. onRecording(isOn) is called when a recording starts or ends (or the microphone is being asked for), so
+ *  the typed question can be switched off meanwhile. Its name is its visible words, Speak or Stop (WCAG 2.5.3);
+ *  whether it is recording is also in aria-pressed. */
+function voiceButton({ record, send, add, isBusy, onRecording, prime }) {
   let recording = null;
   let isStarting = false;   // the browser may be asking for the microphone: a second press must not start another
-  const mic = h("button", { type: "button", class: "btn btn-secondary mic", "aria-pressed": "false", "aria-label": VOICE_WORDS.label });
+  const mic = h("button", { type: "button", class: "btn btn-secondary mic", "aria-pressed": "false" });
   const show = (isOn) => {
     mic.setAttribute("aria-pressed", String(isOn));
     mic.replaceChildren(icon("mic"), isOn ? VOICE_WORDS.stop : VOICE_WORDS.speak);
@@ -146,10 +155,13 @@ function voiceButton({ record, send, add, isBusy }) {
     if (recording) return recording.stop();
     if (mic.disabled || isStarting) return undefined;
     if (isBusy()) return add("error", VOICE_WORDS.wait);
+    prime?.();   // inside the click, for iOS
     isStarting = true;
+    onRecording(true);
     try {
       recording = await record();
     } catch {
+      onRecording(false);
       return add("error", VOICE_WORDS.blocked);
     } finally {
       isStarting = false;
@@ -158,6 +170,7 @@ function voiceButton({ record, send, add, isBusy }) {
     const audio = await recording.done.catch(() => null);
     recording = null;
     show(false);
+    onRecording(false);
     return audio ? send(audio) : add("error", VOICE_WORDS.unreadable);
   });
   return mic;
@@ -211,9 +224,16 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     } finally {
       button.disabled = false;
       mic.disabled = false;
+      restoreFocus(mic);
     }
   }
-  const mic = voice.canRecord() ? voiceButton({ record: voice.startRecording, send: sendVoice, add, isBusy: () => button.disabled }) : null;
+  // While recording, the typed question is off: a question sent then would leave the Ask button busy when the recording
+  // ends, and the recording would be dropped.
+  const onRecording = (isOn) => {
+    button.disabled = isOn;
+    input.disabled = isOn;
+  };
+  const mic = voice.canRecord() ? voiceButton({ record: voice.startRecording, send: sendVoice, add, isBusy: () => button.disabled, onRecording, prime: voice.primeSpeech }) : null;
   if (mic) form.after(h("p", { class: "fineprint voice-note" }, VOICE_WORDS.note));
   if (mic) form.append(mic);
 

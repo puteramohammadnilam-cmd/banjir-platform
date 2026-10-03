@@ -26,23 +26,49 @@ const metres = (m, words) => (m > 0 ? `${m.toFixed(2)} m` : words.dry);
 const WHATSAPP = "https://wa.me/?text=";
 const floodSize = (flood) => flood.size.match(/in (\d+)/)[1];
 
-export const MAX_SHARE_CHARS = 3000;   // a WhatsApp link this long still opens; the steps are cut first, never the rest
+export const MAX_SHARE_CHARS = 3000;   // of the text once percent-encoded for the link, which is what WhatsApp's limit counts
 
 const lines = (list) => list.filter((line) => line !== undefined && line !== null).join("\n").replace(/\n{3,}/g, "\n\n");
+const encodedLength = (text) => encodeURIComponent(text).length;
+const isStep = (line) => /^\d+\. /.test(line);
+
+/** The longest start of `text` that is MAX characters or fewer once encoded, marked "…" when cut. It goes by whole
+ *  characters (an emoji is one), so what is left always encodes: cutting inside one would make encodeURIComponent throw. */
+function clip(text, max) {
+  let out = "";
+  let used = encodedLength("…");
+  for (const char of text) {
+    used += encodedLength(char);
+    if (used > max) return `${out}…`;
+    out += char;
+  }
+  return text;
+}
 
 /** The plan as plain text, to send on WhatsApp or with the phone's share button: the same words as the sheet, with the
- *  model note near the top. A long plan loses its last steps (marked "…"), never the figures, contacts or footer. */
+ *  model note near the top. A long plan loses its last steps (marked "…"), never the figures, contacts or footer; only
+ *  where the figures and contacts alone are past the limit are they cut too (the start of the plan first), so the link
+ *  stays valid. The limit is on the percent-encoded text, where a line break is 3 characters and "ñ" or "’" is 6. */
 export function planText({ plan, facts, contacts, language }) {
   const words = WORDS[language] ?? WORDS.en;
   const head = lines([plan.title, plan.summary, [facts.place, facts.area].filter(Boolean).join(", "), words.modelNote, "",
     ...facts.floods.map((f) => words.line(words.sizeText(floodSize(f)), f.street_depth_m, f.chance_in_10_years_pct))]);
   const tail = lines([words.contacts, ...contacts.map((c) => `- ${c.name}: ${c.how}`), "", words.footer]);
-  const steps = [["before", words.before], ["warning", words.warning], ["during", words.during], ["after", words.after]]
+  const allSteps = [["before", words.before], ["warning", words.warning], ["during", words.during], ["after", words.after]]
     .flatMap(([part, heading]) => (plan[part].length ? ["", heading, ...plan[part].map((step, i) => `${i + 1}. ${step}`)] : []));
-  const room = MAX_SHARE_CHARS - head.length - tail.length - 4;
-  let body = lines(steps);
-  if (body.length > room) body = `${body.slice(0, Math.max(0, room - 1)).replace(/\n[^\n]*$/, "")}\n…`;
-  return lines([head, body, "", tail]);
+  const compose = (kept, isCut) => lines([head, lines([...kept, ...(isCut ? ["…"] : [])]), "", tail]);
+  const fits = (text) => encodedLength(text) <= MAX_SHARE_CHARS;
+  let kept = allSteps;
+  let isCut = false;
+  while (kept.length && !fits(compose(kept, isCut))) {
+    kept = kept.slice(0, -1);
+    while (kept.length && !isStep(kept.at(-1))) kept = kept.slice(0, -1);   // no heading left without its steps
+    isCut = true;
+  }
+  const text = compose(kept, isCut);
+  if (fits(text)) return text;
+  const headRoom = MAX_SHARE_CHARS - encodedLength(`\n\n${tail}`);
+  return headRoom > encodedLength("…") ? `${clip(head, headRoom)}\n\n${tail}` : clip(tail, MAX_SHARE_CHARS);
 }
 
 /** WhatsApp, and the phone's own share sheet where the browser has one. */
@@ -50,8 +76,10 @@ function shareButtons(result) {
   const text = planText(result);
   const share = globalThis.navigator?.share
     && h("button", { type: "button", class: "btn btn-secondary", onclick: () => navigator.share({ title: result.plan.title, text })
-      .catch((error) => { if (error?.name !== "AbortError") window.open(whatsapp, "_blank", "noopener"); }) }, t("plan.share"));
-  const whatsapp = `${WHATSAPP}${encodeURIComponent(text)}`;   // also where a failed share sheet sends it (not a cancel)
+      .catch((error) => { if (error?.name !== "AbortError") globalThis.location.href = whatsapp; }) }, t("plan.share"));
+  // also where a failed share sheet sends it (not a cancel). By then the click is long over, and a window opened now is
+  // blocked as a popup on iOS, so this page goes to WhatsApp (the way back returns to it, the place is in its address)
+  const whatsapp = `${WHATSAPP}${encodeURIComponent(text)}`;
   return h("div", { class: "plan-share" },
     h("a", { class: "btn btn-secondary", href: whatsapp, target: "_blank", rel: "noopener noreferrer" }, t("plan.whatsapp")),
     ...(share ? [share] : []));
@@ -111,15 +139,18 @@ export function createPlanCard({ onWrite, onPrint, onLanguage }) {
     node,
     render(state, chosen) {
       if (state === shown.state && chosen === shown.chosen) return;
-      const isNewResult = state?.result !== shown.state?.result || Boolean(state?.error) !== Boolean(shown.state?.error);
+      const isNewResult = state?.result !== shown.state?.result;
+      const isDone = Boolean(shown.state?.busy) && !state?.busy;
       shown = { state, chosen };
       language = chosen;
       choice.show(chosen);
       write.disabled = Boolean(state?.busy);
+      // a disabled button loses focus to the page: give it back once the plan is written (or failed)
+      if (isDone && [write, document.body].includes(document.activeElement)) write.focus();
       write.textContent = t(state?.busy ? "plan.writing" : state?.result ? "plan.again" : "plan.write");
       alert.textContent = state?.error ?? "";
       alert.hidden = !state?.error;
-      if (isNewResult) live.replaceChildren(...(state?.result && !state.error ? [sheet(state.result, onPrint)] : []));
+      if (isNewResult) live.replaceChildren(...(state?.result ? [sheet(state.result, onPrint)] : []));   // a failed new try keeps the plan shown
     },
   };
 }

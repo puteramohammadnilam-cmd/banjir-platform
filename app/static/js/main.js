@@ -27,6 +27,7 @@ async function shrinkPhoto(file) {
   context.fillStyle = "#fff";   // JPEG has no transparency
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  if (typeof bitmap.close === "function") bitmap.close();   // frees the decoded photo now, not whenever the GC gets to it
   return canvas.toDataURL("image/jpeg", PHOTO_QUALITY);
 }
 

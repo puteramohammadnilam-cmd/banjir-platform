@@ -357,7 +357,6 @@ export default Object.freeze({
   "ask.chipPointAreaDry": "Perniagaan mana di kawasan ini yang tak kena air dalam banjir 1 dalam 100 tahun?",
   "voice.speak": "Cakap",
   "voice.stop": "Berhenti",
-  "voice.label": "Rakam soalan",
   "voice.listening": "Mendengar soalan anda…",
   "voice.wait": "Sila tunggu jawapan, kemudian tanya lagi.",
   "voice.stopReading": "Berhenti membaca",

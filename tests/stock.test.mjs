@@ -116,3 +116,27 @@ test("the water line names the floor height it was worked out with", () => {
   card.render({ result: RESULT }, "100");
   assert.match(text(), /with the floor 30 cm above the street/);
 });
+
+// ---------- review batch 3 ----------
+
+test("the photo picker gets focus back when the photo has been read, if the page took it", () => {
+  const { card } = mount();
+  const body = {};
+  document.body = body;
+  card.render(undefined, "100");
+  const input = card.node.querySelector("input");
+  input.focus = () => { document.activeElement = input; };
+  document.activeElement = input;
+  card.render({ busy: true }, "100");
+  assert.equal(input.disabled, true);
+  document.activeElement = body;   // the disabled picker lost it
+  card.render({ result: RESULT }, "100");
+  assert.equal(input.disabled, false);
+  assert.equal(document.activeElement, input);
+
+  card.render({ busy: true, result: RESULT }, "100");
+  const elsewhere = {};
+  document.activeElement = elsewhere;
+  card.render({ result: RESULT, error: "x" }, "100");
+  assert.equal(document.activeElement, elsewhere, "focus the user moved is left alone");
+});

@@ -1,6 +1,6 @@
 """The JRC rasters shipped with the app (plan card A2): recorded checksums, deploy filters and the deploy.sh guard.
 
-The depth files (about 39 MB) are not in git. app/data/rasters/SOURCES.txt records what they are, and the tests that
+The 9 depth files (about 77 MB) are not in git. app/data/rasters/SOURCES.txt records what they are, and the tests that
 need the files skip on a clone without them. The ignore-file checks read .gcloudignore (gcloud follows .gitignore
 rules) and .dockerignore (Docker's own rules) as closely as fnmatch allows. Standard library only.
 """
@@ -189,7 +189,21 @@ def commands_before_gcloud() -> str:
 
 def test_deploy_script_stops_before_gcloud_when_a_raster_is_missing():
     guard = commands_before_gcloud()
+    for grid in ("ID211_N10_E100", "ID220_N10_E110", "ID202_N10_E90"):
+        assert grid in guard   # every grid is required, not only the Peninsula
     for rp in (10, 100, 500):
-        assert f"app/data/rasters/*_RP{rp}_depth.tif" in guard
-    assert "05_Raw_Data_Sources/jrc_glofas_v2_1" in guard   # where the message says to copy them from
+        assert f"RP{rp}" in guard or str(rp) in guard
+    assert "app/data/rasters/SOURCES.txt" in guard   # where the message says to download them from
+    assert "05_Raw_Data_Sources" not in guard   # a public clone does not have that folder
     assert "exit 1" in guard
+
+
+def test_the_grids_deploy_sh_requires_are_the_files_sources_txt_records():
+    """deploy.sh builds the 9 names from a grid list and the three return periods; SOURCES.txt must say the same."""
+    text = (ROOT / "deploy.sh").read_text(encoding="utf-8")
+    grids = re.search(r"for grid in ([\w ]+); do", text)
+    periods = re.search(r"for rp in ([\d ]+); do", text)
+    assert grids and periods
+    required = {f"{grid}_RP{rp}_depth.tif" for grid in grids[1].split() for rp in periods[1].split()}
+    assert required == {entry.name for entry in recorded_files()}
+    assert required == set(PENINSULA_FILES + BORNEO_FILES + LANGKAWI_FILES)

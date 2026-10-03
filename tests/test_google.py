@@ -111,6 +111,20 @@ def test_listing_name_is_trimmed_and_links_must_be_https(monkeypatch):
     assert "\n" not in out["name"] and len(out["name"]) <= googlemaps.MAX_NAME_CHARS and out["maps_uri"] is None
 
 
+@pytest.mark.parametrize("broken", [
+    {"displayName": None}, {"displayName": {"text": None}}, {"displayName": {}},
+    {"location": None}, {"location": {"longitude": 101.5401}}, {"location": {"latitude": "3.03", "longitude": 101.54}},
+])
+def test_a_listing_with_null_fields_is_skipped_not_a_crash(monkeypatch, broken):
+    good = place("KFC", 3.0302, 101.5402, pid="good")
+    monkeypatch.setattr(googlemaps, "_post", lambda url, body, headers: {"places": [{**place("KFC", 3.0300, 101.5400), **broken}, good]})
+    assert googlemaps.place_status("KFC", 3.03, 101.54)["maps_uri"].endswith("good")
+    monkeypatch.setattr(googlemaps, "_post", lambda url, body, headers: {"places": [{**place("KFC", 3.0300, 101.5400), **broken}]})
+    assert googlemaps.place_status("KFC", 3.03, 101.54) is None
+    monkeypatch.setattr(googlemaps, "_post", lambda url, body, headers: {"places": None})
+    assert googlemaps.place_status("KFC", 3.03, 101.54) is None
+
+
 def test_upstream_failure_is_one_clean_error(monkeypatch):
     def boom(url, body, headers):
         raise googlemaps.UpstreamError("HTTP 403")

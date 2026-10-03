@@ -129,7 +129,7 @@ import { MAX_SHARE_CHARS } from "../app/static/js/plan.js";
 test("a long plan is cut in its steps, never in its figures, contacts or footer", () => {
   const long = { ...RESULT, plan: { ...RESULT.plan, before: Array.from({ length: 30 }, (_, i) => `Langkah ${i} ${"x".repeat(180)}`) } };
   const text = planText(long);
-  assert.ok(text.length <= MAX_SHARE_CHARS, String(text.length));
+  assert.ok(encodeURIComponent(text).length <= MAX_SHARE_CHARS, String(encodeURIComponent(text).length));
   assert.match(text, /…\n\nHubungi\n- Emergency/);
   assert.match(text, /Ditulis oleh Gemini/);
   assert.match(text, /1 dalam 100 tahun/);
@@ -138,4 +138,100 @@ test("a long plan is cut in its steps, never in its figures, contacts or footer"
 test("a dry flood size reads as no water in the street in the model", () => {
   const dry = { ...RESULT, language: "en", facts: { ...FACTS, floods: FACTS.floods.map((f) => ({ ...f, street_depth_m: null })) } };
   assert.match(planText(dry), /1 in 10 years: no water in the street in the model; chance within 10 years 65%/);
+});
+
+// ---------- review batch 3 ----------
+
+test("a failed write again keeps the plan on show, with the error beside it", () => {
+  const { card, text } = mount();
+  card.render({ result: RESULT }, "ms");
+  const sheet = card.node.querySelector(".plan-sheet");
+  card.render({ busy: true, result: RESULT }, "ms");
+  card.render({ result: RESULT, error: "Too many requests. Please wait a moment." }, "ms");
+  assert.match(card.node.querySelector('[role="alert"]').textContent, /Too many requests/);
+  assert.equal(card.node.querySelector('[role="alert"]').hidden, false);
+  assert.equal(card.node.querySelector(".plan-sheet"), sheet, "the same sheet, not rebuilt");
+  assert.match(text(), /Pelan banjir kedai anda/);
+  card.render({ result: RESULT }, "ms");
+  assert.equal(card.node.querySelector('[role="alert"]').hidden, true, "the error goes with the next try");
+});
+
+test("the Write button gets focus back when the plan is done, if the page took it", () => {
+  const { card, button } = mount();
+  const body = {};
+  document.body = body;
+  card.render(undefined, "ms");
+  const write = button("Write my flood plan");
+  write.focus = () => { document.activeElement = write; };
+  document.activeElement = write;
+  card.render({ busy: true }, "ms");
+  document.activeElement = body;   // the disabled button lost it
+  card.render({ result: RESULT }, "ms");
+  assert.equal(document.activeElement, write);
+
+  card.render({ busy: true, result: RESULT }, "ms");
+  const elsewhere = {};
+  document.activeElement = elsewhere;
+  card.render({ result: RESULT, error: "x" }, "ms");
+  assert.equal(document.activeElement, elsewhere, "focus the user moved is left alone");
+});
+
+const encoded = (text) => encodeURIComponent(text).length;
+
+test("the WhatsApp cap counts the percent-encoded text, not the characters", () => {
+  // Malay text with curly quotes and line breaks: every one of them is 3 to 9 encoded characters
+  const steps = Array.from({ length: 40 }, (_, i) => `Langkah ${i}: simpan dokumen penting ‘di rak atas’ — jauh dari air banjir yang naik.`);
+  const result = { ...RESULT, plan: { ...RESULT.plan, before: steps, warning: steps.slice(0, 10) } };
+  const text = planText(result);
+  assert.ok(encoded(text) <= MAX_SHARE_CHARS, String(encoded(text)));
+  assert.ok(text.length < encoded(text) - 200, "the raw length is well under the encoded one, so a raw cap would have let it through");
+  assert.match(text, /…\n\nHubungi\n- Emergency/);
+  assert.match(text, /Ditulis oleh Gemini/);
+  assert.match(text, /1 dalam 100 tahun/);
+  const link = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  assert.ok(link.length <= MAX_SHARE_CHARS + "https://wa.me/?text=".length);
+});
+
+test("a cut plan ends on a whole step, never on a heading with nothing under it", () => {
+  const many = Array.from({ length: 12 }, (_, i) => `Langkah ${i} ${"x".repeat(150)}`);
+  const text = planText({ ...RESULT, plan: { title: "T", summary: "S", before: many, warning: many, during: many, after: many } });
+  const body = text.slice(text.indexOf("Sebelum banjir"), text.indexOf("…"));
+  assert.match(body.trimEnd(), /\d+\. Langkah \d+ x+$/);
+});
+
+test("a plan whose figures and contacts alone are too long still gives a valid link that fits", () => {
+  const huge = { ...RESULT, plan: { ...RESULT.plan, title: `Pelan ${"é😀".repeat(1500)}`, summary: "s".repeat(800) } };
+  const text = planText(huge);
+  assert.ok(encoded(text) <= MAX_SHARE_CHARS, String(encoded(text)));
+  assert.doesNotThrow(() => encodeURIComponent(text), "no character was cut in half");
+  assert.match(text, /Ditulis oleh Gemini/, "the footer is the last to go");
+  assert.match(text, /Hubungi\n- Emergency/);
+  const absurd = { ...RESULT, contacts: Array.from({ length: 400 }, (_, i) => ({ name: `Hubungi ${i} ${"😀".repeat(5)}`, how: "999" })) };
+  const tail = planText(absurd);
+  assert.ok(encoded(tail) <= MAX_SHARE_CHARS);
+  assert.doesNotThrow(() => encodeURIComponent(tail));
+});
+
+test("a failed share sheet sends this page to WhatsApp, not into a popup; a cancelled one does nothing", async () => {
+  const wasNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  try {
+    for (const [failure, goes] of [[new DOMException("closed", "AbortError"), false], [new Error("NotAllowedError"), true]]) {
+      Object.defineProperty(globalThis, "navigator", { value: { share: async () => { throw failure; } }, configurable: true });
+      const opened = [];
+      globalThis.window = { open: (...args) => opened.push(args) };
+      globalThis.location = { href: "https://example.test/#p" };
+      const { card, button } = mount();
+      card.render({ result: RESULT }, "ms");
+      button("Share…").click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      assert.deepEqual(opened, [], "window.open is blocked on iOS after an await");
+      if (goes) assert.equal(globalThis.location.href, `https://wa.me/?text=${encodeURIComponent(planText(RESULT))}`);
+      else assert.equal(globalThis.location.href, "https://example.test/#p");
+    }
+  } finally {
+    if (wasNavigator) Object.defineProperty(globalThis, "navigator", wasNavigator);
+    else delete globalThis.navigator;
+    delete globalThis.window;
+    delete globalThis.location;
+  }
 });

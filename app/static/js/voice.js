@@ -61,7 +61,9 @@ async function toSamples(blob) {
   }
 }
 
-/** Records from a stream until stop(), MAX_SECONDS or a recorder error; the stream is closed in every case. */
+/** Records from a stream until stop(), MAX_SECONDS or a recorder error; the stream is closed in every case. A recorder
+ *  that goes inactive without a "stop" event (iOS, after a call or when the page is backgrounded) or a microphone that
+ *  is taken away (the track's "ended") would leave `done` pending for good, so the timer and the track end it. */
 function record(stream) {
   let recorder;
   try {
@@ -72,13 +74,15 @@ function record(stream) {
   }
   const chunks = [];
   let timer = null;
+  let fail;
   const done = new Promise((resolve, reject) => {
     const finish = () => {
       clearTimeout(timer);
       stream.getTracks().forEach((track) => track.stop());
     };
+    fail = (message) => { finish(); reject(new Error(message)); };
     recorder.addEventListener("dataavailable", (event) => chunks.push(event.data));
-    recorder.addEventListener("error", () => { finish(); reject(new Error("The recorder failed.")); });
+    recorder.addEventListener("error", () => fail("The recorder failed."));
     recorder.addEventListener("stop", () => {
       finish();
       toSamples(new Blob(chunks, { type: recorder.mimeType }))
@@ -91,7 +95,10 @@ function record(stream) {
     stream.getTracks().forEach((track) => track.stop());
     throw error;
   }
-  timer = setTimeout(() => recorder.state === "recording" && recorder.stop(), MAX_SECONDS * 1000);
+  // still recording: stop() gives the "stop" event with what was heard; otherwise no "stop" event is coming
+  const end = () => (recorder.state === "recording" ? recorder.stop() : fail("The recording stopped."));
+  stream.getTracks().forEach((track) => track.addEventListener("ended", end));
+  timer = setTimeout(end, MAX_SECONDS * 1000);
   return { stop: () => { if (recorder.state === "recording") recorder.stop(); }, done };
 }
 
@@ -118,13 +125,26 @@ function voicesOf(synth) {
   });
 }
 
-/** Reads an answer aloud in its language, stopping anything still being read. Nothing happens without a fitting voice. */
+let latestSpeech = 0;   // each speak() and stopSpeaking() makes a new number, so a speak() that was waiting for voices can tell
+
+/** Called in the click that starts a recording: iOS lets speechSynthesis speak only after one speak() made inside a user
+ *  gesture, and the answer is read long after the click. An empty utterance does that, and ends any reading in progress. */
+export function primeSpeech() {
+  const synth = globalThis.speechSynthesis;
+  if (!synth || !globalThis.SpeechSynthesisUtterance) return;
+  synth.cancel();
+  synth.speak(new SpeechSynthesisUtterance(""));
+}
+
+/** Reads an answer aloud in its language, stopping anything still being read. Nothing happens without a fitting voice,
+ *  or when reading was stopped (or another answer asked for) while the voices were loading. */
 export async function speak(text, language) {
   const synth = globalThis.speechSynthesis;
   if (!synth) return;
+  const turn = ++latestSpeech;
   synth.cancel();
   const voice = pickVoice(await voicesOf(synth), language);
-  if (!voice) return;
+  if (!voice || turn !== latestSpeech) return;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.voice = voice;
   utterance.lang = voice.lang;
@@ -132,4 +152,7 @@ export async function speak(text, language) {
 }
 
 /** Stops reading aloud. */
-export const stopSpeaking = () => globalThis.speechSynthesis?.cancel();
+export function stopSpeaking() {
+  latestSpeech += 1;
+  globalThis.speechSynthesis?.cancel();
+}

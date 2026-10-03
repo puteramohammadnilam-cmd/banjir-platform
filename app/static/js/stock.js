@@ -64,8 +64,11 @@ export function createStockCard({ onPhoto, onUse }) {
     node,
     render(state, rp) {
       if (state === shown.state && rp === shown.rp) return;
+      const isDone = Boolean(shown.state?.busy) && !state?.busy;
       shown = { state, rp };
       input.disabled = Boolean(state?.busy);
+      // a disabled picker loses focus to the page: give it back once the photo is read (or failed)
+      if (isDone && [input, document.body].includes(document.activeElement)) input.focus();
       if (state?.busy) picker.setAttribute("aria-disabled", "true");
       else picker.removeAttribute("aria-disabled");
       words.textContent = t(state?.busy ? "common.photoReading" : state?.result ? "common.photoAgain" : "stock.add");

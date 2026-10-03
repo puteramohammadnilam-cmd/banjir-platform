@@ -356,7 +356,6 @@ export default Object.freeze({
   "ask.chipPointAreaDry": "Which businesses in this area stay dry in a 100 year flood?",
   "voice.speak": "Speak",
   "voice.stop": "Stop",
-  "voice.label": "Record a question",
   "voice.listening": "Listening to your question…",
   "voice.wait": "Please wait for the answer, then ask again.",
   "voice.stopReading": "Stop reading",

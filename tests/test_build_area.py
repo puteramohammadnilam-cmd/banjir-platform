@@ -25,7 +25,7 @@ SRI_MUDA_POIS = SRI_MUDA_RAW / "overpass_sri_muda_pois.json"
 SRI_MUDA_ROADS = SRI_MUDA_RAW / "overpass_sri_muda_roads.json"
 SRI_MUDA_VIEW = (101.515, 3.008, 101.550, 3.042)
 SRI_MUDA_DIR = ROOT / "app" / "data" / "areas" / "sri-muda"
-FIXTURE_VIEW = (100.0, 8.0, 101.0, 9.0)   # inside the fixture grid (100-110 E, 2.5-10 N, squares of 0.25 degrees)
+FIXTURE_VIEW = (100.0, 8.0, 101.0, 10.0)   # inside the fixture grid (100-110 E, 2.5-10 N, squares of 0.25 degrees)
 
 
 # ---------- helpers
@@ -194,6 +194,38 @@ def test_build_refuses_a_business_outside_the_loaded_rasters(depths, inputs, tmp
     pois = write_json(tmp_path / "far.json", [node(9, 50.0, 8.5, shop="kiosk", name="Far")])
     with pytest.raises(ValueError, match="node-9"):
         ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(inputs[1], proj), [], depths)
+
+
+def test_build_refuses_a_business_outside_the_view(depths, inputs, tmp_path):
+    # on the fixture's dry no-data side of the grid, so only the view can be what is wrong with it
+    proj = ba.Projection.for_view(FIXTURE_VIEW)
+    pois = write_json(tmp_path / "off.json", [node(8, 100.5, 8.5, shop="kiosk", name="In"),
+                                              node(9, 102.5, 8.5, shop="kiosk", name="Off")])
+    with pytest.raises(ValueError, match=r"node-9.*outside the view"):
+        ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(inputs[1], proj), [], depths)
+
+
+def test_build_refuses_an_id_another_installed_area_already_uses(depths, inputs):
+    pois, roads, _ = inputs
+    proj = ba.Projection.for_view(FIXTURE_VIEW)
+    with pytest.raises(ValueError, match=r"node-1.*another area"):
+        ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), [], depths,
+                 taken_ids={"node-1"})
+
+
+def test_main_checks_ids_against_the_other_installed_areas_not_its_own(tmp_path, inputs, monkeypatch):
+    folder = fx.write_depth_set(tmp_path / "r")
+    other = areas.premises("kuantan")[0]["id"]
+    if not other.startswith("node-"):
+        pytest.skip("the first Kuantan id is not an OSM node")
+    pois = write_json(tmp_path / "clash.json", [node(int(other.split("-")[1]), 100.875, 9.375, shop="bakery",
+                                                     name="Clash")])
+    argv = ["--area", "demo", "--view", *map(str, FIXTURE_VIEW), "--pois", str(pois), "--roads", str(inputs[1]),
+            "--out", str(tmp_path / "out"), "--rasters", str(folder)]
+    with pytest.raises(ValueError, match="another area"):
+        ba.main(argv)
+    # rebuilding an installed area does not clash with its own ids
+    assert ba.main(["--area", "kuantan", *argv[2:]]) == 0
 
 
 def test_build_refuses_a_view_outside_the_rasters(depths, inputs):

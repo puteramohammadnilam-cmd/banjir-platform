@@ -15,7 +15,7 @@ Honest wording matters here. Every depth is "in the model". This is a global riv
 
 ## Quick start
 
-You need Python 3.12 and the three flood depth files (see "Flood depth rasters" below).
+You need Python 3.12 and the nine flood depth files (see "Flood depth rasters" below).
 
 ```bash
 python3.12 -m venv .venv
@@ -94,7 +94,7 @@ They are about 77 MB together, so they are not in git (`.gitignore` skips `app/d
 
 - `app/data/rasters/SOURCES.txt` is committed. It records the source, licence, size and SHA-256 of each file. `tests/test_rasters_shipped.py` checks your copies against it, and skips a file that is absent.
 - `BANJIR_RASTER_DIR` points the app at another folder, for example one outside the repo.
-- `deploy.sh` stops before it touches Google Cloud if no file is there for one of the three return periods.
+- `deploy.sh` stops before it touches Google Cloud unless all nine files are there. It names each missing file and points to `SOURCES.txt` for the download links.
 - `app/raster.py` reads them with the standard library only. It refuses any file layout other than the one JRC ships, rather than guessing.
 
 What they cover: 89.977 to 119.975 E and 0.008 to 10.007 N, which holds all of Malaysia. The grids are rectangles, so they also take in Singapore, Brunei, southern Thailand, eastern Sumatra and part of Kalimantan. In this build the app uses coarse boxes, not national borders, so it answers for points there too. A point outside every box gets "outside".
@@ -250,10 +250,10 @@ PROJECT=your-project-id ./deploy.sh
 
 It does these things, in order:
 
-1. Stops if one of the three flood files is missing, before it touches Google Cloud.
+1. Stops if any of the nine flood files is missing, before it touches Google Cloud.
 2. Enables the APIs and stores both keys in Secret Manager. It asks you to paste each key once.
-3. Creates a service account that can read only those two secrets.
-4. Deploys the service `banjir-check` in `asia-southeast1` (override with `SERVICE` and `REGION`), with 2 instances at most, 512 MiB and a 60 second request timeout.
+3. Creates a service account that can read only those two secrets. A new account can take a few seconds to show up in IAM, so it retries the secret access grant up to 5 times, 5 seconds apart.
+4. Deploys the service `banjir-check` in `asia-southeast1` (override with `SERVICE` and `REGION`), with 2 instances at most, 512 MiB, a 60 second request timeout and startup CPU boost. It passes `--quiet`, so a first run does not stop to ask questions (for example about creating the Artifact Registry repository).
 5. Reads the service URL and runs a smoke test: `/api/status` and `/api/coverage` must answer with success, and a point check at the Taman Sri Muda spot above must come back `covered` in square `pt:3.02998,101.53667`. If a check fails, it says which one and exits non-zero.
 
 The smoke test has been run against stubs only.
@@ -293,7 +293,7 @@ Left out on purpose until their terms are read: JPS river levels, PLANMalaysia z
 
 - The rate limit is in memory, per server instance. Fine for a demo, not for real traffic.
 - The photo estimate is a guess from one image. It has not been tested against measured floors.
-- No Bahasa Melayu version of the page text yet. Only the chat answers in BM.
+- The page text has a BM | EN switch. The area data (place names, flood-plan facts), server messages and OpenStreetMap business types are still English. The chat answers in BM or English.
 - The Google Weather, Places and Search calls are tested against recorded response shapes, not live keys. Whether Google Weather covers a given place, and how well Places matches local shop names, is unknown until you try with keys.
 - The cost estimate has not been tried through the chat with a live Gemini key. The sums, the form's endpoint and the tool schema are tested. The chat does not know the floor height from the photo unless the owner repeats it.
 - The counter (0.9 m), adult (1.65 m), door (2.1 m) and storey (3 m) heights are typical values used to picture a depth, not measurements at any shop.

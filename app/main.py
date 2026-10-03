@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 import binascii
 import logging
+import threading
 import time
 from collections import defaultdict, deque
 from pathlib import Path
@@ -24,6 +25,7 @@ from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
@@ -36,7 +38,13 @@ MAX_TURN_CHARS = 2000
 MAX_TURNS = 12
 MAX_PHOTO_BYTES = 4 * 1024 * 1024
 MAX_BODY_BYTES = 6 * 1024 * 1024   # a 4 MB photo as base64, plus headroom
-PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
+TOO_LARGE_WORDS = "That upload is too large."
+# what each photo type starts with, as (offset, bytes) pairs; the page re-encodes every photo as JPEG
+PHOTO_SIGNATURES = {
+    "image/jpeg": ((0, b"\xff\xd8\xff"),),
+    "image/png": ((0, b"\x89PNG\r\n\x1a\n"),),
+    "image/webp": ((0, b"RIFF"), (8, b"WEBP")),
+}
 MAX_AUDIO_BYTES = 1_000_000   # 30 s of 16 kHz mono 16-bit WAV, as voice.js records it
 AUDIO_TYPES = {"audio/wav"}   # the page turns every recording into WAV, a format Gemini takes on every platform
 NOT_HEARD = "Sorry, I could not hear a question in that recording. Try again, a little closer to the phone."
@@ -46,6 +54,10 @@ CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no 
 GEO_RATE_LIMIT = 120        # point checks: one for each pin dropped or GPS fix
 MAP_RATE_LIMIT = 1200       # the flood model's coverage: asked for once per visit, and again after a failure
 RATE_WINDOW_S = 300
+MAX_AI_CALLS = 8            # Gemini calls in flight at once: each holds a pool thread for up to minutes, and the pool
+AI_SLOT_WAIT_S = 2          # is shared with the data routes, so a visitor past the cap waits this long, then is told
+AI_BUSY_WORDS = "The AI assistant is busy. Please try again in a minute."
+AI_BUSY_CODES = (429, 503)   # Gemini's own "too many requests" and "overloaded"
 GZIP_MIN_BYTES = 1024
 GZIP_LEVEL = 6               # level 9 gains 2% on the area data for over twice the time, on the event loop
 MAX_TRACKED_CLIENTS = 10_000
@@ -92,6 +104,8 @@ app = FastAPI(title="Banjir shop flood check", docs_url=None, redoc_url=None, op
 # JSON and scripts shrink to a seventh or so (a point's answer: 71 KB to under 10 KB); short answers are not worth it
 app.add_middleware(GZipMiddleware, minimum_size=GZIP_MIN_BYTES, compresslevel=GZIP_LEVEL)
 _hits: dict[str, deque[float]] = defaultdict(deque)
+_hits_lock = threading.Lock()
+_ai_slots = threading.BoundedSemaphore(MAX_AI_CALLS)
 areas.preload()   # a malformed area file stops the server here, at start-up, not in the middle of a request
 
 
@@ -164,18 +178,20 @@ def _limit(request: Request, bucket: str, limit: int) -> None:
     # ponytail: in-memory, per instance, resets on restart. Enough to stop one visitor burning
     # the quota in a demo. For real traffic move this to Cloud Armor or an API gateway.
     now = time.monotonic()
-    if len(_hits) > MAX_TRACKED_CLIENTS:   # forget idle visitors so the table cannot grow forever
-        for key, seen in list(_hits.items()):
-            if not seen or now - seen[-1] > RATE_WINDOW_S:
-                _hits.pop(key, None)
-        if len(_hits) > MAX_TRACKED_CLIENTS:
-            raise HTTPException(429, "The service is busy. Please try again shortly.")
-    hits = _hits[f"{bucket}:{client_ip(request)}"]
-    while hits and now - hits[0] > RATE_WINDOW_S:
-        hits.popleft()
-    if len(hits) >= limit:
-        raise HTTPException(429, "Too many requests. Please wait a few minutes.")
-    hits.append(now)
+    key = f"{bucket}:{client_ip(request)}"
+    with _hits_lock:   # sync routes run in a thread pool: the count and the append must be one step
+        if len(_hits) > MAX_TRACKED_CLIENTS:   # forget idle visitors so the table cannot grow forever
+            for seen_key, seen in list(_hits.items()):
+                if not seen or now - seen[-1] > RATE_WINDOW_S:
+                    _hits.pop(seen_key, None)
+            if len(_hits) > MAX_TRACKED_CLIENTS:
+                raise HTTPException(429, "The service is busy. Please try again shortly.")
+        hits = _hits[key]
+        while hits and now - hits[0] > RATE_WINDOW_S:
+            hits.popleft()
+        if len(hits) >= limit:
+            raise HTTPException(429, "Too many requests. Please wait a few minutes.")
+        hits.append(now)
 
 
 def rate_limit(request: Request) -> None:
@@ -243,7 +259,7 @@ def question_area(area_id: str | None, place_ref: str | None) -> areas.Area | No
 def decode_photo(data_url: str) -> tuple[bytes, str]:
     header, _, payload = data_url.partition(",")
     mime = header.removeprefix("data:").removesuffix(";base64")
-    if not header.endswith(";base64") or mime not in PHOTO_TYPES:
+    if not header.endswith(";base64") or mime not in PHOTO_SIGNATURES:
         raise HTTPException(415, "Please upload a JPEG, PNG or WebP photo.")
     try:
         raw = base64.b64decode(payload, validate=True)
@@ -251,6 +267,8 @@ def decode_photo(data_url: str) -> tuple[bytes, str]:
         raise HTTPException(400, "The photo could not be read.") from exc
     if len(raw) > MAX_PHOTO_BYTES:
         raise HTTPException(413, "The photo is too large. The limit is 4 MB.")
+    if not all(raw[at:at + len(start)] == start for at, start in PHOTO_SIGNATURES[mime]):
+        raise HTTPException(415, "Please upload a JPEG, PNG or WebP photo.")
     return raw, mime
 
 
@@ -272,7 +290,10 @@ def decode_audio(data_url: str) -> tuple[bytes, str]:
 
 
 def call_ai(fn, *args):
-    """Run an AI call; turn provider failures into clean HTTP errors without leaking details."""
+    """Run an AI call; turn provider failures into clean HTTP errors without leaking details. At most MAX_AI_CALLS run
+    at once; a visitor past that, or one Gemini itself turns away as over its rate limit or overloaded, gets a 503."""
+    if not _ai_slots.acquire(timeout=AI_SLOT_WAIT_S):
+        raise HTTPException(503, AI_BUSY_WORDS)
     try:
         return fn(*args)
     except ai.NotConfigured as exc:
@@ -283,8 +304,40 @@ def call_ai(fn, *args):
         log.error("AI call failed: %s: ValidationError", fn.__name__)
         raise HTTPException(502, "The AI assistant could not answer just now. Please try again.") from exc
     except Exception as exc:  # provider SDK raises many types; all mean "upstream failed"
+        if isinstance(exc, genai_errors.APIError) and exc.code in AI_BUSY_CODES:
+            log.warning("AI call turned away: %s: %s", fn.__name__, exc.code)
+            raise HTTPException(503, AI_BUSY_WORDS) from exc
         log.exception("AI call failed: %s", fn.__name__)
         raise HTTPException(502, "The AI assistant could not answer just now. Please try again.") from exc
+    finally:
+        _ai_slots.release()
+
+
+class BodyLimit:
+    """Counts a request's body as it arrives and stops it at MAX_BODY_BYTES, whether or not it said how long it is:
+    a chunked upload has no Content-Length for limits_and_headers to check. The 413 comes from the route's read."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        received = 0
+
+        async def counted():
+            nonlocal received
+            message = await receive()
+            received += len(message.get("body", b"")) if message["type"] == "http.request" else 0
+            if received > MAX_BODY_BYTES:
+                raise HTTPException(413, TOO_LARGE_WORDS)
+            return message
+
+        await self.app(scope, counted, send)
+
+
+app.add_middleware(BodyLimit)   # inside limits_and_headers, so its 413 carries the same headers
 
 
 @app.middleware("http")
@@ -292,7 +345,7 @@ async def limits_and_headers(request: Request, call_next):
     # Reject oversized bodies before they are read into memory.
     length = request.headers.get("content-length", "0")
     if not length.isdigit() or int(length) > MAX_BODY_BYTES:
-        response = JSONResponse({"success": False, "data": None, "error": "That upload is too large."}, status_code=413)
+        response = JSONResponse({"success": False, "data": None, "error": TOO_LARGE_WORDS}, status_code=413)
     else:
         response = await call_next(request)
     response.headers.update(SECURITY_HEADERS)
@@ -340,29 +393,32 @@ for _path in POST_ONLY:
     app.add_api_route(_path, post_only, methods=["GET"], include_in_schema=False)
 
 
+GET_AND_HEAD = ["GET", "HEAD"]   # a monitor's HEAD gets the status line and headers of the same answer
+
+
 def area_data(area: areas.Area) -> dict:
     return {"premises": areas.premises(area.id), "town": areas.town(area.id), "limits": floodtools.LIMITS}
 
 
-@app.get("/api/areas")
+@app.api_route("/api/areas", methods=GET_AND_HEAD)
 def area_list() -> dict:
     return ok({"default": areas.default().id, "areas": [areas.summary(area) for area in areas.load_all()]})
 
 
-@app.get("/api/areas/{area_id}/data")
+@app.api_route("/api/areas/{area_id}/data", methods=GET_AND_HEAD)
 def one_area(area_id: str) -> dict:
     area = known_area(area_id)
     return ok({"area": areas.details(area), **area_data(area)})
 
 
-@app.get("/api/data")
+@app.api_route("/api/data", methods=GET_AND_HEAD)
 def data() -> dict:
     """The default area, as /api/areas/{id}/data gives it: a page with no area in its link asks for this at once, beside
     /api/areas, instead of waiting for the list to learn the default's id."""
     return one_area(areas.default().id)
 
 
-@app.get("/api/status")
+@app.api_route("/api/status", methods=GET_AND_HEAD)
 def status() -> dict:
     return ok({"ai_ready": ai.is_configured(), "model": ai.MODEL, "maps_ready": googlemaps.is_configured(),
                "points_ready": places.points_ready()})
@@ -376,7 +432,7 @@ def check_point(body: PointIn) -> dict:
     return ok(places.check(body.lat, body.lon))
 
 
-@app.get("/api/coverage", dependencies=[Depends(map_limit)])
+@app.api_route("/api/coverage", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
 def coverage() -> dict:
     return ok(places.coverage())
 
@@ -492,7 +548,7 @@ def call_maps(fn, *args):
         raise HTTPException(502, "Google Maps did not answer just now. Please try again.") from exc
 
 
-@app.get("/api/rain", dependencies=[Depends(maps_limit)])
+@app.get("/api/rain", dependencies=[Depends(maps_limit)])   # GET only: each answer is a billed Maps call
 def rain(area: str | None = None) -> dict:
     lat, lon = known_area(area).centre()
     if not googlemaps.is_configured():
@@ -500,7 +556,7 @@ def rain(area: str | None = None) -> dict:
     return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
 
 
-@app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])
+@app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain
 def listing(place_id: str) -> dict:
     """How Google Maps lists a mapped business. Never for a point: it is not a business, and it does not go to Google."""
     if places.is_point_id(place_id):

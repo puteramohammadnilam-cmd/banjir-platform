@@ -8,6 +8,6 @@ service-account*.json
 __pycache__/
 .pytest_cache/
 .DS_Store
-# JRC flood depth rasters (about 39 MB): copied in by hand, listed in app/data/rasters/SOURCES.txt
+# JRC flood depth rasters (9 files, about 77 MB): copied in by hand, listed in app/data/rasters/SOURCES.txt
 app/data/rasters/*.tif
 .coverage
