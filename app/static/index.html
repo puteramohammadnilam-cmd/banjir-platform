@@ -24,27 +24,22 @@
   <p class="notice notice-rain" id="rain" role="status" hidden></p>
 
   <main>
+    <section class="history" id="history" aria-labelledby="history-heading"></section>
     <div class="workspace">
     <section class="map-panel" aria-labelledby="map-heading">
       <div class="panel-head">
         <h2 id="map-heading">Taman Sri Muda and nearby</h2>
         <div class="scenario" role="group" aria-label="Size of flood">
-          <button type="button" data-rp="10" aria-pressed="false">1 in 10 years</button>
-          <button type="button" data-rp="100" aria-pressed="false">1 in 100 years</button>
-          <button type="button" data-rp="500" aria-pressed="false">1 in 500 years</button>
+          <button type="button" data-rp="10" aria-pressed="false">1 in 10 years <span class="chance"></span></button>
+          <button type="button" data-rp="100" aria-pressed="false">1 in 100 years <span class="chance"></span></button>
+          <button type="button" data-rp="500" aria-pressed="false">1 in 500 years <span class="chance"></span></button>
         </div>
       </div>
       <div id="map" role="application" aria-label="Map of Taman Sri Muda, Shah Alam, with modelled flood depth and businesses"></div>
-      <ul class="legend" aria-label="Map legend">
-        <li><span class="swatch band-1"></span>under 0.5 m</li>
-        <li><span class="swatch band-2"></span>0.5 to 1.5 m</li>
-        <li><span class="swatch band-3"></span>1.5 to 3 m</li>
-        <li><span class="swatch band-4"></span>over 3 m</li>
-        <li><span class="dot dot-eatery"></span>eatery</li>
-        <li><span class="dot dot-shop"></span>shop</li>
-        <li id="legend-shelter" hidden><span class="shelter-pin"></span>flood relief centre</li>
-      </ul>
+      <ul class="legend" id="legend" aria-label="Map legend: water depth at each business"></ul>
       <p class="tally" id="tally" aria-live="polite"></p>
+      <p class="fineprint">Chance: of at least one flood that size in the next 10 years, if the model is right.
+        Heights are typical: a counter about 0.9 m, an adult about 1.65 m, a door 2.1 m.</p>
     </section>
 
     <div class="side">

@@ -1,12 +1,23 @@
 import * as api from "./api.js";
 import { renderCard } from "./card.js";
 import { createChat } from "./chat.js";
-import { SCENARIOS, band, h } from "./dom.js";
+import { BANDS, SCENARIOS, band, chanceWithin, h } from "./dom.js";
+import { renderHistory } from "./history.js";
 import { createMap } from "./map.js";
 
 const PHOTO_MAX_EDGE = 1280;
 const PHOTO_QUALITY = 0.85;
+const CHANCE_YEARS = 10;   // about one shop lease
 const $ = (id) => document.getElementById(id);
+
+function renderLegend(element, hasShelters) {
+  const items = [
+    ...BANDS.map((b, i) => h("li", {}, h("span", { class: `swatch band-${i + 1}` }), b.words, h("span", { class: "muted" }, b.range))),
+    h("li", {}, h("span", { class: "dot dot-dry" }), "No water in the model"),
+    hasShelters && h("li", {}, h("span", { class: "shelter-pin" }), "Flood relief centre"),
+  ];
+  element.replaceChildren(...items.filter(Boolean));
+}
 
 /** Shrink and re-encode in the browser: smaller upload, and location data in the file is dropped. */
 async function shrinkPhoto(file) {
@@ -41,7 +52,7 @@ function start({ premises, town }, status) {
     return [p.id, row];
   }));
   $("ledger-heading").textContent = `All ${premises.length} businesses`;
-  $("legend-shelter").hidden = town.shelters.length === 0;
+  renderLegend($("legend"), town.shelters.length > 0);
   $("ledger").replaceChildren(...[...ledgerRows.values()].map((row) => h("li", {}, row)));
 
   async function onPhoto(file) {
@@ -73,8 +84,7 @@ function start({ premises, town }, status) {
 
   function render() {
     const premise = byId.get(state.selectedId);
-    map.setScenario(state.rp);
-    map.setSelected(state.selectedId);
+    map.show(state.rp, state.selectedId);
     renderCard($("card"), premise, state.rp, state.photos[state.selectedId], onPhoto, state.listings[state.selectedId]);
     for (const button of document.querySelectorAll(".scenario button")) {
       button.setAttribute("aria-pressed", String(button.dataset.rp === state.rp));
@@ -92,6 +102,8 @@ function start({ premises, town }, status) {
   }
 
   for (const button of document.querySelectorAll(".scenario button")) {
+    const chance = Math.round(chanceWithin(Number(button.dataset.rp), CHANCE_YEARS) * 100);
+    button.querySelector(".chance").textContent = `${chance}% chance in ${CHANCE_YEARS} years`;
     button.addEventListener("click", () => update({ rp: button.dataset.rp }));
   }
   createChat({ messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"), getSelectedId: () => state.selectedId });
@@ -122,6 +134,7 @@ async function showRain() {
   }
 }
 
+renderHistory($("history"));   // needs no data from the server
 try {
   start(...(await Promise.all([api.getData(), api.getStatus()])));
 } catch (error) {

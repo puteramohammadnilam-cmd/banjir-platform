@@ -49,6 +49,7 @@ Gemini key, the Weather API and Places API Text Search.
 
 ```bash
 .venv/bin/python -m pytest -q
+node --test tests/dom.test.mjs   # depth bands, depth words, flood chance, flood list (Node 18+, no packages)
 ```
 
 ## Where things are
@@ -119,6 +120,8 @@ Only sources with clear terms, so the repo can be public.
 - Businesses, roads, base map: OpenStreetMap contributors, ODbL.
 - Shelters: none shown. The build reads `05_Raw_Data_Sources/shah_alam/pps.json` if it exists, so add a relief
   centre list there once we have one we can cite.
+- Past floods at Taman Sri Muda: ten reports from the news, DOSM and one journal paper (Rosmadi and others 2025,
+  quoting MBSA's flood report for 2022), paraphrased with their sources in `app/static/js/history.js` and on the page.
 - Damage share by water depth: Huizinga, de Moel and Szewczyk (2017), Global flood depth-damage functions,
   European Commission JRC, Table 3-6. Nine published numbers, typed into `app/costs.py`.
 
@@ -155,5 +158,7 @@ repo.
 - The Google Weather, Places and Search calls are tested against recorded response shapes, not live keys. Check
   them once the keys are in. Whether Google Weather covers Shah Alam and how well Places matches local shop
   names are unknown until then.
+- The counter (0.9 m), adult (1.65 m), door (2.1 m) and storey (3 m) heights are typical values used to picture a
+  depth, not measurements at any shop.
 - The search suggestions are Google's HTML, put into the page inside a shadow root. The page's script policy stops
   any script in them. Checked with stand-in HTML only.

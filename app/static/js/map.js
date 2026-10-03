@@ -1,9 +1,9 @@
 /* global L */
-import { BAND_COLORS, SCENARIOS, band } from "./dom.js";
+import { SCENARIOS, band, bandColor } from "./dom.js";
 
 const INK = "#14262b";
-const PAPER = "#fbf8f1";
 const SIGNAL = "#c8402a";
+const CELL_OPACITY = 0.28;   // the squares are background: the shop dots carry the depth
 const START_ZOOM = 15;
 const TILES ="https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTRIBUTION = '&copy; OpenStreetMap contributors · flood depth: JRC v2.1 (CC BY 4.0)';
@@ -29,31 +29,28 @@ export function createMap(element, town, premises, onSelect) {
       .addTo(map);
   }
 
-  const markers = new Map(premises.map((p) => {
-    const marker = L.circleMarker([p.lat, p.lon], { radius: 7, weight: 2, fillOpacity: 1 })
+  const markers = premises.map((p) => ({
+    p,
+    marker: L.circleMarker([p.lat, p.lon], { fillOpacity: 1 })
       .bindTooltip(label(p.name))
       .on("click", () => onSelect(p.id))
-      .addTo(map);
-    return [p.id, { marker, isEatery: p.sector === "eatery" }];
+      .addTo(map),
   }));
 
+  let shownRp = null;
   return {
-    setScenario(rp) {
-      const index = SCENARIOS.indexOf(rp);
-      for (const { depths, layer } of cells) {
-        const level = band(depths[index]);
-        layer.setStyle({ fillColor: BAND_COLORS[level - 1] ?? "transparent", fillOpacity: level ? 0.5 : 0 });
+    /** Colour the squares and the shop dots for one flood size, and ring the selected shop. */
+    show(rp, selectedId) {
+      if (rp !== shownRp) {
+        const index = SCENARIOS.indexOf(rp);
+        for (const { depths, layer } of cells) {
+          layer.setStyle({ fillColor: bandColor(depths[index]), fillOpacity: band(depths[index]) ? CELL_OPACITY : 0 });
+        }
+        shownRp = rp;
       }
-    },
-    setSelected(id) {
-      for (const [markerId, { marker, isEatery }] of markers) {
-        const selected = markerId === id;
-        marker.setStyle({
-          radius: selected ? 11 : 7,
-          color: selected ? SIGNAL : isEatery ? PAPER : INK,
-          fillColor: isEatery ? INK : PAPER,
-          weight: selected ? 4 : 2,
-        });
+      for (const { p, marker } of markers) {
+        const selected = p.id === selectedId;
+        marker.setStyle({ radius: selected ? 10 : 6, color: selected ? SIGNAL : INK, weight: selected ? 4 : 1.5, fillColor: bandColor(p.depth_m[rp]) });
         if (selected) marker.bringToFront();
       }
     },

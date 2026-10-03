@@ -18,14 +18,38 @@ export const s = (tag, attrs = {}, ...children) => fill(document.createElementNS
 
 export const SCENARIOS = ["10", "100", "500"];
 export const SCENARIO_LABEL = { 10: "once in 10 years", 100: "once in 100 years", 500: "once in 500 years" };
-export const BAND_COLORS = ["#a9d6e5", "#4f9fc4", "#1f6a96", "#0b3b5c"];
 
-/** 0 = dry, 1..4 = depth band, shallow to deep. */
+// Things a shop owner can picture, at typical heights: a counter, an adult, a door, a storey. Same colours as tokens.css.
+export const ADULT_M = 1.65;
+export const COUNTER_M = 0.9;
+export const DOOR_M = 2.1;
+export const BANDS = [
+  { below: COUNTER_M, color: "#c6e4ef", words: "Up to counter height", range: "under 0.9 m" },
+  { below: ADULT_M, color: "#86c0db", words: "Over the counter", range: "0.9 to 1.65 m" },
+  { below: DOOR_M, color: "#2b77a7", words: "Over an adult's head", range: "1.65 to 2.1 m" },
+  { below: 3, color: "#1a5482", words: "Over the door", range: "2.1 to 3 m" },
+  { below: Infinity, color: "#0b2f4c", words: "A storey or more", range: "3 m or more" },
+];
+export const DRY_COLOR = "#fbf8f1";
+
+/** 0 = dry, 1..5 = depth band, shallow to deep. */
 export function band(depth) {
   if (depth == null || depth <= 0) return 0;
-  if (depth < 0.5) return 1;
-  if (depth < 1.5) return 2;
-  return depth < 3 ? 3 : 4;
+  return BANDS.findIndex((b) => depth < b.below) + 1;
 }
+
+export const bandColor = (depth) => BANDS[band(depth) - 1]?.color ?? DRY_COLOR;
+
+const WORDS = [[0.15, "ankle-deep"], [0.5, "up to the knee"], [COUNTER_M, "up to the waist"], [1.3, "up to the chest"],
+  [ADULT_M, "up to the neck"], [DOOR_M, "over an adult's head"], [3, "over the top of a door"], [Infinity, "a storey or more"]];
+
+/** Plain words for a depth, for an adult about 1.65 m tall. */
+export function depthWords(depth) {
+  if (!band(depth)) return "no water in the model";
+  return WORDS.find(([below]) => depth < below)[1];
+}
+
+/** Chance of at least one flood this size within `years`, for a flood expected once in `returnPeriod` years. */
+export const chanceWithin = (returnPeriod, years) => 1 - (1 - 1 / returnPeriod) ** years;
 
 export const depthText = (depth) => (band(depth) ? `${depth.toFixed(2)} m` : "no water in the model");

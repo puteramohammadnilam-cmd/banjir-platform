@@ -15,11 +15,12 @@
   --signal-wash: #f7e1da;
   --shelter: #2f7a3d;
 
-  /* depth bands, shallow to deep */
-  --band-1: #a9d6e5;
-  --band-2: #4f9fc4;
-  --band-3: #1f6a96;
-  --band-4: #0b3b5c;
+  /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js */
+  --band-1: #c6e4ef;
+  --band-2: #86c0db;
+  --band-3: #2b77a7;
+  --band-4: #1a5482;
+  --band-5: #0b2f4c;
 
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "IBM Plex Sans", system-ui, sans-serif;
