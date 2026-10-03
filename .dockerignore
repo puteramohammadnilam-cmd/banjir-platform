@@ -1,0 +1,12 @@
+.env
+**/.env*
+**/__pycache__
+.venv
+.git
+.claude
+tests
+tools
+__pycache__
+.pytest_cache
+*.md
+deploy.sh

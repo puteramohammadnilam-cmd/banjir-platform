@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==9.1.1
+httpx==0.28.1
+# only for tools/build_data.py
+numpy==2.5.3
+pillow==12.3.0

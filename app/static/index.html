@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banjir Check · Shah Alam shop flood check</title>
+  <meta name="description" content="See how deep a modelled flood gets at each shop around Taman Sri Muda, Shah Alam, and ask an AI assistant about it in Bahasa Melayu or English.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+  <header class="masthead">
+    <p class="overline">Shah Alam · Selangor · test build</p>
+    <h1>Banjir Check</h1>
+    <p class="strap">How deep would the water get at your shop? Pick a business, then ask in Bahasa Melayu or English.</p>
+  </header>
+
+  <p class="notice" role="note"><strong>This is a test.</strong> Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods.</p>
+  <p class="notice notice-error" id="load-error" role="alert" hidden></p>
+  <p class="notice notice-rain" id="rain" role="status" hidden></p>
+
+  <main>
+    <div class="workspace">
+    <section class="map-panel" aria-labelledby="map-heading">
+      <div class="panel-head">
+        <h2 id="map-heading">Taman Sri Muda and nearby</h2>
+        <div class="scenario" role="group" aria-label="Size of flood">
+          <button type="button" data-rp="10" aria-pressed="false">1 in 10 years</button>
+          <button type="button" data-rp="100" aria-pressed="false">1 in 100 years</button>
+          <button type="button" data-rp="500" aria-pressed="false">1 in 500 years</button>
+        </div>
+      </div>
+      <div id="map" role="application" aria-label="Map of Taman Sri Muda, Shah Alam, with modelled flood depth and businesses"></div>
+      <ul class="legend" aria-label="Map legend">
+        <li><span class="swatch band-1"></span>under 0.5 m</li>
+        <li><span class="swatch band-2"></span>0.5 to 1.5 m</li>
+        <li><span class="swatch band-3"></span>1.5 to 3 m</li>
+        <li><span class="swatch band-4"></span>over 3 m</li>
+        <li><span class="dot dot-eatery"></span>eatery</li>
+        <li><span class="dot dot-shop"></span>shop</li>
+        <li id="legend-shelter" hidden><span class="shelter-pin"></span>flood relief centre</li>
+      </ul>
+      <p class="tally" id="tally" aria-live="polite"></p>
+    </section>
+
+    <div class="side">
+      <article class="card" id="card" aria-live="polite"></article>
+
+      <section class="chat" aria-labelledby="chat-heading">
+        <h2 id="chat-heading">Ask about this shop</h2>
+        <p class="notice notice-inline" id="ai-status" hidden></p>
+        <ol class="messages" id="messages" aria-live="polite"></ol>
+        <div class="chips" id="chips"></div>
+        <button type="button" class="news-button" id="news">Latest flood news <span class="muted">· Google Search</span></button>
+        <form id="ask-form" autocomplete="off">
+          <label class="visually-hidden" for="question">Your question</label>
+          <input id="question" name="question" type="text" maxlength="500" required placeholder="Tanya apa-apa pasal banjir di kedai ini">
+          <button type="submit">Ask</button>
+        </form>
+        <p class="fineprint">Answers come from Google Gemini reading this tool's data, Google Weather and Google Maps. News answers are grounded on Google Search and list their sources. Check anything urgent with <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a> or call 999.</p>
+      </section>
+    </div>
+    </div>
+
+    <section class="ledger" aria-labelledby="ledger-heading">
+      <h2 id="ledger-heading">All businesses</h2>
+      <p class="fineprint">Depth in metres at the mapped point. A dash means no water in the model.</p>
+      <ol id="ledger"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
+    <p>River flood forecasts: <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer">Google Flood Hub</a>. Live river levels and warnings: <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a>.</p>
+    <p>Businesses are points on a public map. Nobody has checked whether they are open or whether they are SMEs. Ringgit figures in the chat are rough estimates, not a valuation: from the values you give and an Asia-wide damage curve, or from a JPS guideline figure by shop size if you do not know your own.</p>
+  </footer>
+
+  <script src="vendor/leaflet.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
