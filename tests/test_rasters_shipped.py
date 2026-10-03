@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parent.parent
 RASTER_DIR = ROOT / "app" / "data" / "rasters"
 SOURCES = RASTER_DIR / "SOURCES.txt"
 PENINSULA_FILES = tuple(f"ID211_N10_E100_RP{rp}_depth.tif" for rp in (10, 100, 500))
+BORNEO_FILES = tuple(f"ID220_N10_E110_RP{rp}_depth.tif" for rp in (10, 100, 500))     # Sabah and Sarawak
+LANGKAWI_FILES = tuple(f"ID202_N10_E90_RP{rp}_depth.tif" for rp in (10, 100, 500))
 PROBE = "app/data/rasters/x.tif"   # any raster: no ignore file may keep it out of the image
 RASTER_PATHS = (PROBE, *(f"app/data/rasters/{name}" for name in PENINSULA_FILES))
 INCLUDE = "#!include:"   # in .gcloudignore, gcloud reads another file's rules in place of this line
@@ -63,11 +65,12 @@ def test_sources_credits_the_jrc_with_link_and_licence():
     assert [part for part in CREDIT if part not in text] == []
 
 
-def test_sources_states_coverage_date_and_the_tiles_still_to_fetch():
+def test_sources_states_coverage_and_date_and_records_borneo_and_langkawi():
     text = sources_text()
     assert re.search(r"^Coverage:[ \t]*\S", text, re.MULTILINE)
     assert re.search(r"^Date:[ \t]*\d{4}-\d{2}-\d{2}\b", text, re.MULTILINE)
-    assert "N10_E110" in text and "N10_E090" in text   # Sabah and Sarawak; Langkawi
+    names = {entry.name for entry in recorded_files()}
+    assert set(BORNEO_FILES + LANGKAWI_FILES) <= names, f"SOURCES.txt records {sorted(names)}"
 
 
 @pytest.mark.parametrize("entry", recorded_files(), ids=lambda entry: entry.name)

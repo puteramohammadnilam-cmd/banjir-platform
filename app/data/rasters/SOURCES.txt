@@ -2,20 +2,27 @@ JRC flood depth rasters in this folder
 ======================================
 
 app/raster.py reads these files (from this folder, or from BANJIR_RASTER_DIR when that is set) to look up the
-modelled flood depth at a point. They are about 39 MB, so .gitignore keeps the .tif files out of git and only this
+modelled flood depth at a point. They are about 77 MB, so .gitignore keeps the .tif files out of git and only this
 list is committed. deploy.sh stops if one is missing, and tests/test_rasters_shipped.py checks each file below
 against its size and SHA-256 (it skips a file that is absent). To put them back, copy them in:
 
-  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID211_N10_E100_RP*_depth.tif app/data/rasters/
+  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID2*_depth.tif app/data/rasters/
+
+or download each one from the JRC portal, at <Download>/RP<10, 100 or 500>/<file name>:
+  https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/
 
 Source:    European Commission JRC, global river flood hazard maps v2.1 (Baugh and others, 2024)
 Link:      https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1
 Licence:   CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
-Coverage:  99.976-109.975 E, 0.008-10.007 N: Peninsular Malaysia except Langkawi
-           (a rectangle, so it also takes in Singapore, parts of Thailand, Sumatra and Kalimantan, and the far
-           west of Sarawak)
+Download:  https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/
+Coverage:  three grids of 10 x 10 degrees, all 0.008-10.007 N:
+           N10_E100  99.976-109.975 E   Peninsular Malaysia except Langkawi, and the far west of Sarawak
+           N10_E110  109.975-119.975 E  the rest of Sarawak, and Sabah
+           N10_E90   89.977-99.976 E    Langkawi
+           (rectangles, so they also take in Singapore, Brunei, and parts of Thailand, Sumatra and Kalimantan)
 Date:      2026-10-03
-Copy:      byte for byte from 05_Raw_Data_Sources/jrc_glofas_v2_1 on that date; nothing was downloaded
+Copy:      the N10_E100 files byte for byte from 05_Raw_Data_Sources/jrc_glofas_v2_1 (fetched 2026-09-30); the
+           N10_E110 and N10_E90 files downloaded from the link above on 2026-10-03, also kept in that folder
 
 Files (grid N10_E100: one file for each flood return period of 10, 100 and 500 years)
 
@@ -31,7 +38,31 @@ File:     ID211_N10_E100_RP500_depth.tif
 Bytes:    14615056
 SHA-256:  319589380b54ae5b1901ca37fd57763d7a350cbde1352b02155d9e2b407e71a7
 
-Not held yet
-------------
-Sabah and Sarawak need the N10_E110 files, and Langkawi needs the N10_E090 files, each a depth file for the return
-periods 10, 100 and 500. They are not downloaded, so the app has no depth for points there yet.
+Files (grid N10_E110: Sabah and Sarawak)
+
+File:     ID220_N10_E110_RP10_depth.tif
+Bytes:    8155284
+SHA-256:  9ff8c8529a6d2e6540d180194aa3a0c05f920741609c8727151cda573268312d
+
+File:     ID220_N10_E110_RP100_depth.tif
+Bytes:    10266949
+SHA-256:  17c57c170c175503366ff894093913a4e692d54b75d51a273a9fd5ae8b87e508
+
+File:     ID220_N10_E110_RP500_depth.tif
+Bytes:    11210578
+SHA-256:  17ef23994c5062ab5763167e149cc8afc79ef972dedffea1c10a5cb5cead8365
+
+Files (grid N10_E90: Langkawi. The model has no flood water anywhere on the island, checked 2026-10-03 on a
+100 m sample grid; likely because its streams are smaller than the rivers the model maps, not checked)
+
+File:     ID202_N10_E90_RP10_depth.tif
+Bytes:    3317639
+SHA-256:  11b40b9210fe8a220a0c767e5af6f3a4c99fe5cd6b1bdd64daadee6c228176ea
+
+File:     ID202_N10_E90_RP100_depth.tif
+Bytes:    4079919
+SHA-256:  d13287f4fd17eb08773b5cf29fc7c62022342e729b80911e35bf8b6a51439e60
+
+File:     ID202_N10_E90_RP500_depth.tif
+Bytes:    4357301
+SHA-256:  f93873ce448326c2fec73aa863fa77bd487ea0b61bc7f820f76b0872e2e2e252

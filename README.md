@@ -65,24 +65,26 @@ A point is named by its square, for example `pt:3.02998,101.53667`. A shared lin
 
 ## Flood depth rasters
 
-The depths come from three JRC GeoTIFF files, one for each return period:
+The depths come from nine JRC GeoTIFF files: three 10 x 10 degree grids, each with one file per return period (10, 100 and 500 years):
 
 ```
-ID211_N10_E100_RP10_depth.tif
-ID211_N10_E100_RP100_depth.tif
-ID211_N10_E100_RP500_depth.tif
+ID211_N10_E100_RP{10,100,500}_depth.tif   Peninsular Malaysia (except Langkawi), far west Sarawak
+ID220_N10_E110_RP{10,100,500}_depth.tif   the rest of Sarawak, and Sabah
+ID202_N10_E90_RP{10,100,500}_depth.tif    Langkawi
 ```
 
-They are about 39 MB together, so they are not in git (`.gitignore` skips `app/data/rasters/*.tif`). Copy the three JRC files from the JRC data portal into `app/data/rasters/`. The dataset is described at https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1 (the link recorded in `SOURCES.txt`).
+They are about 77 MB together, so they are not in git (`.gitignore` skips `app/data/rasters/*.tif`). Download them from the JRC portal (https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/, folder `RP10`, `RP100` or `RP500`) into `app/data/rasters/`. The dataset is described at https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1 (the link recorded in `SOURCES.txt`).
 
 - `app/data/rasters/SOURCES.txt` is committed. It records the source, licence, size and SHA-256 of each file. `tests/test_rasters_shipped.py` checks your copies against it, and skips a file that is absent.
 - `BANJIR_RASTER_DIR` points the app at another folder, for example one outside the repo.
-- `deploy.sh` stops before it touches Google Cloud if one of the three files is missing.
+- `deploy.sh` stops before it touches Google Cloud if no file is there for one of the three return periods.
 - `app/raster.py` reads them with the standard library only. It refuses any file layout other than the one JRC ships, rather than guessing.
 
-What they cover: the grid N10_E100, 99.976 to 109.975 E and 0.008 to 10.007 N. That is Peninsular Malaysia except Langkawi, plus the far west tip of Sarawak. The file is a rectangle, so it also takes in Singapore, southern Thailand and eastern Sumatra. In this build the app uses coarse boxes, not national borders, so it answers for points there too.
+What they cover: 89.977 to 119.975 E and 0.008 to 10.007 N, which holds all of Malaysia. The grids are rectangles, so they also take in Singapore, Brunei, southern Thailand, eastern Sumatra and part of Kalimantan. In this build the app uses coarse boxes, not national borders, so it answers for points there too. A point outside every box gets "outside".
 
-Not loaded: Sabah and Sarawak need the N10_E110 files, and Langkawi needs N10_E090. A point there gets a "not in this build yet" answer. A point outside every box gets "outside".
+Langkawi is covered, but the model has no flood water anywhere on the island (checked on a 100 m sample grid), so every point there reads "No water in the model".
+
+The app works with any subset of the files: a region whose grid is missing gets a "not in this build yet" answer.
 
 ## Endpoints
 
@@ -137,7 +139,7 @@ These are the claims this app makes about your location, and what backs each one
 ## Coverage and limits
 
 - Depths are river floods on land, from a global model at 90 m. The model does not show flash floods, blocked drains or the sea. "No water in the model" is not a promise that a place stays dry. It can be a hill, the sea, or a place the model does not flood.
-- Only the Peninsula (and a sliver of far west Sarawak) has depths for points. See "Flood depth rasters".
+- Points anywhere in Malaysia have depths. Langkawi has no flood water in the model. See "Flood depth rasters".
 - Only the two built areas have mapped businesses. The counts are "businesses mapped on OpenStreetMap", not all businesses. Nobody has checked them on the ground. Banks, clinics and fuel stations are left out.
 - Relief centres: Kota Tinggi's two were named in news reports and located on OpenStreetMap. They are not an official list. Taman Sri Muda has none.
 - Floods more frequent than 1 in 10 years are not in the data.
@@ -172,7 +174,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/static/` | The page, in four tabs: area overview, my business, flood cost, ask AI. Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
 | `app/data/areas/` | Built data for each area. |
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
-| `tools/build_data.py` | Built Taman Sri Muda's data from raw OpenStreetMap and JRC files that are not in this repo. The built data is committed, so you do not need to run it. |
+| `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds Taman Sri Muda byte for byte. The built data is committed, so you do not need to run it. |
 | `deploy.sh` | Cloud Run deploy with a post-deploy smoke test. |
 
 ## How the cost estimate works
@@ -206,7 +208,11 @@ Still not Malaysian, or weak, and said so in every answer:
 .venv/bin/python -m pytest -q
 node --test tests/*.test.mjs        # Node 22.7+ or 20.19+, no packages
 .venv/bin/python -m pytest -q tests/test_raster.py -k parity -rs    # must say PASSED, not skipped
+.venv/bin/python -m pytest -q --cov=app --cov-report=term-missing   # coverage (pytest-cov, in requirements-dev.txt)
+node --test --experimental-test-coverage tests/*.test.mjs
 ```
+
+Coverage on 3 October 2026: Python 98% of `app/` lines, JavaScript 94% of lines.
 
 - Tests that need the real JRC files skip when the files are absent. The parity test checks every built business and flood square against a fresh read of the rasters, so run it with the files in place.
 - `tests/test_rules.py` guards file size (800 lines), function size (50 lines), `innerHTML`, `console.log` and area place names in code.
@@ -250,7 +256,7 @@ Swapping parts:
 Only sources with clear terms, so the repo can be public.
 
 - Code: MIT, see `LICENSE`.
-- Flood depth: European Commission JRC global river flood hazard maps v2.1 (Baugh and others, 2024), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1. The three files in `app/data/rasters/` are copied unchanged. Our changes in `app/data/areas/`: depths read at each business and its nearest road (`premises.json`) and for the 90 m squares of each area (`town.json`), rounded to the centimetre.
+- Flood depth: European Commission JRC global river flood hazard maps v2.1 (Baugh and others, 2024), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1. The nine files in `app/data/rasters/` are used unchanged. Our changes in `app/data/areas/`: depths read at each business and its nearest road (`premises.json`) and for the 90 m squares of each area (`town.json`), rounded to the centimetre.
 - Businesses, roads, base map: OpenStreetMap contributors, ODbL (https://opendatacommons.org/licenses/odbl/1-0/). Every `app/data/areas/*/premises.json` is built from OpenStreetMap data, so those files are under the Open Database License 1.0. © OpenStreetMap contributors.
 - Kota Tinggi's relief centres were named in news reports and located on OpenStreetMap. They are not an official list.
 - Past floods at Taman Sri Muda: ten reports from the news, DOSM and one journal paper (Rosmadi and others 2025, quoting MBSA's flood report for 2022), paraphrased with their sources in `app/data/areas/sri-muda/area.json` and on the page.

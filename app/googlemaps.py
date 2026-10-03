@@ -27,7 +27,7 @@ TIMEOUT_S = 8
 MATCH_RADIUS_M = 150      # only Google places this close to the mapped point count, and the search is fenced to it
 MM_PER_INCH = 25.4
 MAX_NAME_CHARS = 80       # a listing's name is set by whoever owns the listing: keep it short and plain
-UNNAMED = "Unnamed"       # how tools/build_data.py labels businesses with no name on the map
+UNNAMED = "Unnamed"       # how tools/build_area.py labels businesses with no name on the map
 STATUS = {"OPERATIONAL": "open", "CLOSED_TEMPORARILY": "closed for now",
           "CLOSED_PERMANENTLY": "closed for good", "FUTURE_OPENING": "not open yet"}
 

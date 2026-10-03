@@ -16,7 +16,7 @@ REGION=${REGION:-asia-southeast1}
 SERVICE=${SERVICE:-banjir-check}
 DOMAIN=${DOMAIN:-}   # optional: a domain you own, to map to the service
 
-# The flood depth rasters are not in git (about 39 MB), but the service needs them. Stop here, before anything in
+# The flood depth rasters are not in git (about 77 MB), but the service needs them. Stop here, before anything in
 # Google Cloud is touched, if one of the three return periods is missing.
 for pattern in \
   'app/data/rasters/*_RP10_depth.tif' \

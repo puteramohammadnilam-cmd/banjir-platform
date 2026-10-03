@@ -119,10 +119,12 @@ def test_a_well_formed_id_resolves_to_the_same_place(rasters):
     assert places.is_point_id(WET_ID) and not places.is_point_id("node-1") and not places.is_point_id(None)
 
 
-def test_no_square_centre_of_the_jrc_grid_is_a_rounding_tie():
-    """JavaScript's toFixed(5) rounds a tie up and Python's format to even. No centre of the grid we ship is a tie,
-    so the page's ids equal the server's (the numbers are the N10_E100 files' own, from tests/test_raster.py)."""
-    grid = raster.Grid(GRID, x0=99.97625154437965, y0=10.00706666666666, px=0.0008333333356347339,
+@pytest.mark.parametrize("name, x0", [("N10_E100", 99.97625154437965), ("N10_E110", 109.97541823882177),
+                                      ("N10_E90", 89.97708484993753)])
+def test_no_square_centre_of_the_jrc_grids_is_a_rounding_tie(name, x0):
+    """JavaScript's toFixed(5) rounds a tie up and Python's format to even. No centre of the grids we ship is a tie,
+    so the page's ids equal the server's (the numbers are the shipped files' own: Peninsula, Borneo, Langkawi)."""
+    grid = raster.Grid(name, x0=x0, y0=10.00706666666666, px=0.0008333333356347339,
                        py=0.0008333333333325754, rows=11999, cols=11999)
     centres = [grid.y0 - (row + 0.5) * grid.py for row in range(grid.rows)]
     centres += [grid.x0 + (col + 0.5) * grid.px for col in range(grid.cols)]
