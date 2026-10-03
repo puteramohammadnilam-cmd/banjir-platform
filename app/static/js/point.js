@@ -2,11 +2,14 @@
 // (tests/point.test.mjs). A point is one 90 m square of the flood model (app/places.py), not a mapped business: it has no
 // name, kind or road. It lies in a listed area (place.area_id, set by the server) or in none.
 
-export const POINT_KICKER = "A point you picked";
-export const POINT_TAGS = Object.freeze(["90 m model square", "Not a mapped business"]);
+import { t } from "./i18n.js";
+
+// In the page's language, read once: the language is chosen as the page starts (i18n.js).
+export const POINT_KICKER = t("point.kicker");
+export const POINT_TAGS = Object.freeze([t("point.tagSquare"), t("point.tagNotBusiness")]);
 /** Under a point's "No water in the model": the model shows river floods on land, and a point can be anywhere. */
-export const NO_WATER_NOTE = "The model maps river floods on land. It does not show flash floods, blocked drains or the sea.";
-const UNNAMED_TITLE = "Point you picked";
+export const NO_WATER_NOTE = t("point.noWaterNote");
+const UNNAMED_TITLE = t("point.unnamed");
 const COORD_DECIMALS = 5;
 
 /** The area a place lies in: the page's own, or the listed one it names. null for a point in none, and for one in an
@@ -29,9 +32,9 @@ export function pointHeader(place, page, areas) {
   const isElsewhere = area !== null && area.id !== page?.id;
   return {
     kicker: POINT_KICKER,
-    title: area ? `Point in ${area.display_name ?? area.name}` : UNNAMED_TITLE,
-    subline: lat !== null && lon !== null ? `The 90 m flood square at ${lat}, ${lon}` : null,
+    title: area ? t("point.in", { area: area.display_name ?? area.name }) : UNNAMED_TITLE,
+    subline: lat !== null && lon !== null ? t("point.subline", { lat, lon }) : null,
     tags: POINT_TAGS,
-    elsewhere: isElsewhere ? { id: area.id, text: `This point is in ${area.name}.`, action: `Open ${area.name}` } : null,
+    elsewhere: isElsewhere ? { id: area.id, text: t("point.elsewhere", { area: area.name }), action: t("point.openArea", { area: area.name }) } : null,
   };
 }

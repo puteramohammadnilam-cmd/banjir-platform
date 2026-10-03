@@ -13,10 +13,12 @@ class FakeText {
   }
 }
 
-/** A selector as the modules use them: a tag, .class, or [attribute="value"]. */
+/** A selector as the modules use them: a tag, .class, [attribute] or [attribute="value"]. */
 function matches(element, selector) {
   const attribute = /^\[([\w-]+)="([^"]*)"\]$/.exec(selector);
   if (attribute) return element.getAttribute(attribute[1]) === attribute[2];
+  const present = /^\[([\w-]+)\]$/.exec(selector);
+  if (present) return element.getAttribute(present[1]) !== null;
   if (selector.startsWith(".")) return (element.getAttribute("class") ?? "").split(/\s+/).includes(selector.slice(1));
   return element.tagName === selector;
 }

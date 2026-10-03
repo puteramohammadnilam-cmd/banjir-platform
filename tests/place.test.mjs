@@ -115,7 +115,7 @@ test("the first grid in coverage order that holds the point wins", () => {
   assert.equal(snapToGrid(3.0297599, 101.5364982, [E100, overlap]).grid, "N10_E100");
 });
 
-const NOTHING = { area: null, place: null, tab: null, rp: null, pointInQuery: false };
+const NOTHING = { area: null, place: null, tab: null, rp: null, lang: null, pointInQuery: false };
 
 test("an old ?shop= link names the place; tab and rp keep their old rules", () => {
   assert.deepEqual(readUrl({ search: "?tab=business&shop=node-13414432501&rp=500", hash: "" }),
@@ -179,7 +179,22 @@ test("a link round-trips through the browser's URL", () => {
     { area: "kota-tinggi", tab: "ask", place: "pt:1.72665,103.90000", rp: "500" },
     { area: "kota-tinggi", tab: "cost", place: null, rp: "10" },
   ];
-  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { ...view, pointInQuery: false }, JSON.stringify(view));
+  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { lang: null, ...view, pointInQuery: false }, JSON.stringify(view));
+  const inMalay = { area: "kota-tinggi", tab: "business", place: ANETAS, rp: "100", lang: "ms" };
+  assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, pointInQuery: false });
+});
+
+test("the language is kept in a link when set, after the flood size and before a point's fragment", () => {
+  assert.equal(writeUrl({ tab: "overview", place: "node-1", rp: "100", lang: "ms" }), "?tab=overview&place=node-1&rp=100&lang=ms");
+  assert.equal(writeUrl({ tab: "business", place: ANETAS, rp: "10", lang: "ms" }), `?tab=business&rp=10&lang=ms#place=${ANETAS}`);
+  assert.equal(writeUrl({ tab: "overview", rp: "100", lang: "en" }), "?tab=overview&rp=100&lang=en");
+  assert.equal(writeUrl({ tab: "overview", rp: "100", lang: null }), "?tab=overview&rp=100", "no language: the reader's own choice applies");
+  assert.equal(writeUrl({ tab: "overview", lang: "fr" }), "?tab=overview", "a language the page does not have is left out");
+  assert.equal(readUrl({ search: "?lang=ms" }).lang, "ms");
+  assert.equal(readUrl({ search: "?lang=en&tab=cost" }).lang, "en");
+  for (const odd of ["fr", "MS", "", "ms-MY"]) assert.equal(readUrl({ search: `?lang=${odd}` }).lang, null, odd);
+  const read = readUrl({ search: `?tab=business&place=${ANETAS}&rp=100&lang=ms`, hash: "" });
+  assert.equal(writeUrl(read), "?tab=business&rp=100&lang=ms", "cleaning a point out of the query keeps the language");
 });
 
 test("writing a link again drops a point from the query, so the page can clean its address before any request", () => {

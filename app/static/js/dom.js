@@ -1,4 +1,5 @@
 // Small DOM helpers. Text goes in through textContent only, so nothing is parsed as HTML.
+import { numberLocale, t } from "./i18n.js";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 function fill(node, attrs, children) {
@@ -17,18 +18,21 @@ export const h = (tag, attrs = {}, ...children) => fill(document.createElement(t
 export const s = (tag, attrs = {}, ...children) => fill(document.createElementNS(SVG_NS, tag), attrs, children);
 
 export const SCENARIOS = ["10", "100", "500"];
-export const SCENARIO_LABEL = { 10: "once in 10 years", 100: "once in 100 years", 500: "once in 500 years" };
+/** "once in 100 years": a flood size in words, for "in a flood expected …". */
+export const scenarioLabel = (rp) => t("scenario.label", { rp });
 
 // Things a shop owner can picture, at typical heights: a counter, an adult, a door, a storey. Same colours as tokens.css.
 export const ADULT_M = 1.65;
 export const COUNTER_M = 0.9;
 export const DOOR_M = 2.1;
+/** A depth band: water shallower than `below` metres, its colour and its words in the page's language. */
+const bandEntry = (n, below, color) => ({ below, color, words: t(`band.${n}.words`), range: t(`band.${n}.range`) });
 export const BANDS = [
-  { below: COUNTER_M, color: "#c6e4ef", words: "Up to counter height", range: "under 0.9 m" },
-  { below: ADULT_M, color: "#86c0db", words: "Over the counter", range: "0.9 to 1.65 m" },
-  { below: DOOR_M, color: "#2b77a7", words: "Over an adult's head", range: "1.65 to 2.1 m" },
-  { below: 3, color: "#1a5482", words: "Over the door", range: "2.1 to 3 m" },
-  { below: Infinity, color: "#0b2f4c", words: "A storey or more", range: "3 m or more" },
+  bandEntry(1, COUNTER_M, "#c6e4ef"),
+  bandEntry(2, ADULT_M, "#86c0db"),
+  bandEntry(3, DOOR_M, "#2b77a7"),
+  bandEntry(4, 3, "#1a5482"),
+  bandEntry(5, Infinity, "#0b2f4c"),
 ];
 export const DRY_COLOR = "#fbf8f1";
 
@@ -40,19 +44,19 @@ export function band(depth) {
 
 export const bandColor = (depth) => BANDS[band(depth) - 1]?.color ?? DRY_COLOR;
 
-const WORDS = [[0.15, "ankle-deep"], [0.5, "up to the knee"], [COUNTER_M, "up to the waist"], [1.3, "up to the chest"],
-  [ADULT_M, "up to the neck"], [DOOR_M, "over an adult's head"], [3, "over the top of a door"], [Infinity, "a storey or more"]];
+const WORDS = [[0.15, "depth.ankle"], [0.5, "depth.knee"], [COUNTER_M, "depth.waist"], [1.3, "depth.chest"],
+  [ADULT_M, "depth.neck"], [DOOR_M, "depth.overHead"], [3, "depth.overDoor"], [Infinity, "depth.storey"]];
 
 /** Plain words for a depth, for an adult about 1.65 m tall. */
 export function depthWords(depth) {
-  if (!band(depth)) return "no water in the model";
-  return WORDS.find(([below]) => depth < below)[1];
+  if (!band(depth)) return t("common.noWater");
+  return t(WORDS.find(([below]) => depth < below)[1]);
 }
 
 /** Chance of at least one flood this size within `years`, for a flood expected once in `returnPeriod` years. */
 export const chanceWithin = (returnPeriod, years) => 1 - (1 - 1 / returnPeriod) ** years;
 
-export const depthText = (depth) => (band(depth) ? `${depth.toFixed(2)} m` : "no water in the model");
+export const depthText = (depth) => (band(depth) ? t("common.metres", { m: depth.toFixed(2) }) : t("common.noWater"));
 
 /** An icon from the sprite in index.html. Decorative, so screen readers skip it. */
 export const icon = (name) => s("svg", { class: "icon", "aria-hidden": "true" }, s("use", { href: `#i-${name}` }));
@@ -61,11 +65,11 @@ export const CHANCE_YEARS = 10;   // about one shop lease
 
 /** The three flood sizes as one control, each with its chance of happening at least once in CHANCE_YEARS. */
 export function scenarioPicker(rp, onPick) {
-  return h("div", { class: "scenario", role: "group", "aria-label": "Size of flood" },
+  return h("div", { class: "scenario", role: "group", "aria-label": t("scenario.group") },
     SCENARIOS.map((key) => {
-      const chance = `${Math.round(chanceWithin(Number(key), CHANCE_YEARS) * 100)}% chance in ${CHANCE_YEARS} years`;
-      return h("button", { type: "button", "aria-pressed": String(key === rp), "aria-label": `1 in ${key} years, ${chance}`, onclick: () => onPick(key) },
-        `1 in ${key} years`, h("span", { class: "chance" }, chance));
+      const chance = t("scenario.chance", { pct: Math.round(chanceWithin(Number(key), CHANCE_YEARS) * 100), years: CHANCE_YEARS });
+      return h("button", { type: "button", "aria-pressed": String(key === rp), "aria-label": t("scenario.option", { rp: key, chance }), onclick: () => onPick(key) },
+        t("common.rpYears", { rp: key }), h("span", { class: "chance" }, chance));
     }));
 }
 
@@ -76,7 +80,17 @@ export function renderPicker(slot, rp, onPick) {
   if (hadFocus) slot.querySelector('[aria-pressed="true"]')?.focus();
 }
 
-const RINGGIT = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 });
-export const ringgit = (value) => RINGGIT.format(value);
+const RINGGIT = new Map();   // one formatter per locale, made when first needed
+/** Ringgit with no sen, grouped as the page's language groups numbers ("RM 50,000"). */
+export function ringgit(value) {
+  const locale = numberLocale();
+  if (!RINGGIT.has(locale)) RINGGIT.set(locale, new Intl.NumberFormat(locale, { style: "currency", currency: "MYR", maximumFractionDigits: 0 }));
+  return RINGGIT.get(locale).format(value);
+}
 
-export const kindText = (premise) => `${premise.sector === "eatery" ? "Eatery" : "Shop"}${premise.kind ? ` · ${premise.kind.replaceAll("_", " ")}` : ""}`;
+/** What tools/build_area.py names a road with no name, in the data; shown in the page's language. */
+export const UNNAMED_ROAD = "a road with no name";
+export const roadName = (name) => (name === UNNAMED_ROAD ? t("common.unnamedRoad") : name);
+
+/** "Shop · convenience": the kind is OpenStreetMap's own tag, in English, as the map has it. */
+export const kindText = (premise) => `${t(premise.sector === "eatery" ? "kind.eatery" : "kind.shop")}${premise.kind ? ` · ${premise.kind.replaceAll("_", " ")}` : ""}`;

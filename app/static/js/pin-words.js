@@ -1,34 +1,37 @@
 // "Check any point", section UI-A of the plan: its words, and the pure rules that choose between them, with no DOM so
 // node can test them (tests/pin.test.mjs). The panel and the dialog that show them are in pin-panel.js, the flow in pin.js.
 
-/** Every sentence of the flow, as the plan has it. */
+import { t } from "./i18n.js";
+
+/** Every sentence of the flow, as the plan has it, in the page's language (read once: it is chosen as the page starts). */
 export const WORDS = Object.freeze({
-  heading: "Check a point",
-  help: "Move the map until the cross sits on your premises. With a keyboard, select the map and use the arrow keys.",
-  check: "Check this spot",
-  locate: "Use my location",
-  cancel: "Cancel",
-  busy: "Reading the flood model…",
-  finding: "Finding your location…",
-  readFailed: "Could not read the flood model just now. Try again.",
-  wideFix: "Move the cross to your premises before you check.",
-  gpsBlocked: "Location is blocked for this page. Move the map to your premises instead.",
-  gpsLost: "Your location could not be found. Try again, or move the map to your premises.",
-  dialogTitle: "Use your location once?",
-  // each claim is held by a test: tests/test_place_ai.py (Gemini and Google Weather), tests/pin.test.mjs (300 m)
-  dialogBody: "This page rounds it to the 90 m flood square you are in, and only that square is sent to our server. We do not keep it. The square appears in this page's link, after the #. The map then moves there, so OpenStreetMap's map servers see where you are to within about 300 m. The AI assistant gets the area's name, the flood depths and the nearest relief centre with its distance, never your coordinates. If you ask it about rain, Google Weather gets no more than your square rounded to about 1 km.",
-  share: "Share my location",
-  notNow: "Not now",
-  squaresNone: "No flood squares near this point in the model",
-  squaresFailed: "Flood squares could not load.",
-  retry: "Retry",
+  heading: t("pin.heading"),
+  help: t("pin.help"),
+  check: t("pin.check"),
+  locate: t("pin.locate"),
+  cancel: t("pin.cancel"),
+  busy: t("pin.busy"),
+  finding: t("pin.finding"),
+  readFailed: t("pin.readFailed"),
+  wideFix: t("pin.wideFix"),
+  gpsBlocked: t("pin.gpsBlocked"),
+  gpsLost: t("pin.gpsLost"),
+  dialogTitle: t("pin.dialogTitle"),
+  // each claim is held by a test: tests/test_place_ai.py (Gemini and Google Weather), tests/pin.test.mjs (300 m), and
+  // in Bahasa Melayu tests/i18n.test.mjs
+  dialogBody: t("pin.dialogBody"),
+  share: t("pin.share"),
+  notNow: t("pin.notNow"),
+  squaresNone: t("pin.squaresNone"),
+  squaresFailed: t("pin.squaresFailed"),
+  retry: t("common.retry"),
 });
 
-const OUTSIDE_WORDS = "This spot is outside Malaysia. Banjir Check covers Malaysia only.";
+const OUTSIDE_WORDS = t("pin.outside");
 const NOT_LOADED_WORDS = {   // by region id, as GET /api/coverage names them
-  borneo: "Sabah and Sarawak are not in this build yet.",
-  langkawi: "Langkawi is not covered yet.",
-  peninsula: "This spot is outside the flood model files in this build.",
+  borneo: t("pin.borneo"),
+  langkawi: t("pin.langkawi"),
+  peninsula: t("pin.files"),
 };
 const FILES_WORDS = NOT_LOADED_WORDS.peninsula;   // for a region this build has no sentence for
 const PERMISSION_DENIED = 1;   // GeolocationPositionError.code: the page is not allowed to ask. 2 and 3 are "no fix".

@@ -2,6 +2,7 @@
 // `history`), paraphrased from the sources named there, with figures as printed. `year` only places the dot on the
 // strip; `account` marks a single person's undated memory. An area without a record says so and draws no strip.
 import { h, s } from "./dom.js";
+import { t } from "./i18n.js";
 
 const DOT_Y = 22;
 const AXIS_Y = 30;
@@ -50,21 +51,21 @@ function strip({ floods, first_year: first, last_year: last }) {
  *  {name, display_name, history}. */
 export function renderHistory(element, area) {
   const counts = floodCounts(area.history);
-  const heading = h("h2", { id: "history-heading" }, "Floods recorded here");
+  const heading = h("h2", { id: "history-heading" }, t("history.heading"));
   if (!counts) {
-    element.replaceChildren(heading, h("p", { class: "history-none" }, `No flood record collected for ${area.display_name} yet.`));
+    element.replaceChildren(heading, h("p", { class: "history-none" }, t("history.none", { area: area.display_name })));
     return;
   }
   const { history } = area;
-  const memory = history.floods.some((flood) => flood.account) ? " A hollow dot is one resident's memory, not a dated report." : "";
+  const memory = history.floods.some((flood) => flood.account) ? t("history.memory") : "";
   element.replaceChildren(
     heading,
-    h("p", { class: "history-lead" }, h("strong", {}, `${counts.dated} dated floods`), ` at ${area.name} since ${counts.since} in the sources we checked, `,
-      h("strong", {}, `${counts.recent} of them since ${counts.recentFrom}`), ". Not a complete record."),
+    h("p", { class: "history-lead" }, h("strong", {}, t("history.leadDated", { n: counts.dated })),
+      t("history.leadMid", { area: area.name, since: counts.since }),
+      h("strong", {}, t("history.leadRecent", { n: counts.recent, from: counts.recentFrom })), t("history.leadEnd")),
     strip(history),
-    h("p", { class: "fineprint" }, "The map shows river floods expected once in 10 years or less often. Smaller, more frequent floods ",
-      `and flash floods from heavy rain are not on it.${memory}`),
-    h("details", {}, h("summary", {}, "The floods and their sources"),
+    h("p", { class: "fineprint" }, t("history.mapNote", { memory })),
+    h("details", {}, h("summary", {}, t("history.list")),   // each flood's own words are the area's data, as its sources have them
       h("ol", { class: "flood-list" }, history.floods.map((f) => h("li", {},
         h("strong", {}, f.when), ` ${f.what} `, h("span", { class: "muted" }, f.source))))),
   );

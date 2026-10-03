@@ -1,5 +1,6 @@
 // The scope bar at the top of "Area overview": which area the page shows, and the way in to any point on the map.
 import { h, icon } from "./dom.js";
+import { t } from "./i18n.js";
 
 /** An "Area" select with one option per listed area (its display name), an "Open" button, and the "Check any point in
  *  Malaysia" button. Another area is another page, so choosing one in the select only chooses it: Open calls
@@ -13,7 +14,7 @@ export function createScopeBar(slot, { areas, areaId, onArea, onCheckPoint }) {
   const openButton = h("button", {
     type: "button", class: "btn btn-secondary", "aria-describedby": "area-hint",
     onclick: () => { if (select.value !== areaId) onArea(select.value); },
-  }, "Open");
+  }, t("scope.open"));
   const sync = () => { openButton.disabled = select.value === areaId; };
   select.addEventListener("change", sync);
   select.value = areaId;
@@ -21,12 +22,12 @@ export function createScopeBar(slot, { areas, areaId, onArea, onCheckPoint }) {
   // coming back to this page from the browser's back-forward cache must show the area it holds, not the one picked on the way out
   window.addEventListener("pageshow", (event) => { if (event.persisted) { select.value = areaId; sync(); } });
   const check = onCheckPoint && h("button", { type: "button", class: "btn btn-secondary scope-check", onclick: (event) => onCheckPoint(event.currentTarget) },
-    icon("pin"), "Check any point in Malaysia");
+    icon("pin"), t("scope.check"));
   slot.replaceChildren(...[
     h("div", { class: "scope-area" },
-      h("label", { class: "scope-label", for: "area-select" }, "Area"),
+      h("label", { class: "scope-label", for: "area-select" }, t("scope.area")),
       h("div", { class: "scope-pick" }, select, openButton)),
     check,
-    h("p", { id: "area-hint", class: "fineprint scope-hint" }, "Choose an area, then Open to load its page."),
+    h("p", { id: "area-hint", class: "fineprint scope-hint" }, t("scope.hint")),
   ].filter(Boolean));
 }

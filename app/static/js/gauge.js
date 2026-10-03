@@ -1,4 +1,5 @@
-import { ADULT_M, COUNTER_M, DOOR_M, SCENARIOS, SCENARIO_LABEL, band, bandColor, depthText, depthWords, s } from "./dom.js";
+import { ADULT_M, COUNTER_M, DOOR_M, SCENARIOS, band, bandColor, depthText, depthWords, s, scenarioLabel } from "./dom.js";
+import { t } from "./i18n.js";
 
 // The shop-front drawing, in SVG units: a street, an adult, a door and a counter, to scale.
 const WIDTH = 330;
@@ -41,9 +42,9 @@ function objects(floorM) {
 function objectLabels(floorM) {
   const y = (m) => yAt(floorM + m) - 6;
   return [
-    s("text", { class: "object-label", x: PERSON_X, y: y(ADULT_M), "text-anchor": "middle" }, `adult ${ADULT_M} m`),
-    s("text", { class: "object-label", x: DOOR.x + DOOR.w / 2, y: y(DOOR_M), "text-anchor": "middle" }, `door ${DOOR_M} m`),
-    s("text", { class: "object-label", x: COUNTER.x + COUNTER.w / 2, y: y(COUNTER_M), "text-anchor": "middle" }, `counter ${COUNTER_M} m`),
+    s("text", { class: "object-label", x: PERSON_X, y: y(ADULT_M), "text-anchor": "middle" }, t("gauge.adult", { m: ADULT_M })),
+    s("text", { class: "object-label", x: DOOR.x + DOOR.w / 2, y: y(DOOR_M), "text-anchor": "middle" }, t("gauge.door", { m: DOOR_M })),
+    s("text", { class: "object-label", x: COUNTER.x + COUNTER.w / 2, y: y(COUNTER_M), "text-anchor": "middle" }, t("gauge.counter", { m: COUNTER_M })),
   ];
 }
 
@@ -53,7 +54,7 @@ function levelLabels(premise, rp) {
     .map((key) => ({ key, y: yAt(Math.min(premise.depth_m[key], TOP_M)) - 4 }))   // just above the line, not struck through
     .sort((a, b) => a.y - b.y);
   labels.forEach((label, i) => { if (i && label.y - labels[i - 1].y < LABEL_GAP) label.y = labels[i - 1].y + LABEL_GAP; });
-  return labels.map(({ key, y }) => s("text", { class: key === rp ? "level is-active" : "level", x: LABEL_X, y, "text-anchor": "end" }, `1 in ${key}`));
+  return labels.map(({ key, y }) => s("text", { class: key === rp ? "level is-active" : "level", x: LABEL_X, y, "text-anchor": "end" }, t("common.rpShort", { rp: key })));
 }
 
 export function gauge(premise, rp, floorM) {
@@ -76,14 +77,14 @@ export function gauge(premise, rp, floorM) {
   return s("svg", { class: "gauge", viewBox: `0 0 ${WIDTH} ${GROUND_Y + 24}`, role: "img", "aria-label": gaugeSummary(premise, rp) },
     objects(floorM), water, waterline, others, objectLabels(floorM), levelLabels(premise, rp),
     s("line", { class: "storey", x1: 0, x2: LABEL_X - 46, y1: yAt(TOP_M), y2: yAt(TOP_M) }),
-    depth > TOP_M && s("text", { class: "object-label", x: 6, y: yAt(TOP_M) + 28 }, `water deeper than shown: ${depth.toFixed(2)} m`),
+    depth > TOP_M && s("text", { class: "object-label", x: 6, y: yAt(TOP_M) + 28 }, t("gauge.deeper", { m: depth.toFixed(2) })),
     s("line", { class: "street", x1: 0, x2: WIDTH, y1: GROUND_Y, y2: GROUND_Y }),
-    s("text", { x: 6, y: GROUND_Y + 17 }, "street level"));
+    s("text", { x: 6, y: GROUND_Y + 17 }, t("gauge.street")));
 }
 
 function gaugeSummary(premise, rp) {
   const depth = premise.depth_m[rp];
-  const others = SCENARIOS.filter((key) => key !== rp).map((key) => `1 in ${key} years: ${depthText(premise.depth_m[key])}`).join(", ");
+  const others = SCENARIOS.filter((key) => key !== rp).map((key) => t("gauge.other", { rp: key, depth: depthText(premise.depth_m[key]) })).join(", ");
   const here = band(depth) ? `${depthText(depth)}, ${depthWords(depth)}` : depthText(depth);
-  return `Drawn to scale against an adult, a counter and a door. Water at street level in a flood expected ${SCENARIO_LABEL[rp]}: ${here}. Other flood sizes: ${others}.`;
+  return t("gauge.summary", { label: scenarioLabel(rp), here, others });
 }

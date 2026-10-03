@@ -1,10 +1,11 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
 import { SCENARIOS, depthText, h, icon, ringgit } from "./dom.js";
+import { t } from "./i18n.js";
 import { createStockCard } from "./stock.js";
 
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
 const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, closed_days: 365, raise_cm: 300, measure_cost_rm: 50_000_000 };
-const SIZES = [["small", "A small shop"], ["medium", "A medium shop"], ["complex", "A large complex, such as a mall or hypermarket"]];
+const SIZES = [["small", "cost.sizeSmall"], ["medium", "cost.sizeMedium"], ["complex", "cost.sizeComplex"]];
 
 function numberField(name, label, unit, extra = {}) {
   const input = h("input", { class: "field", type: "number", name, id: `cost-${name}`, min: 0, max: MAX[name], step: "any", inputmode: "decimal", ...extra });
@@ -12,83 +13,83 @@ function numberField(name, label, unit, extra = {}) {
   return { input, node: h("label", { class: "input-label", for: input.id }, label, box) };
 }
 
-const metresAbove = (m) => (m > 0 ? `${m.toFixed(2)} m` : "none");
+const metresAbove = (m) => (m > 0 ? t("common.metres", { m: m.toFixed(2) }) : t("cost.none"));
 
 function lossTable(result) {
   return h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
-    h("caption", { class: "visually-hidden" }, "Loss in each flood size"),
-    h("thead", {}, h("tr", {}, ["Flood size", "Water above floor", "Damage", "Lost trade", "Total"].map((text) => h("th", { scope: "col" }, text)))),
+    h("caption", { class: "visually-hidden" }, t("cost.caption")),
+    h("thead", {}, h("tr", {}, ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"].map((key) => h("th", { scope: "col" }, t(key))))),
     h("tbody", {}, SCENARIOS.map((rp) => {
       const flood = result.per_flood[rp];
-      return h("tr", {}, h("th", { scope: "row" }, `1 in ${rp} years`), h("td", {}, metresAbove(flood.water_above_floor_m)),
+      return h("tr", {}, h("th", { scope: "row" }, t("common.rpYears", { rp })), h("td", {}, metresAbove(flood.water_above_floor_m)),
         h("td", {}, ringgit(flood.direct_damage_rm)), h("td", {}, ringgit(flood.indirect_loss_rm)), h("td", {}, h("strong", {}, ringgit(flood.total_rm))));
     }))));
 }
 
 function verdict(measure, years) {
   if (!measure) return null;
-  const saving = `It would save about ${ringgit(measure.benefit_present_value_rm)} over ${years} years, for a cost of ${ringgit(measure.cost_rm)}.`;
-  if (measure.worth_it == null) return h("div", { class: "verdict" }, h("strong", {}, `Raising stock ${measure.raise_cm} cm`), h("p", {}, saving));
+  const saving = t("cost.saving", { benefit: ringgit(measure.benefit_present_value_rm), years, cost: ringgit(measure.cost_rm) });
+  const cm = measure.raise_cm;
+  if (measure.worth_it == null) return h("div", { class: "verdict" }, h("strong", {}, t("cost.raise", { cm })), h("p", {}, saving));
   return h("div", { class: `verdict ${measure.worth_it ? "is-yes" : "is-no"}` },
-    h("strong", {}, `Raising stock ${measure.raise_cm} cm ${measure.worth_it ? "pays for itself" : "does not pay for itself"}`),
+    h("strong", {}, t(measure.worth_it ? "cost.raisePays" : "cost.raiseNotPays", { cm })),
     h("p", {}, saving));
 }
 
 function results(result) {
   if (!result) {
-    return [h("div", { class: "cost-empty" }, icon("cash"), h("strong", {}, "Your estimate shows here"),
-      h("p", {}, "Fill in what you know and press Estimate. Leave out what you don't know: the answer says what it assumed."))];
+    return [h("div", { class: "cost-empty" }, icon("cash"), h("strong", {}, t("cost.emptyTitle")), h("p", {}, t("cost.emptyNote")))];
   }
   const { years, discount_rate: rate, present_value_rm: overYears } = result.loss_over_years;
   return [
     h("div", { class: "headline-figures" },
       h("div", { class: "figure-box is-key" }, h("p", { class: "kpi-figure" }, ringgit(result.expected_yearly_loss_rm)),
-        h("p", { class: "kpi-label" }, "average loss a year"), h("p", { class: "kpi-note" }, "across the three flood sizes in the model")),
+        h("p", { class: "kpi-label" }, t("cost.yearly")), h("p", { class: "kpi-note" }, t("cost.yearlyNote"))),
       h("div", { class: "figure-box" }, h("p", { class: "kpi-figure" }, ringgit(overYears)),
-        h("p", { class: "kpi-label" }, `over ${years} years`), h("p", { class: "kpi-note" }, `in today's money, at ${Math.round(rate * 100)}% a year`))),
+        h("p", { class: "kpi-label" }, t("cost.overYears", { years })), h("p", { class: "kpi-note" }, t("cost.overYearsNote", { pct: Math.round(rate * 100) })))),
     lossTable(result),
     verdict(result.measure, years),
-    h("p", { class: "fineprint" }, "A rough estimate, not a valuation or an insurance figure."),
-    h("details", {}, h("summary", {}, "How this is worked out"),
-      h("p", {}, `Damage: ${result.basis.direct}.`), h("p", {}, `Lost trade: ${result.basis.indirect}.`),
+    h("p", { class: "fineprint" }, t("cost.rough")),
+    h("details", {}, h("summary", {}, t("cost.how")),   // the method's own words come from the server, in English
+      h("p", {}, t("cost.damage", { text: result.basis.direct })), h("p", {}, t("cost.trade", { text: result.basis.indirect })),
       h("p", {}, result.method), h("p", {}, result.limits)),
   ].filter(Boolean);
 }
 
-const FLOOR_NOTE = "Leave empty if the floor is level with the street.";
+const FLOOR_NOTE = t("cost.floorNote");
 const number = (field) => Number(field.input.value || 0);
 
 /** The tab's heading: a point is a 90 m square someone picked, so it has no name. */
-export const costTitle = (place) => (place.is_point ? "What a flood could cost at this point" : `What a flood could cost ${place.name}`);
+export const costTitle = (place) => (place.is_point ? t("cost.titlePoint") : t("cost.titleBusiness", { name: place.name }));
 
 const depthsLine = (place) =>
-  `Modelled water at street level: ${SCENARIOS.map((rp) => `${depthText(place.depth_m[rp])} in a 1 in ${rp} years flood`).join(", ")}.`;
+  t("cost.depths", { list: SCENARIOS.map((rp) => t("cost.depthItem", { depth: depthText(place.depth_m[rp]), rp })).join(", ") });
 
 /** The form's inputs, built once: the figures, the shop size choice and the optional measure, with the error line and
  *  the submit button. */
 function buildFields() {
   const size = h("select", { class: "field", name: "shop_size", id: "cost-shop_size" },
-    h("option", { value: "" }, "Choose one"), SIZES.map(([key, text]) => h("option", { value: key }, text)));
-  const raise = numberField("raise_cm", "Raise stock by", "cm");
-  const measureCost = numberField("measure_cost_rm", "What that costs", "RM");
+    h("option", { value: "" }, t("cost.choose")), SIZES.map(([key, text]) => h("option", { value: key }, t(text))));
+  const raise = numberField("raise_cm", t("cost.raiseBy"), "cm");
+  const measureCost = numberField("measure_cost_rm", t("cost.measureCost"), "RM");
   return {
     numbers: {
-      value: numberField("value_at_risk_rm", "Roughly what it is worth", "RM", { min: 1, required: true, placeholder: "50000" }),
-      floor: numberField("floor_height_cm", "Shop floor above the street", "cm", { placeholder: "0" }),
-      takings: numberField("daily_takings_rm", "Takings lost per day closed", "RM"),
-      days: numberField("closed_days", "Days closed after a flood", "days"),
+      value: numberField("value_at_risk_rm", t("cost.value"), "RM", { min: 1, required: true, placeholder: "50000" }),
+      floor: numberField("floor_height_cm", t("cost.floor"), "cm", { placeholder: "0" }),
+      takings: numberField("daily_takings_rm", t("cost.takings"), "RM"),
+      days: numberField("closed_days", t("cost.days"), t("cost.unitDays")),
       raise,
       measureCost,
     },
     size,
-    sizeBox: h("label", { class: "input-label", for: size.id, hidden: true }, "My shop is", size),
+    sizeBox: h("label", { class: "input-label", for: size.id, hidden: true }, t("cost.myShop"), size),
     floorNote: h("p", { class: "hint" }, FLOOR_NOTE),
     valueNote: h("p", { class: "hint", "aria-live": "polite" }),
-    measure: h("details", {}, h("summary", {}, "Test a measure: raise my stock"),
-      h("p", { class: "hint" }, "Optional. Needs the value above, and both figures."),
+    measure: h("details", {}, h("summary", {}, t("cost.measure")),
+      h("p", { class: "hint" }, t("cost.measureHint")),
       h("div", { class: "pair" }, raise.node, measureCost.node)),
     error: h("p", { class: "form-error", role: "alert" }),
-    submit: h("button", { type: "submit", class: "btn btn-primary" }, "Estimate the cost"),
+    submit: h("button", { type: "submit", class: "btn btn-primary" }, t("cost.submit")),
   };
 }
 
@@ -105,8 +106,8 @@ function setMode({ numbers, size, sizeBox }, mode) {
 function readFigures(form, { numbers, size }) {
   const byValue = form.elements.mode.value === "value";
   const [raiseCm, costRm] = [number(numbers.raise), number(numbers.measureCost)];
-  if ((raiseCm > 0) !== (costRm > 0)) return { error: "To test a measure, give both how far to raise the stock and what it costs." };
-  if (raiseCm > 0 && !byValue) return { error: "A measure can only be priced from your own value of stock and equipment, not from a shop size." };
+  if ((raiseCm > 0) !== (costRm > 0)) return { error: t("cost.errBoth") };
+  if (raiseCm > 0 && !byValue) return { error: t("cost.errSize") };
   return {
     figures: {
       value_at_risk_rm: byValue ? number(numbers.value) : 0, shop_size: byValue ? "" : size.value,
@@ -128,14 +129,14 @@ function buildForm(fields, onEstimate) {
     error.textContent = read.error ?? "";
     if (read.figures) onEstimate(read.figures);
   } },
-  h("fieldset", {}, h("legend", {}, "Stock and equipment"),
-    h("p", { class: "hint" }, "What water could reach: goods, machines, furniture and fittings."),
-    modeChoice("value", "I know roughly what it is worth", true),
-    modeChoice("size", "I don't know: use a typical figure for my shop size", false),
+  h("fieldset", {}, h("legend", {}, t("cost.stockLegend")),
+    h("p", { class: "hint" }, t("cost.stockHint")),
+    modeChoice("value", t("cost.modeValue"), true),
+    modeChoice("size", t("cost.modeSize"), false),
     numbers.value.node, valueNote, sizeBox),
-  h("fieldset", {}, h("legend", {}, "Your shop"), numbers.floor.node, floorNote),
-  h("fieldset", {}, h("legend", {}, "Lost trade"),
-    h("p", { class: "hint" }, "Optional. Without it, 30% of the damage is added for cleaning up and lost trade."),
+  h("fieldset", {}, h("legend", {}, t("cost.shopLegend")), numbers.floor.node, floorNote),
+  h("fieldset", {}, h("legend", {}, t("cost.tradeLegend")),
+    h("p", { class: "hint" }, t("cost.tradeHint")),
     h("div", { class: "pair" }, numbers.takings.node, numbers.days.node)),
   measure, error, submit);
   numbers.floor.input.addEventListener("input", () => { numbers.floor.input.dataset.touched = "true"; });
@@ -172,7 +173,7 @@ function useStockValue(form, fields, value) {
   form.elements.mode.value = "value";
   setMode(fields, "value");
   fields.numbers.value.input.value = String(value);
-  fields.valueNote.textContent = "Filled in from your stock photo: Gemini's rough guess. Change it if you know better.";
+  fields.valueNote.textContent = t("cost.fromStock");
   fields.numbers.value.input.focus();
 }
 
@@ -185,9 +186,9 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {} }) {
   const { numbers, floorNote, error, submit } = fields;
   const form = buildForm(fields, onEstimate);
   const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value) });
-  const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": "Your estimate" });
+  const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": t("cost.output") });
   panel.replaceChildren(
-    h("header", { class: "view-head" }, h("p", { class: "kicker" }, "Flood cost"), title, depths),
+    h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths),
     stock.node,
     h("div", { class: "cost-grid" }, form, output));
   const drafts = createDrafts(form, fields);
@@ -209,12 +210,12 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {} }) {
       }
       if (photoFloorCm != null && !numbers.floor.input.dataset.touched && numbers.floor.input.value !== String(photoFloorCm)) {
         numbers.floor.input.value = String(photoFloorCm);
-        floorNote.textContent = "Filled in from your shop-front photo. Change it if you know better.";
+        floorNote.textContent = t("cost.fromPhoto");
       }
       if (isNewPlace || estimate !== shownEstimate) {
         shownEstimate = estimate;
         submit.disabled = Boolean(estimate?.busy);
-        submit.textContent = estimate?.busy ? "Working it out…" : "Estimate the cost";
+        submit.textContent = t(estimate?.busy ? "cost.working" : "cost.submit");
         if (!estimate?.busy) error.textContent = estimate?.error ?? "";
         output.replaceChildren(...results(estimate?.result));
       }

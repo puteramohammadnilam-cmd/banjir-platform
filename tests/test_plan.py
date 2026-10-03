@@ -98,7 +98,7 @@ def test_the_endpoint_gives_the_plan_cleaned_with_our_facts_and_contacts(client)
     data = res.json()["data"]
     assert data["language"] == "ms" and data["plan"]["warning"] == ["Angkat stok ke tempat tinggi."]
     assert data["facts"] == plan.facts(places.resolve(KNOWN["id"]), SRI_MUDA)
-    assert data["contacts"] == plan.contacts(SRI_MUDA)
+    assert data["contacts"] == plan.contacts(SRI_MUDA, "ms")
     assert client.seen[0][1] == "ms"
 
 
@@ -175,3 +175,9 @@ def test_a_floor_out_of_range_is_refused_even_without_other_figures(client, floo
 
 def test_names_from_the_map_are_flagged_to_the_model_as_untrusted():
     assert "untrusted" in ai.PLAN_SYSTEM and "public map" in ai.PLAN_SYSTEM
+
+
+def test_contacts_are_in_the_plans_language():
+    ms = plan.contacts(SRI_MUDA, "ms")
+    assert ms[0] == {"name": "Kecemasan (polis, bomba, ambulans)", "how": "999"} and "majlis tempatan" in ms[-1]["how"]
+    assert plan.contacts(SRI_MUDA)[0]["name"].startswith("Emergency")

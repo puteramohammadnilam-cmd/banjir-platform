@@ -2,43 +2,45 @@
 // inside shows and guesses a rough value range for each thing; the server works out which of them sit under the
 // modelled water (app/stock.py). Nothing reaches the cost form until the owner presses "Use these figures".
 import { h, icon, ringgit } from "./dom.js";
+import { t } from "./i18n.js";
 
-const heightText = (cm) => (cm > 0 ? `${cm} cm up` : "on the floor");
-const range = (low, high) => `${ringgit(low)} to ${ringgit(high)}`;
+const heightText = (cm) => (cm > 0 ? t("stock.up", { cm }) : t("stock.onFloor"));
+const range = (low, high) => t("stock.range", { low: ringgit(low), high: ringgit(high) });
+const CONFIDENCE = { low: "confidence.low", medium: "confidence.medium", high: "confidence.high" };
 
 function itemTable(items, under, rp) {
   return h("div", { class: "table-scroll" }, h("table", { class: "loss-table stock-table" },
-    h("caption", { class: "visually-hidden" }, "What the photo shows"),
-    h("thead", {}, h("tr", {}, ["Item", "Lowest part", "Gemini's rough value", `In a 1 in ${rp} years flood`].map((text) => h("th", { scope: "col" }, text)))),
+    h("caption", { class: "visually-hidden" }, t("stock.caption")),
+    h("thead", {}, h("tr", {}, [t("stock.colItem"), t("stock.colLowest"), t("stock.colValue"), t("stock.colFlood", { rp })].map((text) => h("th", { scope: "col" }, text)))),
     h("tbody", {}, items.map((item, i) => h("tr", { class: under.has(i) ? "is-under" : null },
       h("th", { scope: "row" }, item.item), h("td", {}, heightText(item.lowest_cm)),
       h("td", {}, range(item.value_rm_low, item.value_rm_high)),
-      h("td", {}, under.has(i) ? "Under water" : "Above the water"))))));
+      h("td", {}, t(under.has(i) ? "stock.under" : "stock.above")))))));
 }
 
 function floodLine(flood, rp, count, floorCm) {
-  const floor = `with the floor ${Math.round(floorCm)} cm above the street`;
-  if (!(flood.water_above_floor_m > 0)) return `In a 1 in ${rp} years flood, ${floor}, the model puts no water above your floor.`;
-  return `In a 1 in ${rp} years flood, ${floor}, the model puts ${flood.water_above_floor_m.toFixed(2)} m of water above your floor: `
-    + `${flood.under_water.length} of ${count} items would be under it, worth ${range(flood.value_rm_low, flood.value_rm_high)} by Gemini's guess.`;
+  const floor = t("stock.floor", { cm: Math.round(floorCm) });
+  if (!(flood.water_above_floor_m > 0)) return t("stock.dry", { rp, floor });
+  return t("stock.wet", { rp, floor, m: flood.water_above_floor_m.toFixed(2), under: flood.under_water.length, count,
+    range: range(flood.value_rm_low, flood.value_rm_high) });
 }
 
 function findings(result, rp, onUse) {
   const { estimate } = result;
   if (!estimate.is_shop_inside) {
-    return [h("p", { class: "fact-note" }, "That photo does not look like the inside of a shop. Try one that shows your shelves and equipment.")];
+    return [h("p", { class: "fact-note" }, t("stock.notInside"))];
   }
   if (!estimate.items.length) {
-    return [h("p", { class: "fact-note" }, "Gemini saw no stock or equipment in that photo. Try one that shows your shelves and equipment.")];
+    return [h("p", { class: "fact-note" }, t("stock.nothing"))];
   }
   const flood = result.per_flood[rp];
   return [
     itemTable(estimate.items, new Set(flood.under_water), rp),
     h("p", {}, floodLine(flood, rp, estimate.items.length, result.floor_height_cm)),
-    h("p", { class: "fineprint" }, `Gemini's rough guess from one photo, not a valuation (it says its confidence is ${estimate.confidence}). Things the photo does not show are not counted.`),
+    h("p", { class: "fineprint" }, t("stock.guess", { confidence: CONFIDENCE[estimate.confidence] ? t(CONFIDENCE[estimate.confidence]) : estimate.confidence })),
     h("div", { class: "stock-use" },
-      h("button", { type: "button", class: "btn btn-primary", onclick: () => onUse(result.suggested_value_rm) }, "Use these figures"),
-      h("p", { class: "hint" }, `Puts ${ringgit(result.suggested_value_rm)}, the middle of the guess for everything in the photo, in "Roughly what it is worth". You can change it.`)),
+      h("button", { type: "button", class: "btn btn-primary", onclick: () => onUse(result.suggested_value_rm) }, t("stock.use")),
+      h("p", { class: "hint" }, t("stock.useHint", { value: ringgit(result.suggested_value_rm) }))),
   ];
 }
 
@@ -53,10 +55,10 @@ export function createStockCard({ onPhoto, onUse }) {
   const alert = h("p", { class: "fact-note", role: "alert" });
   const live = h("div", { "aria-live": "polite" });
   const node = h("section", { class: "surface stock-card", "aria-labelledby": "stock-heading" },
-    h("h2", { id: "stock-heading", class: "small-heading" }, "Fill in from a photo of your stock"),
-    h("p", { class: "hint" }, "Take a photo inside your shop. Gemini lists what it sees and guesses a rough value. Nothing is filled in until you press Use these figures."),
+    h("h2", { id: "stock-heading", class: "small-heading" }, t("stock.heading")),
+    h("p", { class: "hint" }, t("stock.hint")),
     picker, alert, live,
-    h("p", { class: "fineprint" }, "The photo is shrunk in your browser, sent to Google Gemini, and not saved by this tool."));
+    h("p", { class: "fineprint" }, t("common.photoPrivacy")));
   let shown = {};
   return {
     node,
@@ -66,7 +68,7 @@ export function createStockCard({ onPhoto, onUse }) {
       input.disabled = Boolean(state?.busy);
       if (state?.busy) picker.setAttribute("aria-disabled", "true");
       else picker.removeAttribute("aria-disabled");
-      words.textContent = state?.busy ? "Reading the photo…" : state?.result ? "Try another photo" : "Add a photo of your stock";
+      words.textContent = t(state?.busy ? "common.photoReading" : state?.result ? "common.photoAgain" : "stock.add");
       alert.textContent = state?.error ?? "";
       alert.hidden = !state?.error;
       live.replaceChildren(...(state?.result ? findings(state.result, rp, onUse) : []));

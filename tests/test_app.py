@@ -257,7 +257,7 @@ def test_area_data_is_gzipped_for_a_browser_that_takes_it(client):
 
 
 # from "./x.js", a bare import "./x.js" and a dynamic import("./x.js")
-IMPORTED = re.compile(r'(?:\bfrom\s*|\bimport\s*\(?\s*)["\']\./([\w-]+\.js)["\']')
+IMPORTED = re.compile(r'(?:\bfrom\s*|\bimport\s*\(?\s*)["\']\./([\w/-]+\.js)["\']')   # strings/en.js too
 
 
 def test_the_import_pattern_sees_every_form_of_import():
@@ -279,7 +279,7 @@ def page_modules(entry: Path) -> set[str]:
 def test_every_start_up_module_is_preloaded_so_the_browser_fetches_them_in_parallel():
     static = Path(main.__file__).parent / "static"
     page = (static / "index.html").read_text(encoding="utf-8")
-    preloaded = set(re.findall(r'<link rel="modulepreload" href="js/([\w-]+\.js)">', page))
+    preloaded = set(re.findall(r'<link rel="modulepreload" href="js/([\w/-]+\.js)">', page))
     assert preloaded == page_modules(static / "js" / "main.js") - {"main.js"}
 
 
@@ -296,3 +296,14 @@ def test_the_footer_says_what_reaches_osm_google_weather_and_gemini_as_the_code_
                   "Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, "
                   "never its coordinates"):
         assert words in page, words
+
+
+def test_the_pages_files_are_checked_again_on_every_load(client):
+    # a new deploy must never mix new and old modules from the browser's cache; an unchanged file comes back as 304
+    for path in ("/", "/js/main.js", "/styles/views.css"):
+        res = client.get(path)
+        assert res.headers["cache-control"] == "no-cache", path
+        etag = res.headers.get("etag")
+        if etag:
+            assert client.get(path, headers={"If-None-Match": etag}).status_code == 304, path
+    assert client.get("/api/status").headers.get("cache-control") != "no-cache"

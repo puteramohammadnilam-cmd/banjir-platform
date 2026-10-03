@@ -1,4 +1,7 @@
-/** A failure the page can show as it is: the server's own words, or that the server could not be reached. */
+import { t } from "./i18n.js";
+
+/** A failure the page can show as it is: the server's own words (in English: the API does not translate them), or that
+ *  the server could not be reached (in the page's language). */
 export class ApiError extends Error {}
 
 async function call(path, payload) {
@@ -9,13 +12,13 @@ async function call(path, payload) {
   try {
     response = await fetch(path, options);
   } catch {
-    throw new ApiError("Could not reach the server. Check your connection and try again.");
+    throw new ApiError(t("api.unreachable"));
   }
   // a reply that is not this app's JSON (a proxy's error page, say) came from somewhere: the connection is fine
   const body = await response.json().catch(() => {
-    throw new ApiError("The server did not answer properly. Try again shortly.");
+    throw new ApiError(t("api.badAnswer"));
   });
-  if (!body.success) throw new ApiError(body.error || "Something went wrong.");
+  if (!body.success) throw new ApiError(body.error || t("api.generic"));
   return body.data;
 }
 

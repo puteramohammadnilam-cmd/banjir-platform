@@ -8,6 +8,7 @@ import { test } from "node:test";
 import { createBusiness } from "../app/static/js/card.js";
 import { createChat } from "../app/static/js/chat.js";
 import { h } from "../app/static/js/dom.js";
+import { useLang } from "../app/static/js/i18n.js";
 import { NO_WATER_NOTE } from "../app/static/js/point.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { AREAS, HOME, LISTING, point, shop } from "./point_fixtures.mjs";
@@ -249,8 +250,35 @@ test("a question goes with the id of the place selected when it is asked, and th
 test("the question box speaks of a location for a point, and gets its own words back for a business", () => {
   const { chat, input } = mountChat();
   const business = input.placeholder;
+  assert.equal(business, "Ask anything about flooding at this shop");
   chat.render(point());
-  assert.equal(input.placeholder, "Tanya apa-apa pasal banjir di lokasi ini");
+  assert.equal(input.placeholder, "Ask anything about flooding at this spot");
   chat.render(shop);
   assert.equal(input.placeholder, business);
+});
+
+test("in Bahasa Melayu the question box, the greeting and the chips are all in Bahasa Melayu", () => {
+  useLang("ms");
+  try {
+    const { chat, chips, input } = mountChat();
+    assert.equal(input.placeholder, "Tanya apa-apa tentang banjir di kedai ini");
+    assert.ok(chipTexts(chips).includes("Kedai ni kena air tak kalau banjir besar?"));
+    assert.ok(chipTexts(chips).every((chip) => !/\b(the|this|would|which)\b/i.test(chip)), chipTexts(chips).join(" | "));
+    chat.render(point());
+    assert.equal(input.placeholder, "Tanya apa-apa tentang banjir di lokasi ini");
+  } finally {
+    useLang("en");
+  }
+});
+
+// ---------- a depth the model may overstate ----------
+
+test("a very deep model depth carries a warning next to the number; a modest one does not", () => {
+  const { panel, card } = mountCard();
+  show(card, { ...shop, depth_m: { 10: 4.1, 100: 5.6, 500: 6.2 } });
+  assert.match(panel.querySelector(".risk").textContent, /The model can run very deep beside rivers/);
+  show(card, { ...shop, id: "node-2", depth_m: { 10: 0.4, 100: 1.2, 500: 1.9 } });
+  assert.doesNotMatch(panel.querySelector(".risk").textContent, /run very deep/);
+  show(card, point({ depth_m: { 10: 3.2, 100: 3.5, 500: 4 } }));
+  assert.match(panel.querySelector(".risk").textContent, /The model can run very deep beside rivers/);
 });

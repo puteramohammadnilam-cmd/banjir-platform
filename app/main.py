@@ -298,6 +298,10 @@ async def limits_and_headers(request: Request, call_next):
     response.headers.update(SECURITY_HEADERS)
     if request.url.path.startswith(NO_STORE_PATHS):
         response.headers["Cache-Control"] = "no-store"
+    elif not request.url.path.startswith("/api/"):
+        # the page's files: checked again on every load (an unchanged one is a 304), so a deploy never mixes old and
+        # new modules from the browser's cache
+        response.headers["Cache-Control"] = "no-cache"
     return response
 
 
@@ -476,7 +480,7 @@ def flood_plan(body: PlanIn) -> dict:
     facts = plan.facts(place, area, body.floor_height_cm, plan_estimate(place, body))
     written = call_ai(ai.write_plan, facts, body.language)
     return ok({"language": body.language, "plan": plan.clean(written, facts, body.language), "facts": facts,
-               "contacts": plan.contacts(area)})
+               "contacts": plan.contacts(area, body.language)})
 
 
 def call_maps(fn, *args):

@@ -69,12 +69,20 @@ def facts(place: dict, area: areas.Area | None, floor_cm: float = 0, estimate: d
     }
 
 
-def contacts(area: areas.Area | None) -> list[dict]:
-    """Who to call or check, printed with every plan. Ours, never the model's."""
-    found = [{"name": "Emergency (police, fire, ambulance)", "how": "999"},
-             {"name": "JPS Public Infobanjir: river levels and flood warnings", "how": INFOBANJIR}]
+CONTACT_WORDS = {
+    "en": ("Emergency (police, fire, ambulance)", "JPS Public Infobanjir: river levels and flood warnings",
+           "your local council, for drains, clean-up and help after a flood"),
+    "ms": ("Kecemasan (polis, bomba, ambulans)", "JPS Public Infobanjir: paras sungai dan amaran banjir",
+           "majlis tempatan anda, untuk longkang, pembersihan dan bantuan selepas banjir"),
+}
+
+
+def contacts(area: areas.Area | None, language: str = "en") -> list[dict]:
+    """Who to call or check, printed with every plan, in the plan's language. Ours, never the model's."""
+    emergency, infobanjir, council = CONTACT_WORDS.get(language, CONTACT_WORDS["en"])
+    found = [{"name": emergency, "how": "999"}, {"name": infobanjir, "how": INFOBANJIR}]
     if area:
-        found.append({"name": area.council, "how": "your local council, for drains, clean-up and help after a flood"})
+        found.append({"name": area.council, "how": council})
     return found
 
 

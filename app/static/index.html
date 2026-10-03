@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Banjir Check · modelled flood depth for shops and businesses</title>
-  <meta name="description" content="See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
+  <title data-i18n="meta.title">Banjir Check · modelled flood depth for shops and businesses</title>
+  <meta name="description" data-i18n-attr="content:meta.description" content="See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -14,6 +14,9 @@
   <link rel="stylesheet" href="styles/views.css">
   <!-- every module main.js loads, so the browser fetches them side by side and not one import at a time -->
   <link rel="modulepreload" href="js/api.js">
+  <link rel="modulepreload" href="js/i18n.js">
+  <link rel="modulepreload" href="js/strings/en.js">
+  <link rel="modulepreload" href="js/strings/ms.js">
   <link rel="modulepreload" href="js/dom.js">
   <link rel="modulepreload" href="js/place.js">
   <link rel="modulepreload" href="js/cells.js">
@@ -32,6 +35,8 @@
   <link rel="modulepreload" href="js/stock.js">
   <link rel="modulepreload" href="js/plan.js">
   <link rel="modulepreload" href="js/voice.js">
+  <link rel="modulepreload" href="js/area-report.js">
+  <link rel="modulepreload" href="js/compare.js">
 </head>
 <body>
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -54,23 +59,27 @@
   <header class="topbar">
     <a class="brand" href="./">
       <span class="brand-mark"><svg class="icon"><use href="#i-wave"/></svg></span>
-      <span class="brand-name">Banjir Check</span>
+      <span class="brand-name" translate="no">Banjir Check</span>
     </a>
     <span class="place" id="area-name" hidden></span>
     <form class="finder" id="finder" role="search">
-      <label class="visually-hidden" for="finder-input">Find your business</label>
+      <label class="visually-hidden" for="finder-input" data-i18n="header.find">Find your business</label>
       <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
-      <input id="finder-input" type="search" list="business-names" placeholder="Find your business" autocomplete="off" enterkeyhint="go">
+      <input id="finder-input" type="search" list="business-names" data-i18n-attr="placeholder:header.find" placeholder="Find your business" autocomplete="off" enterkeyhint="go">
       <datalist id="business-names"></datalist>
     </form>
-    <span class="badge" title="Depths come from a global model, not an official flood map">Test build</span>
+    <span class="badge" data-i18n="header.badge" data-i18n-attr="title:header.badgeTitle" title="Depths come from a global model, not an official flood map">Test build</span>
+    <div class="lang-switch" role="group" aria-label="Language / Bahasa" data-i18n-attr="aria-label:header.language" translate="no">
+      <button type="button" data-lang="ms" lang="ms" title="Bahasa Melayu" aria-pressed="false">BM</button>
+      <button type="button" data-lang="en" lang="en" title="English" aria-pressed="true">EN</button>
+    </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Sections">
-    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span>Area overview</span></button>
-    <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span>My business</span></button>
-    <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span>Flood cost</span></button>
-    <button type="button" role="tab" id="tab-ask" aria-controls="panel-ask" data-tab="ask"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span>Ask AI</span></button>
+  <nav class="tabs" role="tablist" aria-label="Sections" data-i18n-attr="aria-label:nav.label">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span data-i18n="tab.overview">Area overview</span></button>
+    <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span data-i18n="tab.business">My business</span></button>
+    <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span data-i18n="tab.cost">Flood cost</span></button>
+    <button type="button" role="tab" id="tab-ask" aria-controls="panel-ask" data-tab="ask"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span data-i18n="tab.ask">Ask AI</span></button>
   </nav>
 
   <main>
@@ -85,14 +94,14 @@
         <section class="surface map-surface" aria-labelledby="map-heading">
           <div class="surface-head">
             <div>
-              <h2 id="map-heading">Flood model</h2>
-              <p class="muted small">Modelled water depth at each business. Tap a dot for details.</p>
+              <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
+              <p class="muted small" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
             </div>
             <div class="scenario-slot" data-scenario></div>
           </div>
           <div class="map-stage">
-            <div id="map" role="application" aria-label="Map with modelled flood depth at each business"></div>
-            <ul class="legend" id="legend" aria-label="Water depth at each business"></ul>
+            <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
+            <ul class="legend" id="legend" data-i18n-attr="aria-label:overview.legendLabel" aria-label="Water depth at each business"></ul>
             <p class="fineprint area-note" id="map-note" hidden></p>
           </div>
         </section>
@@ -100,14 +109,19 @@
       </div>
       <section class="surface directory" aria-labelledby="directory-heading">
         <div class="surface-head">
-          <h2 id="directory-heading">Businesses</h2>
-          <label class="visually-hidden" for="directory-filter">Filter businesses</label>
-          <input id="directory-filter" class="field" type="search" placeholder="Filter by name or type" autocomplete="off">
+          <h2 id="directory-heading" data-i18n="overview.businesses">Businesses</h2>
+          <label class="visually-hidden" for="directory-filter" data-i18n="overview.filterLabel">Filter businesses</label>
+          <input id="directory-filter" class="field" type="search" data-i18n-attr="placeholder:overview.filterPlaceholder" placeholder="Filter by name or type" autocomplete="off">
         </div>
         <p class="fineprint area-note" id="directory-note" hidden></p>
-        <div class="directory-head" aria-hidden="true"><span>Business</span><span>1 in 10</span><span>1 in 100</span><span>1 in 500</span></div>
+        <div class="directory-head" aria-hidden="true"><span data-i18n="overview.colBusiness">Business</span><span data-i18n="overview.col10">1 in 10</span><span data-i18n="overview.col100">1 in 100</span><span data-i18n="overview.col500">1 in 500</span></div>
         <ol id="directory"></ol>
-        <p class="muted small" id="directory-empty" hidden>No business matches that filter.</p>
+        <p class="muted small" id="directory-empty" data-i18n="overview.noMatch" hidden>No business matches that filter.</p>
+      </section>
+      <section class="surface area-print" aria-labelledby="area-print-heading">
+        <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
+        <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
+        <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
       </section>
     </section>
 
@@ -117,43 +131,43 @@
 
     <section class="panel" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" tabindex="-1" hidden>
       <header class="view-head">
-        <p class="kicker">Ask AI</p>
-        <h1>Ask about <span id="ask-business"></span></h1>
-        <p class="muted">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
+        <p class="kicker" data-i18n="ask.kicker">Ask AI</p>
+        <h1><span data-i18n="ask.about">Ask about</span> <span id="ask-business"></span></h1>
+        <p class="muted" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
       </header>
       <div class="ask-grid">
-        <section class="surface chat" aria-label="Conversation">
+        <section class="surface chat" aria-label="Conversation" data-i18n-attr="aria-label:ask.conversation">
           <p class="alert alert-inline" id="ai-status" hidden></p>
           <ol class="messages" id="messages" aria-live="polite"></ol>
           <form id="ask-form" class="ask-form" autocomplete="off">
-            <label class="visually-hidden" for="question">Your question</label>
-            <input id="question" class="field" name="question" type="text" maxlength="500" required placeholder="Tanya apa-apa pasal banjir di kedai ini">
-            <button type="submit" class="btn btn-primary">Ask</button>
+            <label class="visually-hidden" for="question" data-i18n="ask.question">Your question</label>
+            <input id="question" class="field" name="question" type="text" maxlength="500" required data-i18n-attr="placeholder:ask.placeholderShop" placeholder="Ask anything about flooding at this shop">
+            <button type="submit" class="btn btn-primary" data-i18n="ask.send">Ask</button>
           </form>
         </section>
         <aside class="ask-side">
           <section class="surface">
-            <h2 class="small-heading">Try asking</h2>
+            <h2 class="small-heading" data-i18n="ask.try">Try asking</h2>
             <div class="chips" id="chips"></div>
           </section>
           <section class="surface">
-            <h2 class="small-heading">Flood news</h2>
-            <p class="muted small">Gemini searches Google for recent news and lists its sources.</p>
-            <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Latest flood news</button>
+            <h2 class="small-heading" data-i18n="ask.news">Flood news</h2>
+            <p class="muted small" data-i18n="ask.newsLead">Gemini searches Google for recent news and lists its sources.</p>
+            <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span data-i18n="ask.newsButton">Latest flood news</span></button>
           </section>
-          <p class="fineprint">Check anything urgent with <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a> or call 999.</p>
+          <p class="fineprint"><span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
         </aside>
       </div>
     </section>
   </main>
 
   <footer class="about" id="about">
-    <h2>About this data</h2>
-    <p><strong>This is a test build.</strong> Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</p>
-    <p>Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
-    <p>Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool.</p>
-    <p>River flood forecasts: <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer">Google Flood Hub</a>. Live river levels and warnings: <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a>. In an emergency call 999.</p>
-    <p>Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
+    <h2 data-i18n="footer.heading">About this data</h2>
+    <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
+    <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
+    <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool.</p>
+    <p><span data-i18n="footer.forecasts">River flood forecasts:</span> <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer" translate="no">Google Flood Hub</a><span data-i18n="footer.levels">. Live river levels and warnings:</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a><span data-i18n="footer.emergency">. In an emergency call 999.</span></p>
+    <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
   </footer>
 
   <script src="vendor/leaflet.js"></script>

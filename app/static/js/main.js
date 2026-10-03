@@ -3,10 +3,13 @@ import { createBusiness } from "./card.js";
 import { squaresOf } from "./cells.js";
 import { createChat } from "./chat.js";
 import { createCost } from "./cost.js";
-import { h } from "./dom.js";
+import { h, roadName } from "./dom.js";
+import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createOverview } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard } from "./plan.js";
+import { buildAreaReport } from "./area-report.js";
+import { addCompared, createCompareCard } from "./compare.js";
 import { businessPlace, isPoint, parseRef, readUrl, snapToGrid, writeUrl } from "./place.js";
 
 const PHOTO_MAX_EDGE = 1280;
@@ -55,8 +58,8 @@ function wireTabs(onPick) {
 function wireFinder(premises, onOpen, onNoMatch) {
   const ids = new Map();
   for (const p of [...premises].sort((a, b) => a.name.localeCompare(b.name))) {
-    let text = `${p.name} · ${p.road.name}`;
-    for (let n = 2; ids.has(text); n += 1) text = `${p.name} · ${p.road.name} (${n})`;
+    let text = `${p.name} · ${roadName(p.road.name)}`;
+    for (let n = 2; ids.has(text); n += 1) text = `${p.name} · ${roadName(p.road.name)} (${n})`;
     ids.set(text, p.id);
   }
   $("business-names").replaceChildren(...[...ids.keys()].map((text) => h("option", { value: text })));
@@ -108,7 +111,7 @@ async function linkedPlace(ref, start) {
   return answer.coverage === "covered" ? foundPlace(answer.place, squaresOf(answer)) : null;
 }
 
-const missedWords = (area) => `That link's area or place is not in this build. Showing ${area.name}.`;
+const missedWords = (area) => t("main.missed", { area: area.name });
 
 /** The place the link names ({place, squares}, as linkedPlace gives it), when this build holds it, and a note for a link
  *  to an area or place it does not hold (a point in the query counts: points are read only from the fragment).
@@ -120,7 +123,7 @@ async function openLink(url, start) {
     const linked = await linkedPlace(url.place, start);
     return { linked, note: linked && !start.isAreaMissing ? null : missed };
   } catch (error) {
-    return { linked: null, note: `${error.message} Showing ${start.area.name}.`, isFailed: true };
+    return { linked: null, note: `${error.message} ${t("main.showing", { area: start.area.name })}`, isFailed: true };
   }
 }
 
@@ -136,7 +139,8 @@ function initialState(url, start, linked) {
     photos: {},    // by place id: { busy, preview, estimate, water_above_floor_m, error }
     stocks: {},    // by place id: { busy, result, error }: the photo of the stock (POST /api/stock)
     plans: {},     // by place id: { busy, result, error }: the flood plan (POST /api/plan)
-    planLanguage: "ms",
+    planLanguage: lang,   // the plan is written in the page's language unless the owner picks the other
+    compare: [],   // ids of the places side by side on My business, oldest first (compare.js)
     listings: {},  // by business id: { busy } | { configured, place } | { error }
     estimates: {}, // by place id: { busy, result } | { result } | { error, result }
     rain: start.status.maps_ready ? { busy: true, configured: true } : { configured: false },
@@ -163,9 +167,11 @@ function createStore(initial) {
 /** The selected place: a business of the area, or a point checked on this visit. */
 const placeOf = (app, state) => app.byId.get(state.placeKey) ?? state.points[state.placeKey];
 
-/** The page's own link (place.js writeUrl): the area only when it is not the default, a point only in the fragment. */
+/** The page's own link (place.js writeUrl): the area only when it is not the default, a point only in the fragment, the
+ *  language only when it is not English. A link without one opens in the reader's own remembered choice. */
 const linkFor = (app, state) => writeUrl({
   area: state.areaId === app.start.list.default ? null : state.areaId, place: state.placeKey, tab: state.tab, rp: state.rp,
+  lang: lang === DEFAULT_LANG ? null : lang,
 });
 
 /** Switch tab from a button inside the page, and take keyboard focus to the new tab's heading. */
@@ -221,7 +227,7 @@ async function sendPhoto(app, file) {
   const before = store.state.photos[id];   // kept until the new photo is read, and if reading it fails
   setPhoto({ ...before, busy: true, error: null });
   try {
-    const image = await shrinkPhoto(file).catch(() => { throw new Error("That file could not be read as a photo."); });
+    const image = await shrinkPhoto(file).catch(() => { throw new Error(t("common.photoUnreadable")); });
     setPhoto({ ...before, busy: true, error: null, preview: image });
     setPhoto({ preview: image, ...(await api.sendPhoto({ place: id, image })) });
   } catch (error) {
@@ -243,7 +249,7 @@ async function sendStock(app, file, floorCm) {
   const setStock = (value) => store.update({ stocks: { ...store.state.stocks, [id]: value } });
   setStock({ result: before?.result, busy: true });
   try {
-    const image = await shrinkPhoto(file).catch(() => { throw new Error("That file could not be read as a photo."); });
+    const image = await shrinkPhoto(file).catch(() => { throw new Error(t("common.photoUnreadable")); });
     setStock({ result: await api.sendStock({ place: id, image, floor_height_cm: floorCm }) });
   } catch (error) {
     setStock({ result: before?.result, error: error.message });
@@ -273,11 +279,10 @@ async function writePlan(app, language) {
   }
 }
 
-/** Prints the plan alone: a copy goes in #print-root, a child of the body, and views.css prints only that while it
- *  holds something. It is emptied after printing; where the browser never says so (iOS), the screen is unchanged
- *  anyway, as #print-root is never shown on screen. */
-function printPlan() {
-  const sheet = document.querySelector(".plan-sheet");
+/** Prints one sheet alone (the flood plan or the area summary): a copy goes in #print-root, a child of the body, and
+ *  views.css prints only that while it holds something. It is emptied after printing; where the browser never says so
+ *  (iOS), the screen is unchanged anyway, as #print-root is never shown on screen. */
+function printSheet(sheet) {
   if (!sheet) return;
   let root = $("print-root");
   if (!root) {
@@ -348,6 +353,25 @@ function linkFollower(app) {
   return follow;
 }
 
+/** The flood plan and the compare card under My business, and the area summary's print button. */
+function createExtras(app) {
+  const { start, store } = app;
+  const plan = createPlanCard({
+    onWrite: (language) => writePlan(app, language), onPrint: () => printSheet($("panel-business").querySelector(".plan-sheet")),
+    onLanguage: (planLanguage) => store.update({ planLanguage }),
+  });
+  $("print-area").addEventListener("click", () => printSheet(buildAreaReport({
+    area: start.area, premises: start.premises, date: new Date().toLocaleDateString(dateLocale(), { day: "numeric", month: "short", year: "numeric" }),
+  })));
+  const compare = createCompareCard({
+    onAdd: (id) => store.update({ compare: addCompared(store.state.compare, id) }),
+    onRemove: (id) => store.update({ compare: store.state.compare.filter((kept) => kept !== id) }),
+    onOpen: (place) => (place.is_point ? openPoint(app, place, null) : open(app, place.id)),
+  });
+  $("panel-business").append(plan.node, compare.node);
+  return { plan, compare };
+}
+
 function createViews(app) {
   const { start, store } = app;
   const pickRp = (rp) => store.update({ rp });
@@ -370,10 +394,7 @@ function createViews(app) {
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
   });
-  const plan = createPlanCard({
-    onWrite: (language) => writePlan(app, language), onPrint: printPlan, onLanguage: (planLanguage) => store.update({ planLanguage }),
-  });
-  $("panel-business").append(plan.node);
+  const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
     onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm),
   });
@@ -388,7 +409,7 @@ function createViews(app) {
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
   });
-  return { overview, business, cost, chat, showTab, pin, plan };
+  return { overview, business, cost, chat, showTab, pin, plan, compare };
 }
 
 function render(app, views, state, previous) {
@@ -400,8 +421,9 @@ function render(app, views, state, previous) {
   views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
     state.stocks[state.placeKey], state.rp);
   views.plan.render(state.plans[state.placeKey], state.planLanguage);
+  views.compare.render({ current: place, compared: state.compare.map((id) => placeOf(app, { ...state, placeKey: id })).filter(Boolean) });
   views.chat.render(place);   // the chips, the question box and the flood news that fit the place
-  $("ask-business").textContent = place.is_point ? "this point" : place.name;
+  $("ask-business").textContent = place.is_point ? t("ask.thisPoint") : place.name;
   views.pin.render({ tab: state.tab, place, squares: state.squares[state.placeKey] });   // ends aim mode off the Area overview; puts a point's pin and its squares on the map
   if (previous && previous.tab !== state.tab) {
     if (state.tab === "overview") views.overview.map.refresh();   // the map was measured while its tab was hidden
@@ -422,7 +444,7 @@ function startApp(start, initial) {
   const views = createViews(app);
   app.store.listen((state, previous) => render(app, views, state, previous));
   if (!start.status.ai_ready) {
-    $("ai-status").textContent = "The AI assistant is not connected yet. Add a Gemini key to the .env file and restart.";
+    $("ai-status").textContent = t("main.aiOff");
     $("ai-status").hidden = false;
   }
   render(app, views, initial, null);
@@ -435,21 +457,21 @@ function startApp(start, initial) {
 
 /** The note about a link, with a Retry button when the server could not be asked; no text hides it. */
 function showNote(text, onRetry = null) {
-  const retry = onRetry && h("button", { type: "button", class: "btn btn-secondary", onclick: onRetry }, "Retry");
+  const retry = onRetry && h("button", { type: "button", class: "btn btn-secondary", onclick: onRetry }, t("common.retry"));
   $("link-note").replaceChildren(...[text, retry].filter(Boolean));
   $("link-note").hidden = !text;
 }
 
 function showStartError(error) {
-  $("load-error").replaceChildren(`The flood data could not be loaded. ${error.message}`,
-    h("button", { type: "button", class: "btn btn-secondary", onclick: () => location.reload() }, "Retry"));
+  $("load-error").replaceChildren(`${t("main.loadFailed")} ${error.message}`,
+    h("button", { type: "button", class: "btn btn-secondary", onclick: () => location.reload() }, t("common.retry")));
   $("load-error").hidden = false;
 }
 
 /** Read the link, load what it needs and start the page. A slow start says so; a failed one says why, with Retry. */
 async function main() {
   const loading = $("loading");
-  const slow = setTimeout(() => { loading.textContent = "Loading the flood data…"; }, SLOW_START_MS);
+  const slow = setTimeout(() => { loading.textContent = t("main.loading"); }, SLOW_START_MS);
   try {
     const url = readUrl(location);
     if (url.pointInQuery) history.replaceState(null, "", writeUrl(url));   // before any request can send it as Referer
@@ -465,4 +487,6 @@ async function main() {
   }
 }
 
+applyStatic(document);   // index.html's own words in the page's language, and <html lang>, before anything is drawn
+wireLangSwitch(document);
 main();

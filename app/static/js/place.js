@@ -2,10 +2,11 @@
 // point someone picked, addressed by one id string, as in app/places.py:
 //   business  "node-11075038761"       (node|way|relation)-digits: an OpenStreetMap business in a listed area
 //   point     "pt:3.02998,101.53667"   the centre of the 90 m flood model square that holds the point, 5 decimals
-// A link carries the area, tab, flood size and a business's id in its query. A point's id goes in the fragment
+// A link carries the area, tab, flood size, a business's id and the language (when not English) in its query. A point's id goes in the fragment
 // (#place=…) and never in the query: the browser sends the query to the server, where it reaches the logs, but it
 // never sends the fragment.
 import { SCENARIOS } from "./dom.js";
+import { LANGS } from "./i18n.js";
 
 export const TABS = ["overview", "business", "cost", "ask"];
 const BUSINESS_ID = /^(?:node|way|relation)-[0-9]{1,19}$/;
@@ -94,8 +95,8 @@ export function overlapsView(view, south, west, { px, py }) {
 const given = (value) => value || null;   // an empty parameter counts as none
 const claimsPoint = (value) => typeof value === "string" && value.startsWith(POINT_PREFIX);   // as places.is_point_id
 
-/** What a link asks for: {area, place, tab, rp, pointInQuery}; area, place, tab and rp are null when not there. tab
- *  and rp are null unless valid. area and place are passed on as given, for the page to check against what this
+/** What a link asks for: {area, place, tab, rp, lang, pointInQuery}; area, place, tab, rp and lang are null when not
+ *  there. tab, rp and lang are null unless valid. area and place are passed on as given, for the page to check against what this
  *  build holds. The place is the fragment's (where points go), else ?place=, else ?shop= from links made before
  *  there were points. A point is read only from the fragment: pointInQuery says the query named one (or anything
  *  starting "pt:"), which is never used, so the page can take it out of its address before it sends any request. */
@@ -105,21 +106,24 @@ export function readUrl({ search = "", hash = "" } = {}) {
   const named = [query.get("place"), query.get("shop")];
   const tab = query.get("tab");
   const rp = query.get("rp");
+  const lang = query.get("lang");
   return {
     area: given(query.get("area")),
     place: given(fragment.get("place")) ?? given(named.find((value) => value && !claimsPoint(value))),
     tab: TABS.includes(tab) ? tab : null,
     rp: SCENARIOS.includes(rp) ? rp : null,
+    lang: LANGS.includes(lang) ? lang : null,
     pointInQuery: named.some(claimsPoint),
   };
 }
 
-/** The link for a view, to pass to history.replaceState or location.assign. Area, tab, a business's id and rp go in
- *  the query, in that order; a point's id goes in the fragment. Null values, and a place that is not a valid id, are
+/** The link for a view, to pass to history.replaceState or location.assign. Area, tab, a business's id, rp and lang go
+ *  in the query, in that order; a point's id goes in the fragment. Null values, and a place that is not a valid id, are
  *  left out; give area null for the default area. */
-export function writeUrl({ area = null, place = null, tab = null, rp = null } = {}) {
+export function writeUrl({ area = null, place = null, tab = null, rp = null, lang = null } = {}) {
   const ref = parseRef(place);
-  const query = [["area", area], ["tab", tab], ["place", ref?.kind === "business" ? ref.id : null], ["rp", rp]]
+  const query = [["area", area], ["tab", tab], ["place", ref?.kind === "business" ? ref.id : null], ["rp", rp],
+    ["lang", LANGS.includes(lang) ? lang : null]]
     .filter(([, value]) => value != null && value !== "")
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
   return `?${query.join("&")}${ref?.kind === "point" ? `#place=${ref.id}` : ""}`;

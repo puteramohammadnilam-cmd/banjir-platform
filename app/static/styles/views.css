@@ -145,7 +145,7 @@
   .directory-head { display: none; }
   .directory button { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--space-1); }
   .directory button > span:first-child { grid-column: 1 / -1; }
-  .depth-chip::before { content: "1 in " attr(data-rp) ": "; font-weight: 500; }
+  .depth-chip::before { content: attr(data-size) ": "; font-weight: 500; }   /* "1 in 10" in the page's language, set by overview.js */
 }
 
 @media (min-width: 1040px) {
@@ -208,6 +208,7 @@
 
 /* ---------- flood cost ---------- */
 /* the stock photo: rows under the modelled water carry the water's colour and a mark, so colour is not the only cue */
+.deep-note { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: var(--text-sm); }
 .stock-card { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); justify-items: start; }
 .stock-card > * { max-width: 100%; }
 .stock-card .table-scroll { width: 100%; }
@@ -280,6 +281,12 @@
 @media (max-width: 900px) { .ask-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- the flood plan ---------- */
+.area-print { display: grid; gap: var(--space-2); justify-items: start; margin-top: var(--space-4); }
+.area-report ul { list-style: disc; }
+.compare-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
+.compare-card > * { max-width: 100%; }
+.compare-card .table-scroll { width: 100%; }
+.compare-table .btn-link { min-height: 44px; text-align: left; }
 .plan-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
 .plan-card > * { max-width: 100%; }
 .plan-language { display: flex; flex-wrap: wrap; gap: var(--space-4); border: 0; padding: 0; margin: 0; }
@@ -292,11 +299,12 @@
 .plan-sheet ul { list-style: disc; }
 .plan-sheet li { display: list-item; }
 .plan-sheet .table-scroll { width: 100%; }
+.plan-actions, .plan-share { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .plan-print { justify-self: start; }
 #print-root { display: none; }
 @media print {
   body:has(> #print-root:not(:empty)) > :not(#print-root) { display: none !important; }
   #print-root { display: block; }
   #print-root .plan-sheet { border: 0; padding: 0; max-width: none; }
-  #print-root .plan-print { display: none; }
+  #print-root .plan-actions { display: none; }
 }

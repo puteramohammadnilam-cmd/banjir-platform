@@ -1,6 +1,7 @@
 /* global L */
 import { createCellLayer, squareStyle } from "./cells.js";
-import { SCENARIOS, SCENARIO_LABEL, band, bandColor, depthText, depthWords, h, icon, s } from "./dom.js";
+import { SCENARIOS, band, bandColor, depthText, depthWords, h, icon, s, scenarioLabel } from "./dom.js";
+import { t } from "./i18n.js";
 import { overlapsView } from "./place.js";
 
 const INK = "#0d1b2a";
@@ -51,9 +52,9 @@ function popupBody(map, p, rp, onOpen) {
   const depth = p.depth_m[rp];
   return h("div", {},
     h("p", { class: "pop-name" }, p.name),
-    h("p", { class: "pop-depth" }, band(depth) ? h("strong", {}, `${depthText(depth)}, ${depthWords(depth)}`) : "No water in the model",
-      ` in a flood expected ${SCENARIO_LABEL[rp]}`),
-    h("button", { type: "button", class: "btn btn-primary", onclick: () => { map.closePopup(); onOpen(p.id); } }, "Open details"));
+    h("p", { class: "pop-depth" }, band(depth) ? h("strong", {}, `${depthText(depth)}, ${depthWords(depth)}`) : t("overview.legendDry"),
+      t("map.inFlood", { label: scenarioLabel(rp) })),
+    h("button", { type: "button", class: "btn btn-primary", onclick: () => { map.closePopup(); onOpen(p.id); } }, t("map.openDetails")));
 }
 
 /** One dot per business, with its name on hover and a popup for the flood size on show (getRp gives it). */
@@ -153,7 +154,7 @@ function setDotsTabbable(map, isTabbable) {
 /** A button on the map that starts aim mode, beside the zoom buttons. Gives back what hides or shows it. */
 function addAimButton(map, onCheckPoint) {
   const button = h("button", { type: "button", class: "map-aim-button", onclick: (event) => onCheckPoint(event.currentTarget) },
-    icon("pin"), "Check a point");
+    icon("pin"), t("map.checkPoint"));
   const box = h("div", {}, button);
   L.DomEvent.disableClickPropagation(box);
   const control = L.control({ position: "topright" });

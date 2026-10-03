@@ -100,3 +100,42 @@ test("a section the server left empty has no heading", () => {
   card.render({ result: { ...RESULT, plan: { ...RESULT.plan, during: [] } } }, "ms");
   assert.deepEqual(card.node.querySelectorAll("h4").map((h) => h.textContent), ["Sebelum banjir", "Bila ada amaran", "Selepas banjir", "Hubungi"]);
 });
+
+// ---------- sharing ----------
+
+import { planText } from "../app/static/js/plan.js";
+
+test("the plan as text has the title, our figures, numbered steps, contacts and the footer", () => {
+  const text = planText(RESULT);
+  assert.match(text, /^Pelan banjir kedai anda\n/);
+  assert.match(text, /1 dalam 100 tahun: air 1\.88 m di jalan dalam model; peluang dalam 10 tahun 10%/);
+  assert.match(text, /^Pelan banjir kedai anda\n.*\n.*\nAngka daripada model banjir/);
+  assert.match(text, /Sebelum banjir\n1\. Simpan dokumen di rak atas\./);
+  assert.match(text, /Hubungi\n- Emergency \(police, fire, ambulance\): 999/);
+  assert.match(text, /Ditulis oleh Gemini/);
+});
+
+test("a plan offers WhatsApp with its text, and the phone's own share where there is one", () => {
+  const { card } = mount();
+  card.render({ result: RESULT }, "ms");
+  const link = card.node.querySelectorAll("a").find((a) => a.textContent === "Send on WhatsApp");
+  assert.ok(link.getAttribute("href").startsWith("https://wa.me/?text="));
+  assert.equal(decodeURIComponent(link.getAttribute("href").slice("https://wa.me/?text=".length)), planText(RESULT));
+  assert.equal(link.getAttribute("rel"), "noopener noreferrer");
+});
+
+import { MAX_SHARE_CHARS } from "../app/static/js/plan.js";
+
+test("a long plan is cut in its steps, never in its figures, contacts or footer", () => {
+  const long = { ...RESULT, plan: { ...RESULT.plan, before: Array.from({ length: 30 }, (_, i) => `Langkah ${i} ${"x".repeat(180)}`) } };
+  const text = planText(long);
+  assert.ok(text.length <= MAX_SHARE_CHARS, String(text.length));
+  assert.match(text, /…\n\nHubungi\n- Emergency/);
+  assert.match(text, /Ditulis oleh Gemini/);
+  assert.match(text, /1 dalam 100 tahun/);
+});
+
+test("a dry flood size reads as no water in the street in the model", () => {
+  const dry = { ...RESULT, language: "en", facts: { ...FACTS, floods: FACTS.floods.map((f) => ({ ...f, street_depth_m: null })) } };
+  assert.match(planText(dry), /1 in 10 years: no water in the street in the model; chance within 10 years 65%/);
+});

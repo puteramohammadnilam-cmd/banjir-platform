@@ -1,37 +1,34 @@
 import * as api from "./api.js";
 import { h, icon } from "./dom.js";
+import { lang, t } from "./i18n.js";
 import { areaOf } from "./point.js";
 import * as realVoice from "./voice.js";
 
-const SUGGESTIONS = Object.freeze([
-  "Kedai ni kena air tak kalau banjir besar?",
-  "Berapa anggaran rugi kedai ni kalau banjir?",
-  "Which businesses stay dry in a 100 year flood?",
-  "Hujan lebat tak hari ni?",
-  "Is this shop still open?",
-]);
-// A point is a 90 m square of the model, not a shop: no "is it open" (it has no Google Maps listing), and the area
-// question only inside a listed area, which is what the AI sums up. The lists are constants, so the same list twice
-// means the chips need no rebuilding.
-const POINT_SUGGESTIONS = Object.freeze([
-  "Kawasan ni kena air tak kalau banjir besar?",
-  "Berapa anggaran rugi kalau banjir kat sini?",
-  "How deep would the water be here in a 100 year flood?",
-  "Hujan lebat tak hari ni?",
-]);
-const POINT_AREA_SUGGESTIONS = Object.freeze([
-  ...POINT_SUGGESTIONS.slice(0, 3), "Which businesses in this area stay dry in a 100 year flood?", ...POINT_SUGGESTIONS.slice(3),
-]);
-export const NEWS_NOTE = "Flood news is available for the listed areas.";
-const POINT_PLACEHOLDER = "Tanya apa-apa pasal banjir di lokasi ini";   // the question box says "kedai" (shop) for a business
+// The chips, by kind of place. A point is a 90 m square of the model, not a shop: no "is it open" (it has no Google
+// Maps listing), and the area question only inside a listed area, which is what the AI sums up. Each list is made once
+// per language and frozen, so the same list twice means the chips need no rebuilding.
+const CHIP_KEYS = Object.freeze({
+  business: ["ask.chipShopWater", "ask.chipShopLoss", "ask.chipAreaDry", "ask.chipRain", "ask.chipOpen"],
+  point: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipRain"],
+  pointArea: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipPointAreaDry", "ask.chipRain"],
+});
+const chipSets = new Map();   // language -> {business, point, pointArea}
+
+function chipsIn(language) {
+  if (!chipSets.has(language)) {
+    chipSets.set(language, Object.fromEntries(Object.entries(CHIP_KEYS).map(([kind, keys]) => [kind, Object.freeze(keys.map((key) => t(key)))])));
+  }
+  return chipSets.get(language);
+}
+export const NEWS_NOTE = t("ask.newsNote");
 const MAX_TURN_CHARS = 2000;   // the server rejects longer history turns
-const GREETING = "Hai. Pilih kedai di peta, then ask me anything about the flood model there. I answer in Bahasa Melayu or English.";
 
 /** The chips for the selected place: a business's, or a point's. `page` is the page's own area and `areas` the listed
  *  ones, to tell whether a point lies in one. */
 export function chipsFor(place, page, areas) {
-  if (!place?.is_point) return SUGGESTIONS;
-  return areaOf(place, page, areas) ? POINT_AREA_SUGGESTIONS : POINT_SUGGESTIONS;
+  const chips = chipsIn(lang);
+  if (!place?.is_point) return chips.business;
+  return areaOf(place, page, areas) ? chips.pointArea : chips.point;
 }
 
 /** The area whose flood news the place can ask for, as {areaId, name}: a business's is the page's own area. null for a
@@ -89,7 +86,7 @@ async function exchange({ add, control, userText, waitText, call, show }) {
   }
 }
 
-const newsLabel = ({ name }) => `Latest flood news for ${name}`;
+const newsLabel = ({ name }) => t("ask.newsFor", { name });
 
 /** Shows the news button for an area {areaId, name}, or a note in its place when there is none. Returns the function to
  *  call with the area, or null. The note is made the first time it is needed, so a page that never shows it is as it was. */
@@ -128,11 +125,9 @@ function wireQuestionForm({ form, input, button, send }) {
 }
 
 export const VOICE_WORDS = Object.freeze({
-  speak: "Speak", stop: "Stop", label: "Record a question", listening: "Listening to your question…",
-  wait: "Please wait for the answer, then ask again.", stopReading: "Stop reading",
-  blocked: "The microphone is blocked or not there. Type your question instead.",
-  unreadable: "That recording could not be read. Please try again.",
-  note: "Speak: your recording goes to Google Gemini to write down the question, and is not saved by this tool.",
+  speak: t("voice.speak"), stop: t("voice.stop"), label: t("voice.label"), listening: t("voice.listening"),
+  wait: t("voice.wait"), stopReading: t("voice.stopReading"), blocked: t("voice.blocked"),
+  unreadable: t("voice.unreadable"), note: t("voice.note"),
 });
 
 /** The microphone button: press to record, press again (or wait 30 s) to send. record() starts a recording
@@ -177,15 +172,14 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
   const button = form.querySelector("button");
   const page = { id: areaId, name: areaName };
   const showNews = newsBlock(news);
-  const businessPlaceholder = input.placeholder;   // as index.html has it
-  let shown = { chips: SUGGESTIONS, news: newsFor(null, page, areas) };
+  let shown = { chips: chipsFor(null, page, areas), news: newsFor(null, page, areas) };
   let shownPlaceId;   // what the chips and the news button are built for
   const add = (kind, text) => addMessage(messages, kind, text);
 
   async function send(question) {
     if (button.disabled || !question.trim()) return;
     await exchange({
-      add, control: button, userText: question, waitText: "Checking the flood data…",
+      add, control: button, userText: question, waitText: t("ask.checking"),
       call: () => api.ask({ question, place: getPlaceRef(), area_id: areaId, history }),
       show: ({ answer }) => {
         remember(question, answer);
@@ -227,7 +221,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     const target = shown.news;
     if (news.disabled || !target) return;
     await exchange({
-      add, control: news, userText: newsLabel(target), waitText: "Searching with Google…",
+      add, control: news, userText: newsLabel(target), waitText: t("ask.searching"),
       call: () => api.getNews({ area_id: target.areaId }),
       show: newsAnswer(add, messages),
     });
@@ -237,12 +231,13 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
   showChips(chips, shown.chips, send);
   news.addEventListener("click", sendNews);
   wireQuestionForm({ form, input, button, send });
-  add("model", GREETING);
+  input.placeholder = t("ask.placeholderShop");
+  add("model", t("ask.greeting"));
   return {
     render(place) {
       if (place?.id !== shownPlaceId) voice.stopSpeaking?.();   // an answer about another place is not read on
       shownPlaceId = place?.id;
-      input.placeholder = place?.is_point ? POINT_PLACEHOLDER : businessPlaceholder;
+      input.placeholder = t(place?.is_point ? "ask.placeholderPoint" : "ask.placeholderShop");
       const next = { chips: chipsFor(place, page, areas), news: newsFor(place, page, areas) };
       if (next.chips !== shown.chips) showChips(chips, next.chips, send);
       if (next.news?.areaId !== shown.news?.areaId) showNews(next.news);
