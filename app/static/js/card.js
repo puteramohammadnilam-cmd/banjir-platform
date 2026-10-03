@@ -2,6 +2,7 @@
 import { SCENARIO_LABEL, band, depthText, depthWords, h, icon, kindText, renderPicker } from "./dom.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
+import { NO_WATER_NOTE, pointHeader } from "./point.js";
 
 const LISTED = { open: "open", "closed for now": "closed for now", "closed for good": "closed for good", "not open yet": "not open yet" };
 
@@ -9,7 +10,8 @@ function headline(premise, rp) {
   const depth = premise.depth_m[rp];
   if (!band(depth)) {
     return [h("p", { class: "headline is-dry" }, h("strong", {}, "No water"), h("span", {}, "in the model here")),
-      h("p", { class: "subhead" }, `In a flood expected ${SCENARIO_LABEL[rp]}. That is not a promise of staying dry.`)];
+      h("p", { class: "subhead" }, `In a flood expected ${SCENARIO_LABEL[rp]}. That is not a promise of staying dry.`),
+      ...(premise.is_point ? [h("p", { class: "subhead" }, NO_WATER_NOTE)] : [])];   // a point can be in the sea or on a road
   }
   return [h("p", { class: "headline" }, h("strong", {}, `${depth.toFixed(2)} m`), h("span", {}, depthWords(depth))),
     h("p", { class: "subhead" }, `Water in the model at street level here, in a flood expected ${SCENARIO_LABEL[rp]}.`)];
@@ -73,11 +75,14 @@ function floorFact(rp, photo, onPhoto) {
     h("p", { class: "fineprint" }, "The photo is shrunk in your browser, sent to Google Gemini, and not saved by this tool."));
 }
 
-function historyFact(goto) {
-  const { dated, recent, since, recentFrom } = floodCounts();
+/** The area's own flood record. An area with none collected shows no fact: the Area overview says so. */
+function historyFact(area, goto) {
+  const counts = floodCounts(area.history);
+  if (!counts) return null;
+  const { dated, recent, since, recentFrom } = counts;
   return fact("clock", "Floods recorded here",
     h("p", { class: "fact-value" }, `${recent} since ${recentFrom}`),
-    h("p", { class: "fact-note" }, `${dated} dated floods at Taman Sri Muda since ${since}, in the sources we checked. `,
+    h("p", { class: "fact-note" }, `${dated} dated floods at ${area.name} since ${since}, in the sources we checked. `,
       h("button", { type: "button", class: "btn btn-link", onclick: () => goto("overview") }, "See them")));
 }
 
@@ -94,12 +99,69 @@ function caption(photoFloorM, floorM) {
 
 const spoken = (premise, rp) => {
   const depth = premise.depth_m[rp];
-  return `${premise.name}: ${band(depth) ? `${depthText(depth)}, ${depthWords(depth)}` : "no water in the model"}, in a flood expected ${SCENARIO_LABEL[rp]}.`;
+  const where = premise.is_point ? "This 90 m square" : premise.name;
+  return `${where}: ${band(depth) ? `${depthText(depth)}, ${depthWords(depth)}` : "no water in the model"}, in a flood expected ${SCENARIO_LABEL[rp]}.`;
 };
 
-/** Built once. The drawing is rebuilt only when the business, flood size or floor changes, so its water
- *  animation is not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { onPhoto, onPick, goto, showOnMap }) {
+const seeOnMap = (showOnMap) =>
+  h("button", { type: "button", class: "btn btn-secondary", onclick: showOnMap }, icon("pin"), "See on map");
+
+/** A business's name, kind and tags, and the way to see it on the map. */
+function businessHead(premise, showOnMap) {
+  return [
+    h("div", {},
+      h("p", { class: "kicker" }, kindText(premise)),
+      h("h1", { class: "view-title" }, premise.name),
+      h("ul", { class: "tags" },
+        h("li", { class: "tag" }, "From a public map"),
+        h("li", { class: "tag" }, "Not checked on the ground"),
+        premise.is_chain && h("li", { class: "tag" }, "Chain outlet"))),
+    seeOnMap(showOnMap),
+  ];
+}
+
+/** Where a point lies, when that is a listed area other than the page's: said, and a way to open that area. Without
+ *  onOpenArea only the sentence shows. */
+const elsewhereOffer = ({ id, text, action }, onOpenArea) => h("p", { class: "fact-note" }, text, " ",
+  onOpenArea && h("button", { type: "button", class: "btn btn-link", onclick: () => onOpenArea(id) }, action));
+
+/** A point, a model square someone picked, has no name, kind or road of its own: its words are in point.js. "Move the
+ *  pin" shows only where the page can move the pin (onMovePin). */
+function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea }) {
+  const words = pointHeader(place, area, areas);
+  const move = onMovePin && h("button", { type: "button", class: "btn btn-secondary", onclick: () => onMovePin() }, icon("map"), "Move the pin");
+  return [
+    h("div", {},
+      h("p", { class: "kicker" }, words.kicker),
+      h("h1", { class: "view-title" }, words.title),
+      words.subline && h("p", { class: "muted small" }, words.subline),
+      h("ul", { class: "tags" }, words.tags.map((tag) => h("li", { class: "tag" }, tag))),
+      words.elsewhere && elsewhereOffer(words.elsewhere, onOpenArea)),
+    h("div", { class: "biz-actions" }, move, " ", seeOnMap(showOnMap)),
+  ];
+}
+
+const header = (place, options) => (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap));
+
+/** The facts beside the drawing. A point has no road or Google Maps listing: it is not a business. Its relief centre
+ *  is the server's, for a point in a listed area with one; the flood record is the page's area's, so only a point in
+ *  that area shows it (another area's record is on that area's own page). */
+function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto }) {
+  const isPoint = premise.is_point;
+  const hasPageRecord = !isPoint || premise.area_id === area.id;
+  return h("div", { class: "facts" },
+    !isPoint && premise.road && roadFact(premise, rp),
+    premise.shelter && shelterFact(premise.shelter),
+    !isPoint && listingFact(listing),
+    floorFact(rp, photo, onPhoto),
+    hasPageRecord && historyFact(area, goto));
+}
+
+/** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
+ *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onMovePin() puts the pin of a point back in
+ *  the map's hands. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
+ *  not restarted by other updates, such as the Google Maps listing arriving. */
+export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea }) {
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": "Modelled flood depth" });
   const picker = h("div");
@@ -119,15 +181,7 @@ export function createBusiness(panel, { onPhoto, onPick, goto, showOnMap }) {
       shown = { premise, rp, photo, listing };
       const photoFloorM = photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm / 100 : 0;
       const floorM = Math.min(photoFloorM, MAX_DRAWN_FLOOR_M);
-      if (isNewBusiness) head.replaceChildren(
-        h("div", {},
-          h("p", { class: "kicker" }, kindText(premise)),
-          h("h1", { class: "view-title" }, premise.name),
-          h("ul", { class: "tags" },
-            h("li", { class: "tag" }, "From a public map"),
-            h("li", { class: "tag" }, "Not checked on the ground"),
-            premise.is_chain && h("li", { class: "tag" }, "Chain outlet"))),
-        h("button", { type: "button", class: "btn btn-secondary", onclick: showOnMap }, icon("pin"), "See on map"));
+      if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea }));
       const key = `${premise.id}|${rp}|${photoFloorM}`;
       if (key !== drawnKey) {
         drawnKey = key;
@@ -136,12 +190,7 @@ export function createBusiness(panel, { onPhoto, onPick, goto, showOnMap }) {
         announcer.textContent = spoken(premise, rp);
       }
       side.replaceChildren(
-        h("div", { class: "facts" },
-          roadFact(premise, rp),
-          premise.shelter && shelterFact(premise.shelter),
-          listingFact(listing),
-          floorFact(rp, photo, onPhoto),
-          historyFact(goto)),
+        sideFacts(shown, { area, goto, onPhoto }),
         h("div", { class: "next" },
           nextStep("What would a flood cost you?", "Loss per flood, per year and over 10 years", () => goto("cost"), true),
           nextStep("Ask in Bahasa Melayu or English", "Gemini, with Google Weather and Google Maps", () => goto("ask"))));

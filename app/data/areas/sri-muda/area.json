@@ -1,0 +1,86 @@
+{
+  "id": "sri-muda",
+  "default": true,
+  "name": "Taman Sri Muda",
+  "display_name": "Taman Sri Muda, Shah Alam",
+  "view": [
+    101.515,
+    3.008,
+    101.55,
+    3.042
+  ],
+  "zoom": 15,
+  "ai_name": "Taman Sri Muda (Seksyen 25) and the neighbouring sections of Shah Alam, Selangor, Malaysia",
+  "news_place": "Taman Sri Muda, Shah Alam",
+  "news_region": "Taman Sri Muda and Shah Alam, Selangor, Malaysia",
+  "council": "MBSA",
+  "notes": {},
+  "history": {
+    "first_year": 1995,
+    "recent_from": 2019,
+    "last_year": 2026,
+    "floods": [
+      {
+        "when": "April 1995",
+        "year": 1995.25,
+        "what": "The area flooded. It was called the worst in 10 years at the time.",
+        "source": "Free Malaysia Today, opinion, 28 Dec 2021"
+      },
+      {
+        "when": "24 to 25 Dec 1995",
+        "year": 1995.98,
+        "what": "Seksyen 25 flooded, water a little over 1 m.",
+        "source": "DOSM newsletter, citing the New Straits Times; Free Malaysia Today, 1 Jan 2022"
+      },
+      {
+        "when": "2001",
+        "year": 2001.5,
+        "account": true,
+        "what": "One resident recalls her house was flooded for four days.",
+        "source": "Free Malaysia Today, 14 Apr 2025, one person's account"
+      },
+      {
+        "when": "17 Oct 2019",
+        "year": 2019.79,
+        "what": "The river rose over the bund and most homes and shops flooded, after more than 150 mm of rain.",
+        "source": "Sinar Harian, 18 Oct 2019"
+      },
+      {
+        "when": "29 Jan 2020",
+        "year": 2020.08,
+        "what": "Flash flood.",
+        "source": "Malaysia Gazette, 29 Jan 2020"
+      },
+      {
+        "when": "18 to 19 Dec 2021",
+        "year": 2021.96,
+        "what": "The big flood. Depth was reported as over six feet, and later as over 4 m. We found no published survey.",
+        "source": "Malaysiakini, 21 Dec 2021; The Star, 6 Aug 2024"
+      },
+      {
+        "when": "24 Jan 2022",
+        "year": 2022.06,
+        "what": "Streets flooded 0.1 to 0.3 m.",
+        "source": "Rosmadi and others 2025, quoting MBSA's flood report for 2022"
+      },
+      {
+        "when": "20 Aug 2022",
+        "year": 2022.63,
+        "what": "Streets flooded 0.1 to 0.3 m.",
+        "source": "Rosmadi and others 2025, quoting MBSA's flood report for 2022"
+      },
+      {
+        "when": "8 Nov 2022",
+        "year": 2022.85,
+        "what": "Streets flooded 0.1 to 0.3 m.",
+        "source": "Rosmadi and others 2025, quoting MBSA's flood report for 2022"
+      },
+      {
+        "when": "11 Apr 2025",
+        "year": 2025.28,
+        "what": "About 700 houses flooded, knee to waist deep (0.5 to 1 m).",
+        "source": "Free Malaysia Today; Utusan Malaysia, 12 Apr 2025"
+      }
+    ]
+  }
+}

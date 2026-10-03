@@ -1,6 +1,18 @@
 /* One block per tab: overview, my business, flood cost, ask AI. */
 
 /* ---------- overview ---------- */
+/* the area chooser and the way in to any point; controls are 44 px tall, and fill the row on a phone */
+.scope-bar { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); margin-bottom: var(--space-4); }
+.scope-area { display: grid; flex: 1 1 16rem; gap: var(--space-1); max-width: 28rem; }
+.scope-label { font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); }
+.scope-bar .field, .scope-bar .btn { min-height: 44px; }
+.scope-pick { display: flex; gap: var(--space-2); }
+.scope-pick .field { flex: 1 1 auto; min-width: 0; }
+.scope-pick .btn { flex: none; }
+.scope-check { flex: none; }
+.scope-hint { flex: 1 1 100%; margin: calc(-1 * var(--space-2)) 0 0; }
+@media (max-width: 520px) { .scope-area, .scope-check { flex: 1 1 100%; max-width: none; } }
+
 .kpis { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
 .kpi { display: grid; align-content: start; gap: 2px; padding: var(--space-4) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
 .kpi-figure { font-size: var(--text-figure); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
@@ -13,8 +25,10 @@
 .kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-2); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
 
 .overview-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
-#map { height: clamp(320px, 58vh, 600px); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
+.map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
+#map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
 .leaflet-container { font-family: var(--font); }
+.leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }   /* zoom buttons: 44 px touch targets */
 .leaflet-tile-pane { filter: grayscale(1) sepia(0.06) contrast(0.85) brightness(1.06); }   /* quiet base, so the water reads */
 .leaflet-popup-content-wrapper { border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 .leaflet-popup-content { margin: var(--space-3) var(--space-4); min-width: 12rem; }
@@ -25,7 +39,72 @@
 .leaflet-tooltip.shelter-label { border: 0; box-shadow: none; background: none; color: var(--dry); font-weight: 700; font-size: var(--text-xs); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
 .leaflet-tooltip.shelter-label::before { display: none; }
 
+/* ---------- checking any point: the cross, the panel, the pin ---------- */
+#map { scroll-margin-top: 4.5rem; }   /* aim mode scrolls the map clear of the sticky tab bar */
+.aim-cross { position: absolute; z-index: 640; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; pointer-events: none; }
+.aim-cross svg { display: block; overflow: visible; }
+.aim-cross .halo { stroke: #fff; stroke-width: 6; stroke-linecap: round; }
+.aim-cross .core { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.aim-cross .dot { fill: var(--accent); stroke: #fff; stroke-width: 2; }
+@media (forced-colors: active) {
+  .aim-cross .halo { stroke: Canvas; }
+  .aim-cross .core { stroke: CanvasText; }
+  .aim-cross .dot { fill: Highlight; stroke: Canvas; }
+}
+.point-pin svg { display: block; filter: drop-shadow(0 2px 2px rgba(13, 27, 42, 0.35)); }
+.point-pin path { fill: var(--accent); stroke: #fff; stroke-width: 1.5; }
+.point-pin circle { fill: #fff; }
+.map-aim-button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 2px solid rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); background: var(--surface); background-clip: padding-box; color: var(--ink); font-weight: 700; font-size: var(--text-sm); cursor: pointer; }
+.map-aim-button:hover { background: var(--surface-sunk); }
+.map-aim-button .icon { color: var(--accent); }
+
+/* the panel sits under the map; on a phone it sticks to the bottom of the screen, as a sheet above the tab bar (pin.js
+   measures it into --tab-bar-h; 64 px and the safe area when it cannot). Sticky, not fixed: the tab panel's entrance
+   animation would make a fixed sheet's box the panel */
+.aim-panel { margin-top: var(--space-3); padding: var(--space-4); background: var(--accent-wash); border: 1px solid var(--line-strong); border-left: 4px solid var(--accent); border-radius: var(--radius-md); }
+.aim-heading { font-size: var(--text-md); font-weight: 700; }
+.aim-help { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
+.aim-status, .aim-panel [role="alert"] { margin-top: var(--space-2); }
+.aim-status { font-size: var(--text-sm); font-weight: 600; }
+.aim-status:empty, .aim-panel [role="alert"]:empty { margin-top: 0; }   /* the live regions stay in the page, and take no room while empty */
+.aim-panel .alert { margin-bottom: 0; background: var(--surface); border: 1px solid #e3b4a6; }   /* the panel is tinted like a danger wash: the alert needs its own box */
+.aim-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.aim-panel .btn { min-height: 44px; }
+.aim-panel .btn:disabled { cursor: not-allowed; }
+.aim-panel .btn.is-busy { opacity: 0.6; cursor: progress; }
+@media (max-width: 720px) {
+  .aim-panel { position: sticky; z-index: 1100; bottom: var(--tab-bar-h, calc(64px + env(safe-area-inset-bottom))); max-height: 60vh; overflow-y: auto; box-shadow: 0 -10px 28px -12px rgba(13, 27, 42, 0.4), var(--shadow-md); }
+  .aim-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aim-actions .btn-primary { grid-column: 1 / -1; }
+  #map { scroll-margin-top: var(--space-4); }
+}
+/* a short landscape screen (a phone on its side): under the map the panel would be below the fold, or, at 720 px wide or
+   less, a sheet over the middle of the map where the cross is. So the map is cut down to fit the screen with the tab bar,
+   and the panel floats over its right-hand side, in a compact form that scrolls inside itself when it must: the cross
+   stays clear of it, and so do the zoom buttons (top left) and the map's credit (bottom right). Below the tab bar (1000)
+   and above what Leaflet draws on the map (700), so the page scrolls under the bar as usual */
+@media (max-height: 480px) and (orientation: landscape) {
+  .map-stage { --map-h: clamp(240px, calc(100vh - 4.75rem), 320px); }
+  #map { scroll-margin-top: 3.25rem; }
+  .aim-panel { position: absolute; z-index: 900; top: var(--space-2); right: var(--space-2); bottom: auto; width: min(19rem, 42%); max-height: calc(var(--map-h) - 1.75rem); margin: 0; padding: var(--space-2) var(--space-3); overflow-y: auto; box-shadow: var(--shadow-md); }
+  .aim-help { font-size: var(--text-xs); line-height: 1.4; }
+  .aim-status, .aim-panel [role="alert"] { margin-top: var(--space-1); }
+  .aim-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); margin-top: var(--space-2); }
+  .aim-actions .btn-primary { grid-column: 1 / -1; }
+  .aim-actions .btn-secondary { padding: 0 var(--space-2); font-size: var(--text-xs); }   /* "Use my location" on one line */
+}
+@media (max-height: 480px) and (orientation: landscape) and (max-width: 720px) {
+  #map { scroll-margin-top: var(--space-4); }   /* the tab bar is at the bottom here, so the map goes to the top of the screen */
+}
+
+/* how the flood squares around a point are doing: said under the map, and nothing when all is well */
+.squares-status > :not(:empty) { margin-top: var(--space-2); }
+.squares-status .alert { margin-bottom: 0; }
+.squares-status .btn { min-height: 44px; }
+.squares-status:focus { outline: none; }   /* it takes focus from the script when a Retry goes, to keep the place in the page */
+
 /* past floods strip */
+.history-none { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .history-lead { margin-top: var(--space-1); font-size: var(--text-sm); }
 .history-lead strong { color: var(--brand); }
 .flood-strip { display: block; width: 100%; margin: var(--space-3) 0 var(--space-2); overflow: visible; }
@@ -39,7 +118,11 @@
 .flood-list { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
 .flood-list .muted { display: block; font-size: var(--text-xs); color: var(--ink-3); }
 
-/* all businesses */
+/* what an area's data says about its businesses and relief centres, shown only when it says something */
+.area-note { margin-top: var(--space-2); }
+.directory .area-note { margin: calc(-1 * var(--space-2)) 0 var(--space-3); }
+
+/* the area's businesses */
 .directory #directory-filter { max-width: 18rem; }
 .directory-head, .directory button { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 4rem); gap: var(--space-2); align-items: center; }
 .directory-head { padding: 0 var(--space-3) var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); text-align: center; }
@@ -76,6 +159,8 @@
 /* ---------- my business ---------- */
 .biz-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
 .biz-head .tags { margin-top: var(--space-2); }
+.biz-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.biz-actions .btn, .biz-head .fact-note .btn-link { min-height: 44px; }   /* touch targets */
 .biz-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
 .risk .scenario { margin-bottom: var(--space-5); }
 .headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }

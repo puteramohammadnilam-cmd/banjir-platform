@@ -1,6 +1,8 @@
 """Run from 11_Platform_Draft:  .venv/bin/python -m pytest -q"""
 import base64
 import json
+import re
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -16,7 +18,7 @@ TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" 
 @pytest.fixture
 def client(monkeypatch):
     main._hits.clear()
-    monkeypatch.setattr(ai, "ask", lambda question, business_id, history: f"echo:{business_id}:{len(history)}")
+    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area: f"echo:{business_id}:{len(history)}")
     monkeypatch.setattr(ai, "read_shop_photo", lambda image, mime: ai.PhotoEstimate(
         is_shop_front=True, floor_height_cm=30, steps_counted=2, stock_at_floor_level="yes",
         confidence="low", reasoning="Two steps."))
@@ -45,7 +47,7 @@ def test_find_business_matches_name_and_ignores_blank():
 def test_no_shelter_is_claimed_without_a_cited_list():
     assert floodtools.town()["shelters"] == []
     assert floodtools.flood_check(KNOWN_ID)["shelter"] is None
-    assert "no relief centre list" in floodtools.town_summary()["shelters"]
+    assert "no relief centre list" in floodtools.area_summary()["shelters"]
 
 
 def test_flood_check_returns_limits_and_reports_unknown_id():
@@ -54,8 +56,8 @@ def test_flood_check_returns_limits_and_reports_unknown_id():
     assert "error" in floodtools.flood_check(["node-1"])
 
 
-def test_town_summary_counts_add_up():
-    summary = floodtools.town_summary()
+def test_area_summary_counts_add_up():
+    summary = floodtools.area_summary()
     for scenario in summary["scenarios"].values():
         assert scenario["businesses_with_water"] + len(scenario["stay_dry"]) == TOTAL
 
@@ -138,7 +140,7 @@ def test_tools_without_arguments_run_when_gemini_sends_no_args(monkeypatch):
     # Gemini may send {"functionCall": {"name": "rain_forecast"}} with no "args" for a tool that takes none. The
     # SDK's own sync function calling skips such a call, and the chat then ends with "Sorry" instead of an answer.
     monkeypatch.setattr(googlemaps, "rain_outlook", lambda lat, lon, hours: {"total_mm": 3.0})
-    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "town_summary"}, "thoughtSignature": "c2ln"},
+    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "area_summary"}, "thoughtSignature": "c2ln"},
                                                           {"functionCall": {"name": "rain_forecast", "id": "c2"}})
                        if n == 1 else gemini_says({"text": "Ok."}))
 
@@ -147,15 +149,15 @@ def test_tools_without_arguments_run_when_gemini_sends_no_args(monkeypatch):
     assert sent[1]["contents"][1]["parts"][0]["thoughtSignature"] == "c2ln"   # Gemini 3 rejects the turn without it
     assert sent[1]["contents"][2]["parts"][1]["functionResponse"]["id"] == "c2"
     answers = tool_answers(sent[1])
-    assert answers["town_summary"]["result"]["total_businesses"] == len(floodtools.premises())
+    assert answers["area_summary"]["result"]["total_businesses"] == len(floodtools.premises())
     assert answers["rain_forecast"]["result"]["total_mm"] == 3.0
 
 
 def test_tool_calls_with_arguments_reach_the_tools(monkeypatch):
     # The SDK's own function calling failed every call with arguments here: floodtools uses string annotations.
-    estimate = {"business_id": KNOWN_ID, "value_at_risk_rm": 5000.0, "shop_size": "", "floor_height_cm": 0,
+    estimate = {"place_id": KNOWN_ID, "value_at_risk_rm": 5000.0, "shop_size": "", "floor_height_cm": 0,
                 "daily_takings_rm": 0, "closed_days": 0, "raise_cm": 0, "measure_cost_rm": 0}
-    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "flood_check", "args": {"business_id": KNOWN_ID}}},
+    sent = fake_gemini(monkeypatch, lambda n: gemini_says({"functionCall": {"name": "flood_check", "args": {"place_id": KNOWN_ID}}},
                                                           {"functionCall": {"name": "damage_estimate", "args": estimate}})
                        if n == 1 else gemini_says({"text": "Ok."}))
 
@@ -246,3 +248,51 @@ def test_photo_over_4mb_gets_the_too_large_message(client):
 ])
 def test_photo_rejects_bad_uploads(client, image, status):
     assert client.post("/api/photo", json={"business_id": KNOWN_ID, "image": image}).status_code == status
+
+
+def test_area_data_is_gzipped_for_a_browser_that_takes_it(client):
+    res = client.get("/api/areas/sri-muda/data", headers={"Accept-Encoding": "gzip"})
+    assert res.headers["content-encoding"] == "gzip" and res.json()["success"] is True
+    assert int(res.headers["content-length"]) < 24_000   # about 16 KB in the plan's checklist 6A
+
+
+# from "./x.js", a bare import "./x.js" and a dynamic import("./x.js")
+IMPORTED = re.compile(r'(?:\bfrom\s*|\bimport\s*\(?\s*)["\']\./([\w-]+\.js)["\']')
+
+
+def test_the_import_pattern_sees_every_form_of_import():
+    text = 'import { a } from "./a.js";\nimport "./b.js";\nconst c = await import("./c.js");\n// see ./d.js'
+    assert IMPORTED.findall(text) == ["a.js", "b.js", "c.js"]
+
+
+def page_modules(entry: Path) -> set[str]:
+    """Every module the page loads from `entry`, following its `from "./x.js"` imports."""
+    seen, todo = set(), [entry.name]
+    while todo:
+        name = todo.pop()
+        if name not in seen:
+            seen.add(name)
+            todo += IMPORTED.findall((entry.parent / name).read_text(encoding="utf-8"))
+    return seen
+
+
+def test_every_start_up_module_is_preloaded_so_the_browser_fetches_them_in_parallel():
+    static = Path(main.__file__).parent / "static"
+    page = (static / "index.html").read_text(encoding="utf-8")
+    preloaded = set(re.findall(r'<link rel="modulepreload" href="js/([\w-]+\.js)">', page))
+    assert preloaded == page_modules(static / "js" / "main.js") - {"main.js"}
+
+
+def test_the_footer_says_what_reaches_osm_google_weather_and_gemini_as_the_code_does():
+    # the numbers are the code's: rain rounded to WEATHER_DECIMALS (0.01 degrees is about 1.1 km), a GPS fix shown at
+    # zoom 17 (pin.js AIM_ZOOM), where one OpenStreetMap tile is about 305 m across at Malaysia's latitudes
+    static = Path(main.__file__).parent / "static"
+    page = re.sub(r"\s+", " ", (static / "index.html").read_text(encoding="utf-8"))
+    assert floodtools.WEATHER_DECIMALS == 2
+    assert re.search(r"const AIM_ZOOM = 17;", (static / "js" / "pin.js").read_text(encoding="utf-8"))
+    for words in ("at street level, where the map goes when you share your location, that is within about 300 m",
+                  "Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m "
+                  "square rounded to about 1 km",
+                  "Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, "
+                  "never its coordinates"):
+        assert words in page, words

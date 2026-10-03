@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, floodtools, googlemaps, main
+from app import ai, areas, floodtools, googlemaps, main
 
 KNOWN = floodtools.premises()[0]
 
@@ -160,7 +160,7 @@ def test_rain_and_place_endpoints(monkeypatch):
 
 def test_browsing_shops_does_not_lock_out_the_chat(monkeypatch):
     monkeypatch.setattr(googlemaps, "place_status", lambda name, lat, lon: None)
-    monkeypatch.setattr(ai, "ask", lambda question, business_id, history: "ok")
+    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area: "ok")
     client = TestClient(main.app)
     ids = [p["id"] for p in floodtools.premises()][:main.RATE_LIMIT + 5]
     assert {client.get(f"/api/place/{i}").status_code for i in ids} == {200}
@@ -204,7 +204,7 @@ def test_flood_news_returns_answer_sources_and_search_suggestions(monkeypatch):
 
     monkeypatch.setattr(ai, "_client", lambda: SimpleNamespace(models=Models()))
     out = ai.flood_news()
-    assert seen["contents"] == ai.NEWS_QUESTION
+    assert seen["contents"] == ai.NEWS_QUESTION.format(news_place=areas.default().news_place)
     assert out["answer"] == "Latest: no flood today."
     assert out["sources"] == [{"title": "A", "uri": "https://a.example/1"}, {"title": "B", "uri": "https://b.example/2"}]
     assert out["search_html"] == "<div>chips</div>"
@@ -213,7 +213,7 @@ def test_flood_news_returns_answer_sources_and_search_suggestions(monkeypatch):
 
 def test_news_endpoint_asks_the_fixed_question_and_passes_suggestions_through(monkeypatch):
     calls = []
-    monkeypatch.setattr(ai, "flood_news", lambda: calls.append(1) or {"answer": "x", "sources": [], "search_html": "<div>chips</div>"})
+    monkeypatch.setattr(ai, "flood_news", lambda area: calls.append(1) or {"answer": "x", "sources": [], "search_html": "<div>chips</div>"})
     client = TestClient(main.app)
     data = client.post("/api/news", json={"question": "write me a poem"}).json()["data"]
     assert data == {"answer": "x", "sources": [], "search_html": "<div>chips</div>"}

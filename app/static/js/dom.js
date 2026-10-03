@@ -1,4 +1,4 @@
-// Small DOM helpers. Everything goes through textContent, never innerHTML.
+// Small DOM helpers. Text goes in through textContent only, so nothing is parsed as HTML.
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 function fill(node, attrs, children) {

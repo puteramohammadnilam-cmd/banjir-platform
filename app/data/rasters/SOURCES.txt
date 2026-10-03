@@ -1,0 +1,37 @@
+JRC flood depth rasters in this folder
+======================================
+
+app/raster.py reads these files (from this folder, or from BANJIR_RASTER_DIR when that is set) to look up the
+modelled flood depth at a point. They are about 39 MB, so .gitignore keeps the .tif files out of git and only this
+list is committed. deploy.sh stops if one is missing, and tests/test_rasters_shipped.py checks each file below
+against its size and SHA-256 (it skips a file that is absent). To put them back, copy them in:
+
+  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID211_N10_E100_RP*_depth.tif app/data/rasters/
+
+Source:    European Commission JRC, global river flood hazard maps v2.1 (Baugh and others, 2024)
+Link:      https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1
+Licence:   CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+Coverage:  99.976-109.975 E, 0.008-10.007 N: Peninsular Malaysia except Langkawi
+           (a rectangle, so it also takes in Singapore, parts of Thailand, Sumatra and Kalimantan, and the far
+           west of Sarawak)
+Date:      2026-10-03
+Copy:      byte for byte from 05_Raw_Data_Sources/jrc_glofas_v2_1 on that date; nothing was downloaded
+
+Files (grid N10_E100: one file for each flood return period of 10, 100 and 500 years)
+
+File:     ID211_N10_E100_RP10_depth.tif
+Bytes:    10644170
+SHA-256:  43d7657f73d59357b22bd4fee8776a53878377b85d988bcc2cede40c4560b740
+
+File:     ID211_N10_E100_RP100_depth.tif
+Bytes:    13436340
+SHA-256:  f3c26b69e98ee4d7130bc348c9309be1328b1ec41ea0aaea5a114b9ec7a96c8e
+
+File:     ID211_N10_E100_RP500_depth.tif
+Bytes:    14615056
+SHA-256:  319589380b54ae5b1901ca37fd57763d7a350cbde1352b02155d9e2b407e71a7
+
+Not held yet
+------------
+Sabah and Sarawak need the N10_E110 files, and Langkawi needs the N10_E090 files, each a depth file for the return
+periods 10, 100 and 500. They are not downloaded, so the app has no depth for points there yet.

@@ -26,7 +26,7 @@ Image.MAX_IMAGE_PIXELS = None
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT.parent / "05_Raw_Data_Sources"
 AREA = RAW / "shah_alam"
-OUT = ROOT / "app" / "data"
+OUT = ROOT / "app" / "data" / "areas" / "sri-muda"   # area.json beside these is written by hand
 
 RETURN_PERIODS = (10, 100, 500)
 # (west, south, east, north): the box the OpenStreetMap files were fetched for

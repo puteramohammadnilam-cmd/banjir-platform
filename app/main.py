@@ -1,4 +1,10 @@
-"""HTTP layer: serves the page, the data and two AI endpoints."""
+"""HTTP layer: serves the page, the data, points on the flood model and the AI endpoints.
+
+A point (a pin or a GPS fix) arrives only in a POST body and is never logged: the page snaps it to its 90 m square
+before sending, and app/places.py snaps it again. Afterwards the page names it only by the square's id. The flood squares
+around a covered point come back in the same answer, so the page asks for no block of squares by URL: a URL naming a
+block would tell every server and proxy log the area, about 2 km, that a person is looking at.
+"""
 from __future__ import annotations
 
 import base64
@@ -15,12 +21,13 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from fastapi import Depends, FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.exceptions import RequestValidationError  # noqa: E402
+from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
-from pydantic import BaseModel, Field, StringConstraints  # noqa: E402
+from pydantic import AliasChoices, BaseModel, Field, StringConstraints  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, floodtools, googlemaps  # noqa: E402
+from . import ai, areas, floodtools, googlemaps, places, raster  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -33,8 +40,13 @@ PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
 RATE_LIMIT = 20             # chat, photo and news: each one is a Gemini call
 MAPS_RATE_LIMIT = 60        # rain and open-or-closed lookups: cheap, and fired as visitors click round the map
 CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no Google call
+GEO_RATE_LIMIT = 120        # point checks: one for each pin dropped or GPS fix
+MAP_RATE_LIMIT = 1200       # the flood model's coverage: asked for once per visit, and again after a failure
 RATE_WINDOW_S = 300
+GZIP_MIN_BYTES = 1024
+GZIP_LEVEL = 6               # level 9 gains 2% on the area data for over twice the time, on the event loop
 MAX_TRACKED_CLIENTS = 10_000
+MAX_ID_CHARS = 40
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'self'; script-src 'self'; connect-src 'self'; "
@@ -45,12 +57,36 @@ SECURITY_HEADERS = {
     ),
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    # Referer holds the origin only, even on requests to this site, so no request repeats the page's address in a log;
+    # OSM's tile servers still get the origin
+    "Referrer-Policy": "strict-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",   # GPS for this page, never for a frame
 }
+NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point")   # Google results may not be cached; a point is personal
+POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/news", "/api/point")
+# business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
+# {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
+PLACE_NAMES = AliasChoices("place", "business_id")
+POINT_WORDS = "Please check the location and try again."
+NOT_COVERED_WORDS = "That point is not covered by the flood model in this build."
+MODEL_DOWN_WORDS = "Could not read the flood model just now. Try again."
+QUESTION_WORDS = f"Please check your input and try again. Questions can be up to {MAX_QUESTION_CHARS} characters."
+VALIDATION_WORDS = (   # (path prefix, message) for a request body or path that does not fit; else QUESTION_WORDS
+    ("/api/estimate", "Please check the figures. Use plain numbers, such as 50000."),
+    ("/api/point", POINT_WORDS),
+    ("/api/news", "Please reload the page and ask for the news again."),
+    ("/api/photo", "The photo could not be sent. Please choose it again."),
+)
+PLACE_ERRORS = {"malformed": (422, POINT_WORDS), "unknown": (404, "Unknown business.")}   # else NOT_COVERED_WORDS
+# FastAPI's 400 for a body json.loads cannot read without a JSONDecodeError: bad UTF-8, an integer of more than 4,300
+# digits, nesting too deep. It is answered like any body that does not fit, in VALIDATION_WORDS.
+BODY_UNREADABLE = "There was an error parsing the body"
 
 app = FastAPI(title="Banjir shop flood check", docs_url=None, redoc_url=None, openapi_url=None)
+# JSON and scripts shrink to a seventh or so (a point's answer: 71 KB to under 10 KB); short answers are not worth it
+app.add_middleware(GZipMiddleware, minimum_size=GZIP_MIN_BYTES, compresslevel=GZIP_LEVEL)
 _hits: dict[str, deque[float]] = defaultdict(deque)
+areas.preload()   # a malformed area file stops the server here, at start-up, not in the middle of a request
 
 
 class Turn(BaseModel):
@@ -60,18 +96,24 @@ class Turn(BaseModel):
 
 class AskIn(BaseModel):
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_QUESTION_CHARS)]
-    business_id: str | None = Field(default=None, max_length=40)
+    place: str | None = Field(default=None, max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
+    area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
     history: list[Turn] = Field(default_factory=list, max_length=MAX_TURNS)
 
 
+class NewsIn(BaseModel):
+    """The news question is fixed: only the area it is about can be chosen. Other fields are ignored."""
+    area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
+
+
 class PhotoIn(BaseModel):
-    business_id: str = Field(max_length=40)
+    place: str = Field(max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
     image: str = Field(min_length=32, description="data: URL, base64. Size is capped by MAX_BODY_BYTES and decode_photo.")
 
 
 class EstimateIn(BaseModel):
-    """The owner's own figures. Ranges and the rules between fields are checked in one place: floodtools.damage_estimate."""
-    business_id: str = Field(max_length=40)
+    """The owner's own figures. Ranges and the rules between fields are checked in one place: floodtools.estimate_for."""
+    place: str = Field(max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
     value_at_risk_rm: float = 0
     shop_size: str = Field(default="", max_length=20)
     floor_height_cm: float = 0
@@ -79,6 +121,13 @@ class EstimateIn(BaseModel):
     closed_days: float = 0
     raise_cm: float = 0
     measure_cost_rm: float = 0
+
+
+class PointIn(BaseModel):
+    """A pin or a GPS fix, already snapped by the page. Numbers only (no text, no NaN or infinity), in range."""
+    lat: float = Field(ge=-90, le=90, strict=True, allow_inf_nan=False)
+    lon: float = Field(ge=-180, le=180, strict=True, allow_inf_nan=False)
+    source: Literal["pin", "gps"]
 
 
 def ok(data: dict) -> dict:
@@ -121,11 +170,54 @@ def calc_limit(request: Request) -> None:
     _limit(request, "calc", CALC_RATE_LIMIT)
 
 
+def geo_limit(request: Request) -> None:
+    _limit(request, "geo", GEO_RATE_LIMIT)
+
+
+def map_limit(request: Request) -> None:
+    _limit(request, "map", MAP_RATE_LIMIT)
+
+
+def known_area(area_id: str | None) -> areas.Area:
+    """The area with this id; the default area when none is given."""
+    if not area_id:
+        return areas.default()
+    area = areas.get(area_id)
+    if area is None:
+        raise HTTPException(404, "Unknown area.")
+    return area
+
+
 def known_business(business_id: str) -> dict:
-    premise = floodtools.get(business_id)
-    if premise is None:
+    """A business from any area."""
+    found = areas.business(business_id)
+    if found is None:
         raise HTTPException(404, "Unknown business.")
-    return premise
+    return found[0]
+
+
+def known_place(ref: str) -> dict:
+    """A mapped business from any area, or a point the flood model covers (places.resolve). 404 for an unknown
+    business or an uncovered point; 422 for a point id not in the exact form the server gives out."""
+    try:
+        return places.resolve(ref)
+    except places.PlaceError as error:
+        status, words = PLACE_ERRORS.get(error.reason, (404, NOT_COVERED_WORDS))
+        raise HTTPException(status, words) from None
+
+
+def question_area(area_id: str | None, place_ref: str | None) -> areas.Area | None:
+    """The area a chat question is about: the selected place's, else the one asked for, else the default. A selected
+    business must be in the area asked for. A point brings its own area, None outside the listed areas, since the
+    page's area need not hold it."""
+    asked = known_area(area_id) if area_id else None
+    if not place_ref:
+        return asked or areas.default()
+    place = known_place(place_ref)
+    area = places.area_of(place)
+    if not place["is_point"] and asked is not None and area.id != asked.id:
+        raise HTTPException(404, "Unknown business.")
+    return area
 
 
 def decode_photo(data_url: str) -> tuple[bytes, str]:
@@ -148,6 +240,8 @@ def call_ai(fn, *args):
         return fn(*args)
     except ai.NotConfigured as exc:
         raise HTTPException(503, "The AI assistant is not set up yet. Add a Gemini key to .env.") from exc
+    except raster.RasterError:
+        raise   # damaged flood model files are model_unreadable's 503, not a failure of the AI provider
     except Exception as exc:  # provider SDK raises many types; all mean "upstream failed"
         log.exception("AI call failed: %s", fn.__name__)
         raise HTTPException(502, "The AI assistant could not answer just now. Please try again.") from exc
@@ -162,49 +256,102 @@ async def limits_and_headers(request: Request, call_next):
     else:
         response = await call_next(request)
     response.headers.update(SECURITY_HEADERS)
+    if request.url.path.startswith(NO_STORE_PATHS):
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
 @app.exception_handler(StarletteHTTPException)   # also covers 404s raised by the static mount
-async def http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
-    return JSONResponse({"success": False, "data": None, "error": exc.detail}, status_code=exc.status_code)
+async def http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    if exc.status_code == 400 and exc.detail == BODY_UNREADABLE:
+        return body_does_not_fit(request.url.path)
+    return JSONResponse({"success": False, "data": None, "error": exc.detail}, status_code=exc.status_code,
+                        headers=exc.headers)
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_error(request: Request, __: RequestValidationError) -> JSONResponse:
-    if request.url.path == "/api/estimate":
-        message = "Please check the figures. Use plain numbers, such as 50000."
-    else:
-        message = f"Please check your input and try again. Questions can be up to {MAX_QUESTION_CHARS} characters."
+    return body_does_not_fit(request.url.path)
+
+
+def body_does_not_fit(path: str) -> JSONResponse:
+    """422 in the endpoint's plain words. The details are neither sent nor logged: they would repeat what was posted,
+    such as a point."""
+    message = next((words for prefix, words in VALIDATION_WORDS if path.startswith(prefix)), QUESTION_WORDS)
     return JSONResponse({"success": False, "data": None, "error": message}, status_code=422)
+
+
+@app.exception_handler(raster.RasterError)
+async def model_unreadable(_: Request, exc: raster.RasterError) -> JSONResponse:
+    log.error("The flood model files could not be read: %s", exc)   # names a file and a tag, never a point
+    return JSONResponse({"success": False, "data": None, "error": MODEL_DOWN_WORDS}, status_code=503)
+
+
+def post_only() -> None:
+    """A GET to an endpoint that takes a POST: 405, where the page's static mount would otherwise answer 404."""
+    raise HTTPException(405, "Method Not Allowed", headers={"Allow": "POST"})
+
+
+for _path in POST_ONLY:
+    app.add_api_route(_path, post_only, methods=["GET"], include_in_schema=False)
+
+
+def area_data(area: areas.Area) -> dict:
+    return {"premises": areas.premises(area.id), "town": areas.town(area.id), "limits": floodtools.LIMITS}
+
+
+@app.get("/api/areas")
+def area_list() -> dict:
+    return ok({"default": areas.default().id, "areas": [areas.summary(area) for area in areas.load_all()]})
+
+
+@app.get("/api/areas/{area_id}/data")
+def one_area(area_id: str) -> dict:
+    area = known_area(area_id)
+    return ok({"area": areas.details(area), **area_data(area)})
 
 
 @app.get("/api/data")
 def data() -> dict:
-    return ok({"premises": floodtools.premises(), "town": floodtools.town(), "limits": floodtools.LIMITS})
+    """The default area, as /api/areas/{id}/data gives it: a page with no area in its link asks for this at once, beside
+    /api/areas, instead of waiting for the list to learn the default's id."""
+    return one_area(areas.default().id)
 
 
 @app.get("/api/status")
 def status() -> dict:
-    return ok({"ai_ready": ai.is_configured(), "model": ai.MODEL, "maps_ready": googlemaps.is_configured()})
+    return ok({"ai_ready": ai.is_configured(), "model": ai.MODEL, "maps_ready": googlemaps.is_configured(),
+               "points_ready": places.points_ready()})
+
+
+@app.post("/api/point", dependencies=[Depends(geo_limit)])
+def check_point(body: PointIn) -> dict:
+    """{coverage, region, place} for a pin or a GPS fix; a covered one also has the 2 x 2 blocks of squares around it
+    (`blocks`, and their wet squares as `cells`, places.neighbourhood). A POST, so the point never sits in a URL or a
+    log, and neither do the blocks, which name the area."""
+    return ok(places.check(body.lat, body.lon))
+
+
+@app.get("/api/coverage", dependencies=[Depends(map_limit)])
+def coverage() -> dict:
+    return ok(places.coverage())
 
 
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])
 def ask(body: AskIn) -> dict:
-    if body.business_id:
-        known_business(body.business_id)
+    area = question_area(body.area_id, body.place)
     history = [turn.model_dump() for turn in body.history]
-    return ok({"answer": call_ai(ai.ask, body.question, body.business_id, history)})
+    return ok({"answer": call_ai(ai.ask, body.question, body.place, history, area)})
 
 
 @app.post("/api/photo", dependencies=[Depends(rate_limit)])
 def photo(body: PhotoIn) -> dict:
-    premise = known_business(body.business_id)
+    place = known_place(body.place)
     raw, mime = decode_photo(body.image)
     estimate = call_ai(ai.read_shop_photo, raw, mime)
     floor_m = estimate.floor_height_cm / 100
     above_floor = {rp: (None if depth is None else round(max(0.0, depth - floor_m), 2))
-                   for rp, depth in premise["depth_m"].items()}
+                   for rp, depth in place["depth_m"].items()}
     return ok({"estimate": estimate.model_dump(), "water_above_floor_m": above_floor})
 
 
@@ -226,8 +373,8 @@ def for_people(message: str) -> str:
 
 @app.post("/api/estimate", dependencies=[Depends(calc_limit)])
 def estimate(body: EstimateIn) -> dict:
-    known_business(body.business_id)
-    result = floodtools.damage_estimate(**body.model_dump())
+    place = known_place(body.place)
+    result = floodtools.estimate_for(place, **body.model_dump(exclude={"place"}))
     if "error" in result:
         raise HTTPException(422, for_people(result["error"]))
     return ok(result)
@@ -243,16 +390,19 @@ def call_maps(fn, *args):
 
 
 @app.get("/api/rain", dependencies=[Depends(maps_limit)])
-def rain() -> dict:
+def rain(area: str | None = None) -> dict:
+    lat, lon = known_area(area).centre()
     if not googlemaps.is_configured():
         return ok({"configured": False, "rain": None})
-    return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, *floodtools.area_centre(),
-                                                     floodtools.RAIN_HOURS)})
+    return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
 
 
-@app.get("/api/place/{business_id}", dependencies=[Depends(maps_limit)])
-def place(business_id: str) -> dict:
-    premise = known_business(business_id)
+@app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])
+def listing(place_id: str) -> dict:
+    """How Google Maps lists a mapped business. Never for a point: it is not a business, and it does not go to Google."""
+    if places.is_point_id(place_id):
+        raise HTTPException(404, "Only mapped businesses have a Google Maps listing.")
+    premise = known_business(place_id)
     if not googlemaps.is_configured():
         return ok({"configured": False, "place": None})
     return ok({"configured": True,
@@ -260,11 +410,12 @@ def place(business_id: str) -> dict:
 
 
 @app.post("/api/news", dependencies=[Depends(rate_limit)])
-def news() -> dict:
-    # ponytail: a request body, if any, is ignored on purpose: the question is fixed in ai.NEWS_QUESTION.
+def news(body: NewsIn | None = None) -> dict:
+    # ponytail: only the area comes from the request; the question is fixed in ai.NEWS_QUESTION.
     # Grounded results may not be cached or framed (Gemini API terms), so each press is one Gemini call,
     # bounded by the per-visitor limit and the quotas set in Google Cloud.
-    return ok(call_ai(ai.flood_news))
+    area = known_area(body.area_id if body else None)
+    return ok(call_ai(ai.flood_news, area))
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

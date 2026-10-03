@@ -1,7 +1,8 @@
-// The "Area overview" tab: headline figures, the map, past floods and every business in one list.
+// The "Area overview" tab: the area chooser, headline figures, the map, past floods and the area's businesses in one list.
 import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker } from "./dom.js";
 import { floodCounts, renderHistory } from "./history.js";
 import { createMap } from "./map.js";
+import { createScopeBar } from "./scope.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -74,18 +75,42 @@ function createDirectory(premises, onOpen) {
   return (selectedId) => { for (const row of rows) row.button.setAttribute("aria-current", String(row.id === selectedId)); };
 }
 
-export function createOverview({ premises, town, onSelect, onOpen, onPick }) {
-  const map = createMap($("map"), town, premises, { onSelect, onOpen });
+/** The "Floods recorded" tile: the area's own counts, or a dash when no flood record has been collected for it. */
+function floodTileText(history) {
+  const counts = floodCounts(history);
+  if (!counts) return ["–", "Floods recorded", "No flood record collected yet"];
+  return [String(counts.recent), `Floods recorded since ${counts.recentFrom}`, `${counts.dated} since ${counts.since}, in the sources we checked`];
+}
+
+function createKpis(history) {
+  const tiles = { wet: kpiTile("wave", { hero: true, bar: true }), depth: kpiTile("store"), flood: kpiTile("clock"), rain: kpiTile("rain") };
+  tiles.flood.set(...floodTileText(history));
+  $("kpis").replaceChildren(tiles.wet.node, tiles.depth.node, tiles.flood.node, tiles.rain.node);
+  return tiles;
+}
+
+const setNote = (element, text) => { element.textContent = text ?? ""; element.hidden = !text; };
+
+/** The page's words that name the area come from its config: the map's and the list's labels, and what the area's
+ *  data notes say about where its businesses and relief centres come from (an area may have no notes). */
+function renderAreaLabels(area) {
+  $("map").setAttribute("aria-label", `Map of ${area.display_name}, with modelled flood depth at each business`);
+  $("directory-heading").textContent = `Businesses in ${area.name}`;
+  setNote($("directory-note"), area.notes?.businesses);
+  setNote($("map-note"), area.notes?.shelters);
+}
+
+/** `area` is the page's area config (GET /api/areas/{id}/data) and `areas` the listed areas for the chooser.
+ *  onArea(areaId) is for another area's page; onCheckPoint(button) opens the pin and GPS flow (pin.js), from the scope
+ *  bar's button and from the map's own, and is null when this build cannot check points. */
+export function createOverview({ area, areas, premises, town, onSelect, onOpen, onPick, onArea, onCheckPoint = null }) {
+  createScopeBar($("scope"), { areas, areaId: area.id, onArea, onCheckPoint });
+  renderAreaLabels(area);
+  const map = createMap($("map"), area, town, premises, { onSelect, onOpen, onCheckPoint });
   const markSelected = createDirectory(premises, onOpen);
   renderLegend($("legend"), town.shelters.length > 0);
-  renderHistory($("history"));
-  const { dated, recent, recentFrom } = floodCounts();
-  const wetTile = kpiTile("wave", { hero: true, bar: true });
-  const depthTile = kpiTile("store");
-  const floodTile = kpiTile("clock");
-  const rainTile = kpiTile("rain");
-  floodTile.set(String(recent), `Floods recorded since ${recentFrom}`, `${dated} since 1995, in the sources we checked`);
-  $("kpis").replaceChildren(wetTile.node, depthTile.node, floodTile.node, rainTile.node);
+  renderHistory($("history"), area);
+  const tiles = createKpis(area.history);
   let shown = {};
 
   return {
@@ -94,11 +119,12 @@ export function createOverview({ premises, town, onSelect, onOpen, onPick }) {
     render({ rp, selectedId, rain }) {
       if (rp !== shown.rp) {
         const wet = premises.filter((p) => band(p.depth_m[rp]));
-        wetTile.set(`${wet.length} of ${premises.length}`, "businesses get water", `In a 1 in ${rp} years flood, in the model`, wet.length / premises.length);
-        depthTile.set(wet.length ? `${median(wet.map((p) => p.depth_m[rp])).toFixed(1)} m` : "–", "Typical depth at a wet business", "Half are deeper, in the model");
+        const share = premises.length ? wet.length / premises.length : 0;
+        tiles.wet.set(`${wet.length} of ${premises.length}`, `businesses in ${area.name} get water`, `In a 1 in ${rp} years flood, in the model`, share);
+        tiles.depth.set(wet.length ? `${median(wet.map((p) => p.depth_m[rp])).toFixed(1)} m` : "–", "Typical depth at a wet business", "Half are deeper, in the model");
         renderPicker(document.querySelector("[data-scenario]"), rp, onPick);
       }
-      if (rain !== shown.rain) rainTile.set(...rainText(rain));
+      if (rain !== shown.rain) tiles.rain.set(...rainText(rain));
       if (rp !== shown.rp || selectedId !== shown.selectedId) {
         map.show(rp, selectedId);
         markSelected(selectedId);

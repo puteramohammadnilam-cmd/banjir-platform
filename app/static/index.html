@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Banjir Check · flood risk for shops in Taman Sri Muda, Shah Alam</title>
-  <meta name="description" content="See how deep a modelled flood gets at each business around Taman Sri Muda, Shah Alam, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
+  <title>Banjir Check · modelled flood depth for shops and businesses</title>
+  <meta name="description" content="See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -12,6 +12,23 @@
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/app.css">
   <link rel="stylesheet" href="styles/views.css">
+  <!-- every module main.js loads, so the browser fetches them side by side and not one import at a time -->
+  <link rel="modulepreload" href="js/api.js">
+  <link rel="modulepreload" href="js/dom.js">
+  <link rel="modulepreload" href="js/place.js">
+  <link rel="modulepreload" href="js/cells.js">
+  <link rel="modulepreload" href="js/map.js">
+  <link rel="modulepreload" href="js/scope.js">
+  <link rel="modulepreload" href="js/history.js">
+  <link rel="modulepreload" href="js/overview.js">
+  <link rel="modulepreload" href="js/gauge.js">
+  <link rel="modulepreload" href="js/point.js">
+  <link rel="modulepreload" href="js/card.js">
+  <link rel="modulepreload" href="js/chat.js">
+  <link rel="modulepreload" href="js/cost.js">
+  <link rel="modulepreload" href="js/pin-words.js">
+  <link rel="modulepreload" href="js/pin-panel.js">
+  <link rel="modulepreload" href="js/pin.js">
 </head>
 <body>
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -35,7 +52,7 @@
       <span class="brand-mark"><svg class="icon"><use href="#i-wave"/></svg></span>
       <span class="brand-name">Banjir Check</span>
     </a>
-    <span class="place">Taman Sri Muda · Shah Alam</span>
+    <span class="place" id="area-name" hidden></span>
     <form class="finder" id="finder" role="search">
       <label class="visually-hidden" for="finder-input">Find your business</label>
       <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
@@ -53,9 +70,12 @@
   </nav>
 
   <main>
+    <p class="status-line muted small" id="loading" role="status"></p>
     <p class="alert" id="load-error" role="alert" hidden></p>
+    <p class="alert" id="link-note" role="alert" hidden></p>
 
     <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
+      <div class="scope-bar" id="scope"></div>
       <div class="kpis" id="kpis" aria-live="polite"></div>
       <div class="overview-grid">
         <section class="surface map-surface" aria-labelledby="map-heading">
@@ -66,17 +86,21 @@
             </div>
             <div class="scenario-slot" data-scenario></div>
           </div>
-          <div id="map" role="application" aria-label="Map of Taman Sri Muda, Shah Alam, with modelled flood depth at each business"></div>
-          <ul class="legend" id="legend" aria-label="Water depth at each business"></ul>
+          <div class="map-stage">
+            <div id="map" role="application" aria-label="Map with modelled flood depth at each business"></div>
+            <ul class="legend" id="legend" aria-label="Water depth at each business"></ul>
+            <p class="fineprint area-note" id="map-note" hidden></p>
+          </div>
         </section>
         <section class="surface" id="history" aria-labelledby="history-heading"></section>
       </div>
       <section class="surface directory" aria-labelledby="directory-heading">
         <div class="surface-head">
-          <h2 id="directory-heading">All businesses</h2>
+          <h2 id="directory-heading">Businesses</h2>
           <label class="visually-hidden" for="directory-filter">Filter businesses</label>
           <input id="directory-filter" class="field" type="search" placeholder="Filter by name or type" autocomplete="off">
         </div>
+        <p class="fineprint area-note" id="directory-note" hidden></p>
         <div class="directory-head" aria-hidden="true"><span>Business</span><span>1 in 10</span><span>1 in 100</span><span>1 in 500</span></div>
         <ol id="directory"></ol>
         <p class="muted small" id="directory-empty" hidden>No business matches that filter.</p>
@@ -123,6 +147,7 @@
     <h2>About this data</h2>
     <p><strong>This is a test build.</strong> Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</p>
     <p>Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
+    <p>Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates.</p>
     <p>River flood forecasts: <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer">Google Flood Hub</a>. Live river levels and warnings: <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer">JPS Public Infobanjir</a>. In an emergency call 999.</p>
     <p>Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
   </footer>

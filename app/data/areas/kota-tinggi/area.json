@@ -1,0 +1,21 @@
+{
+  "id": "kota-tinggi",
+  "name": "Kota Tinggi",
+  "display_name": "Kota Tinggi town centre, Johor",
+  "view": [
+    103.89,
+    1.7215,
+    103.911,
+    1.7475
+  ],
+  "zoom": 15,
+  "ai_name": "Kota Tinggi town centre, Johor, Malaysia",
+  "news_place": "Kota Tinggi, Johor",
+  "news_region": "Kota Tinggi, Johor, Malaysia",
+  "council": null,
+  "notes": {
+    "businesses": "27 shops and eateries picked from OpenStreetMap for the earlier report",
+    "shelters": "Named in news reports, located on OpenStreetMap. Not an official list."
+  },
+  "history": null
+}

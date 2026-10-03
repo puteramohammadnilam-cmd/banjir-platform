@@ -76,6 +76,8 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 
 .alert { margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--danger-wash); color: #7a2a12; font-weight: 600; font-size: var(--text-sm); }
 .alert-inline { margin-bottom: var(--space-3); }
+.alert .btn { margin-left: var(--space-2); }
+.status-line:not(:empty) { margin-bottom: var(--space-4); }   /* empty, it takes no room, so a quick start looks unchanged */
 
 /* ---------- controls ---------- */
 .btn {
@@ -119,6 +121,14 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .band-1 { background: var(--band-1); } .band-2 { background: var(--band-2); } .band-3 { background: var(--band-3); }
 .band-4 { background: var(--band-4); } .band-5 { background: var(--band-5); }
 .swatch-dry { background: var(--surface); }
+
+/* ---------- dialogs: the native <dialog>, opened with showModal ---------- */
+.dialog { width: min(28rem, calc(100% - 2 * var(--gutter))); max-height: calc(100% - 2 * var(--gutter)); padding: var(--space-5); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-md); }
+.dialog::backdrop { background: rgba(13, 27, 42, 0.55); }
+.dialog:focus-visible { outline: none; }   /* it takes focus itself, to be read first: the dialog's edge is plain enough */
+.dialog h2 { margin-bottom: var(--space-2); }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
+.dialog .btn { min-height: 44px; }
 
 /* ---------- footer ---------- */
 .about { max-width: var(--content-max); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-10); display: grid; gap: var(--space-2); font-size: var(--text-xs); color: var(--ink-2); border-top: 1px solid var(--line); }

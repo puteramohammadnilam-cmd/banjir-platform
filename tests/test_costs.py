@@ -244,7 +244,8 @@ def test_estimate_endpoint_returns_the_tool_result(client):
     body = client.post("/api/estimate", json=estimate_body()).json()
 
     assert body["success"] is True
-    assert body["data"] == floodtools.damage_estimate(**estimate_body())
+    figures = {key: value for key, value in estimate_body().items() if key != "business_id"}
+    assert body["data"] == floodtools.damage_estimate(WET["id"], **figures)   # the tool takes a place id
 
 
 def test_estimate_endpoint_fills_missing_fields_with_zero(client):
