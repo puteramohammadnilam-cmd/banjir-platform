@@ -97,7 +97,7 @@ function renderAreaLabels(area) {
   $("map").setAttribute("aria-label", `Map of ${area.display_name}, with modelled flood depth at each business`);
   $("directory-heading").textContent = `Businesses in ${area.name}`;
   setNote($("directory-note"), area.notes?.businesses);
-  setNote($("map-note"), area.notes?.shelters);
+  setNote($("map-note"), [area.notes?.shelters, area.notes?.depths].filter(Boolean).join(" "));
 }
 
 /** `area` is the page's area config (GET /api/areas/{id}/data) and `areas` the listed areas for the chooser.

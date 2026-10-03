@@ -1,0 +1,4110 @@
+[
+ {
+  "id": "node-7016175186",
+  "name": "A&W Restaurant",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": false,
+  "lat": 5.3240728,
+  "lon": 103.1540548,
+  "map_last_edited": "2024-02-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12570540823",
+  "name": "Aijaa Kitchen",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3310276,
+  "lon": 103.1356419,
+  "map_last_edited": "2025-02-09",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7153877388",
+  "name": "Aryaf Hadramout Great kebabs",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3353962,
+  "lon": 103.1382341,
+  "map_last_edited": "2020-01-23",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 4,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12459852878",
+  "name": "Ayam Gepuk",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.329248,
+  "lon": 103.1368509,
+  "map_last_edited": "2024-12-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-13463433756",
+  "name": "Ayam Gepuk Ibuk Bapak",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3318184,
+  "lon": 103.1483756,
+  "map_last_edited": "2026-01-18",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "Jalan Sultan Zainal Abidin",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599580724",
+  "name": "Ayam Penyet - Ap",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3309051,
+  "lon": 103.1365044,
+  "map_last_edited": "2018-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5598320425",
+  "name": "Ayamas (fried chicken)",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": false,
+  "lat": 5.3312622,
+  "lon": 103.1353679,
+  "map_last_edited": "2018-05-05",
+  "depth_m": {
+   "10": null,
+   "100": 0.15,
+   "500": 1.04
+  },
+  "road": {
+   "name": "Jalan Banggol",
+   "kind": "unclassified",
+   "distance_m": 5,
+   "depth_m": {
+    "10": null,
+    "100": 0.15,
+    "500": 1.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12570540822",
+  "name": "Ayin Dine",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3310608,
+  "lon": 103.1356538,
+  "map_last_edited": "2025-02-09",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6759214185",
+  "name": "Chuk Lim Vege",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3261286,
+  "lon": 103.1335903,
+  "map_last_edited": "2026-07-24",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Syed Zain",
+   "kind": "tertiary",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887418",
+  "name": "Cik Bella Station",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3319904,
+  "lon": 103.1383318,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12906018952",
+  "name": "D Tulips",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3307549,
+  "lon": 103.1372209,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6432486797",
+  "name": "Domino's",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3289919,
+  "lon": 103.1353724,
+  "map_last_edited": "2020-09-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894182",
+  "name": "D’Verandah",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.333089,
+  "lon": 103.1381794,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": 1.15,
+    "500": 2.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599579422",
+  "name": "Gloria Jeans's Coffees",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3309385,
+  "lon": 103.1364433,
+  "map_last_edited": "2018-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6596404787",
+  "name": "Golden Dragon",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3324075,
+  "lon": 103.1326509,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453603",
+  "name": "KFC",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3330915,
+  "lon": 103.1370887,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary_link",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4294596789",
+  "name": "KFC",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3310052,
+  "lon": 103.133015,
+  "map_last_edited": "2020-02-01",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Sultan Ismail",
+   "kind": "secondary",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-13273762176",
+  "name": "KFC",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3248306,
+  "lon": 103.1525796,
+  "map_last_edited": "2025-11-01",
+  "depth_m": {
+   "10": 5.25,
+   "100": 6.77,
+   "500": 7.25
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 24,
+   "depth_m": {
+    "10": 5.25,
+    "100": 6.77,
+    "500": 7.25
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599832522",
+  "name": "Kampung Cina Cafe",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3328731,
+  "lon": 103.1326379,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 3,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6755906086",
+  "name": "MORI Tea and Dining Room",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3330603,
+  "lon": 103.1328555,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4759082822",
+  "name": "Madam Bee's Kitchen",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3327657,
+  "lon": 103.1325959,
+  "map_last_edited": "2018-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10795522501",
+  "name": "McDonald's",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3183535,
+  "lon": 103.1540753,
+  "map_last_edited": "2023-06-18",
+  "depth_m": {
+   "10": null,
+   "100": 1.24,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": 1.24,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-472267551",
+  "name": "Medan Selera Batu Buruk",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3200018,
+  "lon": 103.1541123,
+  "map_last_edited": "2024-02-15",
+  "depth_m": {
+   "10": null,
+   "100": 0.24,
+   "500": 1.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 21,
+   "depth_m": {
+    "10": null,
+    "100": 0.24,
+    "500": 1.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-472267552",
+  "name": "Medan Selera Batu Buruk",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3203077,
+  "lon": 103.1546446,
+  "map_last_edited": "2017-02-05",
+  "depth_m": {
+   "10": null,
+   "100": 3.04,
+   "500": 3.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-577269033",
+  "name": "Medan Selera Tanjung Waterfront",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.338442,
+  "lon": 103.1421929,
+  "map_last_edited": "2024-02-10",
+  "depth_m": {
+   "10": 5.1,
+   "100": 7.15,
+   "500": 8.04
+  },
+  "road": {
+   "name": "Jalan Astaka",
+   "kind": "service",
+   "distance_m": 91,
+   "depth_m": {
+    "10": 0.2,
+    "100": 2.25,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12570540814",
+  "name": "Mee Champa 2",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.331097,
+  "lon": 103.1356676,
+  "map_last_edited": "2025-02-09",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4839410823",
+  "name": "Mei Fong Curry Noodles",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3328655,
+  "lon": 103.1328157,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1264895169",
+  "name": "Mes Pegawai Polis Di Raja Malaysia (PDRM)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3166298,
+  "lon": 103.1429939,
+  "map_last_edited": "2026-01-02",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 21,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12570540836",
+  "name": "Nasi Dagang Atas Tol",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3308236,
+  "lon": 103.1359008,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5640958424",
+  "name": "Nasi Dagang Vintage",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.336684,
+  "lon": 103.1395638,
+  "map_last_edited": "2024-02-10",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11739104914",
+  "name": "Nasi Kukus Sempoi Alias 2",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3136894,
+  "lon": 103.1406435,
+  "map_last_edited": "2024-03-17",
+  "depth_m": {
+   "10": 0.89,
+   "100": 3.04,
+   "500": 3.94
+  },
+  "road": {
+   "name": "Jalan Sultan Mohamad",
+   "kind": "trunk",
+   "distance_m": 20,
+   "depth_m": {
+    "10": 0.89,
+    "100": 3.04,
+    "500": 3.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894156",
+  "name": "Nasi Minyak John",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3331548,
+  "lon": 103.1385611,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 2,
+   "depth_m": {
+    "10": null,
+    "100": 1.15,
+    "500": 2.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6432486796",
+  "name": "OldTown White Coffee",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": true,
+  "lat": 5.3286257,
+  "lon": 103.1360571,
+  "map_last_edited": "2021-05-25",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Engku Sar",
+   "kind": "unclassified",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5597906022",
+  "name": "On the Way",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3338736,
+  "lon": 103.1324929,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599805024",
+  "name": "PappaRich",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": true,
+  "lat": 5.3340018,
+  "lon": 103.1358805,
+  "map_last_edited": "2021-05-25",
+  "depth_m": {
+   "10": 2.3,
+   "100": 4.35,
+   "500": 5.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 6,
+   "depth_m": {
+    "10": 2.3,
+    "100": 4.35,
+    "500": 5.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4294596189",
+  "name": "Pizza Hut",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": true,
+  "lat": 5.3310079,
+  "lon": 103.1331782,
+  "map_last_edited": "2019-02-17",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Sultan Ismail",
+   "kind": "secondary",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5601053922",
+  "name": "Pizza Hut",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": true,
+  "lat": 5.3294894,
+  "lon": 103.1456178,
+  "map_last_edited": "2022-12-25",
+  "depth_m": {
+   "10": null,
+   "100": 1.75,
+   "500": 2.64
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": 1.75,
+    "500": 2.64
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12798102642",
+  "name": "Plan A",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3303666,
+  "lon": 103.1344651,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Sultan Ismail",
+   "kind": "secondary",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4507472689",
+  "name": "Restaurant Selamat",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3358746,
+  "lon": 103.13937,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "living_street",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12906018944",
+  "name": "Restoran Aharn Thai",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3326593,
+  "lon": 103.138243,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7892462656",
+  "name": "Restoran Mat Binjai",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3311129,
+  "lon": 103.1439404,
+  "map_last_edited": "2020-09-10",
+  "depth_m": {
+   "10": null,
+   "100": 1.65,
+   "500": 2.54
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": 1.65,
+    "500": 2.54
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1220674257",
+  "name": "Restoran Singgang Budu",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3353816,
+  "lon": 103.1462958,
+  "map_last_edited": "2024-03-16",
+  "depth_m": {
+   "10": 0.64,
+   "100": 2.04,
+   "500": 2.59
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 13,
+   "depth_m": {
+    "10": 0.64,
+    "100": 2.04,
+    "500": 2.59
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1144350419",
+  "name": "Restoran Sri Cahaya Ikhlas",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3145464,
+  "lon": 103.1430878,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5156941821",
+  "name": "Restoren A&I Selera",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3240345,
+  "lon": 103.1417788,
+  "map_last_edited": "2018-07-04",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4307228692",
+  "name": "Secret Recipe",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3335241,
+  "lon": 103.1366903,
+  "map_last_edited": "2021-05-25",
+  "depth_m": {
+   "10": 2.3,
+   "100": 4.35,
+   "500": 5.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 18,
+   "depth_m": {
+    "10": 2.3,
+    "100": 4.35,
+    "500": 5.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599580725",
+  "name": "SeoulGarden",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3308604,
+  "lon": 103.1368149,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6497601689",
+  "name": "Soon Kee",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.332529,
+  "lon": 103.1326704,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7043518878",
+  "name": "Subway",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "lat": 5.3311589,
+  "lon": 103.13696,
+  "map_last_edited": "2019-12-09",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 29,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599601331",
+  "name": "Sushi King",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3307841,
+  "lon": 103.1370158,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11672183971",
+  "name": "Tanjung Seafood",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3352774,
+  "lon": 103.1457274,
+  "map_last_edited": "2024-02-28",
+  "depth_m": {
+   "10": 1.0,
+   "100": 3.05,
+   "500": 3.94
+  },
+  "road": {
+   "name": "Jalan Sultan Zainal Abidin",
+   "kind": "tertiary",
+   "distance_m": 7,
+   "depth_m": {
+    "10": 1.0,
+    "100": 3.05,
+    "500": 3.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11672183970",
+  "name": "The Doctor’s Kitchen and Coffee",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3310216,
+  "lon": 103.1328563,
+  "map_last_edited": "2024-02-28",
+  "depth_m": {
+   "10": null,
+   "100": 2.05,
+   "500": 2.94
+  },
+  "road": {
+   "name": "Jalan Sultan Ismail",
+   "kind": "secondary",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": 2.05,
+    "500": 2.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11745552226",
+  "name": "The Manhattan FISH MARKET",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3310477,
+  "lon": 103.1487327,
+  "map_last_edited": "2024-03-19",
+  "depth_m": {
+   "10": null,
+   "100": 2.25,
+   "500": 3.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": 2.25,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5195943223",
+  "name": "The Vinum Xchange",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.331865,
+  "lon": 103.132462,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": 0.3,
+   "100": 2.35,
+   "500": 3.24
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 4,
+   "depth_m": {
+    "10": 0.3,
+    "100": 2.35,
+    "500": 3.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4985093321",
+  "name": "Uncle Chua Restaurant",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3313625,
+  "lon": 103.148259,
+  "map_last_edited": "2024-03-15",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11671560769",
+  "name": "Uncle NG",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3334214,
+  "lon": 103.1489587,
+  "map_last_edited": "2024-03-15",
+  "depth_m": {
+   "10": 4.28,
+   "100": 6.15,
+   "500": 7.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 13,
+   "depth_m": {
+    "10": 4.28,
+    "100": 6.15,
+    "500": 7.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-3224343815",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3322059,
+  "lon": 103.1371639,
+  "map_last_edited": "2014-12-08",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Platform A",
+   "kind": "service",
+   "distance_m": 27,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.64
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-3599862590",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3257572,
+  "lon": 103.1316013,
+  "map_last_edited": "2015-06-17",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 45,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5304476521",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3138119,
+  "lon": 103.1548634,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.34
+  },
+  "road": {
+   "name": "Jalan Sultan Mahmud",
+   "kind": "trunk",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.34
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5305572821",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3174595,
+  "lon": 103.1258592,
+  "map_last_edited": "2022-02-10",
+  "depth_m": {
+   "10": 2.49,
+   "100": 4.55,
+   "500": 5.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": 2.49,
+    "100": 4.55,
+    "500": 5.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-8849847297",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3321489,
+  "lon": 103.1326012,
+  "map_last_edited": "2021-06-20",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-9719594861",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3317417,
+  "lon": 103.1365242,
+  "map_last_edited": "2022-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10651791458",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3278376,
+  "lon": 103.1466894,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": 0.55,
+   "500": 1.44
+  },
+  "road": {
+   "name": "Jalan Sultan Mahmud",
+   "kind": "primary",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 0.55,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12179546101",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3290009,
+  "lon": 103.149021,
+  "map_last_edited": "2024-09-16",
+  "depth_m": {
+   "10": null,
+   "100": 0.15,
+   "500": 1.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": 0.15,
+    "500": 1.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12459852876",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3290379,
+  "lon": 103.1373254,
+  "map_last_edited": "2024-12-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-634985619",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3243417,
+  "lon": 103.1524391,
+  "map_last_edited": "2018-10-16",
+  "depth_m": {
+   "10": 1.94,
+   "100": 4.05,
+   "500": 4.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 13,
+   "depth_m": {
+    "10": 1.94,
+    "100": 4.05,
+    "500": 4.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1126837210",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.332839,
+  "lon": 103.1367918,
+  "map_last_edited": "2023-01-04",
+  "depth_m": {
+   "10": null,
+   "100": 0.35,
+   "500": 1.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 0.35,
+    "500": 1.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1167118204",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3364752,
+  "lon": 103.1292318,
+  "map_last_edited": "2023-04-28",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1167118206",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3356651,
+  "lon": 103.1288407,
+  "map_last_edited": "2023-04-28",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1167118207",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "lat": 5.3360937,
+  "lon": 103.129011,
+  "map_last_edited": "2023-04-28",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 18,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1458944856",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3259303,
+  "lon": 103.1321832,
+  "map_last_edited": "2025-12-16",
+  "depth_m": {
+   "10": 3.5,
+   "100": 5.55,
+   "500": 6.45
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 22,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4305598490",
+  "name": "Vegan Recipe Cafe",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.332974,
+  "lon": 103.1328432,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12162847820",
+  "name": "Verandah Restaurant",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3401967,
+  "lon": 103.1298968,
+  "map_last_edited": "2024-09-08",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 33,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12651168101",
+  "name": "Vietnamese Coffee",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 5.3348704,
+  "lon": 103.1346278,
+  "map_last_edited": "2025-03-11",
+  "depth_m": {
+   "10": 2.5,
+   "100": 4.55,
+   "500": 5.44
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": 2.5,
+    "100": 4.55,
+    "500": 5.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10263177315",
+  "name": "Warung Nangka",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3325288,
+  "lon": 103.1359604,
+  "map_last_edited": "2025-12-13",
+  "depth_m": {
+   "10": null,
+   "100": 2.15,
+   "500": 3.04
+  },
+  "road": {
+   "name": "Jalan Jail",
+   "kind": "unclassified",
+   "distance_m": 4,
+   "depth_m": {
+    "10": null,
+    "100": 2.15,
+    "500": 3.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7153877389",
+  "name": "Z Bajet",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3304365,
+  "lon": 103.1488955,
+  "map_last_edited": "2024-03-19",
+  "depth_m": {
+   "10": null,
+   "100": 2.05,
+   "500": 2.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": 2.05,
+    "500": 2.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7892463996",
+  "name": "Zah(Zan) Keropok Losong",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "lat": 5.3192426,
+  "lon": 103.1254561,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": 1.39,
+   "100": 3.45,
+   "500": 4.34
+  },
+  "road": {
+   "name": "Jalan Kuala Hiliran",
+   "kind": "tertiary",
+   "distance_m": 11,
+   "depth_m": {
+    "10": 1.39,
+    "100": 3.45,
+    "500": 4.34
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897448656",
+  "name": "burger shak",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": false,
+  "lat": 5.3343473,
+  "lon": 103.1422325,
+  "map_last_edited": "2014-06-03",
+  "depth_m": {
+   "10": null,
+   "100": 2.05,
+   "500": 2.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": 2.05,
+    "500": 2.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453872",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3365474,
+  "lon": 103.1405704,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary",
+   "distance_m": 30,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-4301877790",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3290769,
+  "lon": 103.1357097,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Air Jernih",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5597798221",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3167995,
+  "lon": 103.1267648,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": 1.99,
+   "100": 4.05,
+   "500": 4.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "secondary",
+   "distance_m": 6,
+   "depth_m": {
+    "10": 1.99,
+    "100": 4.05,
+    "500": 4.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5597906021",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3347828,
+  "lon": 103.1341967,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": 4.1,
+   "100": 6.15,
+   "500": 7.04
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": 4.1,
+    "100": 6.15,
+    "500": 7.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5598128322",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3304335,
+  "lon": 103.1369414,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 7,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599814421",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3324277,
+  "lon": 103.1377252,
+  "map_last_edited": "2025-04-30",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6432486798",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3288345,
+  "lon": 103.1352966,
+  "map_last_edited": "2023-10-14",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894181",
+  "name": "7-Eleven",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3334875,
+  "lon": 103.1386279,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.34
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11751055201",
+  "name": "Aidea",
+  "sector": "shop",
+  "kind": "electronics",
+  "is_chain": false,
+  "lat": 5.3141514,
+  "lon": 103.1447554,
+  "map_last_edited": "2024-03-21",
+  "depth_m": {
+   "10": null,
+   "100": 1.04,
+   "500": 1.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 1.04,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-13463433755",
+  "name": "Aladin Dobi",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "lat": 5.3318767,
+  "lon": 103.1483769,
+  "map_last_edited": "2026-01-18",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "Jalan Sultan Zainal Abidin",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12798256173",
+  "name": "Alibaba",
+  "sector": "shop",
+  "kind": "travel_agency",
+  "is_chain": false,
+  "lat": 5.3325308,
+  "lon": 103.1376071,
+  "map_last_edited": "2025-04-30",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Jalan Syed Husin",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12796591680",
+  "name": "Alpha Tech",
+  "sector": "shop",
+  "kind": "computer",
+  "is_chain": false,
+  "lat": 5.3334815,
+  "lon": 103.1373841,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894173",
+  "name": "Ar-Rahmu Exclusive",
+  "sector": "shop",
+  "kind": "pawnbroker",
+  "is_chain": false,
+  "lat": 5.3334459,
+  "lon": 103.1378411,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 3,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7892458900",
+  "name": "Bata",
+  "sector": "shop",
+  "kind": "shoes",
+  "is_chain": true,
+  "lat": 5.3308681,
+  "lon": 103.1443492,
+  "map_last_edited": "2022-05-26",
+  "depth_m": {
+   "10": null,
+   "100": 1.65,
+   "500": 2.54
+  },
+  "road": {
+   "name": "Jalan Sultan Sulaiman",
+   "kind": "tertiary",
+   "distance_m": 18,
+   "depth_m": {
+    "10": null,
+    "100": 1.65,
+    "500": 2.54
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894174",
+  "name": "Baterihub",
+  "sector": "shop",
+  "kind": "car_parts",
+  "is_chain": false,
+  "lat": 5.3330533,
+  "lon": 103.1385283,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": 1.15,
+    "500": 2.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-472267549",
+  "name": "Bazaar Warisan",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "lat": 5.3363977,
+  "lon": 103.1365412,
+  "map_last_edited": "2024-02-10",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary",
+   "distance_m": 40,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887412",
+  "name": "Calla Lily",
+  "sector": "shop",
+  "kind": "clothes",
+  "is_chain": false,
+  "lat": 5.3321115,
+  "lon": 103.1379291,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.44
+  },
+  "road": {
+   "name": "Jalan Syed Husin",
+   "kind": "tertiary",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.64
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10651697040",
+  "name": "Chin Huat (Spares) Company SB",
+  "sector": "shop",
+  "kind": "motorcycle",
+  "is_chain": false,
+  "lat": 5.3135031,
+  "lon": 103.1393514,
+  "map_last_edited": "2024-03-17",
+  "depth_m": {
+   "10": null,
+   "100": 2.14,
+   "500": 3.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "100": 2.14,
+    "500": 3.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894163",
+  "name": "Collector Hub",
+  "sector": "shop",
+  "kind": "collector",
+  "is_chain": false,
+  "lat": 5.3332564,
+  "lon": 103.1376129,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 5,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887424",
+  "name": "Decor Floral & Gift",
+  "sector": "shop",
+  "kind": "gift",
+  "is_chain": false,
+  "lat": 5.3320617,
+  "lon": 103.1383553,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-396489193",
+  "name": "Desa Murni Batik",
+  "sector": "shop",
+  "kind": "department_store",
+  "is_chain": false,
+  "lat": 5.3136337,
+  "lon": 103.138898,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": 2.14,
+   "500": 3.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 18,
+   "depth_m": {
+    "10": null,
+    "100": 2.14,
+    "500": 3.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887411",
+  "name": "Dokan Mart",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 5.3327457,
+  "lon": 103.138489,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.44
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-417177871",
+  "name": "Econsave",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": true,
+  "lat": 5.337286,
+  "lon": 103.141521,
+  "map_last_edited": "2026-02-10",
+  "depth_m": {
+   "10": 0.2,
+   "100": 2.25,
+   "500": 3.14
+  },
+  "road": {
+   "name": "Jalan Astaka",
+   "kind": "service",
+   "distance_m": 25,
+   "depth_m": {
+    "10": 0.2,
+    "100": 2.25,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5598320424",
+  "name": "Ezy Self Dhobi (Coin Laundry)",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "lat": 5.3315762,
+  "lon": 103.1355965,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "Jalan Banggol",
+   "kind": "unclassified",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12798256176",
+  "name": "FamilyMart",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "lat": 5.3325964,
+  "lon": 103.1375861,
+  "map_last_edited": "2025-04-30",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894165",
+  "name": "Frame Gambar Wan Abd Aziz Wan Mohamad",
+  "sector": "shop",
+  "kind": "frame",
+  "is_chain": false,
+  "lat": 5.3332163,
+  "lon": 103.1374515,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1126837211",
+  "name": "Hari-Hari",
+  "sector": "shop",
+  "kind": "clothes",
+  "is_chain": false,
+  "lat": 5.3326792,
+  "lon": 103.1365162,
+  "map_last_edited": "2025-12-13",
+  "depth_m": {
+   "10": null,
+   "100": 0.35,
+   "500": 1.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": 0.35,
+    "500": 1.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599583225",
+  "name": "Harold's Bread",
+  "sector": "shop",
+  "kind": "bakery",
+  "is_chain": false,
+  "lat": 5.330858,
+  "lon": 103.1366052,
+  "map_last_edited": "2018-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12450874410",
+  "name": "Hock Kee Seng Tanjung",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "lat": 5.3362058,
+  "lon": 103.1428542,
+  "map_last_edited": "2024-12-25",
+  "depth_m": {
+   "10": 1.2,
+   "100": 3.25,
+   "500": 4.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": 1.2,
+    "100": 3.25,
+    "500": 4.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-3708197926",
+  "name": "KAMDAR",
+  "sector": "shop",
+  "kind": "fabric",
+  "is_chain": false,
+  "lat": 5.3298455,
+  "lon": 103.1345374,
+  "map_last_edited": "2015-08-21",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Kota Lama",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-768700239",
+  "name": "KTCC Mall",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "lat": 5.33355,
+  "lon": 103.1502497,
+  "map_last_edited": "2024-03-16",
+  "depth_m": {
+   "10": 6.96,
+   "100": 9.05,
+   "500": 9.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 43,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11804061873",
+  "name": "Kedai Gambar kyoto studio",
+  "sector": "shop",
+  "kind": "photographer",
+  "is_chain": false,
+  "lat": 5.3349655,
+  "lon": 103.1392586,
+  "map_last_edited": "2024-04-09",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 21,
+   "depth_m": {
+    "10": null,
+    "100": 1.15,
+    "500": 2.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12179546002",
+  "name": "LaundryBar",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "lat": 5.3317672,
+  "lon": 103.1483764,
+  "map_last_edited": "2024-09-16",
+  "depth_m": {
+   "10": null,
+   "100": 1.25,
+   "500": 2.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": 1.25,
+    "500": 2.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599537821",
+  "name": "Laundrylab",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "lat": 5.3207891,
+  "lon": 103.1287229,
+  "map_last_edited": "2024-02-14",
+  "depth_m": {
+   "10": 3.2,
+   "100": 5.25,
+   "500": 6.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": 3.2,
+    "100": 5.25,
+    "500": 6.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599573921",
+  "name": "MR.DIY",
+  "sector": "shop",
+  "kind": "doityourself",
+  "is_chain": true,
+  "lat": 5.3317682,
+  "lon": 103.1344891,
+  "map_last_edited": "2022-05-26",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 21,
+   "depth_m": {
+    "10": null,
+    "100": 0.15,
+    "500": 1.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-875028819",
+  "name": "Mayang Mall",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "lat": 5.3370666,
+  "lon": 103.1442397,
+  "map_last_edited": "2024-12-25",
+  "depth_m": {
+   "10": 2.1,
+   "100": 4.15,
+   "500": 5.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 33,
+   "depth_m": {
+    "10": 2.1,
+    "100": 4.15,
+    "500": 5.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894176",
+  "name": "Mokhtar",
+  "sector": "shop",
+  "kind": "jewelry",
+  "is_chain": false,
+  "lat": 5.3333177,
+  "lon": 103.1375398,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894162",
+  "name": "Muzairi Jewels",
+  "sector": "shop",
+  "kind": "jewelry",
+  "is_chain": false,
+  "lat": 5.3332513,
+  "lon": 103.1374771,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599583226",
+  "name": "MyFarm Outlet",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 5.330343,
+  "lon": 103.1372712,
+  "map_last_edited": "2022-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Tengku Embong Fatimah",
+   "kind": "unclassified",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453858",
+  "name": "Mydin",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": true,
+  "lat": 5.3349409,
+  "lon": 103.136668,
+  "map_last_edited": "2021-06-02",
+  "depth_m": {
+   "10": null,
+   "100": 1.35,
+   "500": 2.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": 1.35,
+    "500": 2.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12798256174",
+  "name": "Nur Enterprise",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 5.3326649,
+  "lon": 103.1374543,
+  "map_last_edited": "2025-04-30",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11314392652",
+  "name": "Nymph Coffee",
+  "sector": "shop",
+  "kind": "kiosk",
+  "is_chain": false,
+  "lat": 5.334901,
+  "lon": 103.1461233,
+  "map_last_edited": "2024-02-13",
+  "depth_m": {
+   "10": 1.0,
+   "100": 3.05,
+   "500": 3.94
+  },
+  "road": {
+   "name": "Jalan Sultan Zainal Abidin",
+   "kind": "tertiary",
+   "distance_m": 10,
+   "depth_m": {
+    "10": 1.0,
+    "100": 3.05,
+    "500": 3.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12794894180",
+  "name": "Oppo",
+  "sector": "shop",
+  "kind": "mobile_phone",
+  "is_chain": true,
+  "lat": 5.3332712,
+  "lon": 103.137499,
+  "map_last_edited": "2025-04-28",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11745552224",
+  "name": "Pacific",
+  "sector": "shop",
+  "kind": "department_store",
+  "is_chain": false,
+  "lat": 5.3340723,
+  "lon": 103.1494691,
+  "map_last_edited": "2024-03-19",
+  "depth_m": {
+   "10": 6.99,
+   "100": 9.05,
+   "500": 9.94
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 34,
+   "depth_m": {
+    "10": 6.99,
+    "100": 9.05,
+    "500": 9.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-467747134",
+  "name": "Paya Bunga Plaza",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "lat": 5.330934,
+  "lon": 103.1377277,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 38,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-316323046",
+  "name": "Paya Bunga Square",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "lat": 5.331094,
+  "lon": 103.1368924,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 38,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887402",
+  "name": "Perniagaan Hasil Laut N.C.K.",
+  "sector": "shop",
+  "kind": "seafood",
+  "is_chain": false,
+  "lat": 5.3319356,
+  "lon": 103.1383199,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11804060370",
+  "name": "Photo wira studio",
+  "sector": "shop",
+  "kind": "photographer",
+  "is_chain": false,
+  "lat": 5.3328343,
+  "lon": 103.1372086,
+  "map_last_edited": "2024-04-09",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Jalan Syed Husin",
+   "kind": "tertiary",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5335997722",
+  "name": "Pusat Servis Tayar CP",
+  "sector": "shop",
+  "kind": "tyres",
+  "is_chain": false,
+  "lat": 5.317556,
+  "lon": 103.13099,
+  "map_last_edited": "2022-02-10",
+  "depth_m": {
+   "10": 0.89,
+   "100": 2.95,
+   "500": 3.84
+  },
+  "road": {
+   "name": "Jalan Bukit Kecil",
+   "kind": "secondary",
+   "distance_m": 13,
+   "depth_m": {
+    "10": 0.89,
+    "100": 2.95,
+    "500": 3.84
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887421",
+  "name": "Redang Pelangi Resort",
+  "sector": "shop",
+  "kind": "travel_agency",
+  "is_chain": false,
+  "lat": 5.3321971,
+  "lon": 103.1378423,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Jalan Syed Husin",
+   "kind": "tertiary",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6568098176",
+  "name": "SMO",
+  "sector": "shop",
+  "kind": "books",
+  "is_chain": false,
+  "lat": 5.3297374,
+  "lon": 103.1362557,
+  "map_last_edited": "2023-08-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 22,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-1263421961",
+  "name": "Sabasun HYPErRUNCIT",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "lat": 5.315645,
+  "lon": 103.1344979,
+  "map_last_edited": "2024-03-17",
+  "depth_m": {
+   "10": 2.03,
+   "100": 4.15,
+   "500": 5.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 22,
+   "depth_m": {
+    "10": 2.03,
+    "100": 4.15,
+    "500": 5.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12796591681",
+  "name": "Seng Huat Electrical & Home Appliances",
+  "sector": "shop",
+  "kind": "electronics",
+  "is_chain": false,
+  "lat": 5.3329516,
+  "lon": 103.1373021,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7892462013",
+  "name": "The Bakers Store",
+  "sector": "shop",
+  "kind": "bakery",
+  "is_chain": false,
+  "lat": 5.3308227,
+  "lon": 103.1443957,
+  "map_last_edited": "2020-09-10",
+  "depth_m": {
+   "10": null,
+   "100": 1.65,
+   "500": 2.54
+  },
+  "road": {
+   "name": "Jalan Sultan Sulaiman",
+   "kind": "tertiary",
+   "distance_m": 19,
+   "depth_m": {
+    "10": null,
+    "100": 1.65,
+    "500": 2.54
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599599431",
+  "name": "The Body Shop",
+  "sector": "shop",
+  "kind": "cosmetics",
+  "is_chain": true,
+  "lat": 5.3310451,
+  "lon": 103.1367349,
+  "map_last_edited": "2019-05-26",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 30,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10764045545",
+  "name": "The Store",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "lat": 5.3313744,
+  "lon": 103.1379318,
+  "map_last_edited": "2023-11-21",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 24,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.64
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-11804061172",
+  "name": "Tokyo studio",
+  "sector": "shop",
+  "kind": "photographer",
+  "is_chain": false,
+  "lat": 5.3335485,
+  "lon": 103.1374324,
+  "map_last_edited": "2024-04-09",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12798256172",
+  "name": "Topman Mobile",
+  "sector": "shop",
+  "kind": "mobile_phone",
+  "is_chain": false,
+  "lat": 5.3326925,
+  "lon": 103.137421,
+  "map_last_edited": "2025-04-30",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 6,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12797951725",
+  "name": "Trengganu Refrigeration & Electrical Service",
+  "sector": "shop",
+  "kind": "electronics_repair",
+  "is_chain": false,
+  "lat": 5.3329198,
+  "lon": 103.1372624,
+  "map_last_edited": "2025-04-29",
+  "depth_m": {
+   "10": null,
+   "100": 1.05,
+   "500": 1.94
+  },
+  "road": {
+   "name": "Jalan Masjid Abidin",
+   "kind": "unclassified",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "100": 1.05,
+    "500": 1.94
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453601",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "travel_agency",
+  "is_chain": false,
+  "lat": 5.3372079,
+  "lon": 103.1399599,
+  "map_last_edited": "2018-07-04",
+  "depth_m": {
+   "10": null,
+   "100": 2.15,
+   "500": 3.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "100": 2.15,
+    "500": 3.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5601053822",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "ticket",
+  "is_chain": false,
+  "lat": 5.3323471,
+  "lon": 103.1372012,
+  "map_last_edited": "2022-05-06",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5749493757",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "car_parts",
+  "is_chain": false,
+  "lat": 5.3135759,
+  "lon": 103.1382027,
+  "map_last_edited": "2018-07-09",
+  "depth_m": {
+   "10": null,
+   "100": 2.24,
+   "500": 3.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 25,
+   "depth_m": {
+    "10": null,
+    "100": 2.24,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5749493758",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "car_repair",
+  "is_chain": false,
+  "lat": 5.3135759,
+  "lon": 103.1381732,
+  "map_last_edited": "2018-07-09",
+  "depth_m": {
+   "10": null,
+   "100": 2.24,
+   "500": 3.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 22,
+   "depth_m": {
+    "10": null,
+    "100": 2.24,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5848412609",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "furniture",
+  "is_chain": false,
+  "lat": 5.3177649,
+  "lon": 103.1276482,
+  "map_last_edited": "2018-08-22",
+  "depth_m": {
+   "10": 4.09,
+   "100": 6.15,
+   "500": 7.04
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "secondary",
+   "distance_m": 16,
+   "depth_m": {
+    "10": 4.09,
+    "100": 6.15,
+    "500": 7.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7043518879",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "shoemaker",
+  "is_chain": false,
+  "lat": 5.3320756,
+  "lon": 103.1372229,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Platform A",
+   "kind": "service",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.64
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-8849784114",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "pharmacy",
+  "is_chain": false,
+  "lat": 5.3346739,
+  "lon": 103.1338589,
+  "map_last_edited": "2021-06-20",
+  "depth_m": {
+   "10": 4.1,
+   "100": 6.15,
+   "500": 7.04
+  },
+  "road": {
+   "name": "Jalan Kampung Cina",
+   "kind": "unclassified",
+   "distance_m": 7,
+   "depth_m": {
+    "10": 4.1,
+    "100": 6.15,
+    "500": 7.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-9719594831",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "kiosk",
+  "is_chain": false,
+  "lat": 5.3323784,
+  "lon": 103.1374598,
+  "map_last_edited": "2022-05-06",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-9719594838",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "hairdresser",
+  "is_chain": false,
+  "lat": 5.3321113,
+  "lon": 103.1368943,
+  "map_last_edited": "2022-05-06",
+  "depth_m": {
+   "10": null,
+   "100": 0.35,
+   "500": 1.24
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 22,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10303774697",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "pharmacy",
+  "is_chain": false,
+  "lat": 5.3332025,
+  "lon": 103.1369595,
+  "map_last_edited": "2023-06-23",
+  "depth_m": {
+   "10": 2.3,
+   "100": 4.35,
+   "500": 5.24
+  },
+  "road": {
+   "name": "Jalan Kampung Daik",
+   "kind": "tertiary",
+   "distance_m": 19,
+   "depth_m": {
+    "10": 2.3,
+    "100": 4.35,
+    "500": 5.24
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10651697027",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "car",
+  "is_chain": true,
+  "lat": 5.3134905,
+  "lon": 103.1381518,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": 2.24,
+   "500": 3.14
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "100": 2.24,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-10651697028",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "car",
+  "is_chain": true,
+  "lat": 5.3134891,
+  "lon": 103.1382282,
+  "map_last_edited": "2023-02-12",
+  "depth_m": {
+   "10": null,
+   "100": 2.24,
+   "500": 3.14
+  },
+  "road": {
+   "name": "Jalan Sultan Mohamad",
+   "kind": "trunk",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "100": 2.24,
+    "500": 3.14
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12906018953",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 5.3329305,
+  "lon": 103.1385383,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": 1.15,
+   "500": 2.04
+  },
+  "road": {
+   "name": "Jalan Tok Lam",
+   "kind": "tertiary",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": 1.15,
+    "500": 2.04
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "way-618782783",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "seafood",
+  "is_chain": false,
+  "lat": 5.3221628,
+  "lon": 103.1283268,
+  "map_last_edited": "2022-02-01",
+  "depth_m": {
+   "10": 3.6,
+   "100": 5.65,
+   "500": 6.55
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 26,
+   "depth_m": {
+    "10": 3.6,
+    "100": 5.65,
+    "500": 6.55
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-12905887422",
+  "name": "Vivo",
+  "sector": "shop",
+  "kind": "mobile_phone",
+  "is_chain": true,
+  "lat": 5.3321501,
+  "lon": 103.1378822,
+  "map_last_edited": "2025-06-11",
+  "depth_m": {
+   "10": null,
+   "100": 1.85,
+   "500": 2.74
+  },
+  "road": {
+   "name": "Jalan Syed Husin",
+   "kind": "tertiary",
+   "distance_m": 11,
+   "depth_m": {
+    "10": null,
+    "100": 1.85,
+    "500": 2.74
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-13331543975",
+  "name": "Windscreen2U Kuala Terengganu",
+  "sector": "shop",
+  "kind": "car_repair",
+  "is_chain": true,
+  "lat": 5.3337123,
+  "lon": 103.1402503,
+  "map_last_edited": "2025-11-27",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Sultan Sulaiman",
+   "kind": "tertiary",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6568104709",
+  "name": "Xiri",
+  "sector": "shop",
+  "kind": "clothes",
+  "is_chain": false,
+  "lat": 5.3308264,
+  "lon": 103.1352234,
+  "map_last_edited": "2019-06-24",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Banggol",
+   "kind": "unclassified",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-7892474010",
+  "name": "eco-shop",
+  "sector": "shop",
+  "kind": "variety_store",
+  "is_chain": true,
+  "lat": 5.3307695,
+  "lon": 103.1444801,
+  "map_last_edited": "2021-05-31",
+  "depth_m": {
+   "10": null,
+   "100": 1.65,
+   "500": 2.54
+  },
+  "road": {
+   "name": "Jalan Sultan Sulaiman",
+   "kind": "tertiary",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "100": 1.65,
+    "500": 2.54
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-5599579543",
+  "name": "elianto",
+  "sector": "shop",
+  "kind": "cosmetics",
+  "is_chain": false,
+  "lat": 5.3309705,
+  "lon": 103.1369591,
+  "map_last_edited": "2018-05-06",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 1.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 29,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 1.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453238",
+  "name": "emart",
+  "sector": "shop",
+  "kind": "electronics",
+  "is_chain": false,
+  "lat": 5.3323791,
+  "lon": 103.1383826,
+  "map_last_edited": "2025-06-13",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": 0.44
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": 0.44
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-6432486802",
+  "name": "red ONE",
+  "sector": "shop",
+  "kind": "mobile_phone",
+  "is_chain": false,
+  "lat": 5.3291527,
+  "lon": 103.1354499,
+  "map_last_edited": "2020-09-29",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "Jalan Air Jernih",
+   "kind": "tertiary",
+   "distance_m": 15,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ },
+ {
+  "id": "node-2897453874",
+  "name": "treleaf",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "lat": 5.3345337,
+  "lon": 103.1404289,
+  "map_last_edited": "2014-06-03",
+  "depth_m": {
+   "10": null,
+   "100": null,
+   "500": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 24,
+   "depth_m": {
+    "10": null,
+    "100": null,
+    "500": null
+   }
+  },
+  "shelter": null
+ }
+]

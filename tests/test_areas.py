@@ -35,8 +35,9 @@ def ids_in(area_id: str) -> set[str]:
 
 # ---------- the areas and their data
 
-def test_both_areas_load_and_sri_muda_is_the_default():
-    assert [a.id for a in areas.load_all()] == [SRI_MUDA, KOTA_TINGGI]   # the default first
+def test_every_area_loads_and_sri_muda_is_the_default():
+    ids = [SRI_MUDA, "kota-bharu", KOTA_TINGGI, "kuala-terengganu", "kuantan"]
+    assert [a.id for a in areas.load_all()] == ids   # the default first, then by id
     assert areas.default().id == SRI_MUDA and areas.default() == areas.get(SRI_MUDA)
     assert areas.get("nope") is None
     areas.preload()   # both areas' built data fit their config
@@ -229,12 +230,15 @@ def test_a_folder_without_area_json_or_a_second_default_is_rejected(tmp_path):
 def test_the_area_list_gives_each_area_with_its_counts(client):
     body = client.get("/api/areas").json()
     assert body["success"] is True and body["data"]["default"] == SRI_MUDA
-    first, second = body["data"]["areas"]
+    listed = {area["id"]: area for area in body["data"]["areas"]}
+    first = body["data"]["areas"][0]
     assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters"}
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
         SRI_MUDA, {"businesses": 204, "squares": 1575, "shelters": 0}, True, False)
-    assert (second["id"], second["counts"], second["has_history"], second["has_shelters"]) == (
-        KOTA_TINGGI, {"businesses": 27, "squares": 462, "shelters": 2}, False, True)
+    kota = listed[KOTA_TINGGI]
+    assert (kota["counts"], kota["has_history"], kota["has_shelters"]) == (
+        {"businesses": 27, "squares": 462, "shelters": 2}, False, True)
+    assert len(listed) == 5 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
 
 
 def test_area_data_carries_the_area_and_its_data(client):
@@ -423,3 +427,26 @@ def test_the_backend_python_names_no_place():
     hits = [f"{path.name}: {name}" for path in sorted((ROOT / "app").glob("*.py"))
             for name in sorted(names) if name.lower() in path.read_text(encoding="utf-8").lower()]
     assert not hits, hits
+
+
+# ---------- the towns added from the screen of 3 Oct 2026 (05_Raw_Data_Sources/town_screen_2026-10-03)
+
+@pytest.mark.parametrize("area_id, businesses, wet, squares, floods", [
+    ("kuantan", 300, {"10": 27, "100": 219, "500": 250}, 1204, 5),
+    ("kota-bharu", 491, {"10": 85, "100": 115, "500": 138}, 769, 3),
+    ("kuala-terengganu", 158, {"10": 29, "100": 94, "500": 110}, 736, 5),
+])
+def test_the_screened_towns_hold_what_was_built(area_id, businesses, wet, squares, floods):
+    area = areas.get(area_id)
+    found = areas.premises(area_id)
+    assert len(found) == businesses and len(areas.town(area_id)["cells"]) == squares
+    assert {rp: sum(1 for p in found if p["depth_m"][rp]) for rp in wet} == wet
+    assert len(area.history["floods"]) == floods and area.council and areas.counts(area)["shelters"] == 0
+    assert "not checked on the ground" in area.notes["businesses"]
+    assert all(flood["source"] for flood in area.history["floods"])
+
+
+@pytest.mark.parametrize("area_id, over_5_m", [("kota-bharu", 53), ("kuantan", 19), ("kuala-terengganu", 11)])
+def test_the_depth_check_note_counts_what_the_data_holds(area_id, over_5_m):
+    deep = sum(1 for p in areas.premises(area_id) if (p["depth_m"]["100"] or 0) > 5)
+    assert deep == over_5_m and f"more than 5 m of water at {over_5_m} of these businesses" in areas.get(area_id).notes["depths"]

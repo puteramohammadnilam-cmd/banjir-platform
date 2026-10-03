@@ -1,0 +1,47 @@
+{
+  "id": "kota-bharu",
+  "name": "Kota Bharu",
+  "display_name": "Kota Bharu town centre, Kelantan",
+  "view": [
+    102.2206,
+    6.1084,
+    102.2556,
+    6.1424
+  ],
+  "zoom": 15,
+  "ai_name": "Kota Bharu town centre, Kelantan, Malaysia, beside Sungai Kelantan",
+  "news_place": "Kota Bharu, Kelantan",
+  "news_region": "Kota Bharu, Kelantan, Malaysia",
+  "council": "Majlis Perbandaran Kota Bharu - Bandar Raya Islam (MPKB-BRI)",
+  "notes": {
+    "businesses": "Shops, eateries and pharmacies as mapped on OpenStreetMap (fetched 3 Oct 2026). The list is what volunteers have mapped, not checked on the ground, so many real businesses are missing and some listed ones may have closed.",
+    "shelters": "No relief centre list from an official or public source has been collected for this area, so none are shown.",
+    "history": "Dated floods that sources say reached this town centre, from news and official reports checked on 3 Oct 2026 (details and every source opened: the project's raw-data notes). Not a complete record.",
+    "depths": "Depth check: the model puts more than 5 m of water at 53 of these businesses in a 1 in 100 years flood, but news reports of real floods in the town give about 0.25 to 2 m. The model runs deep beside the river here: read its depths as the model's, not as what to expect."
+  },
+  "history": {
+    "first_year": 2014,
+    "recent_from": 2019,
+    "last_year": 2026,
+    "floods": [
+      {
+        "when": "Late Dec 2014",
+        "year": 2014.98,
+        "what": "The river flood covered the town, including Jalan Tok Hakim, Jalan Hamzah and Jalan Temenggong. One shop's stock was under water at waist level.",
+        "source": "Berita Harian, 24 Dec 2014; Malay Mail, 29 and 30 Dec 2014"
+      },
+      {
+        "when": "27 to 30 Nov 2024",
+        "year": 2024.91,
+        "what": "Sungai Kelantan spilled into the town centre and most roads there went under water. Reported depths differ: 0.25 to 0.3 m as it began, and about 2 m later that day, from the state police chief.",
+        "source": "Sinar Harian, 30 Nov 2024; Bernama, 30 Nov 2024"
+      },
+      {
+        "when": "2 Apr 2025",
+        "year": 2025.25,
+        "what": "Flash flood around Jalan Hilir Pasar after hours of heavy rain, blamed on blocked drains. It had gone by the afternoon.",
+        "source": "Kosmo, 2 Apr 2025; Harian Metro, 2 Apr 2025; Berita Harian, 2 Apr 2025"
+      }
+    ]
+  }
+}

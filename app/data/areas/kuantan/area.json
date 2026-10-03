@@ -1,0 +1,59 @@
+{
+  "id": "kuantan",
+  "name": "Kuantan",
+  "display_name": "Kuantan town centre, Pahang",
+  "view": [
+    103.3085,
+    3.7907,
+    103.3435,
+    3.8247
+  ],
+  "zoom": 15,
+  "ai_name": "Kuantan town centre, Pahang, Malaysia, beside Sungai Kuantan",
+  "news_place": "Kuantan, Pahang",
+  "news_region": "Kuantan, Pahang, Malaysia",
+  "council": "Majlis Bandaraya Kuantan (MBK)",
+  "notes": {
+    "businesses": "Shops, eateries and pharmacies as mapped on OpenStreetMap (fetched 3 Oct 2026). The list is what volunteers have mapped, not checked on the ground, so many real businesses are missing and some listed ones may have closed.",
+    "shelters": "No relief centre list from an official or public source has been collected for this area, so none are shown.",
+    "history": "Dated floods that sources say reached this town centre, from news and official reports checked on 3 Oct 2026 (details and every source opened: the project's raw-data notes). Not a complete record.",
+    "depths": "Depth check: the model puts more than 5 m of water at 19 of these businesses in a 1 in 100 years flood, but news reports of real floods in the town give up to about 1.5 m. Read the model's depths as the model's, not as what to expect."
+  },
+  "history": {
+    "first_year": 2012,
+    "recent_from": 2019,
+    "last_year": 2026,
+    "floods": [
+      {
+        "when": "24 Dec 2012",
+        "year": 2012.98,
+        "what": "Flash floods covered town-centre roads, including Jalan Tun Ismail, Jalan Mahkota and Jalan Bukit Ubi, and some shops and shopping centres closed. Road depth was reported as 1.5 m, and about 1 m at 14 junctions.",
+        "source": "Malaysiakini (Bernama), 24 Dec 2012; mStar, 24 Dec 2012"
+      },
+      {
+        "when": "2 to 4 Dec 2013",
+        "year": 2013.92,
+        "what": "Roads in and around the town were under up to 1 m of water, and most shops and banks closed after power cuts.",
+        "source": "Bernama via Malay Mail, 4 Dec 2013; mStar, 3 Dec 2013"
+      },
+      {
+        "when": "8 Dec 2016",
+        "year": 2016.94,
+        "what": "Water rose up to 0.5 m on parts of Jalan Tun Ismail and Jalan Bukit Ubi after two hours of heavy rain.",
+        "source": "New Straits Times, 8 Dec 2016"
+      },
+      {
+        "when": "3 Jan 2021",
+        "year": 2021.01,
+        "what": "City-centre roads flooded, about 0.5 m on some stretches, including Jalan Bukit Ubi and Jalan Lim Hoe Lek.",
+        "source": "Berita Harian, 3 Jan 2021; New Straits Times, 3 Jan 2021"
+      },
+      {
+        "when": "17 Dec 2021",
+        "year": 2021.96,
+        "what": "Town-centre roads flooded to about 0.5 m, and the wet market on Jalan Tun Ismail had ankle-deep water.",
+        "source": "New Straits Times, 17 Dec 2021"
+      }
+    ]
+  }
+}

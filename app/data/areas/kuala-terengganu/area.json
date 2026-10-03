@@ -1,0 +1,60 @@
+{
+  "id": "kuala-terengganu",
+  "name": "Kuala Terengganu",
+  "display_name": "Kuala Terengganu town centre, Terengganu",
+  "view": [
+    103.1233,
+    5.3132,
+    103.1583,
+    5.3472
+  ],
+  "zoom": 15,
+  "ai_name": "Kuala Terengganu town centre, Terengganu, Malaysia, at the mouth of Sungai Terengganu",
+  "news_place": "Kuala Terengganu, Terengganu",
+  "news_region": "Kuala Terengganu, Terengganu, Malaysia",
+  "council": "Majlis Bandaraya Kuala Terengganu (MBKT)",
+  "notes": {
+    "businesses": "Shops, eateries and pharmacies as mapped on OpenStreetMap (fetched 3 Oct 2026). The list is what volunteers have mapped, not checked on the ground, so many real businesses are missing and some listed ones may have closed.",
+    "shelters": "No relief centre list from an official or public source has been collected for this area, so none are shown.",
+    "history": "Dated floods that sources say reached this town centre, from news and official reports checked on 3 Oct 2026 (details and every source opened: the project's raw-data notes). Not a complete record.",
+    "depths": "Depth check: the model puts more than 5 m of water at 11 of these businesses in a 1 in 100 years flood, but news reports of real floods in the town give about 0.1 to 1 m. Read the model's depths as the model's, not as what to expect."
+  },
+  "history": {
+    "first_year": 1999,
+    "recent_from": 2019,
+    "last_year": 2026,
+    "floods": [
+      {
+        "when": "1999",
+        "year": 1999.5,
+        "account": true,
+        "what": "A shop owner on Jalan Sultan Omar recalls water rising outside his shop, the worst he knew before 2020.",
+        "source": "Bernama, 3 Dec 2020, one person's account"
+      },
+      {
+        "when": "9 Jul 2020",
+        "year": 2020.52,
+        "what": "Roads around the Paya Keladi business centre, next to Pasar Payang, flooded 0.1 to 0.45 m.",
+        "source": "JPS, Laporan Banjir Tahunan 2020"
+      },
+      {
+        "when": "2 to 3 Dec 2020",
+        "year": 2020.92,
+        "what": "Heavy rain and a high tide flooded the town centre, including about 20 shops at Pasar Payang and premises on Jalan Sultan Omar. Traders said about 0.5 to 1 m inside.",
+        "source": "Bernama, 3 Dec 2020; Sinar Harian, 3 Dec 2020; JPS, Laporan Banjir Tahunan 2020"
+      },
+      {
+        "when": "23 Jan 2024",
+        "year": 2024.06,
+        "what": "Flash floods covered Jalan Kamaruddin, Jalan Sultan Omar and Jalan Gong Kapas after more than 100 mm of rain with a high tide.",
+        "source": "Utusan Malaysia, 23 Jan 2024; Sinar Harian, 24 Jan 2024"
+      },
+      {
+        "when": "26 Dec 2025",
+        "year": 2025.98,
+        "what": "Police closed Jalan Sultan Omar, Jalan Kamaruddin and Jalan Sultan Ismail for flash floods.",
+        "source": "The Star, 26 Dec 2025; Kosmo, 26 Dec 2025; Utusan Malaysia, 26 Dec 2025"
+      }
+    ]
+  }
+}

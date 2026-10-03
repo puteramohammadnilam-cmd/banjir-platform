@@ -49,12 +49,22 @@ An area is a folder in `app/data/areas/{id}/`:
 | `premises.json` | Businesses mapped on OpenStreetMap, each with its modelled depths and nearest road. |
 | `town.json` | The 90 m flood squares around them, and any relief centres. |
 
-Two areas are built in:
+Five areas are built in:
 
-- Taman Sri Muda, Shah Alam, Selangor. The default. 204 businesses, 1,575 flood squares, ten past flood reports. No relief centre list yet.
-- Kota Tinggi town centre, Johor. 27 shops and eateries picked from OpenStreetMap, 462 flood squares, 2 relief centres. No past flood record collected.
+| Area | Businesses | Wet at 1 in 100 (model) | Flood squares | Past floods in the sources checked |
+|---|---|---|---|---|
+| Taman Sri Muda, Shah Alam, Selangor (the default) | 204 | 183 | 1,575 | 10 |
+| Kuantan town centre, Pahang | 300 | 219 | 1,204 | 5 (2012 to 2021) |
+| Kota Bharu town centre, Kelantan | 491 | 115 | 769 | 3 (2014 to 2025) |
+| Kuala Terengganu town centre, Terengganu | 158 | 94 | 736 | 5 (1999 to 2025) |
+| Kota Tinggi town centre, Johor | 27, picked by hand | 21 | 462 | none collected; 2 relief centres |
 
-The page opens on the default area. `?area=kota-tinggi` opens the other. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
+Kuantan, Kota Bharu and Kuala Terengganu were picked on 3 Oct 2026 from a screen of eleven river towns (OpenStreetMap
+business count and the share wet in the model) and built with `tools/build_area.py`. In all three the model gives
+5 to 10 m at some businesses, where news reports of real floods give about 0.1 to 2 m; each area's notes say so on
+the page and to the AI. Only Kota Tinggi has relief centres.
+
+The page opens on the default area; `?area=kuantan` (or another id) opens another. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
 
 Place names live only in `area.json`. The backend and the page scripts carry none, and a test guards that.
 

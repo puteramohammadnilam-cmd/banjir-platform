@@ -309,3 +309,18 @@ def test_kuala_krai_rebuilds_byte_identical_from_its_saved_overpass_answers(tmp_
              "--out", str(tmp_path)])
     for name in ("premises.json", "town.json"):
         assert (tmp_path / name).read_bytes() == (ROOT / "app" / "data" / "areas" / "kuala-krai" / name).read_bytes()
+
+
+@pytest.mark.parametrize("area_id, folder", [("kuantan", "kuantan"), ("kota-bharu", "kota_bharu"),
+                                             ("kuala-terengganu", "kuala_terengganu")])
+def test_the_screened_towns_rebuild_byte_identical_from_their_saved_overpass_answers(tmp_path, area_id, folder):
+    pois, roads = RAW / folder / f"overpass_{folder}_pois.json", RAW / folder / f"overpass_{folder}_roads.json"
+    if not (pois.is_file() and roads.is_file()):
+        pytest.skip(f"the saved Overpass answers for {area_id} are not on this machine")
+    if not raster.depth_set().grids:
+        pytest.skip(f"no depth rasters in {raster.raster_dir()}")
+    area = areas.get(area_id)
+    ba.main(["--area", area_id, "--view", *map(str, area.view), "--pois", str(pois), "--roads", str(roads),
+             "--out", str(tmp_path)])
+    for name in ("premises.json", "town.json"):
+        assert (tmp_path / name).read_bytes() == (ROOT / "app" / "data" / "areas" / area_id / name).read_bytes()

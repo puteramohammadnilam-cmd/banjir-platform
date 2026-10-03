@@ -364,9 +364,13 @@ def test_parity_each_premise_point_returns_its_depth(monkeypatch):
         for premise in areas.premises(area.id):
             data = post_point(client, premise["lat"], premise["lon"]).json()["data"]
             assert (data["coverage"], data["place"]["depth_m"]) == ("covered", premise["depth_m"]), premise["id"]
-            assert data["place"]["area_id"] == area.id
+            # a business near the view's edge can sit in a square whose centre is outside it: that point is in no area
+            west, south, east, north = area.view
+            lat, lon = data["place"]["lat"], data["place"]["lon"]
+            inside = west <= lon <= east and south <= lat <= north
+            assert data["place"]["area_id"] == (area.id if inside else None), premise["id"]
             checked += 1
-    assert checked == 204 + 27
+    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 204 + 27 + 300 + 491 + 158
     example = post_point(client, 3.0297599, 101.5364982).json()["data"]["place"]   # the plan's checklist point
     assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["100"] == 1.88
 
