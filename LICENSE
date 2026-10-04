@@ -29,3 +29,7 @@ Data. The MIT licence above covers the code. The data is under its own licences:
 - The JRC flood depth rasters (app/data/rasters/*.tif) are not in this repository. They are European Commission JRC
   global river flood hazard maps v2.1, CC BY 4.0, https://creativecommons.org/licenses/by/4.0/ (see
   app/data/rasters/SOURCES.txt).
+- The elevation crops (app/data/dem/*.tif) are derived from the Copernicus DEM GLO-30: (c) DLR e.V. 2010-2014 and
+  (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights
+  reserved. Their river levels come from OpenStreetMap rivers, (c) OpenStreetMap contributors, ODbL 1.0 (see
+  app/data/dem/SOURCES.txt).
