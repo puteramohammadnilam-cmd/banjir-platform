@@ -429,7 +429,7 @@ export default Object.freeze({
   // ---------- main.js and api.js ----------
   "main.missed": "That link's area or place is not in this build. Showing {area}.",
   "main.showing": "Showing {area}.",
-  "main.aiOff": "The AI assistant is switched off in this test build. The flood figures on the other tabs still work.",
+  "main.aiOff": "The AI assistant is switched off in this test build. The flood figures and costs on the page still work.",
   "main.loadFailed": "The flood data could not be loaded.",
   "main.loading": "Loading the flood data…",
   "api.unreachable": "Could not reach the server. Check your connection and try again.",

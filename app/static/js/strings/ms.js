@@ -430,7 +430,7 @@ export default Object.freeze({
   // ---------- main.js and api.js ----------
   "main.missed": "Kawasan atau tempat dalam pautan itu tiada dalam versi ini. Memaparkan {area}.",
   "main.showing": "Memaparkan {area}.",
-  "main.aiOff": "Pembantu AI dimatikan dalam versi ujian ini. Angka banjir di tab lain masih berfungsi.",
+  "main.aiOff": "Pembantu AI dimatikan dalam versi ujian ini. Angka banjir dan kos di halaman ini masih berfungsi.",
   "main.loadFailed": "Data banjir tidak dapat dimuatkan.",
   "main.loading": "Memuatkan data banjir…",
   "api.unreachable": "Pelayan tidak dapat dihubungi. Semak sambungan anda dan cuba lagi.",
