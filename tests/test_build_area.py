@@ -2,8 +2,8 @@
 
 Run from 11_Platform_Draft:  .venv/bin/python -m pytest -q tests/test_build_area.py -rs
 
-The parity tests rebuild Sri Muda from the raw files it was first built from and compare the bytes with the files in
-app/data/areas/sri-muda. They skip, saying why, when the raw files or the depth rasters are not on this machine.
+The parity tests rebuild Sri Muda from the raw files it was first built from and compare the bytes with a frozen copy
+of its build, tests/fixtures/sri_muda_built (so the test outlives the area folder, which the city build replaces). They skip, saying why, when the raw files or the depth rasters are not on this machine.
 The raw files are looked for in ../05_Raw_Data_Sources, or in BANJIR_RAW_DIR when that is set (a git worktree).
 """
 import json
@@ -26,6 +26,7 @@ SRI_MUDA_RAW = RAW / "shah_alam"
 SRI_MUDA_POIS = SRI_MUDA_RAW / "overpass_sri_muda_pois.json"
 SRI_MUDA_ROADS = SRI_MUDA_RAW / "overpass_sri_muda_roads.json"
 SRI_MUDA_VIEW = (101.515, 3.008, 101.550, 3.042)
+SRI_MUDA_BUILT = ROOT / "tests" / "fixtures" / "sri_muda_built"   # frozen copy of app/data/areas/sri-muda's build
 SRI_MUDA_DIR = ROOT / "app" / "data" / "areas" / "sri-muda"
 FIXTURE_VIEW = (100.0, 8.0, 101.0, 10.0)   # inside the fixture grid (100-110 E, 2.5-10 N, squares of 0.25 degrees)
 
@@ -83,11 +84,18 @@ def real_inputs_or_skip():
 
 def test_rebuilding_sri_muda_is_byte_identical(tmp_path):
     real_inputs_or_skip()
+    # the city area holds these same businesses once it ships, so its ids are not a clash here
     code = ba.main(["--area", "sri-muda", "--view", *map(str, SRI_MUDA_VIEW), "--pois", str(SRI_MUDA_POIS),
-                    "--roads", str(SRI_MUDA_ROADS), "--out", str(tmp_path)])
+                    "--roads", str(SRI_MUDA_ROADS), "--out", str(tmp_path), "--replaces", "shah-alam"])
     assert code == 0
     for name in ("premises.json", "town.json"):
-        assert (tmp_path / name).read_bytes() == (SRI_MUDA_DIR / name).read_bytes(), name
+        assert (tmp_path / name).read_bytes() == (SRI_MUDA_BUILT / name).read_bytes(), name
+
+
+@pytest.mark.skipif(not SRI_MUDA_DIR.is_dir(), reason="the Sri Muda area folder has been replaced by the city")
+def test_the_frozen_sri_muda_build_is_the_shipped_one_while_it_ships():
+    for name in ("premises.json", "town.json"):
+        assert (SRI_MUDA_BUILT / name).read_bytes() == (SRI_MUDA_DIR / name).read_bytes(), name
 
 
 def test_sri_muda_numbers_match_the_handover():

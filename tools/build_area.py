@@ -2,7 +2,8 @@
 
     .venv/bin/python tools/build_area.py --area kuala-krai --view 102.185 5.513 102.22 5.547 \\
         --pois ../05_Raw_Data_Sources/kuala_krai/overpass_kuala_krai_pois.json \\
-        --roads ../05_Raw_Data_Sources/kuala_krai/overpass_kuala_krai_roads.json [--shelters pps.json]
+        --roads ../05_Raw_Data_Sources/kuala_krai/overpass_kuala_krai_roads.json [--shelters pps.json] \\
+        [--sections sections.geojson] [--replaces AREA]
 
 Run from 11_Platform_Draft. It writes premises.json and town.json into app/data/areas/{area} (or --out). The folder's
 area.json is written by hand and must hold the same view.
@@ -13,8 +14,14 @@ Inputs, read only:
     eateries and pharmacies are kept; banks, clinics and fuel stations in a fetch are left out.
   - --shelters, optional: JSON {"located": [{name, lat, lon}]} of flood relief centres from a source we can cite.
     Without it the app shows no shelters rather than guessing.
+  - --sections, optional: a GeoJSON file of the area's sections (tools/sections_io.py reads it). Each business then
+    gains `section`, the id of the section holding it, or of the nearest one within 300 m; a business farther from
+    every section stops the build, naming it. Without it there is no `section` key, so older builds stay byte for byte.
+  - --replaces, optional and repeatable: an installed area whose businesses this build takes over, so its ids are not
+    a clash (a city build that holds a smaller area's businesses, before the smaller one is removed).
 
-Local metres use the view's centre latitude for the length of a degree of longitude.
+Local metres use the view's centre latitude for the length of a degree of longitude. The nearest road is looked up in
+a grid of 250 m squares (RoadIndex): the same road, distance and point as the search over every segment, ties included.
 """
 from __future__ import annotations
 
@@ -28,7 +35,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from app import areas, raster  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from app import areas, geo, raster  # noqa: E402
+import sections_io  # noqa: E402
 
 RETURN_PERIODS = raster.RETURN_PERIODS
 EATERIES = {"restaurant", "cafe", "fast_food", "food_court"}
@@ -41,6 +50,8 @@ M_PER_DEG_LAT = 110574.0
 M_PER_DEG_LON_EQUATOR = 111320.0
 UNNAMED_BUSINESS = "Unnamed (no name on the map)"
 UNNAMED_ROAD = "a road with no name"
+ROAD_CELL_M = 250          # side of a square of the road index, metres
+SECTION_REACH_M = 300.0    # a business outside every section takes the nearest one this close
 
 Point = tuple[float, float]
 View = tuple[float, float, float, float]   # west, south, east, north
@@ -123,7 +134,76 @@ def nearest_road(p: Point, roads: list[dict]) -> tuple[dict, float, Point]:
     return best
 
 
-def _premise(row: dict, proj: Projection, roads: list[dict], shelters: list[dict], depth_set: raster.DepthSet) -> dict:
+class RoadIndex:
+    """Road segments filed by the 250 m squares their bounding box touches. nearest() looks at the point's square, then
+    the ring of squares around it, and so on, and stops once the best distance is shorter than the distance to any
+    square not yet looked at. Segments keep their order in the road list, and a tie goes to the earlier one, so the
+    answer is nearest_road's exactly."""
+
+    def __init__(self, roads: list[dict], cell_m: float = ROAD_CELL_M) -> None:
+        self.cell_m = cell_m
+        self.segments = [(road, a, b) for road in roads for a, b in zip(road["pts"], road["pts"][1:])]
+        self.cells: dict[tuple[int, int], list[int]] = {}
+        for i, (_, a, b) in enumerate(self.segments):
+            (x0, y0), (x1, y1) = self._cell(min(a[0], b[0]), min(a[1], b[1])), self._cell(max(a[0], b[0]), max(a[1], b[1]))
+            for key in ((x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1)):
+                self.cells.setdefault(key, []).append(i)
+        keys = list(self.cells) or [(0, 0)]
+        self.span = (min(k[0] for k in keys), min(k[1] for k in keys), max(k[0] for k in keys), max(k[1] for k in keys))
+
+    def _cell(self, x: float, y: float) -> tuple[int, int]:
+        return math.floor(x / self.cell_m), math.floor(y / self.cell_m)
+
+    @staticmethod
+    def _ring(cx: int, cy: int, r: int):
+        if r == 0:
+            yield cx, cy
+            return
+        for x in range(cx - r, cx + r + 1):
+            yield x, cy - r
+            yield x, cy + r
+        for y in range(cy - r + 1, cy + r):
+            yield cx - r, y
+            yield cx + r, y
+
+    def nearest(self, p: Point) -> tuple[dict, float, Point]:
+        """(the road, metres to it, the nearest point on it), as nearest_road gives them."""
+        if not self.segments:
+            raise ValueError("no roads in the OSM extract")
+        cx, cy = self._cell(*p)
+        west, south, east, north = self.span
+        reach = max(cx - west, east - cx, cy - south, north - cy, 0)
+        best: tuple[float, int, Point] | None = None
+        for r in range(reach + 1):
+            for key in self._ring(cx, cy, r):
+                for i in self.cells.get(key, ()):
+                    dist, q = nearest_on_segment(p, self.segments[i][1], self.segments[i][2])
+                    if best is None or (dist, i) < best[:2]:
+                        best = (dist, i, q)
+            if best is not None and best[0] < r * self.cell_m:
+                break
+        return self.segments[best[1]][0], best[0], best[2]
+
+
+def assign_sections(businesses: list[dict], sections: list[dict]) -> list[dict]:
+    """New rows, each with "section": the id of the first section holding the business (an edge counts as inside), or
+    of the nearest section within 300 m. Raises ValueError naming every business farther than that from all of them."""
+    rows, far = [], []
+    for row in businesses:
+        found = geo.containing(row["lon"], row["lat"], sections)
+        if found is None:
+            near = geo.nearest_within(row["lon"], row["lat"], sections, SECTION_REACH_M)
+            found = near[0] if near else None
+        if found is None:
+            far.append(row["id"])
+        else:
+            rows.append({**row, "section": found["id"]})
+    if far:
+        raise ValueError(f"{len(far)} businesses are more than {SECTION_REACH_M:.0f} m from every section: {', '.join(far)}")
+    return rows
+
+
+def _premise(row: dict, proj: Projection, roads: RoadIndex, shelters: list[dict], depth_set: raster.DepthSet) -> dict:
     def depths(lon: float, lat: float) -> dict:
         found = depth_set.depths(lon, lat)
         if found is None:
@@ -131,12 +211,13 @@ def _premise(row: dict, proj: Projection, roads: list[dict], shelters: list[dict
         return found
 
     here = proj.to_m(row["lon"], row["lat"])
-    road, road_dist, road_pt = nearest_road(here, roads)
+    road, road_dist, road_pt = roads.nearest(here)
     shelter = min(shelters, key=lambda s: math.dist(here, proj.to_m(s["lon"], s["lat"])), default=None)
     return {
         "id": row["id"],
         "name": row["name"] or UNNAMED_BUSINESS,
         "sector": row["sector"], "kind": row["kind"], "is_chain": row["is_chain"],
+        **({"section": row["section"]} if "section" in row else {}),
         "lat": row["lat"], "lon": row["lon"],
         "map_last_edited": row["edited"],
         "depth_m": depths(row["lon"], row["lat"]),
@@ -170,13 +251,16 @@ def check_placement(view: View, businesses: list[dict], taken_ids: Collection[st
 
 
 def build(view: View, businesses: list[dict], roads: list[dict], shelters: list[dict],
-          depth_set: raster.DepthSet, taken_ids: Collection[str] = ()) -> tuple[list[dict], dict]:
+          depth_set: raster.DepthSet, taken_ids: Collection[str] = (),
+          sections: list[dict] | None = None) -> tuple[list[dict], dict]:
     """(premises, town) for one area: the view's wet squares first, so a view the rasters do not cover fails fast.
-    taken_ids are the business ids of the other installed areas."""
+    taken_ids are the business ids of the other installed areas; with sections, each business gains its section."""
     check_placement(view, businesses, taken_ids)
+    rows = assign_sections(businesses, sections) if sections is not None else businesses
     cells = depth_set.view_cells(view)
     proj = Projection.for_view(view)
-    premises = [_premise(row, proj, roads, shelters, depth_set) for row in businesses]
+    index = RoadIndex(roads)
+    premises = [_premise(row, proj, index, shelters, depth_set) for row in rows]
     premises.sort(key=lambda p: (p["sector"], p["name"]))
     check_premises(premises)
     grid = depth_set.locate(view[0], view[3])[0]
@@ -201,6 +285,9 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--pois", required=True, type=Path, help="Overpass answer: businesses")
     parser.add_argument("--roads", required=True, type=Path, help="Overpass answer: roads, with geometry")
     parser.add_argument("--shelters", type=Path, help='JSON {"located": [{name, lat, lon}]}')
+    parser.add_argument("--sections", type=Path, help="GeoJSON of the area's sections: each business gains its section")
+    parser.add_argument("--replaces", action="append", default=[], metavar="AREA",
+                        help="an installed area whose businesses this build takes over (its ids may repeat here)")
     parser.add_argument("--out", type=Path, help="output folder (default app/data/areas/AREA)")
     parser.add_argument("--rasters", type=Path, help="folder of JRC depth files (default app/data/rasters)")
     args = parser.parse_args(argv)
@@ -214,7 +301,8 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
 
 def check_inputs(args: argparse.Namespace, out: Path) -> None:
     """Stop with a plain message for a missing input, or an area.json whose view is not the one given."""
-    for flag, path in (("--pois", args.pois), ("--roads", args.roads), ("--shelters", args.shelters)):
+    for flag, path in (("--pois", args.pois), ("--roads", args.roads), ("--shelters", args.shelters),
+                       ("--sections", args.sections)):
         if path is not None and not path.is_file():
             raise SystemExit(f"{flag} file not found: {path}")
     config = out / "area.json"
@@ -222,6 +310,12 @@ def check_inputs(args: argparse.Namespace, out: Path) -> None:
         print(f"note: {config} does not exist yet; write it by hand before the app can load this area")
     elif json.loads(config.read_text(encoding="utf-8")).get("view") != list(args.view):
         raise SystemExit(f"{config} holds a different view from --view; make them the same first")
+
+
+def installed_ids(area_id: str, replaces: Collection[str]) -> set[str]:
+    """The business ids of the installed areas other than this one and the ones it replaces."""
+    skipped = {area_id, *replaces}
+    return {p["id"] for area in areas.load_all() if area.id not in skipped for p in areas.premises(area.id)}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -233,9 +327,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit(f"no depth rasters (JRC ID..._RP10_depth.tif and friends) in {depth_set.folder}")
     view = tuple(args.view)
     proj = Projection.for_view(view)
-    taken_ids = {p["id"] for area in areas.load_all() if area.id != args.area for p in areas.premises(area.id)}
+    sections = sections_io.load_sections(args.sections) if args.sections else None
     premises, town = build(view, load_businesses(args.pois), load_roads(args.roads, proj),
-                           load_shelters(args.shelters), depth_set, taken_ids)
+                           load_shelters(args.shelters), depth_set, installed_ids(args.area, args.replaces), sections)
     write_area(out, premises, town)
     wet = {rp: sum(1 for p in premises if p["depth_m"][str(rp)]) for rp in RETURN_PERIODS}
     print(f"{len(premises)} premises, {len(town['cells'])} flood cells, wet counts {wet}")
