@@ -173,6 +173,18 @@ export default Object.freeze({
   "history.leadEnd": ". Not a complete record.",
   "history.mapNote": "The map shows river floods expected once in 10 years or less often. Smaller, more frequent floods and flash floods from heavy rain are not on it.{memory}",
   "history.list": "The floods and their sources",
+  "history.noneFound": "No flood record found for {area} in the sources we checked ({from}–{to}). That does not mean it has never flooded.",
+  "history.undated": " A hollow dot is a year with reports that give no day.",
+  "history.gaps": "Years with no flood record in the sources we checked include {ranges}.",
+  "history.depth": "Depth reported: {depth}",
+  "history.sources": "Sources:",
+  "history.typeNews": "News",
+  "history.typeOfficial": "Official",
+  "history.typeDataset": "Dataset",
+  "history.typePaper": "Study",
+  "history.confidenceHigh": "High confidence",
+  "history.confidenceMedium": "Medium confidence",
+  "history.confidenceLow": "Low confidence",
 
   // ---------- My business: card.js ----------
   "business.deepNote": "The model can run very deep beside rivers. Reports of real floods often show much less water, so read this as the model's depth, not as what to expect.",

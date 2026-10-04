@@ -1,0 +1,177 @@
+{
+ "osm3s": {
+  "timestamp_osm_base": "2026-10-04T09:21:20Z",
+  "timestamp_areas_base": "2026-10-03T14:05:21Z",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 158731933,
+   "lat": 3.0873466,
+   "lon": 101.5472164,
+   "timestamp": "2025-08-11T08:16:33Z",
+   "tags": {
+    "brand": "HeroMarket",
+    "name": "HeroMarket",
+    "shop": "supermarket"
+   }
+  },
+  {
+   "type": "node",
+   "id": 158732943,
+   "lat": 3.0434654,
+   "lon": 101.5169616,
+   "timestamp": "2021-09-26T15:13:36Z",
+   "tags": {
+    "name": "Ole Ole",
+    "shop": "mall"
+   }
+  },
+  {
+   "type": "way",
+   "id": 19206050,
+   "timestamp": "2021-09-26T15:13:36Z",
+   "center": {
+    "lat": 3.045088,
+    "lon": 101.515778
+   },
+   "nodes": [
+    199262671,
+    199262673,
+    248498653,
+    6180220568,
+    199262674,
+    199262677,
+    6180220567,
+    248498654,
+    199262671
+   ],
+   "tags": {
+    "brand": "Mydin",
+    "name": "Mydin",
+    "shop": "supermarket"
+   }
+  },
+  {
+   "type": "way",
+   "id": 19800584,
+   "timestamp": "2025-02-11T14:47:09Z",
+   "center": {
+    "lat": 3.0719818,
+    "lon": 101.5386622
+   },
+   "nodes": [
+    206341148,
+    5565911202,
+    248237148,
+    206341149,
+    206341150,
+    7850736303,
+    7850736304,
+    343637242,
+    343637256,
+    206341148
+   ],
+   "tags": {
+    "brand": "Lotus's",
+    "name": "Lotus's",
+    "shop": "supermarket"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 8477822,
+   "timestamp": "2026-07-20T02:55:52Z",
+   "center": {
+    "lat": 3.0717638,
+    "lon": 101.5181847
+   },
+   "members": [
+    {
+     "type": "way",
+     "ref": 25680965,
+     "role": "outer"
+    },
+    {
+     "type": "way",
+     "ref": 610996754,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996752,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996745,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996756,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996750,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996760,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610996758,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610976219,
+     "role": "inner"
+    },
+    {
+     "type": "way",
+     "ref": 610976222,
+     "role": "outer"
+    }
+   ],
+   "tags": {
+    "name": "SACC Mall",
+    "shop": "mall"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 16615231,
+   "timestamp": "2023-10-29T16:25:02Z",
+   "center": {
+    "lat": 3.0351099,
+    "lon": 101.5560277
+   },
+   "members": [
+    {
+     "type": "way",
+     "ref": 1219328773,
+     "role": "outer"
+    },
+    {
+     "type": "way",
+     "ref": 1219322051,
+     "role": "outer"
+    },
+    {
+     "type": "way",
+     "ref": 1219337580,
+     "role": "outer"
+    }
+   ],
+   "tags": {
+    "shop": "car"
+   }
+  }
+ ]
+}
