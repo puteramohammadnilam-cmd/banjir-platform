@@ -72,8 +72,10 @@ export function flashFact(place, area = null) {
 }
 
 // How closely an index's ranking of the sections follows the floods on record (Spearman's rho, index_method.validation).
+// A rho of -0.2 or below is no match but a ranking that goes the other way, and is said so.
 const MATCH_WORDS = [[0.2, "compare.none"], [0.35, "compare.weak"], [0.6, "compare.moderate"], [Infinity, "compare.strong"]];
-export const matchKey = (rho) => MATCH_WORDS.find(([below]) => Math.abs(rho) < below)[1];
+const OPPOSITE_FROM = -0.2;
+export const matchKey = (rho) => (rho <= OPPOSITE_FROM ? "compare.opposite" : MATCH_WORDS.find(([below]) => Math.abs(rho) < below)[1]);
 
 /** "Compared with the floods on record, section by section (56 in all): a moderate match (rank correlation 0.40)", or
  *  null when the validation has no such figure. `which` is "flash" or "score". */

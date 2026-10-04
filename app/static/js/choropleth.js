@@ -64,11 +64,12 @@ const FLASH_WORDS = [() => t("choropleth.under", { pct: 10 }), () => t("chorople
 const SCORE_WORDS = ["very_low", "low", "moderate", "high", "very_high"].map((id, i) => () => `${i + 1} · ${t(`score.${id}`)}`);
 const tip = (section, value, none, text) => [section.name, value === null ? t(none) : text(value), t("choropleth.tipOpen")];
 
-/** The share of a section's ground at high or extreme flash flood potential, in the warm ramp. */
+/** The share of a section's ground at high or extreme flash flood potential, in the warm ramp; a share of 0 is "under
+ *  10%", and only a section with no figures is "not worked out" (outlined only). */
 export const FLASH_METRIC = Object.freeze({
   value: highShare,
-  class: (share) => (share > 0 ? FLASH_TOPS.filter((top, i) => (i === 2 ? share > top : share >= top)).length + 1 : 0),
-  classes: [NO_SHARE, ...FLASH_RAMP.map((step, i) => ({ ...step, words: FLASH_WORDS[i] }))],
+  class: (share) => (Number.isFinite(share) ? FLASH_TOPS.filter((top, i) => (i === 2 ? share > top : share >= top)).length + 1 : 0),
+  classes: [{ ...NO_SHARE, words: () => t("choropleth.metricNone") }, ...FLASH_RAMP.map((step, i) => ({ ...step, words: FLASH_WORDS[i] }))],
   tooltip: (section) => tip(section, highShare(section), "choropleth.metricTipFlashNone", (share) => t("choropleth.metricTipFlash", { share: shareText(share) })),
   heading: (word) => t("choropleth.metricFlashHeading", { word }),
 });

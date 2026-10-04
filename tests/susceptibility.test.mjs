@@ -202,9 +202,16 @@ test("the comparison with recorded floods is put in words from its rank correlat
   assert.equal(matchKey(0.3), "compare.weak");
   assert.equal(matchKey(0.398), "compare.moderate");
   assert.equal(matchKey(0.64), "compare.strong");
+  assert.equal(matchKey(-0.2), "compare.opposite");
+  assert.equal(matchKey(-0.45), "compare.opposite");
+  assert.equal(matchKey(-0.199), "compare.none");
   const validation = { n: 56, spearman: { flash_vs_history: 0.017, score_vs_history: 0.398 } };
   assert.equal(comparedNote(validation, "flash", { en: "Section", ms: "Seksyen" }),
     "Compared with the floods on record, section by section (56 in all): no clear match (rank correlation 0.02).");
   assert.match(comparedNote(validation, "score", null), /a moderate match \(rank correlation 0\.40\)/);
   assert.equal(comparedNote({ n: 56 }, "flash"), null, "no figure, no note");
+  const against = { n: 56, spearman: { flash_vs_history: -0.25 } };
+  assert.equal(comparedNote(against, "flash", { en: "Section", ms: "Seksyen" }),
+    "Compared with the floods on record, section by section (56 in all): the ranking goes the other way, with more floods on record where it ranks lower (rank correlation -0.25).");
+  inMalay(() => assert.match(comparedNote(against, "flash", { en: "Section", ms: "Seksyen" }), /berlawanan arah.*\(korelasi pangkat -0\.25\)/));
 });

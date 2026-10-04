@@ -186,13 +186,14 @@ test("the river model's metric is the share of squares with water, as before", (
   assert.deepEqual(DEPTH_METRIC.tooltip(SECTIONS[1], "50"), tooltipLines(SECTIONS[1], "50"));
 });
 
-test("flash flood potential shades by the share of ground at high or extreme, in the warm ramp, none when not worked out", () => {
+test("flash flood potential shades by the share of ground at high or extreme, in the warm ramp; 'not worked out' only when missing", () => {
   assert.equal(FLASH_METRIC.value(INDEXED_SECTIONS[0]), 0.2);
   assert.equal(FLASH_METRIC.value(SECTIONS[0]), null);
-  const cases = [[null, 0], [0, 0], [0.05, 1], [0.0999, 1], [0.1, 2], [0.25, 3], [0.5, 3], [0.51, 4], [1, 4]];
+  const cases = [[null, 0], [undefined, 0], [0, 1], [0.05, 1], [0.0999, 1], [0.1, 2], [0.25, 3], [0.5, 3], [0.51, 4], [1, 4]];
   for (const [share, expected] of cases) assert.equal(FLASH_METRIC.class(share), expected, String(share));
   assert.deepEqual(FLASH_METRIC.classes.slice(1).map(({ color }) => color), FLASH_RAMP.map(({ color }) => color));
-  assert.deepEqual(FLASH_METRIC.classes.map((step) => step.words()), ["None", "Under 10%", "10–25%", "25–50%", "Over 50%"]);
+  assert.deepEqual(FLASH_METRIC.classes.map((step) => step.words()), ["Not worked out", "Under 10%", "10–25%", "25–50%", "Over 50%"]);
+  assert.equal(FLASH_METRIC.classes[0].opacity, 0, "a section with no figures is outlined only");
   assert.deepEqual(FLASH_METRIC.tooltip(INDEXED_SECTIONS[2]), ["Seksyen U1", "70% of its ground at high or extreme flash flood potential", "Tap to open"]);
   assert.equal(FLASH_METRIC.tooltip(SECTIONS[2])[1], "Flash flood potential not worked out here yet");
 });

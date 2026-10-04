@@ -169,6 +169,7 @@ export default Object.freeze({
   "compare.weak": "padanan yang lemah",
   "compare.moderate": "padanan yang sederhana",
   "compare.strong": "padanan yang kuat",
+  "compare.opposite": "kedudukannya berlawanan arah, dengan lebih banyak banjir direkodkan di tempat yang kedudukannya lebih rendah",
   "score.method": "Skor kami (1 lebih rendah, 5 lebih tinggi) menimbang tujuh perkara bagi setiap {word} seperti Leeonis et al. (2024): jarak ke sungai, kepadatan longkang, ketinggian tanah, guna tanah, kecerunan, jarak ke jalan dan penduduk. Ia membandingkan tempat dalam bandar ini; bukan dibuat oleh mana-mana pihak berkuasa.",
   "score.very_low": "sangat rendah",
   "score.low": "rendah",

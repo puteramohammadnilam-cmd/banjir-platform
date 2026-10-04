@@ -168,6 +168,7 @@ export default Object.freeze({
   "compare.weak": "a weak match",
   "compare.moderate": "a moderate match",
   "compare.strong": "a strong match",
+  "compare.opposite": "the ranking goes the other way, with more floods on record where it ranks lower",
   "score.method": "Our score (1 lower, 5 higher) weighs seven things for each {word} as Leeonis et al. (2024) do: distance to a river, drain density, ground height, land use, slope, distance to a road and population. It compares places in this city; no authority made it.",
   "score.very_low": "very low",
   "score.low": "low",
