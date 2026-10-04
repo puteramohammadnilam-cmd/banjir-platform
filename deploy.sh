@@ -16,12 +16,12 @@ REGION=${REGION:-asia-southeast1}
 SERVICE=${SERVICE:-banjir-check}
 DOMAIN=${DOMAIN:-}   # optional: a domain you own, to map to the service
 
-# The flood depth rasters are not in git (9 files, about 77 MB), but the service needs all of them: three grids
+# The flood depth rasters are not in git (9 files, about 73 MB), but the service needs all of them: three grids
 # (Peninsula, Sabah and Sarawak, Langkawi) with one file for each return period. Stop here, before anything in Google
 # Cloud is touched, and name every file that is missing. The names and download links are in SOURCES.txt.
 missing=()
 for grid in ID211_N10_E100 ID220_N10_E110 ID202_N10_E90; do
-  for rp in 10 100 500; do
+  for rp in 10 20 50; do
     [ -f "app/data/rasters/${grid}_RP${rp}_depth.tif" ] || missing+=("${grid}_RP${rp}_depth.tif")
   done
 done

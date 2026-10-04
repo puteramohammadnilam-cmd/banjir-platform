@@ -86,7 +86,7 @@ test("the cost tab's title says 'this point' for a point and names a business", 
 });
 
 test("with nothing picked, the chips ask only about the area", () => {
-  assert.deepEqual(chipsFor(undefined, HOME, AREAS), ["Which businesses stay dry in a 100 year flood?", "Is heavy rain due today?"]);
+  assert.deepEqual(chipsFor(undefined, HOME, AREAS), ["Which businesses stay dry in a 1 in 50 years flood?", "Is heavy rain due today?"]);
 });
 
 test("a business keeps its five chips; a point gets its own, with no question a point cannot answer", () => {
@@ -94,7 +94,7 @@ test("a business keeps its five chips; a point gets its own, with no question a 
   assert.deepEqual(business, [
     "Would this shop get water in a big flood?",
     "Roughly how much could this shop lose in a flood?",
-    "Which businesses stay dry in a 100 year flood?",
+    "Which businesses stay dry in a 1 in 50 years flood?",
     "Is heavy rain due today?",
     "Is this shop still open?",
   ]);
@@ -110,7 +110,7 @@ test("in Bahasa Melayu every chip set is in Bahasa Melayu, with the same questio
     assert.deepEqual(chipsFor(shop, HOME, AREAS), [
       "Kedai ni kena air tak kalau banjir besar?",
       "Berapa anggaran rugi kedai ni kalau banjir?",
-      "Perniagaan mana yang tak kena air dalam banjir 1 dalam 100 tahun?",
+      "Perniagaan mana yang tak kena air dalam banjir 1 dalam 50 tahun?",
       "Hujan lebat tak hari ni?",
       "Kedai ni masih buka tak?",
     ]);
@@ -118,7 +118,7 @@ test("in Bahasa Melayu every chip set is in Bahasa Melayu, with the same questio
     assert.equal(outside[0], "Kawasan ni kena air tak kalau banjir besar?");
     for (const chip of outside) assert.ok(!/shop|kedai|open|buka/i.test(chip), `${chip} is about a shop`);
     const inside = chipsFor(point({ area_id: "home" }), HOME, AREAS);
-    assert.deepEqual(inside.filter((chip) => !outside.includes(chip)), ["Perniagaan mana di kawasan ini yang tak kena air dalam banjir 1 dalam 100 tahun?"]);
+    assert.deepEqual(inside.filter((chip) => !outside.includes(chip)), ["Perniagaan mana di kawasan ini yang tak kena air dalam banjir 1 dalam 50 tahun?"]);
     assert.equal(chipsFor(shop, HOME, AREAS), chipsFor(shop, HOME, AREAS), "the same frozen list, so the chat rebuilds nothing");
   } finally {
     useLang("en");
@@ -129,7 +129,7 @@ test("a point inside a listed area also gets the area question", () => {
   const outside = chipsFor(point({ area_id: null }), HOME, AREAS);
   for (const area_id of ["home", "far"]) {
     const inside = chipsFor(point({ area_id }), HOME, AREAS);
-    assert.deepEqual(inside.filter((chip) => !outside.includes(chip)), ["Which businesses in this area stay dry in a 100 year flood?"], area_id);
+    assert.deepEqual(inside.filter((chip) => !outside.includes(chip)), ["Which businesses in this area stay dry in a 1 in 50 years flood?"], area_id);
     assert.equal(inside.length, outside.length + 1);
   }
 });

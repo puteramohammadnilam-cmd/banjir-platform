@@ -139,7 +139,7 @@ def test_a_point_result_has_no_id_coordinates_or_square(selected):
     result = floodtools.flood_check("selected")
     assert set(result) == POINT_KEYS
     assert (result["place"], result["area"], result["shelter"]) == ("the selected point", None, None)
-    assert result["depth_m"] == selected["depth_m"] == {"10": 14.14, "100": 14.64, "500": 15.14}
+    assert result["depth_m"] == selected["depth_m"] == {"10": 14.14, "20": 14.64, "50": 15.14}
 
 
 def test_a_point_in_an_area_gets_its_area_and_relief_centre_but_not_where_it_is(private_rasters):
@@ -255,7 +255,7 @@ def hostile_areas(monkeypatch) -> dict:
     """A Taman Sri Muda business whose name, type, road and relief centre carry injections, with no water at 1 in 10,
     which every area lists; and every area's relief centre list holds one hostile centre, beside Kota Tinggi's."""
     premise = {**SRI_MUDA, "name": hostile("NAME"), "kind": hostile("KIND"),
-               "depth_m": {"10": None, "100": 0.5, "500": 1.0}, "road": {**SRI_MUDA["road"], "name": hostile("ROAD")},
+               "depth_m": {"10": None, "20": 0.5, "50": 1.0}, "road": {**SRI_MUDA["road"], "name": hostile("ROAD")},
                "shelter": {"name": hostile("SHELTER"), "distance_m": 250}}
     found, town = areas.business, areas.town
     monkeypatch.setattr(areas, "business",

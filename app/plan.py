@@ -10,14 +10,14 @@ import re
 
 from . import areas, floodtools, places
 
-SCENARIOS = ("10", "100", "500")
+SCENARIOS = ("10", "20", "50")
 CHANCE_YEARS = 10
 INFOBANJIR = "https://publicinfobanjir.water.gov.my/"
 MAX_STEP_CHARS = 200
 STEP_LIMITS = {"before": 6, "warning": 5, "during": 4, "after": 5}
 TITLES = {"ms": "Pelan banjir", "en": "Flood plan"}
 # What only contacts() may give: a link, a web or e-mail address, or a Malaysian phone number (0 or +60 first, or a
-# 1-300 or 1-800 line). Seven digits in a row without those (such as "10 100 500") are not taken for a phone number.
+# 1-300 or 1-800 line). Seven digits in a row without those (such as "65 40 180") are not taken for a phone number.
 CONTACT = re.compile(
     r"https?://|www\.|@|\b[\w-]+(?:\.[\w-]+)*\.(?:my|com|org|net|gov|edu|io|me|info|asia)\b"
     r"|(?:\+?60|\b0)\d{1,2}[\s.-]?\d{3,4}[\s.-]?\d{3,4}\b|\b1[\s-]?[38]00\b", re.IGNORECASE)

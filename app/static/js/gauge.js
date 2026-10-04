@@ -11,7 +11,7 @@ const PERSON_X = 58;
 const DOOR = { x: 104, w: 54 };
 const COUNTER = { x: 180, w: 82 };
 const LABEL_X = WIDTH - 4;
-const WATER_W = 280;              // water and the dashed levels stop here: the gutter to LABEL_X fits "1 dalam 500", so no label is under water
+const WATER_W = 280;              // water and the dashed levels stop here: the gutter to LABEL_X fits "1 dalam 50", so no label is under water
 const LABEL_GAP = 14;
 // The water is always the same blue, whatever the depth: the deeper bands' indigo and plum, painted over a street, do not
 // read as water. How deep it is stays in the words and on the map, and the depth is the height of the blue.

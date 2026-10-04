@@ -16,7 +16,7 @@ const REGIONS = [
   { id: "peninsula", box: [99.5, 1.15, 104.7, 6.8] },
   { id: "borneo", box: [109.5, 0.8, 119.4, 7.5] },
 ];
-const COVERAGE = { data_version: "a5486e860339", return_periods: [10, 100, 500], block_cells: 24, grids: [E100], regions: REGIONS };
+const COVERAGE = { data_version: "a5486e860339", return_periods: [10, 20, 50], block_cells: 24, grids: [E100], regions: REGIONS };
 
 // ---------- where a spot lies ----------
 

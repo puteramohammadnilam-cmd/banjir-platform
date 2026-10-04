@@ -11,14 +11,14 @@ const FACTS = {
   place: "Anetas KARUPATI COFFEE RESTAURANT", kind: "restaurant", area: "Taman Sri Muda",
   floods: [
     { size: "1 in 10 years", chance_in_10_years_pct: 65, street_depth_m: 1.35, water_above_floor_m: 1.35 },
-    { size: "1 in 100 years", chance_in_10_years_pct: 10, street_depth_m: 1.88, water_above_floor_m: 1.88 },
-    { size: "1 in 500 years", chance_in_10_years_pct: 2, street_depth_m: null, water_above_floor_m: 0 },
+    { size: "1 in 20 years", chance_in_10_years_pct: 40, street_depth_m: 1.54, water_above_floor_m: 1.54 },
+    { size: "1 in 50 years", chance_in_10_years_pct: 18, street_depth_m: null, water_above_floor_m: 0 },
   ],
   floor_height_cm: 0, relief_centre: null, estimate: null, model_note: "Depths are from a global river flood model.",
 };
 const RESULT = {
   language: "ms", facts: FACTS,
-  plan: { title: "Pelan banjir kedai anda", summary: "Dalam model, air sampai 1.88 m.", before: ["Simpan dokumen di rak atas."],
+  plan: { title: "Pelan banjir kedai anda", summary: "Dalam model, air sampai 1.54 m.", before: ["Simpan dokumen di rak atas."],
     warning: ["Angkat stok."], during: ["Tutup suis utama."], after: ["Bersihkan kedai."] },
   contacts: [{ name: "Emergency (police, fire, ambulance)", how: "999" }, { name: "Majlis Bandaraya Shah Alam", how: "your local council" }],
 };
@@ -57,7 +57,7 @@ test("a plan shows Gemini's steps under headings in its own language, beside our
   assert.deepEqual(headings, ["Sebelum banjir", "Bila ada amaran", "Semasa banjir", "Selepas banjir", "Hubungi"]);
   assert.match(text(), /Pelan banjir kedai anda/);
   const rows = card.node.querySelectorAll("tr").slice(1).map((row) => row.textContent);
-  assert.match(rows[1], /1 dalam 100 tahun.*10%.*1\.88 m/);
+  assert.match(rows[1], /1 dalam 20 tahun.*40%.*1\.54 m/);
   assert.match(rows[2], /tiada air dalam model/);
   assert.match(text(), /999/);
   assert.match(text(), /Ditulis oleh Gemini/);
@@ -108,7 +108,7 @@ import { planText } from "../app/static/js/plan.js";
 test("the plan as text has the title, our figures, numbered steps, contacts and the footer", () => {
   const text = planText(RESULT);
   assert.match(text, /^Pelan banjir kedai anda\n/);
-  assert.match(text, /1 dalam 100 tahun: air 1\.88 m di jalan dalam model; peluang dalam 10 tahun 10%/);
+  assert.match(text, /1 dalam 20 tahun: air 1\.54 m di jalan dalam model; peluang dalam 10 tahun 40%/);
   assert.match(text, /^Pelan banjir kedai anda\n.*\n.*\nAngka daripada model banjir/);
   assert.match(text, /Sebelum banjir\n1\. Simpan dokumen di rak atas\./);
   assert.match(text, /Hubungi\n- Emergency \(police, fire, ambulance\): 999/);
@@ -132,7 +132,7 @@ test("a long plan is cut in its steps, never in its figures, contacts or footer"
   assert.ok(encodeURIComponent(text).length <= MAX_SHARE_CHARS, String(encodeURIComponent(text).length));
   assert.match(text, /…\n\nHubungi\n- Emergency/);
   assert.match(text, /Ditulis oleh Gemini/);
-  assert.match(text, /1 dalam 100 tahun/);
+  assert.match(text, /1 dalam 20 tahun/);
 });
 
 test("a dry flood size reads as no water in the street in the model", () => {
@@ -187,7 +187,7 @@ test("the WhatsApp cap counts the percent-encoded text, not the characters", () 
   assert.ok(text.length < encoded(text) - 200, "the raw length is well under the encoded one, so a raw cap would have let it through");
   assert.match(text, /…\n\nHubungi\n- Emergency/);
   assert.match(text, /Ditulis oleh Gemini/);
-  assert.match(text, /1 dalam 100 tahun/);
+  assert.match(text, /1 dalam 20 tahun/);
   const link = `https://wa.me/?text=${encodeURIComponent(text)}`;
   assert.ok(link.length <= MAX_SHARE_CHARS + "https://wa.me/?text=".length);
 });

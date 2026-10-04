@@ -10,8 +10,8 @@
   "map_last_edited": "2024-12-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -19,8 +19,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -36,8 +36,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -45,8 +45,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -62,8 +62,8 @@
   "map_last_edited": "2025-03-21",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Belakang Hospital",
@@ -71,8 +71,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -88,8 +88,8 @@
   "map_last_edited": "2022-09-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -97,8 +97,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -114,8 +114,8 @@
   "map_last_edited": "2022-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Lorong Merican",
@@ -123,8 +123,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -140,8 +140,8 @@
   "map_last_edited": "2017-05-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -149,8 +149,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -166,8 +166,8 @@
   "map_last_edited": "2024-12-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -175,8 +175,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -192,8 +192,8 @@
   "map_last_edited": "2025-02-03",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Bayam",
@@ -201,8 +201,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -218,8 +218,8 @@
   "map_last_edited": "2024-12-03",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -227,8 +227,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -244,8 +244,8 @@
   "map_last_edited": "2025-08-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -253,8 +253,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -270,8 +270,8 @@
   "map_last_edited": "2024-09-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Langgar",
@@ -279,8 +279,8 @@
    "distance_m": 24,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -296,8 +296,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -305,8 +305,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -322,8 +322,8 @@
   "map_last_edited": "2024-03-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Maharaja",
@@ -331,8 +331,8 @@
    "distance_m": 3,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -348,8 +348,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -357,8 +357,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -374,8 +374,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -383,8 +383,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -400,8 +400,8 @@
   "map_last_edited": "2019-08-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -409,8 +409,8 @@
    "distance_m": 2,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -426,8 +426,8 @@
   "map_last_edited": "2022-07-16",
   "depth_m": {
    "10": 3.24,
-   "100": 4.74,
-   "500": 5.08
+   "20": 3.92,
+   "50": 4.49
   },
   "road": {
    "name": "a road with no name",
@@ -435,8 +435,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 0.94,
-    "100": 2.44,
-    "500": 2.78
+    "20": 1.62,
+    "50": 2.18
    }
   },
   "shelter": null
@@ -452,8 +452,8 @@
   "map_last_edited": "2015-10-01",
   "depth_m": {
    "10": 6.94,
-   "100": 8.43,
-   "500": 8.77
+   "20": 7.62,
+   "50": 8.18
   },
   "road": {
    "name": "Lorong Tukang Perak",
@@ -461,8 +461,8 @@
    "distance_m": 42,
    "depth_m": {
     "10": 6.03,
-    "100": 7.53,
-    "500": 7.87
+    "20": 6.71,
+    "50": 7.28
    }
   },
   "shelter": null
@@ -478,8 +478,8 @@
   "map_last_edited": "2026-08-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -487,8 +487,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -504,8 +504,8 @@
   "map_last_edited": "2022-12-26",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -513,8 +513,8 @@
    "distance_m": 1,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -530,8 +530,8 @@
   "map_last_edited": "2026-01-17",
   "depth_m": {
    "10": 2.33,
-   "100": 3.7,
-   "500": 4.0
+   "20": 2.96,
+   "50": 3.47
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -539,8 +539,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 2.33,
-    "100": 3.7,
-    "500": 4.0
+    "20": 2.96,
+    "50": 3.47
    }
   },
   "shelter": null
@@ -556,8 +556,8 @@
   "map_last_edited": "2025-03-09",
   "depth_m": {
    "10": null,
-   "100": 0.26,
-   "500": 0.47
+   "20": null,
+   "50": 0.12
   },
   "road": {
    "name": "a road with no name",
@@ -565,8 +565,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": 0.37,
-    "500": 0.58
+    "20": null,
+    "50": 0.22
    }
   },
   "shelter": null
@@ -582,8 +582,8 @@
   "map_last_edited": "2019-02-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -591,8 +591,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -608,8 +608,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -617,8 +617,8 @@
    "distance_m": 28,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -634,8 +634,8 @@
   "map_last_edited": "2023-08-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -643,8 +643,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -660,8 +660,8 @@
   "map_last_edited": "2021-12-07",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -669,8 +669,8 @@
    "distance_m": 4,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -686,8 +686,8 @@
   "map_last_edited": "2021-10-26",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dusun Muda",
@@ -695,8 +695,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -712,8 +712,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -721,8 +721,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -738,8 +738,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -747,8 +747,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -764,8 +764,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -773,8 +773,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -790,8 +790,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -799,8 +799,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -816,8 +816,8 @@
   "map_last_edited": "2020-12-15",
   "depth_m": {
    "10": 1.57,
-   "100": 3.09,
-   "500": 3.44
+   "20": 2.26,
+   "50": 2.83
   },
   "road": {
    "name": "a road with no name",
@@ -825,8 +825,8 @@
    "distance_m": 48,
    "depth_m": {
     "10": 1.57,
-    "100": 3.1,
-    "500": 3.44
+    "20": 2.27,
+    "50": 2.84
    }
   },
   "shelter": null
@@ -842,8 +842,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.17
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang",
@@ -851,8 +851,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.17
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -868,8 +868,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -877,8 +877,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -894,8 +894,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.98,
-   "500": 1.19
+   "20": 0.46,
+   "50": 0.82
   },
   "road": {
    "name": "a road with no name",
@@ -903,8 +903,8 @@
    "distance_m": 4,
    "depth_m": {
     "10": null,
-    "100": 0.98,
-    "500": 1.19
+    "20": 0.46,
+    "50": 0.82
    }
   },
   "shelter": null
@@ -920,8 +920,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 5.04,
-   "100": 6.54,
-   "500": 6.88
+   "20": 5.72,
+   "50": 6.29
   },
   "road": {
    "name": "a road with no name",
@@ -929,8 +929,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 5.04,
-    "100": 6.54,
-    "500": 6.88
+    "20": 5.72,
+    "50": 6.29
    }
   },
   "shelter": null
@@ -946,8 +946,8 @@
   "map_last_edited": "2023-07-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -955,8 +955,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -972,8 +972,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.32,
-   "100": 4.8,
-   "500": 5.14
+   "20": 3.99,
+   "50": 4.55
   },
   "road": {
    "name": "a road with no name",
@@ -981,8 +981,8 @@
    "distance_m": 25,
    "depth_m": {
     "10": 3.32,
-    "100": 4.8,
-    "500": 5.14
+    "20": 3.99,
+    "50": 4.55
    }
   },
   "shelter": null
@@ -998,8 +998,8 @@
   "map_last_edited": "2020-12-15",
   "depth_m": {
    "10": null,
-   "100": 2.5,
-   "500": 2.82
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1007,8 +1007,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": 2.5,
-    "500": 2.82
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1024,8 +1024,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": 0.26,
-   "500": 0.47
+   "20": null,
+   "50": 0.12
   },
   "road": {
    "name": "a road with no name",
@@ -1033,8 +1033,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": 0.26,
-    "500": 0.47
+    "20": null,
+    "50": 0.12
    }
   },
   "shelter": null
@@ -1050,8 +1050,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1059,8 +1059,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1076,8 +1076,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1085,8 +1085,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1102,8 +1102,8 @@
   "map_last_edited": "2024-11-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dewan Mak Jah Pasir Pekan",
@@ -1111,8 +1111,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1128,8 +1128,8 @@
   "map_last_edited": "2023-07-31",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1137,8 +1137,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1154,8 +1154,8 @@
   "map_last_edited": "2025-07-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1163,8 +1163,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1180,8 +1180,8 @@
   "map_last_edited": "2026-06-30",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1189,8 +1189,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1206,8 +1206,8 @@
   "map_last_edited": "2023-09-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1215,8 +1215,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1232,8 +1232,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1241,8 +1241,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1258,8 +1258,8 @@
   "map_last_edited": "2026-01-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -1267,8 +1267,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1284,8 +1284,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1293,8 +1293,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1310,8 +1310,8 @@
   "map_last_edited": "2023-06-28",
   "depth_m": {
    "10": 2.95,
-   "100": 4.25,
-   "500": 4.54
+   "20": 3.56,
+   "50": 4.04
   },
   "road": {
    "name": "a road with no name",
@@ -1319,8 +1319,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 2.95,
-    "100": 4.25,
-    "500": 4.54
+    "20": 3.56,
+    "50": 4.04
    }
   },
   "shelter": null
@@ -1336,8 +1336,8 @@
   "map_last_edited": "2026-09-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1345,8 +1345,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1362,8 +1362,8 @@
   "map_last_edited": "2026-01-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kampung Dusun",
@@ -1371,8 +1371,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1388,8 +1388,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Darulnaim",
@@ -1397,8 +1397,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1414,8 +1414,8 @@
   "map_last_edited": "2025-07-07",
   "depth_m": {
    "10": null,
-   "100": 0.6,
-   "500": 0.88
+   "20": null,
+   "50": 0.41
   },
   "road": {
    "name": "Jalan Besar Nik Rahimah Nik Mat",
@@ -1423,8 +1423,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": 0.6,
-    "500": 0.88
+    "20": null,
+    "50": 0.41
    }
   },
   "shelter": null
@@ -1440,8 +1440,8 @@
   "map_last_edited": "2025-02-03",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1449,8 +1449,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1466,8 +1466,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.33,
-   "100": 4.81,
-   "500": 5.15
+   "20": 4.0,
+   "50": 4.56
   },
   "road": {
    "name": "a road with no name",
@@ -1475,8 +1475,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 3.33,
-    "100": 4.81,
-    "500": 5.15
+    "20": 4.0,
+    "50": 4.56
    }
   },
   "shelter": null
@@ -1492,8 +1492,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 5.23,
-   "100": 6.73,
-   "500": 7.07
+   "20": 5.91,
+   "50": 6.48
   },
   "road": {
    "name": "a road with no name",
@@ -1501,8 +1501,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": 6.03,
-    "100": 7.52,
-    "500": 7.86
+    "20": 6.71,
+    "50": 7.27
    }
   },
   "shelter": null
@@ -1518,8 +1518,8 @@
   "map_last_edited": "2024-02-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Bayam",
@@ -1527,8 +1527,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1544,8 +1544,8 @@
   "map_last_edited": "2024-08-06",
   "depth_m": {
    "10": 0.37,
-   "100": 1.43,
-   "500": 1.66
+   "20": 0.88,
+   "50": 1.27
   },
   "road": {
    "name": "a road with no name",
@@ -1553,8 +1553,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 0.37,
-    "100": 1.43,
-    "500": 1.66
+    "20": 0.88,
+    "50": 1.27
    }
   },
   "shelter": null
@@ -1570,8 +1570,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.98,
-   "500": 1.19
+   "20": 0.46,
+   "50": 0.82
   },
   "road": {
    "name": "a road with no name",
@@ -1579,8 +1579,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": 0.98,
-    "500": 1.19
+    "20": 0.46,
+    "50": 0.82
    }
   },
   "shelter": null
@@ -1596,8 +1596,8 @@
   "map_last_edited": "2022-04-18",
   "depth_m": {
    "10": null,
-   "100": 0.19,
-   "500": 0.39
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1605,8 +1605,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": 0.19,
-    "500": 0.39
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1622,8 +1622,8 @@
   "map_last_edited": "2021-08-02",
   "depth_m": {
    "10": 1.57,
-   "100": 3.09,
-   "500": 3.44
+   "20": 2.26,
+   "50": 2.83
   },
   "road": {
    "name": "a road with no name",
@@ -1631,8 +1631,8 @@
    "distance_m": 40,
    "depth_m": {
     "10": 1.57,
-    "100": 3.09,
-    "500": 3.44
+    "20": 2.26,
+    "50": 2.83
    }
   },
   "shelter": null
@@ -1648,8 +1648,8 @@
   "map_last_edited": "2022-09-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -1657,8 +1657,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1674,8 +1674,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1683,8 +1683,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1700,8 +1700,8 @@
   "map_last_edited": "2025-07-31",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1709,8 +1709,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1726,8 +1726,8 @@
   "map_last_edited": "2020-08-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -1735,8 +1735,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1752,8 +1752,8 @@
   "map_last_edited": "2016-05-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 1/27",
@@ -1761,8 +1761,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1778,8 +1778,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 14/27",
@@ -1787,8 +1787,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1804,8 +1804,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -1813,8 +1813,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1830,8 +1830,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1839,8 +1839,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1856,8 +1856,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Bayam",
@@ -1865,8 +1865,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1882,8 +1882,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.88,
-   "500": 1.1
+   "20": 0.36,
+   "50": 0.72
   },
   "road": {
    "name": "Jalan Kelochor",
@@ -1891,8 +1891,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": 0.88,
-    "500": 1.1
+    "20": 0.36,
+    "50": 0.72
    }
   },
   "shelter": null
@@ -1908,8 +1908,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1917,8 +1917,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1934,8 +1934,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -1943,8 +1943,8 @@
    "distance_m": 1,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -1960,8 +1960,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -1969,8 +1969,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -1986,8 +1986,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -1995,8 +1995,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -2012,8 +2012,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 3/27",
@@ -2021,8 +2021,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2038,8 +2038,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2047,8 +2047,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2064,8 +2064,8 @@
   "map_last_edited": "2023-08-12",
   "depth_m": {
    "10": 4.05,
-   "100": 5.55,
-   "500": 5.89
+   "20": 4.73,
+   "50": 5.3
   },
   "road": {
    "name": "a road with no name",
@@ -2073,8 +2073,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": 4.05,
-    "100": 5.55,
-    "500": 5.89
+    "20": 4.73,
+    "50": 5.3
    }
   },
   "shelter": null
@@ -2090,8 +2090,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2099,8 +2099,8 @@
    "distance_m": 30,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2116,8 +2116,8 @@
   "map_last_edited": "2025-07-24",
   "depth_m": {
    "10": 0.67,
-   "100": 1.56,
-   "500": 1.76
+   "20": 1.11,
+   "50": 1.42
   },
   "road": {
    "name": "a road with no name",
@@ -2125,8 +2125,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": 0.67,
-    "100": 1.56,
-    "500": 1.76
+    "20": 1.11,
+    "50": 1.42
    }
   },
   "shelter": null
@@ -2142,8 +2142,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -2151,8 +2151,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -2168,8 +2168,8 @@
   "map_last_edited": "2026-08-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2177,8 +2177,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2194,8 +2194,8 @@
   "map_last_edited": "2023-03-16",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2203,8 +2203,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2220,8 +2220,8 @@
   "map_last_edited": "2022-12-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -2229,8 +2229,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2246,8 +2246,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -2255,8 +2255,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -2272,8 +2272,8 @@
   "map_last_edited": "2025-09-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -2281,8 +2281,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2298,8 +2298,8 @@
   "map_last_edited": "2024-11-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dewan Mak Jah Pasir Pekan",
@@ -2307,8 +2307,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2324,8 +2324,8 @@
   "map_last_edited": "2023-10-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2333,8 +2333,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2350,8 +2350,8 @@
   "map_last_edited": "2022-05-19",
   "depth_m": {
    "10": null,
-   "100": 0.14,
-   "500": 0.32
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Koperatif 1/29",
@@ -2359,8 +2359,8 @@
    "distance_m": 3,
    "depth_m": {
     "10": null,
-    "100": 0.14,
-    "500": 0.32
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2376,8 +2376,8 @@
   "map_last_edited": "2026-08-16",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Abdul Kadir Adabi",
@@ -2385,8 +2385,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2402,8 +2402,8 @@
   "map_last_edited": "2026-05-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -2411,8 +2411,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2428,8 +2428,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2437,8 +2437,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2454,8 +2454,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Seri Akar",
@@ -2463,8 +2463,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2480,8 +2480,8 @@
   "map_last_edited": "2026-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Perdana",
@@ -2489,8 +2489,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2506,8 +2506,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Padang Garong",
@@ -2515,8 +2515,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2532,8 +2532,8 @@
   "map_last_edited": "2016-09-03",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2541,8 +2541,8 @@
    "distance_m": 1,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2558,8 +2558,8 @@
   "map_last_edited": "2016-10-10",
   "depth_m": {
    "10": null,
-   "100": 1.4,
-   "500": 1.72
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Mohd Yusof Daud MPKB",
@@ -2567,8 +2567,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": 1.4,
-    "500": 1.72
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2584,8 +2584,8 @@
   "map_last_edited": "2016-10-10",
   "depth_m": {
    "10": null,
-   "100": 1.4,
-   "500": 1.72
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Mohd Yusof Daud MPKB",
@@ -2593,8 +2593,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": 1.4,
-    "500": 1.72
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2610,8 +2610,8 @@
   "map_last_edited": "2019-09-11",
   "depth_m": {
    "10": null,
-   "100": 1.4,
-   "500": 1.72
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Mohd Yusof Daud MPKB",
@@ -2619,8 +2619,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": 1.4,
-    "500": 1.72
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2636,8 +2636,8 @@
   "map_last_edited": "2025-10-29",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -2645,8 +2645,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2662,8 +2662,8 @@
   "map_last_edited": "2022-11-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2671,8 +2671,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2688,8 +2688,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -2697,8 +2697,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -2714,8 +2714,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2723,8 +2723,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2740,8 +2740,8 @@
   "map_last_edited": "2024-02-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Lorong Bawah Lembah",
@@ -2749,8 +2749,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2766,8 +2766,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.88,
-   "500": 1.1
+   "20": 0.36,
+   "50": 0.72
   },
   "road": {
    "name": "a road with no name",
@@ -2775,8 +2775,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": 0.88,
-    "500": 1.1
+    "20": 0.36,
+    "50": 0.72
    }
   },
   "shelter": null
@@ -2792,8 +2792,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -2801,8 +2801,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2818,8 +2818,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Hilir Kota",
@@ -2827,8 +2827,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2844,8 +2844,8 @@
   "map_last_edited": "2025-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Gajah Mati",
@@ -2853,8 +2853,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2870,8 +2870,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Ismail",
@@ -2879,8 +2879,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2896,8 +2896,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.33,
-   "100": 4.81,
-   "500": 5.15
+   "20": 4.0,
+   "50": 4.56
   },
   "road": {
    "name": "a road with no name",
@@ -2905,8 +2905,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 3.33,
-    "100": 4.81,
-    "500": 5.15
+    "20": 4.0,
+    "50": 4.56
    }
   },
   "shelter": null
@@ -2922,8 +2922,8 @@
   "map_last_edited": "2024-12-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.17
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -2931,8 +2931,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": 0.16,
-    "500": 0.35
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2948,8 +2948,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -2957,8 +2957,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -2974,8 +2974,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Taman Laksamana",
@@ -2983,8 +2983,8 @@
    "distance_m": 4,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3000,8 +3000,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -3009,8 +3009,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3026,8 +3026,8 @@
   "map_last_edited": "2024-01-09",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -3035,8 +3035,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -3052,8 +3052,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Kadir",
@@ -3061,8 +3061,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3078,8 +3078,8 @@
   "map_last_edited": "2023-09-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -3087,8 +3087,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3104,8 +3104,8 @@
   "map_last_edited": "2022-11-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3113,8 +3113,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3130,8 +3130,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.27,
-   "500": 0.49
+   "20": null,
+   "50": 0.12
   },
   "road": {
    "name": "a road with no name",
@@ -3139,8 +3139,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": 0.27,
-    "500": 0.49
+    "20": null,
+    "50": 0.12
    }
   },
   "shelter": null
@@ -3156,8 +3156,8 @@
   "map_last_edited": "2023-08-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dusun Muda",
@@ -3165,8 +3165,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3182,8 +3182,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3191,8 +3191,8 @@
    "distance_m": 4,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3208,8 +3208,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kuala Kerai",
@@ -3217,8 +3217,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3234,8 +3234,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3243,8 +3243,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3260,8 +3260,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3269,8 +3269,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3286,8 +3286,8 @@
   "map_last_edited": "2025-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -3295,8 +3295,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3312,8 +3312,8 @@
   "map_last_edited": "2023-09-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -3321,8 +3321,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3338,8 +3338,8 @@
   "map_last_edited": "2025-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kampung Dusun",
@@ -3347,8 +3347,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3364,8 +3364,8 @@
   "map_last_edited": "2022-10-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -3373,8 +3373,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3390,8 +3390,8 @@
   "map_last_edited": "2024-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -3399,8 +3399,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3416,8 +3416,8 @@
   "map_last_edited": "2026-02-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Abdul Kadir Adabi",
@@ -3425,8 +3425,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3442,8 +3442,8 @@
   "map_last_edited": "2022-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -3451,8 +3451,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3468,8 +3468,8 @@
   "map_last_edited": "2024-02-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3477,8 +3477,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3494,8 +3494,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3503,8 +3503,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3520,8 +3520,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3529,8 +3529,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3546,8 +3546,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -3555,8 +3555,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -3572,8 +3572,8 @@
   "map_last_edited": "2022-12-26",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Besar Nik Rahimah Nik Mat",
@@ -3581,8 +3581,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3598,8 +3598,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3607,8 +3607,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3624,8 +3624,8 @@
   "map_last_edited": "2021-12-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 14/27",
@@ -3633,8 +3633,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3650,8 +3650,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -3659,8 +3659,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.63,
-    "100": 6.14,
-    "500": 6.47
+    "20": 5.32,
+    "50": 5.88
    }
   },
   "shelter": null
@@ -3676,8 +3676,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3685,8 +3685,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3702,8 +3702,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3711,8 +3711,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3728,8 +3728,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -3737,8 +3737,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3754,8 +3754,8 @@
   "map_last_edited": "2022-08-01",
   "depth_m": {
    "10": 3.24,
-   "100": 4.74,
-   "500": 5.08
+   "20": 3.92,
+   "50": 4.49
   },
   "road": {
    "name": "a road with no name",
@@ -3763,8 +3763,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 3.34,
-    "100": 4.84,
-    "500": 5.18
+    "20": 4.02,
+    "50": 4.59
    }
   },
   "shelter": null
@@ -3780,8 +3780,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -3789,8 +3789,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3806,8 +3806,8 @@
   "map_last_edited": "2020-02-29",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.16
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 7/27",
@@ -3815,8 +3815,8 @@
    "distance_m": 1,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.16
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3832,8 +3832,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3841,8 +3841,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3858,8 +3858,8 @@
   "map_last_edited": "2025-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Gajah Mati",
@@ -3867,8 +3867,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3884,8 +3884,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.32,
-   "100": 4.8,
-   "500": 5.14
+   "20": 3.99,
+   "50": 4.55
   },
   "road": {
    "name": "a road with no name",
@@ -3893,8 +3893,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": 3.32,
-    "100": 4.8,
-    "500": 5.14
+    "20": 3.99,
+    "50": 4.55
    }
   },
   "shelter": null
@@ -3910,8 +3910,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -3919,8 +3919,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3936,8 +3936,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Petra Semerak",
@@ -3945,8 +3945,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3962,8 +3962,8 @@
   "map_last_edited": "2020-02-29",
   "depth_m": {
    "10": null,
-   "100": 0.14,
-   "500": 0.32
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -3971,8 +3971,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": 0.14,
-    "500": 0.32
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -3988,8 +3988,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Ismail",
@@ -3997,8 +3997,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4014,8 +4014,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4023,8 +4023,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4040,8 +4040,8 @@
   "map_last_edited": "2021-11-02",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4049,8 +4049,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4066,8 +4066,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": 0.19,
-   "500": 0.39
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4075,8 +4075,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": 0.19,
-    "500": 0.39
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4092,8 +4092,8 @@
   "map_last_edited": "2024-02-14",
   "depth_m": {
    "10": 0.37,
-   "100": 1.43,
-   "500": 1.66
+   "20": 0.88,
+   "50": 1.27
   },
   "road": {
    "name": "a road with no name",
@@ -4101,8 +4101,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 0.37,
-    "100": 1.43,
-    "500": 1.66
+    "20": 0.88,
+    "50": 1.27
    }
   },
   "shelter": null
@@ -4118,8 +4118,8 @@
   "map_last_edited": "2023-08-12",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -4127,8 +4127,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -4144,8 +4144,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4153,8 +4153,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4170,8 +4170,8 @@
   "map_last_edited": "2017-08-22",
   "depth_m": {
    "10": null,
-   "100": 0.28,
-   "500": 0.47
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang",
@@ -4179,8 +4179,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": 0.28,
-    "500": 0.47
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4196,8 +4196,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 1.57,
-   "100": 3.1,
-   "500": 3.44
+   "20": 2.27,
+   "50": 2.84
   },
   "road": {
    "name": "a road with no name",
@@ -4205,8 +4205,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": 1.57,
-    "100": 3.1,
-    "500": 3.44
+    "20": 2.27,
+    "50": 2.84
    }
   },
   "shelter": null
@@ -4222,8 +4222,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -4231,8 +4231,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4248,8 +4248,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Petra Semerak",
@@ -4257,8 +4257,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4274,8 +4274,8 @@
   "map_last_edited": "2021-07-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4283,8 +4283,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4300,8 +4300,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -4309,8 +4309,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -4326,8 +4326,8 @@
   "map_last_edited": "2024-01-09",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -4335,8 +4335,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -4352,8 +4352,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4361,8 +4361,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4378,8 +4378,8 @@
   "map_last_edited": "2024-12-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.17
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -4387,8 +4387,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.19
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4404,8 +4404,8 @@
   "map_last_edited": "2021-10-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4413,8 +4413,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4430,8 +4430,8 @@
   "map_last_edited": "2021-07-30",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -4439,8 +4439,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -4456,8 +4456,8 @@
   "map_last_edited": "2024-10-30",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4465,8 +4465,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4482,8 +4482,8 @@
   "map_last_edited": "2025-03-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4491,8 +4491,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4508,8 +4508,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -4517,8 +4517,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -4534,8 +4534,8 @@
   "map_last_edited": "2024-09-10",
   "depth_m": {
    "10": 0.37,
-   "100": 1.43,
-   "500": 1.66
+   "20": 0.88,
+   "50": 1.27
   },
   "road": {
    "name": "a road with no name",
@@ -4543,8 +4543,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 0.37,
-    "100": 1.43,
-    "500": 1.66
+    "20": 0.88,
+    "50": 1.27
    }
   },
   "shelter": null
@@ -4560,8 +4560,8 @@
   "map_last_edited": "2024-12-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4569,8 +4569,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4586,8 +4586,8 @@
   "map_last_edited": "2020-04-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Petra Semerak",
@@ -4595,8 +4595,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4612,8 +4612,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4621,8 +4621,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4638,8 +4638,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4647,8 +4647,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4664,8 +4664,8 @@
   "map_last_edited": "2022-12-08",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -4673,8 +4673,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -4690,8 +4690,8 @@
   "map_last_edited": "2026-08-16",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -4699,8 +4699,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4716,8 +4716,8 @@
   "map_last_edited": "2015-10-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -4725,8 +4725,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4742,8 +4742,8 @@
   "map_last_edited": "2023-09-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -4751,8 +4751,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4768,8 +4768,8 @@
   "map_last_edited": "2025-03-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Belakang Istana",
@@ -4777,8 +4777,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4794,8 +4794,8 @@
   "map_last_edited": "2023-09-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4803,8 +4803,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4820,8 +4820,8 @@
   "map_last_edited": "2026-03-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4829,8 +4829,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4846,8 +4846,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4855,8 +4855,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4872,8 +4872,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4881,8 +4881,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4898,8 +4898,8 @@
   "map_last_edited": "2022-05-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4907,8 +4907,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4924,8 +4924,8 @@
   "map_last_edited": "2022-05-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4933,8 +4933,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -4950,8 +4950,8 @@
   "map_last_edited": "2022-05-28",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -4959,8 +4959,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -4976,8 +4976,8 @@
   "map_last_edited": "2026-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -4985,8 +4985,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5002,8 +5002,8 @@
   "map_last_edited": "2022-05-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pendek",
@@ -5011,8 +5011,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5028,8 +5028,8 @@
   "map_last_edited": "2022-05-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5037,8 +5037,8 @@
    "distance_m": 3,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5054,8 +5054,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5063,8 +5063,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5080,8 +5080,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.14
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -5089,8 +5089,8 @@
    "distance_m": 27,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.14
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5106,8 +5106,8 @@
   "map_last_edited": "2025-03-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -5115,8 +5115,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5132,8 +5132,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5141,8 +5141,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5158,8 +5158,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dusun Muda",
@@ -5167,8 +5167,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5184,8 +5184,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5193,8 +5193,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5210,8 +5210,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -5219,8 +5219,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5236,8 +5236,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5245,8 +5245,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5262,8 +5262,8 @@
   "map_last_edited": "2026-02-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Abdul Kadir Adabi",
@@ -5271,8 +5271,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5288,8 +5288,8 @@
   "map_last_edited": "2026-08-12",
   "depth_m": {
    "10": 1.57,
-   "100": 3.09,
-   "500": 3.44
+   "20": 2.26,
+   "50": 2.83
   },
   "road": {
    "name": "a road with no name",
@@ -5297,8 +5297,8 @@
    "distance_m": 52,
    "depth_m": {
     "10": 4.46,
-    "100": 5.98,
-    "500": 6.33
+    "20": 5.15,
+    "50": 5.73
    }
   },
   "shelter": null
@@ -5314,8 +5314,8 @@
   "map_last_edited": "2022-10-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -5323,8 +5323,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5340,8 +5340,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5349,8 +5349,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5366,8 +5366,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -5375,8 +5375,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5392,8 +5392,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5401,8 +5401,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5418,8 +5418,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5427,8 +5427,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5444,8 +5444,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5453,8 +5453,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5470,8 +5470,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -5479,8 +5479,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5496,8 +5496,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -5505,8 +5505,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5522,8 +5522,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -5531,8 +5531,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.63,
-    "100": 6.14,
-    "500": 6.47
+    "20": 5.32,
+    "50": 5.88
    }
   },
   "shelter": null
@@ -5548,8 +5548,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -5557,8 +5557,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5574,8 +5574,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -5583,8 +5583,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -5600,8 +5600,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5609,8 +5609,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5626,8 +5626,8 @@
   "map_last_edited": "2023-09-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5635,8 +5635,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5652,8 +5652,8 @@
   "map_last_edited": "2015-10-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -5661,8 +5661,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5678,8 +5678,8 @@
   "map_last_edited": "2025-03-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5687,8 +5687,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5704,8 +5704,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 5.23,
-   "100": 6.73,
-   "500": 7.07
+   "20": 5.91,
+   "50": 6.48
   },
   "road": {
    "name": "a road with no name",
@@ -5713,8 +5713,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": 6.03,
-    "100": 7.52,
-    "500": 7.86
+    "20": 6.71,
+    "50": 7.27
    }
   },
   "shelter": null
@@ -5730,8 +5730,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -5739,8 +5739,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5756,8 +5756,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Padang Garong",
@@ -5765,8 +5765,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5782,8 +5782,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5791,8 +5791,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5808,8 +5808,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 6.03,
-   "100": 7.52,
-   "500": 7.86
+   "20": 6.71,
+   "50": 7.27
   },
   "road": {
    "name": "a road with no name",
@@ -5817,8 +5817,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -5834,8 +5834,8 @@
   "map_last_edited": "2022-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -5843,8 +5843,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5860,8 +5860,8 @@
   "map_last_edited": "2022-11-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5869,8 +5869,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5886,8 +5886,8 @@
   "map_last_edited": "2022-11-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5895,8 +5895,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5912,8 +5912,8 @@
   "map_last_edited": "2021-07-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -5921,8 +5921,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -5938,8 +5938,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 5.04,
-   "100": 6.54,
-   "500": 6.88
+   "20": 5.72,
+   "50": 6.29
   },
   "road": {
    "name": "a road with no name",
@@ -5947,8 +5947,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 5.04,
-    "100": 6.54,
-    "500": 6.88
+    "20": 5.72,
+    "50": 6.29
    }
   },
   "shelter": null
@@ -5964,8 +5964,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -5973,8 +5973,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -5990,8 +5990,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Buluh Kubu",
@@ -5999,8 +5999,8 @@
    "distance_m": 38,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6016,8 +6016,8 @@
   "map_last_edited": "2025-03-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Seri Akar",
@@ -6025,8 +6025,8 @@
    "distance_m": 38,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6042,8 +6042,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Padang Perdana",
@@ -6051,8 +6051,8 @@
    "distance_m": 27,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6068,8 +6068,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6077,8 +6077,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6094,8 +6094,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -6103,8 +6103,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6120,8 +6120,8 @@
   "map_last_edited": "2025-03-29",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -6129,8 +6129,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6146,8 +6146,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6155,8 +6155,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6172,8 +6172,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6181,8 +6181,8 @@
    "distance_m": 29,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6198,8 +6198,8 @@
   "map_last_edited": "2015-01-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Koperatif 5/29",
@@ -6207,8 +6207,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6224,8 +6224,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Taman Laksamana",
@@ -6233,8 +6233,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6250,8 +6250,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6259,8 +6259,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6276,8 +6276,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -6285,8 +6285,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6302,8 +6302,8 @@
   "map_last_edited": "2022-10-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -6311,8 +6311,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6328,8 +6328,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -6337,8 +6337,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -6354,8 +6354,8 @@
   "map_last_edited": "2022-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6363,8 +6363,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6380,8 +6380,8 @@
   "map_last_edited": "2021-08-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -6389,8 +6389,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6406,8 +6406,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 5.23,
-   "100": 6.73,
-   "500": 7.07
+   "20": 5.91,
+   "50": 6.48
   },
   "road": {
    "name": "a road with no name",
@@ -6415,8 +6415,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": 5.23,
-    "100": 6.73,
-    "500": 7.07
+    "20": 5.91,
+    "50": 6.48
    }
   },
   "shelter": null
@@ -6432,8 +6432,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -6441,8 +6441,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6458,8 +6458,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -6467,8 +6467,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6484,8 +6484,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -6493,8 +6493,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6510,8 +6510,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Masjid",
@@ -6519,8 +6519,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6536,8 +6536,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6545,8 +6545,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6562,8 +6562,8 @@
   "map_last_edited": "2021-08-02",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -6571,8 +6571,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -6588,8 +6588,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6597,8 +6597,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6614,8 +6614,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -6623,8 +6623,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6640,8 +6640,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6649,8 +6649,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6666,8 +6666,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6675,8 +6675,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6692,8 +6692,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6701,8 +6701,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6718,8 +6718,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6727,8 +6727,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6744,8 +6744,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6753,8 +6753,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6770,8 +6770,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -6779,8 +6779,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6796,8 +6796,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -6805,8 +6805,8 @@
    "distance_m": 4,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -6822,8 +6822,8 @@
   "map_last_edited": "2025-08-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6831,8 +6831,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6848,8 +6848,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.88,
-   "500": 1.1
+   "20": 0.36,
+   "50": 0.72
   },
   "road": {
    "name": "a road with no name",
@@ -6857,8 +6857,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": 0.88,
-    "500": 1.1
+    "20": 0.36,
+    "50": 0.72
    }
   },
   "shelter": null
@@ -6874,8 +6874,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -6883,8 +6883,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6900,8 +6900,8 @@
   "map_last_edited": "2022-12-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -6909,8 +6909,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6926,8 +6926,8 @@
   "map_last_edited": "2024-04-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -6935,8 +6935,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -6952,8 +6952,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -6961,8 +6961,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -6978,8 +6978,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -6987,8 +6987,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7004,8 +7004,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7013,8 +7013,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7030,8 +7030,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -7039,8 +7039,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7056,8 +7056,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -7065,8 +7065,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -7082,8 +7082,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -7091,8 +7091,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -7108,8 +7108,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -7117,8 +7117,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.63,
-    "100": 6.14,
-    "500": 6.47
+    "20": 5.32,
+    "50": 5.88
    }
   },
   "shelter": null
@@ -7134,8 +7134,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7143,8 +7143,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7160,8 +7160,8 @@
   "map_last_edited": "2024-12-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Koperatif 5/29",
@@ -7169,8 +7169,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7186,8 +7186,8 @@
   "map_last_edited": "2024-12-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -7195,8 +7195,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7212,8 +7212,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Belakang Hospital",
@@ -7221,8 +7221,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7238,8 +7238,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7247,8 +7247,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7264,8 +7264,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7273,8 +7273,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7290,8 +7290,8 @@
   "map_last_edited": "2024-10-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7299,8 +7299,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7316,8 +7316,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -7325,8 +7325,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -7342,8 +7342,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -7351,8 +7351,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -7368,8 +7368,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7377,8 +7377,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7394,8 +7394,8 @@
   "map_last_edited": "2025-03-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7403,8 +7403,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7420,8 +7420,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 6.03,
-   "100": 7.52,
-   "500": 7.86
+   "20": 6.71,
+   "50": 7.27
   },
   "road": {
    "name": "a road with no name",
@@ -7429,8 +7429,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -7446,8 +7446,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7455,8 +7455,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7472,8 +7472,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -7481,8 +7481,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7498,8 +7498,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": 2.33,
-   "100": 3.7,
-   "500": 4.0
+   "20": 2.96,
+   "50": 3.47
   },
   "road": {
    "name": "a road with no name",
@@ -7507,8 +7507,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7524,8 +7524,8 @@
   "map_last_edited": "2025-02-03",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7533,8 +7533,8 @@
    "distance_m": 24,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7550,8 +7550,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7559,8 +7559,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7576,8 +7576,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7585,8 +7585,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7602,8 +7602,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -7611,8 +7611,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -7628,8 +7628,8 @@
   "map_last_edited": "2022-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -7637,8 +7637,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7654,8 +7654,8 @@
   "map_last_edited": "2021-08-02",
   "depth_m": {
    "10": 3.34,
-   "100": 4.84,
-   "500": 5.18
+   "20": 4.02,
+   "50": 4.59
   },
   "road": {
    "name": "a road with no name",
@@ -7663,8 +7663,8 @@
    "distance_m": 43,
    "depth_m": {
     "10": 3.44,
-    "100": 4.94,
-    "500": 5.28
+    "20": 4.12,
+    "50": 4.69
    }
   },
   "shelter": null
@@ -7680,8 +7680,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -7689,8 +7689,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7706,8 +7706,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -7715,8 +7715,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7732,8 +7732,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.34
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -7741,8 +7741,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7758,8 +7758,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -7767,8 +7767,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7784,8 +7784,8 @@
   "map_last_edited": "2019-05-02",
   "depth_m": {
    "10": 1.57,
-   "100": 3.1,
-   "500": 3.44
+   "20": 2.27,
+   "50": 2.84
   },
   "road": {
    "name": "a road with no name",
@@ -7793,8 +7793,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": 1.57,
-    "100": 3.1,
-    "500": 3.44
+    "20": 2.27,
+    "50": 2.84
    }
   },
   "shelter": null
@@ -7810,8 +7810,8 @@
   "map_last_edited": "2023-08-12",
   "depth_m": {
    "10": 4.33,
-   "100": 5.81,
-   "500": 6.15
+   "20": 5.0,
+   "50": 5.56
   },
   "road": {
    "name": "a road with no name",
@@ -7819,8 +7819,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": 1.03,
-    "100": 2.51,
-    "500": 2.85
+    "20": 1.7,
+    "50": 2.26
    }
   },
   "shelter": null
@@ -7836,8 +7836,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -7845,8 +7845,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7862,8 +7862,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Petra Semerak",
@@ -7871,8 +7871,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7888,8 +7888,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -7897,8 +7897,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7914,8 +7914,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -7923,8 +7923,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7940,8 +7940,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.33,
-   "100": 5.82,
-   "500": 6.16
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -7949,8 +7949,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -7966,8 +7966,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -7975,8 +7975,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -7992,8 +7992,8 @@
   "map_last_edited": "2022-12-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -8001,8 +8001,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8018,8 +8018,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8027,8 +8027,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8044,8 +8044,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Ibrahim",
@@ -8053,8 +8053,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8070,8 +8070,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Lorong Embi",
@@ -8079,8 +8079,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8096,8 +8096,8 @@
   "map_last_edited": "2015-10-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -8105,8 +8105,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8122,8 +8122,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -8131,8 +8131,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8148,8 +8148,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8157,8 +8157,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8174,8 +8174,8 @@
   "map_last_edited": "2021-12-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8183,8 +8183,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8200,8 +8200,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 5/27",
@@ -8209,8 +8209,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8226,8 +8226,8 @@
   "map_last_edited": "2026-01-17",
   "depth_m": {
    "10": 0.42,
-   "100": 1.78,
-   "500": 2.08
+   "20": 1.05,
+   "50": 1.55
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -8235,8 +8235,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 0.42,
-    "100": 1.78,
-    "500": 2.08
+    "20": 1.05,
+    "50": 1.55
    }
   },
   "shelter": null
@@ -8252,8 +8252,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -8261,8 +8261,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8278,8 +8278,8 @@
   "map_last_edited": "2026-08-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8287,8 +8287,8 @@
    "distance_m": 51,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8304,8 +8304,8 @@
   "map_last_edited": "2021-08-11",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -8313,8 +8313,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -8330,8 +8330,8 @@
   "map_last_edited": "2025-07-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -8339,8 +8339,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8356,8 +8356,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8365,8 +8365,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8382,8 +8382,8 @@
   "map_last_edited": "2021-08-11",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -8391,8 +8391,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -8408,8 +8408,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kuala Kerai",
@@ -8417,8 +8417,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8434,8 +8434,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8443,8 +8443,8 @@
    "distance_m": 2,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8460,8 +8460,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8469,8 +8469,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8486,8 +8486,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -8495,8 +8495,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8512,8 +8512,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -8521,8 +8521,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -8538,8 +8538,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Belakang Istana",
@@ -8547,8 +8547,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8564,8 +8564,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8573,8 +8573,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8590,8 +8590,8 @@
   "map_last_edited": "2026-03-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8599,8 +8599,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8616,8 +8616,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -8625,8 +8625,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8642,8 +8642,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -8651,8 +8651,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8668,8 +8668,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8677,8 +8677,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8694,8 +8694,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -8703,8 +8703,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8720,8 +8720,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8729,8 +8729,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8746,8 +8746,8 @@
   "map_last_edited": "2021-08-11",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -8755,8 +8755,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -8772,8 +8772,8 @@
   "map_last_edited": "2022-07-21",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -8781,8 +8781,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -8798,8 +8798,8 @@
   "map_last_edited": "2023-07-26",
   "depth_m": {
    "10": null,
-   "100": 0.83,
-   "500": 1.16
+   "20": null,
+   "50": 0.59
   },
   "road": {
    "name": "Jalan Dewan Mak Jah Pasir Pekan",
@@ -8807,8 +8807,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": 0.83,
-    "500": 1.16
+    "20": null,
+    "50": 0.59
    }
   },
   "shelter": null
@@ -8824,8 +8824,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": 0.23,
-   "500": 0.44
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8833,8 +8833,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": 0.23,
-    "500": 0.44
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8850,8 +8850,8 @@
   "map_last_edited": "2024-12-17",
   "depth_m": {
    "10": null,
-   "100": 0.16,
-   "500": 0.35
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -8859,8 +8859,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": 0.16,
-    "500": 0.35
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8876,8 +8876,8 @@
   "map_last_edited": "2021-08-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -8885,8 +8885,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8902,8 +8902,8 @@
   "map_last_edited": "2026-02-02",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8911,8 +8911,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8928,8 +8928,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -8937,8 +8937,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8954,8 +8954,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Perdana",
@@ -8963,8 +8963,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -8980,8 +8980,8 @@
   "map_last_edited": "2022-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -8989,8 +8989,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9006,8 +9006,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Ismail",
@@ -9015,8 +9015,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9032,8 +9032,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9041,8 +9041,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9058,8 +9058,8 @@
   "map_last_edited": "2025-04-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9067,8 +9067,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9084,8 +9084,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Suara Muda",
@@ -9093,8 +9093,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9110,8 +9110,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9119,8 +9119,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9136,8 +9136,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9145,8 +9145,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9162,8 +9162,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9171,8 +9171,8 @@
    "distance_m": 39,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9188,8 +9188,8 @@
   "map_last_edited": "2026-01-17",
   "depth_m": {
    "10": 0.42,
-   "100": 1.78,
-   "500": 2.08
+   "20": 1.05,
+   "50": 1.55
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -9197,8 +9197,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 0.42,
-    "100": 1.78,
-    "500": 2.08
+    "20": 1.05,
+    "50": 1.55
    }
   },
   "shelter": null
@@ -9214,8 +9214,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -9223,8 +9223,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9240,8 +9240,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9249,8 +9249,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9266,8 +9266,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dusun Muda",
@@ -9275,8 +9275,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9292,8 +9292,8 @@
   "map_last_edited": "2025-03-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9301,8 +9301,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9318,8 +9318,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9327,8 +9327,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9344,8 +9344,8 @@
   "map_last_edited": "2021-08-12",
   "depth_m": {
    "10": null,
-   "100": 0.14,
-   "500": 0.32
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -9353,8 +9353,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": 0.14,
-    "500": 0.32
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9370,8 +9370,8 @@
   "map_last_edited": "2015-12-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9379,8 +9379,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9396,8 +9396,8 @@
   "map_last_edited": "2023-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -9405,8 +9405,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9422,8 +9422,8 @@
   "map_last_edited": "2026-08-12",
   "depth_m": {
    "10": 4.23,
-   "100": 5.72,
-   "500": 6.06
+   "20": 4.91,
+   "50": 5.47
   },
   "road": {
    "name": "a road with no name",
@@ -9431,8 +9431,8 @@
    "distance_m": 60,
    "depth_m": {
     "10": 4.33,
-    "100": 5.82,
-    "500": 6.16
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -9448,8 +9448,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -9457,8 +9457,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9474,8 +9474,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9483,8 +9483,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9500,8 +9500,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9509,8 +9509,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9526,8 +9526,8 @@
   "map_last_edited": "2021-07-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9535,8 +9535,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9552,8 +9552,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Gajah Mati",
@@ -9561,8 +9561,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9578,8 +9578,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.32,
-   "100": 4.8,
-   "500": 5.14
+   "20": 3.99,
+   "50": 4.55
   },
   "road": {
    "name": "a road with no name",
@@ -9587,8 +9587,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": 3.32,
-    "100": 4.8,
-    "500": 5.14
+    "20": 3.99,
+    "50": 4.55
    }
   },
   "shelter": null
@@ -9604,8 +9604,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9613,8 +9613,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9630,8 +9630,8 @@
   "map_last_edited": "2025-03-09",
   "depth_m": {
    "10": null,
-   "100": 0.88,
-   "500": 1.1
+   "20": 0.36,
+   "50": 0.72
   },
   "road": {
    "name": "a road with no name",
@@ -9639,8 +9639,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": 0.88,
-    "500": 1.1
+    "20": 0.36,
+    "50": 0.72
    }
   },
   "shelter": null
@@ -9656,8 +9656,8 @@
   "map_last_edited": "2025-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kampung Dusun",
@@ -9665,8 +9665,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9682,8 +9682,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.32,
-   "100": 4.8,
-   "500": 5.14
+   "20": 3.99,
+   "50": 4.55
   },
   "road": {
    "name": "a road with no name",
@@ -9691,8 +9691,8 @@
    "distance_m": 25,
    "depth_m": {
     "10": 3.32,
-    "100": 4.8,
-    "500": 5.14
+    "20": 3.99,
+    "50": 4.55
    }
   },
   "shelter": null
@@ -9708,8 +9708,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9717,8 +9717,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9734,8 +9734,8 @@
   "map_last_edited": "2023-04-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9743,8 +9743,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9760,8 +9760,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.13,
-   "100": 5.63,
-   "500": 5.97
+   "20": 4.82,
+   "50": 5.38
   },
   "road": {
    "name": "a road with no name",
@@ -9769,8 +9769,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.63,
-    "100": 6.14,
-    "500": 6.47
+    "20": 5.32,
+    "50": 5.88
    }
   },
   "shelter": null
@@ -9786,8 +9786,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sri Cemerlang 5/27",
@@ -9795,8 +9795,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9812,8 +9812,8 @@
   "map_last_edited": "2025-03-29",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.34
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -9821,8 +9821,8 @@
    "distance_m": 31,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.34
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9838,8 +9838,8 @@
   "map_last_edited": "2021-08-11",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -9847,8 +9847,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -9864,8 +9864,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tengku Petra Semerak",
@@ -9873,8 +9873,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9890,8 +9890,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9899,8 +9899,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9916,8 +9916,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9925,8 +9925,8 @@
    "distance_m": 28,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9942,8 +9942,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9951,8 +9951,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9968,8 +9968,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -9977,8 +9977,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -9994,8 +9994,8 @@
   "map_last_edited": "2018-11-24",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10003,8 +10003,8 @@
    "distance_m": 2,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10020,8 +10020,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": 0.26,
-   "500": 0.47
+   "20": null,
+   "50": 0.12
   },
   "road": {
    "name": "a road with no name",
@@ -10029,8 +10029,8 @@
    "distance_m": 25,
    "depth_m": {
     "10": null,
-    "100": 0.26,
-    "500": 0.47
+    "20": null,
+    "50": 0.12
    }
   },
   "shelter": null
@@ -10046,8 +10046,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -10055,8 +10055,8 @@
    "distance_m": 21,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10072,8 +10072,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10081,8 +10081,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10098,8 +10098,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -10107,8 +10107,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10124,8 +10124,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10133,8 +10133,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10150,8 +10150,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Temenggong",
@@ -10159,8 +10159,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10176,8 +10176,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -10185,8 +10185,8 @@
    "distance_m": 30,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10202,8 +10202,8 @@
   "map_last_edited": "2026-08-03",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tok Guru",
@@ -10211,8 +10211,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10228,8 +10228,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10237,8 +10237,8 @@
    "distance_m": 26,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10254,8 +10254,8 @@
   "map_last_edited": "2024-09-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Langgar",
@@ -10263,8 +10263,8 @@
    "distance_m": 24,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10280,8 +10280,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -10289,8 +10289,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10306,8 +10306,8 @@
   "map_last_edited": "2025-03-11",
   "depth_m": {
    "10": null,
-   "100": 0.26,
-   "500": 0.47
+   "20": null,
+   "50": 0.12
   },
   "road": {
    "name": "a road with no name",
@@ -10315,8 +10315,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": 0.26,
-    "500": 0.47
+    "20": null,
+    "50": 0.12
    }
   },
   "shelter": null
@@ -10332,8 +10332,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10341,8 +10341,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10358,8 +10358,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10367,8 +10367,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10384,8 +10384,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -10393,8 +10393,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10410,8 +10410,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10419,8 +10419,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10436,8 +10436,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -10445,8 +10445,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10462,8 +10462,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10471,8 +10471,8 @@
    "distance_m": 23,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10488,8 +10488,8 @@
   "map_last_edited": "2025-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10497,8 +10497,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10514,8 +10514,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -10523,8 +10523,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10540,8 +10540,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10549,8 +10549,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10566,8 +10566,8 @@
   "map_last_edited": "2025-03-23",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Lorong Hj Hassan Daud",
@@ -10575,8 +10575,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10592,8 +10592,8 @@
   "map_last_edited": "2025-04-03",
   "depth_m": {
    "10": 5.23,
-   "100": 6.73,
-   "500": 7.07
+   "20": 5.91,
+   "50": 6.48
   },
   "road": {
    "name": "a road with no name",
@@ -10601,8 +10601,8 @@
    "distance_m": 45,
    "depth_m": {
     "10": 5.23,
-    "100": 6.73,
-    "500": 7.07
+    "20": 5.91,
+    "50": 6.48
    }
   },
   "shelter": null
@@ -10618,8 +10618,8 @@
   "map_last_edited": "2024-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -10627,8 +10627,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10644,8 +10644,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -10653,8 +10653,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10670,8 +10670,8 @@
   "map_last_edited": "2025-03-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10679,8 +10679,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10696,8 +10696,8 @@
   "map_last_edited": "2026-04-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10705,8 +10705,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10722,8 +10722,8 @@
   "map_last_edited": "2026-04-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10731,8 +10731,8 @@
    "distance_m": 2,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10748,8 +10748,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10757,8 +10757,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10774,8 +10774,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 6.04,
-   "100": 7.53,
-   "500": 7.87
+   "20": 6.72,
+   "50": 7.28
   },
   "road": {
    "name": "a road with no name",
@@ -10783,8 +10783,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -10800,8 +10800,8 @@
   "map_last_edited": "2022-11-22",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -10809,8 +10809,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10826,8 +10826,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -10835,8 +10835,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10852,8 +10852,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 6.03,
-   "100": 7.52,
-   "500": 7.86
+   "20": 6.71,
+   "50": 7.27
   },
   "road": {
    "name": "a road with no name",
@@ -10861,8 +10861,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -10878,8 +10878,8 @@
   "map_last_edited": "2021-12-16",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -10887,8 +10887,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10904,8 +10904,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -10913,8 +10913,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10930,8 +10930,8 @@
   "map_last_edited": "2021-08-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -10939,8 +10939,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10956,8 +10956,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -10965,8 +10965,8 @@
    "distance_m": 29,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -10982,8 +10982,8 @@
   "map_last_edited": "2021-08-11",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -10991,8 +10991,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -11008,8 +11008,8 @@
   "map_last_edited": "2026-02-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Abdul Kadir Adabi",
@@ -11017,8 +11017,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11034,8 +11034,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11043,8 +11043,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11060,8 +11060,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.43,
-   "100": 4.93,
-   "500": 5.26
+   "20": 4.11,
+   "50": 4.67
   },
   "road": {
    "name": "a road with no name",
@@ -11069,8 +11069,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": 3.43,
-    "100": 4.93,
-    "500": 5.26
+    "20": 4.11,
+    "50": 4.67
    }
   },
   "shelter": null
@@ -11086,8 +11086,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -11095,8 +11095,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11112,8 +11112,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11121,8 +11121,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11138,8 +11138,8 @@
   "map_last_edited": "2023-06-04",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Belakang Istana",
@@ -11147,8 +11147,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11164,8 +11164,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11173,8 +11173,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11190,8 +11190,8 @@
   "map_last_edited": "2025-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -11199,8 +11199,8 @@
    "distance_m": 19,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11216,8 +11216,8 @@
   "map_last_edited": "2019-03-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tok Hakim",
@@ -11225,8 +11225,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11242,8 +11242,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11251,8 +11251,8 @@
    "distance_m": 24,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11268,8 +11268,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -11277,8 +11277,8 @@
    "distance_m": 28,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11294,8 +11294,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -11303,8 +11303,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -11320,8 +11320,8 @@
   "map_last_edited": "2021-07-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11329,8 +11329,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11346,8 +11346,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -11355,8 +11355,8 @@
    "distance_m": 27,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11372,8 +11372,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 3.73,
-   "100": 5.22,
-   "500": 5.56
+   "20": 4.41,
+   "50": 4.97
   },
   "road": {
    "name": "a road with no name",
@@ -11381,8 +11381,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": 3.73,
-    "100": 5.22,
-    "500": 5.56
+    "20": 4.41,
+    "50": 4.97
    }
   },
   "shelter": null
@@ -11398,8 +11398,8 @@
   "map_last_edited": "2026-02-02",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11407,8 +11407,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11424,8 +11424,8 @@
   "map_last_edited": "2022-07-28",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tok Guru",
@@ -11433,8 +11433,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11450,8 +11450,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -11459,8 +11459,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11476,8 +11476,8 @@
   "map_last_edited": "2024-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -11485,8 +11485,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11502,8 +11502,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.13,
-   "100": 5.62,
-   "500": 5.96
+   "20": 4.81,
+   "50": 5.37
   },
   "road": {
    "name": "a road with no name",
@@ -11511,8 +11511,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.13,
-    "100": 5.62,
-    "500": 5.96
+    "20": 4.81,
+    "50": 5.37
    }
   },
   "shelter": null
@@ -11528,8 +11528,8 @@
   "map_last_edited": "2016-10-27",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Pintu Pong",
@@ -11537,8 +11537,8 @@
    "distance_m": 14,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11554,8 +11554,8 @@
   "map_last_edited": "2022-10-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -11563,8 +11563,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11580,8 +11580,8 @@
   "map_last_edited": "2024-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -11589,8 +11589,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11606,8 +11606,8 @@
   "map_last_edited": "2022-10-09",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dato Pati",
@@ -11615,8 +11615,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11632,8 +11632,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Post Office Lama",
@@ -11641,8 +11641,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11658,8 +11658,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Dusun Muda",
@@ -11667,8 +11667,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11684,8 +11684,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11693,8 +11693,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11710,8 +11710,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -11719,8 +11719,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11736,8 +11736,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11745,8 +11745,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11762,8 +11762,8 @@
   "map_last_edited": "2024-08-01",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Che Su",
@@ -11771,8 +11771,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11788,8 +11788,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -11797,8 +11797,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11814,8 +11814,8 @@
   "map_last_edited": "2026-01-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11823,8 +11823,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11840,8 +11840,8 @@
   "map_last_edited": "2021-07-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11849,8 +11849,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11866,8 +11866,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": 4.33,
-   "100": 5.83,
-   "500": 6.17
+   "20": 5.01,
+   "50": 5.57
   },
   "road": {
    "name": "a road with no name",
@@ -11875,8 +11875,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.33,
-    "100": 5.83,
-    "500": 6.17
+    "20": 5.01,
+    "50": 5.57
    }
   },
   "shelter": null
@@ -11892,8 +11892,8 @@
   "map_last_edited": "2015-04-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11901,8 +11901,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11918,8 +11918,8 @@
   "map_last_edited": "2026-03-29",
   "depth_m": {
    "10": null,
-   "100": 2.5,
-   "500": 2.82
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11927,8 +11927,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": 2.5,
-    "500": 2.82
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11944,8 +11944,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": 0.19,
-   "500": 0.39
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -11953,8 +11953,8 @@
    "distance_m": 22,
    "depth_m": {
     "10": null,
-    "100": 0.29,
-    "500": 0.49
+    "20": null,
+    "50": 0.14
    }
   },
   "shelter": null
@@ -11970,8 +11970,8 @@
   "map_last_edited": "2021-08-12",
   "depth_m": {
    "10": null,
-   "100": 0.14,
-   "500": 0.32
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -11979,8 +11979,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": 0.14,
-    "500": 0.32
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -11996,8 +11996,8 @@
   "map_last_edited": "2021-08-13",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -12005,8 +12005,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12022,8 +12022,8 @@
   "map_last_edited": "2022-12-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kota Bharu - Pengkalan Kubor",
@@ -12031,8 +12031,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12048,8 +12048,8 @@
   "map_last_edited": "2023-12-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Suara Muda",
@@ -12057,8 +12057,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12074,8 +12074,8 @@
   "map_last_edited": "2024-06-26",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Bayam",
@@ -12083,8 +12083,8 @@
    "distance_m": 2,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12100,8 +12100,8 @@
   "map_last_edited": "2024-06-26",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Long Yunus",
@@ -12109,8 +12109,8 @@
    "distance_m": 5,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12126,8 +12126,8 @@
   "map_last_edited": "2025-07-31",
   "depth_m": {
    "10": null,
-   "100": 1.21,
-   "500": 1.49
+   "20": 0.53,
+   "50": 1.0
   },
   "road": {
    "name": "a road with no name",
@@ -12135,8 +12135,8 @@
    "distance_m": 6,
    "depth_m": {
     "10": null,
-    "100": 1.21,
-    "500": 1.49
+    "20": 0.53,
+    "50": 1.0
    }
   },
   "shelter": null
@@ -12152,8 +12152,8 @@
   "map_last_edited": "2026-01-14",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -12161,8 +12161,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12178,8 +12178,8 @@
   "map_last_edited": "2026-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12187,8 +12187,8 @@
    "distance_m": 20,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12204,8 +12204,8 @@
   "map_last_edited": "2025-03-12",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Doktor",
@@ -12213,8 +12213,8 @@
    "distance_m": 9,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12230,8 +12230,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12239,8 +12239,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12256,8 +12256,8 @@
   "map_last_edited": "2023-01-15",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12265,8 +12265,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12282,8 +12282,8 @@
   "map_last_edited": "2021-08-05",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12291,8 +12291,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12308,8 +12308,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12317,8 +12317,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12334,8 +12334,8 @@
   "map_last_edited": "2025-07-06",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12343,8 +12343,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12360,8 +12360,8 @@
   "map_last_edited": "2021-07-19",
   "depth_m": {
    "10": 4.21,
-   "100": 5.7,
-   "500": 6.03
+   "20": 4.89,
+   "50": 5.45
   },
   "road": {
    "name": "a road with no name",
@@ -12369,8 +12369,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": 4.21,
-    "100": 5.7,
-    "500": 6.03
+    "20": 4.89,
+    "50": 5.45
    }
   },
   "shelter": null
@@ -12386,8 +12386,8 @@
   "map_last_edited": "2019-09-11",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12395,8 +12395,8 @@
    "distance_m": 8,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12412,8 +12412,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12421,8 +12421,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12438,8 +12438,8 @@
   "map_last_edited": "2025-11-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tok Guru",
@@ -12447,8 +12447,8 @@
    "distance_m": 16,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12464,8 +12464,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultan Yahya Petra",
@@ -12473,8 +12473,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12490,8 +12490,8 @@
   "map_last_edited": "2025-03-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.56
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12499,8 +12499,8 @@
    "distance_m": 13,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.56
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12516,8 +12516,8 @@
   "map_last_edited": "2021-07-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": 0.27
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Kebun Sultan",
@@ -12525,8 +12525,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": 0.27
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12542,8 +12542,8 @@
   "map_last_edited": "2025-10-08",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Sultanah Zainab",
@@ -12551,8 +12551,8 @@
    "distance_m": 18,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12568,8 +12568,8 @@
   "map_last_edited": "2026-03-17",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12577,8 +12577,8 @@
    "distance_m": 17,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12594,8 +12594,8 @@
   "map_last_edited": "2025-03-20",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12603,8 +12603,8 @@
    "distance_m": 15,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12620,8 +12620,8 @@
   "map_last_edited": "2025-10-08",
   "depth_m": {
    "10": 3.33,
-   "100": 4.81,
-   "500": 5.15
+   "20": 4.0,
+   "50": 4.56
   },
   "road": {
    "name": "a road with no name",
@@ -12629,8 +12629,8 @@
    "distance_m": 12,
    "depth_m": {
     "10": 3.33,
-    "100": 4.81,
-    "500": 5.15
+    "20": 4.0,
+    "50": 4.56
    }
   },
   "shelter": null
@@ -12646,8 +12646,8 @@
   "map_last_edited": "2021-07-18",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12655,8 +12655,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12672,8 +12672,8 @@
   "map_last_edited": "2021-08-02",
   "depth_m": {
    "10": 1.57,
-   "100": 3.09,
-   "500": 3.44
+   "20": 2.26,
+   "50": 2.83
   },
   "road": {
    "name": "a road with no name",
@@ -12681,8 +12681,8 @@
    "distance_m": 39,
    "depth_m": {
     "10": 1.57,
-    "100": 3.09,
-    "500": 3.44
+    "20": 2.26,
+    "50": 2.83
    }
   },
   "shelter": null
@@ -12698,8 +12698,8 @@
   "map_last_edited": "2025-03-26",
   "depth_m": {
    "10": null,
-   "100": 0.78,
-   "500": 0.99
+   "20": 0.26,
+   "50": 0.62
   },
   "road": {
    "name": "a road with no name",
@@ -12707,8 +12707,8 @@
    "distance_m": 7,
    "depth_m": {
     "10": null,
-    "100": 0.78,
-    "500": 0.99
+    "20": 0.26,
+    "50": 0.62
    }
   },
   "shelter": null
@@ -12724,8 +12724,8 @@
   "map_last_edited": "2019-01-25",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "Jalan Tok Hakim",
@@ -12733,8 +12733,8 @@
    "distance_m": 11,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null
@@ -12750,8 +12750,8 @@
   "map_last_edited": "2025-03-10",
   "depth_m": {
    "10": null,
-   "100": null,
-   "500": null
+   "20": null,
+   "50": null
   },
   "road": {
    "name": "a road with no name",
@@ -12759,8 +12759,8 @@
    "distance_m": 10,
    "depth_m": {
     "10": null,
-    "100": null,
-    "500": null
+    "20": null,
+    "50": null
    }
   },
   "shelter": null

@@ -8,7 +8,7 @@ import { band, bandColor } from "./dom.js";
 
 export const MAX_NEIGHBOURHOODS = 4;
 const CELL_OPACITY = 0.28;   // the squares are background: the shop dots carry the depth
-const CELL_FIELDS = 5;       // [south, west, depth at 1 in 10, 1 in 100, 1 in 500], as in town.json `cells`
+const CELL_FIELDS = 5;       // [south, west, depth at 1 in 10, 1 in 20, 1 in 50], as in town.json `cells`
 
 /** The paint of one square: the colour of its depth for the flood size at `index` of its depths, or none when dry. */
 export const squareStyle = (depths, index) => ({

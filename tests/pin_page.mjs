@@ -34,7 +34,7 @@ export function placeAt(lat, lon) {
   const bounds = [west, north - E100.py, west + E100.px, north].map((edge) => Number(edge.toFixed(6)));
   return {
     id: square.id, is_point: true, name: null, sector: null, kind: null, is_chain: null, lat: centre.lat, lon: centre.lon,
-    area_id: null, depth_m: { 10: null, 100: 0.5, 500: 1 }, road: null, shelter: null,
+    area_id: null, depth_m: { 10: null, 20: 0.5, 50: 1 }, road: null, shelter: null,
     cell: { grid: square.grid, row: square.row, col: square.col, bounds },
   };
 }

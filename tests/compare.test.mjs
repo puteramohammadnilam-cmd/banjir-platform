@@ -24,7 +24,7 @@ function mount() {
   return { card, calls, button };
 }
 
-const other = { ...shop, id: "node-2", name: "Kedai Dua", depth_m: { 10: null, 100: 0.3, 500: 0.8 }, shelter: { name: "SK Satu", distance_m: 450 } };
+const other = { ...shop, id: "node-2", name: "Kedai Dua", depth_m: { 10: null, 20: 0.3, 50: 0.8 }, shelter: { name: "SK Satu", distance_m: 450 } };
 
 test("the place on show can be added; once added the button says so and removes it", () => {
   const { card, calls, button } = mount();
@@ -41,7 +41,7 @@ test("with two places the table shows their depths, road water and relief centre
   card.render({ current: shop, compared: [shop, other] });
   const rows = card.node.querySelectorAll("tr").slice(1).map((row) => row.textContent);
   assert.equal(rows.length, 2);
-  assert.match(rows[0], /A Shop.*0\.20 m.*0\.50 m.*1\.00 m.*0\.40 m.*none listed/);
+  assert.match(rows[0], /A Shop.*0\.20 m.*0\.50 m.*1\.00 m.*0\.90 m.*none listed/);
   assert.match(rows[1], /Kedai Dua.*no water.*0\.30 m.*0\.80 m.*SK Satu, 450 m/);
 });
 

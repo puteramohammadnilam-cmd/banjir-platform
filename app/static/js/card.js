@@ -216,7 +216,7 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
       const key = `${premise.id}|${rp}|${photoFloorM}`;
       if (key !== drawnKey) {
         drawnKey = key;
-        renderPicker(picker, rp, onPick);
+        renderPicker(picker, rp, onPick, area.bigger_flood_example);
         drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM));
         announcer.textContent = spoken(premise, rp);
       }

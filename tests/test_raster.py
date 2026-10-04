@@ -24,7 +24,7 @@ from app import raster
 ROOT = Path(__file__).resolve().parent.parent
 GRID = "N10_E100"
 SRI_MUDA_VIEW = (101.515, 3.008, 101.550, 3.042)   # the box tools/build_data.py built (west, south, east, north)
-DRY = {"10": None, "100": None, "500": None}
+DRY = {"10": None, "20": None, "50": None}
 TALL = (0.25, 0.5)                                 # squares twice as tall as wide
 AFFINE = (0.25, 0.0, 0.0, 100.0, 0.0, -0.25, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
 LIMITS = {324: 1 << 18, 325: 1 << 18, 34735: 4 + 4 * 64}   # most values a tag may claim; any other tag: 64
@@ -94,8 +94,8 @@ def test_depth_value_follows_the_build_rule(value, metres):
 
 
 def test_depths_give_the_three_return_periods(depth_set):
-    assert depth_set.depths(100.875, 9.375) == {"10": 2.13, "100": 2.63, "500": 3.13}
-    assert depth_set.depths(*depth_set.grids[0].centre(*fx.ONLY_500)) == {"10": None, "100": None, "500": 0.42}
+    assert depth_set.depths(100.875, 9.375) == {"10": 2.13, "20": 2.63, "50": 3.13}
+    assert depth_set.depths(*depth_set.grids[0].centre(*fx.ONLY_50)) == {"10": None, "20": None, "50": 0.42}
 
 
 def test_depths_and_block_agree_a_trace_is_dry_in_both(depth_set):
@@ -159,7 +159,7 @@ def test_tall_squares_use_their_height_for_rows_and_their_width_for_columns(tall
     assert grid.bounds(1, 1) == (100.25, 9.0, 100.5, 9.5)
     assert grid.centre(2, 3) == (100.875, 8.75)
     assert all(grid.cell(*grid.centre(r, c)) == (r, c) for r in range(fx.ROWS) for c in range(fx.COLS))
-    assert tall.depths(*grid.centre(2, 3)) == {"10": 2.13, "100": 2.63, "500": 3.13}
+    assert tall.depths(*grid.centre(2, 3)) == {"10": 2.13, "20": 2.63, "50": 3.13}
 
 
 def test_tall_squares_give_the_json_a_client_snaps_with(tall):
@@ -386,9 +386,9 @@ def two(tmp_path):
 
 def test_two_grids_route_to_their_own_files(two):
     assert [g.name for g in two.grids] == [GRID, "N10_E110"]
-    assert two.depths(100.875, 9.375) == {"10": 2.13, "100": 2.63, "500": 3.13}
-    assert two.depths(110.875, 9.375) == {"10": 52.13, "100": 52.63, "500": 53.13}
-    assert two.depths(109.9, 9.0) == {"10": 4.49, "100": 4.99, "500": 5.49}   # the last column of the first grid
+    assert two.depths(100.875, 9.375) == {"10": 2.13, "20": 2.63, "50": 3.13}
+    assert two.depths(110.875, 9.375) == {"10": 52.13, "20": 52.63, "50": 53.13}
+    assert two.depths(109.9, 9.0) == {"10": 4.49, "20": 4.99, "50": 5.49}   # the last column of the first grid
     assert two.depths(120.0, 9.0) is None and two.depths(105.0, 10.5) is None   # east and north of both
     assert two.locate(110.875, 9.375) == (two.grids[1], 2, 3)
     assert two.locate(110.0, 9.0) == (two.grids[1], 4, 0)   # the shared edge goes east, as every edge does
@@ -398,8 +398,8 @@ def test_two_grids_route_to_their_own_files(two):
 def test_a_block_holds_only_wet_squares_in_town_cells_format(depth_set):
     cells = depth_set.block(GRID, 0, 0, 4)
     assert len(cells) == 13                                   # 16 squares less no data, zero and negative
-    assert cells[0] == [9.75, 100.75, 1.23, 1.23, 1.23]       # (0, 3), [south, west, d10, d100, d500]
-    assert cells[1] == [9.5, 100.0, None, None, 0.42]         # (1, 0): water at 1 in 500 only
+    assert cells[0] == [9.75, 100.75, 1.23, 1.23, 1.23]       # (0, 3), [south, west, d10, d20, d50]
+    assert cells[1] == [9.5, 100.0, None, None, 0.42]         # (1, 0): water at 1 in 50 only
     assert cells[-1] == [9.0, 100.75, 3.13, 3.63, 4.13]       # (3, 3)
 
 
@@ -476,7 +476,7 @@ def test_the_tile_cache_drops_the_least_recently_used():
 def test_reads_stay_within_the_tile_cache_limit(folder):
     small = raster.DepthSet.load(folder, cache_tiles=2)
     for cell in [(2, 3), (2, 20), (20, 20), (2, 3)]:
-        assert small.depths(*small.grids[0].centre(*cell))["500"] > 0
+        assert small.depths(*small.grids[0].centre(*cell))["50"] > 0
         assert len(small.cache) <= 2
 
 
@@ -508,14 +508,14 @@ def test_a_missing_folder_gives_an_empty_set(tmp_path):
 
 
 def test_a_grid_missing_a_return_period_is_refused(tmp_path):
-    fx.write_depth_set(tmp_path, rps=(10, 100))
-    with pytest.raises(raster.RasterError, match="N10_E100.*500"):
+    fx.write_depth_set(tmp_path, rps=(10, 20))
+    with pytest.raises(raster.RasterError, match="N10_E100.*50"):
         raster.DepthSet.load(tmp_path)
 
 
 def test_the_return_period_files_must_share_one_grid(tmp_path):
     fx.write_depth_set(tmp_path)
-    fx.write_depth_tiff(tmp_path / f"ID211_{GRID}_RP500_depth.tif", fx.depth_values(500), origin=(100.25, 10.0))
+    fx.write_depth_tiff(tmp_path / f"ID211_{GRID}_RP50_depth.tif", fx.depth_values(50), origin=(100.25, 10.0))
     with pytest.raises(raster.RasterError, match="N10_E100"):
         raster.DepthSet.load(tmp_path)
 
@@ -543,7 +543,7 @@ def test_other_files_in_the_folder_are_ignored(tmp_path):
 
 def test_coverage_describes_each_grid(depth_set):
     cover = depth_set.coverage()
-    assert (cover["return_periods"], cover["block_cells"]) == ([10, 100, 500], 24)
+    assert (cover["return_periods"], cover["block_cells"]) == ([10, 20, 50], 24)
     assert cover["grids"] == [{"name": GRID, "x0": 100.0, "y0": 10.0, "px": 0.25, "py": 0.25, "rows": 30, "cols": 40,
                                "bounds": [100.0, 2.5, 110.0, 10.0]}]
     assert cover["data_version"] == depth_set.data_version and json.loads(json.dumps(cover)) == cover
@@ -552,13 +552,13 @@ def test_coverage_describes_each_grid(depth_set):
 def test_the_data_version_follows_the_file_bytes(folder):
     first = raster.DepthSet.load(folder).data_version
     assert re.fullmatch(r"[0-9a-f]{12}", first) and raster.DepthSet.load(folder).data_version == first
-    fx.write_depth_tiff(folder / f"ID211_{GRID}_RP500_depth.tif", fx.depth_values(500, shift=0.01))
+    fx.write_depth_tiff(folder / f"ID211_{GRID}_RP50_depth.tif", fx.depth_values(50, shift=0.01))
     assert raster.DepthSet.load(folder).data_version != first
 
 
 def test_the_data_version_follows_the_file_names_too(folder):
     first = raster.DepthSet.load(folder).data_version
-    (folder / f"ID211_{GRID}_RP500_depth.tif").rename(folder / f"ID212_{GRID}_RP500_depth.tif")   # same bytes and order
+    (folder / f"ID211_{GRID}_RP50_depth.tif").rename(folder / f"ID212_{GRID}_RP50_depth.tif")   # same bytes and order
     assert raster.DepthSet.load(folder).data_version != first
 
 
@@ -604,7 +604,7 @@ def built(name: str) -> list[Path]:
 
 
 def square(grid: raster.Grid, cell: list) -> tuple:
-    """(row, col, d10, d100, d500) of a town.json cell, the row and column taken from its south-west corner."""
+    """(row, col, d10, d20, d50) of a town.json cell, the row and column taken from its south-west corner."""
     south, west, *depths = cell
     return (round((grid.y0 - south) / grid.py) - 1, round((west - grid.x0) / grid.px), *depths)
 
@@ -630,8 +630,8 @@ def assert_same_town(real, town: dict) -> None:
         row, col, *depths = square(grid, cell)
         lon, lat = grid.centre(row, col)
         assert real.locate(lon, lat) == (grid, row, col)
-        assert real.depths(lon, lat) == dict(zip(("10", "100", "500"), depths))
-    assert (town["cell_deg"], town["return_periods"]) == (grid.px, [10, 100, 500])
+        assert real.depths(lon, lat) == dict(zip(("10", "20", "50"), depths))
+    assert (town["cell_deg"], town["return_periods"]) == (grid.px, [10, 20, 50])
 
 
 @needs_real
@@ -679,7 +679,7 @@ def test_the_plan_example_point_snaps_to_its_square(real):
     grid, row, col = real.locate(101.5364982, 3.0297599)
     lon, lat = grid.centre(row, col)
     assert f"pt:{lat:.5f},{lon:.5f}" == "pt:3.02998,101.53667"
-    assert real.depths(lon, lat) == {"10": 1.35, "100": 1.88, "500": 2.11}
+    assert real.depths(lon, lat) == {"10": 1.35, "20": 1.54, "50": 1.76}
 
 
 def test_ten_thousand_warm_reads_take_under_a_second(request, folder):

@@ -10,7 +10,7 @@ import { SQUARES_FAILED, createCellLayer, squareStyle, squaresOf } from "../app/
 import { BANDS, DRY_COLOR } from "../app/static/js/dom.js";
 
 const GRID = { name: "N10_E100", px: 0.001, py: 0.002 };
-const FLOOD_SIZES = ["10", "100", "500"];
+const FLOOD_SIZES = ["10", "20", "50"];
 
 class FakeRectangle {
   constructor(bounds, options) {
@@ -187,6 +187,6 @@ test("changing the flood size repaints every square on the map, and squares draw
   assert.equal(drawn()[0].style.fillColor, BANDS[3].color, "2.5 m is over the door");
   squares.show(GRID, [block(2, 2)], [cell(3.1, 101.0, 0.5, 1.0, 2.5)]);
   assert.equal(drawn()[1].options.fillColor, BANDS[3].color);
-  assert.equal(FLOOD_SIZES[shown], "500");
+  assert.equal(FLOOD_SIZES[shown], "50");
   assert.deepEqual(requested, []);
 });

@@ -19,7 +19,7 @@ function mount(options = {}) {
   const mode = { get value() { return radios.find((radio) => radio.checked)?.getAttribute("value"); }, set value(next) { radios.forEach((radio) => { radio.checked = radio.getAttribute("value") === next; }); } };
   form.elements = { mode };
   form.reportValidity = () => true;
-  cost.render(shop, null, undefined, undefined, "100");
+  cost.render(shop, null, undefined, undefined, "20");
   return { panel, cost, form, sent, mode, radios };
 }
 
@@ -58,6 +58,6 @@ test("another place gets the same ready-to-answer form, not the last place's mod
   const { cost, mode, radios } = mount();
   radios.find((radio) => radio.getAttribute("value") === "value").dispatch("change");
   mode.value = "value";
-  cost.render({ ...shop, id: "node-9", name: "Other" }, null, undefined, undefined, "100");
+  cost.render({ ...shop, id: "node-9", name: "Other" }, null, undefined, undefined, "20");
   assert.equal(mode.value, "size");
 });

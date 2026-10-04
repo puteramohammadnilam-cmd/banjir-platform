@@ -17,12 +17,14 @@ from dataclasses import dataclass, replace
 
 from . import areas, costs, googlemaps, places
 
-SCENARIOS = {"10": "a flood expected once in 10 years", "100": "a flood expected once in 100 years",
-             "500": "a flood expected once in 500 years"}
+SCENARIOS = {"10": "a flood expected once in 10 years", "20": "a flood expected once in 20 years",
+             "50": "a flood expected once in 50 years"}
 LIMITS = (
     "Depths come from a global computer model (European Commission JRC, 90 m squares). "
     "It is not an official Malaysian flood map and not a record of real floods. "
     "It ignores local flood walls, pumps and floor heights. Several shops can share one square. "
+    "It shows floods of three sizes, 1 in 10, 20 and 50 years; floods bigger than 1 in 50 years are not in the "
+    "model, so a rarer, bigger flood can bring deeper water than any depth here. "
     "Businesses are points on a public map and have not been checked on the ground."
 )
 NO_SHELTERS = ("This tool has no relief centre list for this area yet. "
@@ -181,7 +183,7 @@ def flood_check(place_id: str) -> dict:
             the point the user picked on the map.
 
     Returns:
-        Depth in metres for the 10, 100 and 500 year floods (null means no water in the model).
+        Depth in metres for the 10, 20 and 50 year floods (null means no water in the model).
         For a business, also its nearest road and the depth there. The selected point (is_point
         true) is one 90 m square of the model, not a mapped business; its listed area, if any, is
         given. Also the nearest relief centre (null means this tool has no list for the area) and
@@ -236,7 +238,7 @@ def damage_estimate(place_id: str, value_at_risk_rm: float, shop_size: str, floo
         measure_cost_rm: What that measure costs in ringgit. 0 for no measure.
 
     Returns:
-        Loss in each of the 10, 100 and 500 year floods, the average loss per year, the loss over
+        Loss in each of the 10, 20 and 50 year floods, the average loss per year, the loss over
         ten years, whether the measure pays for itself, the basis used for the direct and indirect
         figures, the method and its limits. Or an error.
     """

@@ -18,21 +18,22 @@ const result = (per_flood) => ({
   loss_over_years: { years: 10, discount_rate: 0.04, present_value_rm: 28102 }, measure: null,
 });
 // a medium shop on the typical figure: the same damage in every flood that reaches the floor (the case in the report)
-const FLAT = result({ 10: flood(0.95, 31647, 3000, null), 100: flood(1.48, 31647, 3000, null), 500: flood(1.71, 31647, 3000, null) });
-const OWN = result({ 10: flood(0, 0, 0, 0), 100: flood(0.5, 19000, 5700, 0.38), 500: flood(1, 27000, 8100, 0.54) });
+const FLAT = result({ 10: flood(0.95, 31647, 3000, null), 20: flood(1.48, 31647, 3000, null), 50: flood(1.71, 31647, 3000, null) });
+const OWN = result({ 10: flood(0, 0, 0, 0), 20: flood(0.5, 19000, 5700, 0.38), 50: flood(1, 27000, 8100, 0.54) });
 const text = (nodes) => nodes.map((node) => node.textContent).join(" | ");
 
 test("the yearly loss says it is a floor and why", () => {
   const shown = text(results(FLAT));
   assert.match(shown, /at least RM\s?3,465/);
   assert.match(shown, /more frequent than 1 in 10 years are not in the model/);
+  assert.match(shown, /bigger than 1 in 50 years are counted as if they cost the same as a 1 in 50 years flood/);
 });
 
 test("the second figure is the chance of a costly flood in 10 years, with what one costs", () => {
   const shown = text(results(FLAT));
   assert.match(shown, /65%/);
   assert.match(shown, /a 1 in 10 years flood or bigger: about RM\s?34,647 each time/);
-  assert.match(text(results(OWN)), /10%.*a 1 in 100 years flood or bigger/s, "the 1 in 10 flood costs nothing here");
+  assert.match(text(results(OWN)), /40%.*a 1 in 20 years flood or bigger/s, "the 1 in 10 flood costs nothing here");
 });
 
 test("the discounted sum over 10 years moves into How this is worked out", () => {
@@ -54,6 +55,6 @@ test("the owner's own value keeps the full table and no flat line", () => {
 });
 
 test("no costly flood at all: no chance figure to show", () => {
-  const dry = result({ 10: flood(0, 0, 0, 0), 100: flood(0, 0, 0, 0), 500: flood(0, 0, 0, 0) });
+  const dry = result({ 10: flood(0, 0, 0, 0), 20: flood(0, 0, 0, 0), 50: flood(0, 0, 0, 0) });
   assert.match(text(results(dry)), /no flood in the model costs this shop money/);
 });

@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { BANDS, band, chanceWithin, depthWords } from "../app/static/js/dom.js";
+import { BANDS, SCENARIOS, band, chanceWithin, depthWords, renderPicker } from "../app/static/js/dom.js";
 import { floodCounts, tickYears } from "../app/static/js/history.js";
+import { useLang } from "../app/static/js/i18n.js";
+import { installFakeDom } from "./fake_dom.mjs";
 
 // The floods are an area's data, not the page's: area.json is what GET /api/areas/{id}/data sends as `area`.
 const SRI_MUDA = JSON.parse(readFileSync(new URL("../app/data/areas/sri-muda/area.json", import.meta.url), "utf8"));
@@ -26,7 +28,40 @@ test("depth words follow an adult about 1.65 m tall", () => {
 });
 
 test("chance of at least one flood in 10 years", () => {
-  assert.deepEqual(["10", "100", "500"].map((rp) => Math.round(chanceWithin(Number(rp), 10) * 100)), [65, 10, 2]);
+  assert.deepEqual(SCENARIOS.map((rp) => Math.round(chanceWithin(Number(rp), 10) * 100)), [65, 40, 18]);
+});
+
+test("the flood sizes are 1 in 10, 20 and 50 years, smallest first", () => {
+  assert.deepEqual(SCENARIOS, ["10", "20", "50"]);
+});
+
+function picked(example) {
+  installFakeDom();
+  const slot = document.createElement("div");
+  const chosen = [];
+  renderPicker(slot, "50", (rp) => chosen.push(rp), example);
+  return { slot, chosen, note: slot.querySelector(".scenario-note") };
+}
+
+test("the picker offers the three sizes with their chance, the biggest pressed, and says bigger floods are not shown", () => {
+  const { slot, chosen, note } = picked(null);
+  const buttons = slot.querySelectorAll("button");
+  assert.deepEqual(buttons.map((b) => b.textContent), ["1 in 10 years65% chance in 10 years", "1 in 20 years40% chance in 10 years",
+    "1 in 50 years18% chance in 10 years"]);
+  assert.deepEqual(buttons.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true"]);
+  buttons[1].click();
+  assert.deepEqual(chosen, ["20"]);
+  assert.equal(note.textContent, "Floods bigger than 1 in 50 years are not shown.");
+});
+
+test("the note names the area's own example of a bigger flood, in either language", () => {
+  assert.equal(picked("such as December 2021").note.textContent, "Floods bigger than 1 in 50 years are not shown, such as December 2021.");
+  useLang("ms");
+  try {
+    assert.equal(picked(undefined).note.textContent, "Banjir lebih besar daripada 1 dalam 50 tahun tidak ditunjukkan.");
+  } finally {
+    useLang("en");
+  }
 });
 
 test("every recorded flood has a date, a year in range and a source, oldest first", () => {

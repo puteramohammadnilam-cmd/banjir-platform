@@ -182,7 +182,7 @@ def build(view: View, businesses: list[dict], roads: list[dict], shelters: list[
     grid = depth_set.locate(view[0], view[3])[0]
     town = {
         "view": view, "cell_deg": grid.px, "return_periods": RETURN_PERIODS,
-        "cells": cells,  # [south, west, depth10, depth100, depth500]
+        "cells": cells,  # [south, west, depth10, depth20, depth50]
         "shelters": [{"name": s["name"], "lat": s["lat"], "lon": s["lon"]} for s in shelters],
     }
     return premises, town

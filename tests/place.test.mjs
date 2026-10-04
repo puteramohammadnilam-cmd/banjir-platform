@@ -9,7 +9,7 @@ import { TABS, businessPlace, isPoint, parseRef, pointId, readUrl, snapToGrid, w
 // GET /api/coverage `grids`, as the server sends them for the shipped files.
 const E100 = { name: "N10_E100", x0: 99.97625154437965, y0: 10.00706666666666, px: 0.0008333333356347339, py: 0.0008333333333325754, rows: 11999, cols: 11999 };
 const GRIDS = [E100];
-const ANETAS = "pt:3.02998,101.53667";   // the square of the business at 3.0297599, 101.5364982: 1.88 m at 1 in 100
+const ANETAS = "pt:3.02998,101.53667";   // the square of the business at 3.0297599, 101.5364982: 1.76 m at 1 in 50
 
 /** Split a link written by writeUrl the way the browser would: {search, hash}. */
 const asLocation = (link) => {
@@ -50,7 +50,7 @@ test("isPoint takes an id or a place", () => {
 });
 
 test("a business from premises.json takes the server's Place shape", () => {
-  const premise = { id: "node-1", name: "A shop", depth_m: { 10: null, 100: 0.5, 500: 1 } };
+  const premise = { id: "node-1", name: "A shop", depth_m: { 10: null, 20: 0.5, 50: 1 } };
   const place = businessPlace(premise, "kota-tinggi");
   assert.deepEqual(place, { ...premise, is_point: false, area_id: "kota-tinggi", cell: null });
   assert.notEqual(place, premise);
@@ -118,8 +118,8 @@ test("the first grid in coverage order that holds the point wins", () => {
 const NOTHING = { area: null, place: null, tab: null, rp: null, lang: null, pointInQuery: false };
 
 test("an old ?shop= link names the place; tab and rp keep their old rules", () => {
-  assert.deepEqual(readUrl({ search: "?tab=business&shop=node-13414432501&rp=500", hash: "" }),
-    { ...NOTHING, place: "node-13414432501", tab: "business", rp: "500" });
+  assert.deepEqual(readUrl({ search: "?tab=business&shop=node-13414432501&rp=20", hash: "" }),
+    { ...NOTHING, place: "node-13414432501", tab: "business", rp: "20" });
   assert.deepEqual(readUrl({ search: "?shop=node-1", hash: "" }), { ...NOTHING, place: "node-1" });
   assert.deepEqual(readUrl({ search: "", hash: "" }), NOTHING);
   assert.deepEqual(readUrl({}), NOTHING);
@@ -133,8 +133,8 @@ test("the fragment's place comes first, then ?place=, then ?shop=", () => {
 });
 
 test("a point is read only from the fragment: one in the query is flagged, never used", () => {
-  assert.deepEqual(readUrl({ search: `?tab=business&place=${ANETAS}&rp=100`, hash: "" }),
-    { ...NOTHING, tab: "business", rp: "100", pointInQuery: true });
+  assert.deepEqual(readUrl({ search: `?tab=business&place=${ANETAS}&rp=50`, hash: "" }),
+    { ...NOTHING, tab: "business", rp: "50", pointInQuery: true });
   assert.deepEqual(readUrl({ search: "?shop=pt:3.0297599,101.5364982", hash: "" }), { ...NOTHING, pointInQuery: true },
     "anything that claims to be a point, even malformed, which may hold a precise position");
   assert.deepEqual(readUrl({ search: `?place=${ANETAS}`, hash: "#place=pt:1.72665,103.90000" }),
@@ -144,19 +144,25 @@ test("a point is read only from the fragment: one in the query is flagged, never
 });
 
 test("a link's tab and rp are kept only when valid; area and place are passed on to be checked", () => {
-  const url = readUrl({ search: "?area=Nowhere&tab=admin&rp=50&place=<b>", hash: "#tab=cost" });
+  const url = readUrl({ search: "?area=Nowhere&tab=admin&rp=25&place=<b>", hash: "#tab=cost" });
   assert.deepEqual(url, { ...NOTHING, area: "Nowhere", place: "<b>" });
   assert.deepEqual(readUrl({ search: "?area=&place=&tab=&rp=", hash: "#place=" }), NOTHING);
   for (const tab of TABS) assert.equal(readUrl({ search: `?tab=${tab}` }).tab, tab);
-  for (const rp of ["10", "100", "500"]) assert.equal(readUrl({ search: `?rp=${rp}` }).rp, rp);
+  for (const rp of ["10", "20", "50"]) assert.equal(readUrl({ search: `?rp=${rp}` }).rp, rp);
+});
+
+test("an old link to a 1 in 100 or 500 years flood, sizes no longer shown, falls back to the default size", () => {
+  for (const rp of ["100", "500"]) {
+    assert.equal(readUrl({ search: `?tab=business&rp=${rp}`, hash: "" }).rp, null, rp);
+  }
 });
 
 test("a business goes in the query; a point goes in the fragment and never in the query", () => {
-  assert.equal(writeUrl({ area: null, tab: "overview", place: "node-13414432501", rp: "100" }), "?tab=overview&place=node-13414432501&rp=100");
+  assert.equal(writeUrl({ area: null, tab: "overview", place: "node-13414432501", rp: "50" }), "?tab=overview&place=node-13414432501&rp=50");
   assert.equal(writeUrl({ area: "kota-tinggi", tab: "business", place: "node-1", rp: "10" }), "?area=kota-tinggi&tab=business&place=node-1&rp=10");
-  assert.equal(writeUrl({ area: null, tab: "business", place: ANETAS, rp: "100" }), `?tab=business&rp=100#place=${ANETAS}`);
-  assert.equal(writeUrl({ area: "kota-tinggi", tab: "cost", place: "pt:1.72665,103.90000", rp: "500" }), "?area=kota-tinggi&tab=cost&rp=500#place=pt:1.72665,103.90000");
-  assert.equal(writeUrl({ tab: "overview", place: "javascript:alert(1)", rp: "100" }), "?tab=overview&rp=100");
+  assert.equal(writeUrl({ area: null, tab: "business", place: ANETAS, rp: "50" }), `?tab=business&rp=50#place=${ANETAS}`);
+  assert.equal(writeUrl({ area: "kota-tinggi", tab: "cost", place: "pt:1.72665,103.90000", rp: "20" }), "?area=kota-tinggi&tab=cost&rp=20#place=pt:1.72665,103.90000");
+  assert.equal(writeUrl({ tab: "overview", place: "javascript:alert(1)", rp: "50" }), "?tab=overview&rp=50");
   assert.equal(writeUrl({}), "?");
 });
 
@@ -165,7 +171,7 @@ test("no point, wherever it is, puts a coordinate in the query", () => {
     const lat = 1 + ((i * 7919) % 6000) / 1000;
     const lon = 100 + ((i * 104729) % 9000) / 1000;
     const snap = snapToGrid(lat, lon, GRIDS);
-    const { search, hash } = asLocation(writeUrl({ area: "sri-muda", tab: "business", place: snap.id, rp: "100" }));
+    const { search, hash } = asLocation(writeUrl({ area: "sri-muda", tab: "business", place: snap.id, rp: "50" }));
     assert.ok(!search.includes("pt") && !search.includes(snap.id.slice(3, 8)), search);
     assert.equal(readUrl({ search, hash }).place, snap.id);
   }
@@ -173,33 +179,33 @@ test("no point, wherever it is, puts a coordinate in the query", () => {
 
 test("a link round-trips through the browser's URL", () => {
   const views = [
-    { area: null, tab: "overview", place: "node-13414432501", rp: "100" },
+    { area: null, tab: "overview", place: "node-13414432501", rp: "50" },
     { area: "kota-tinggi", tab: "business", place: "node-11075038761", rp: "10" },
-    { area: null, tab: "business", place: ANETAS, rp: "100" },
-    { area: "kota-tinggi", tab: "ask", place: "pt:1.72665,103.90000", rp: "500" },
+    { area: null, tab: "business", place: ANETAS, rp: "50" },
+    { area: "kota-tinggi", tab: "ask", place: "pt:1.72665,103.90000", rp: "20" },
     { area: "kota-tinggi", tab: "cost", place: null, rp: "10" },
   ];
   for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { lang: null, ...view, pointInQuery: false }, JSON.stringify(view));
-  const inMalay = { area: "kota-tinggi", tab: "business", place: ANETAS, rp: "100", lang: "ms" };
+  const inMalay = { area: "kota-tinggi", tab: "business", place: ANETAS, rp: "50", lang: "ms" };
   assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, pointInQuery: false });
 });
 
 test("the language is kept in a link when set, after the flood size and before a point's fragment", () => {
-  assert.equal(writeUrl({ tab: "overview", place: "node-1", rp: "100", lang: "ms" }), "?tab=overview&place=node-1&rp=100&lang=ms");
+  assert.equal(writeUrl({ tab: "overview", place: "node-1", rp: "50", lang: "ms" }), "?tab=overview&place=node-1&rp=50&lang=ms");
   assert.equal(writeUrl({ tab: "business", place: ANETAS, rp: "10", lang: "ms" }), `?tab=business&rp=10&lang=ms#place=${ANETAS}`);
-  assert.equal(writeUrl({ tab: "overview", rp: "100", lang: "en" }), "?tab=overview&rp=100&lang=en");
-  assert.equal(writeUrl({ tab: "overview", rp: "100", lang: null }), "?tab=overview&rp=100", "no language: the reader's own choice applies");
+  assert.equal(writeUrl({ tab: "overview", rp: "50", lang: "en" }), "?tab=overview&rp=50&lang=en");
+  assert.equal(writeUrl({ tab: "overview", rp: "50", lang: null }), "?tab=overview&rp=50", "no language: the reader's own choice applies");
   assert.equal(writeUrl({ tab: "overview", lang: "fr" }), "?tab=overview", "a language the page does not have is left out");
   assert.equal(readUrl({ search: "?lang=ms" }).lang, "ms");
   assert.equal(readUrl({ search: "?lang=en&tab=cost" }).lang, "en");
   for (const odd of ["fr", "MS", "", "ms-MY"]) assert.equal(readUrl({ search: `?lang=${odd}` }).lang, null, odd);
-  const read = readUrl({ search: `?tab=business&place=${ANETAS}&rp=100&lang=ms`, hash: "" });
-  assert.equal(writeUrl(read), "?tab=business&rp=100&lang=ms", "cleaning a point out of the query keeps the language");
+  const read = readUrl({ search: `?tab=business&place=${ANETAS}&rp=50&lang=ms`, hash: "" });
+  assert.equal(writeUrl(read), "?tab=business&rp=50&lang=ms", "cleaning a point out of the query keeps the language");
 });
 
 test("writing a link again drops a point from the query, so the page can clean its address before any request", () => {
-  const read = readUrl({ search: `?area=kota-tinggi&tab=business&place=${ANETAS}&rp=100`, hash: "" });
-  assert.equal(writeUrl(read), "?area=kota-tinggi&tab=business&rp=100");
+  const read = readUrl({ search: `?area=kota-tinggi&tab=business&place=${ANETAS}&rp=50`, hash: "" });
+  assert.equal(writeUrl(read), "?area=kota-tinggi&tab=business&rp=50");
   const both = readUrl({ search: "?shop=pt:3.0297599,101.5364982", hash: "#place=pt:1.72665,103.90000" });
   assert.equal(writeUrl(both), "?#place=pt:1.72665,103.90000");
 });

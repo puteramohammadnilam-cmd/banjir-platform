@@ -6,7 +6,7 @@
 import { h, icon, roadName } from "./dom.js";
 import { lang, t } from "./i18n.js";
 
-export const DEFAULT_RP = "100";
+export const DEFAULT_RP = "50";   // the biggest flood size shown (dom.js SCENARIOS)
 const STORE_KEY = "banjir-check-place";   // {[areaId]: placeId}: the business last picked in each area, in this browser
 
 /** Storage can be missing, blocked or full (a private window), or hold anything: what is not a plain object reads as

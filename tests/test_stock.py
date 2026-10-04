@@ -21,23 +21,23 @@ INSIDE = {"is_shop_inside": True, "items": ITEMS, "confidence": "medium", "reaso
 # --- the sums, with no AI ---
 
 def test_items_below_the_water_above_the_floor_are_under_water_in_each_flood():
-    summary = stock.summarise(ITEMS, {"10": None, "100": 0.6, "500": 2.0}, floor_cm=30)
+    summary = stock.summarise(ITEMS, {"10": None, "20": 0.6, "50": 2.0}, floor_cm=30)
     assert summary["total"] == {"value_rm_low": 2600, "value_rm_high": 4200}
     assert summary["suggested_value_rm"] == 3400   # the midpoint of every item in the photo
     flood = summary["per_flood"]
     assert flood["10"] == {"water_above_floor_m": 0.0, "under_water": [], "value_rm_low": 0, "value_rm_high": 0}
-    assert flood["100"] == {"water_above_floor_m": 0.3, "under_water": [0, 1], "value_rm_low": 2300, "value_rm_high": 3700}
-    assert flood["500"]["under_water"] == [0, 1, 2] and flood["500"]["water_above_floor_m"] == 1.7
+    assert flood["20"] == {"water_above_floor_m": 0.3, "under_water": [0, 1], "value_rm_low": 2300, "value_rm_high": 3700}
+    assert flood["50"]["under_water"] == [0, 1, 2] and flood["50"]["water_above_floor_m"] == 1.7
 
 
 def test_water_that_only_reaches_an_items_base_does_not_count_it():
-    summary = stock.summarise(ITEMS[1:2], {"10": 0.1, "100": 0.11, "500": None}, floor_cm=0)
-    assert summary["per_flood"]["10"]["under_water"] == [] and summary["per_flood"]["100"]["under_water"] == [0]
+    summary = stock.summarise(ITEMS[1:2], {"10": 0.1, "20": 0.11, "50": None}, floor_cm=0)
+    assert summary["per_flood"]["10"]["under_water"] == [] and summary["per_flood"]["20"]["under_water"] == [0]
 
 
 def test_a_floor_above_the_water_keeps_everything_dry_and_no_items_give_zeroes():
-    assert stock.summarise(ITEMS, {"10": 0.2, "100": 0.2, "500": 0.2}, floor_cm=50)["per_flood"]["500"]["under_water"] == []
-    empty = stock.summarise([], {"10": 1.0, "100": 1.0, "500": 1.0}, floor_cm=0)
+    assert stock.summarise(ITEMS, {"10": 0.2, "20": 0.2, "50": 0.2}, floor_cm=50)["per_flood"]["50"]["under_water"] == []
+    empty = stock.summarise([], {"10": 1.0, "20": 1.0, "50": 1.0}, floor_cm=0)
     assert empty["total"] == {"value_rm_low": 0, "value_rm_high": 0} and empty["suggested_value_rm"] == 0
 
 
@@ -108,7 +108,7 @@ def test_stock_photos_share_the_ai_bucket_and_take_only_post(client, monkeypatch
 
 def test_the_suggested_value_never_passes_the_forms_limit():
     rich = [{"item": "Gold", "kind": "stock", "lowest_cm": 0, "value_rm_low": 5_000_000, "value_rm_high": 5_000_000}] * 20
-    assert stock.summarise(rich, {"10": 1.0, "100": 1.0, "500": 1.0}, 0)["suggested_value_rm"] == floodtools.ESTIMATE_MAX["value_at_risk_rm"]
+    assert stock.summarise(rich, {"10": 1.0, "20": 1.0, "50": 1.0}, 0)["suggested_value_rm"] == floodtools.ESTIMATE_MAX["value_at_risk_rm"]
 
 
 def test_a_reply_past_the_limits_is_trimmed_not_refused():

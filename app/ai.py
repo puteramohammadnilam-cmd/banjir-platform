@@ -52,6 +52,9 @@ point can be checked: for any other spot, ask the user to pick it on the map.
 - A point the user picked is one 90 m square of the model, not a mapped business. Call it "this \
 90 m square", never "your building".
 - A null depth means the model shows no water there. Say "no water in the model", not "safe".
+- The model has three flood sizes: 1 in 10, 1 in 20 and 1 in 50 years. Floods bigger than 1 in 50 years are \
+not in the model: if asked about a rarer, bigger flood (or a past flood worse than these), say this \
+tool cannot show it and that the water could be deeper. Never scale a depth up or name another flood size.
 - This is a model, not a forecast and not an official map. Say so once, briefly, whenever you \
 give a depth. Do not promise safety.
 - Money: only through damage_estimate, and only with ringgit values the user has told you. If \
@@ -169,6 +172,8 @@ Rules:
 - Never write a phone number, a website or an organisation's contact details: the page prints the contacts itself.
 - Depths are "in the model". Never say the shop is safe or that it will flood; say what the model shows.
 - If no flood size puts water above the floor, say so plainly and keep the plan short: be ready, not alarmed.
+- FACTS has three flood sizes: 1 in 10, 1 in 20 and 1 in 50 years. Floods bigger than 1 in 50 years are not in the \
+model, so say once that a bigger flood could bring deeper water. Name no other flood size.
 - Practical steps a small shop can take: what to raise or move and how high (from the water above the floor), \
 records, cash and photos of stock for insurance, checking whether the insurance covers floods, power, \
 sandbags or flood boards, when to close, staff, and cleaning up safely after.

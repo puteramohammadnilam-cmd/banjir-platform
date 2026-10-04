@@ -60,14 +60,17 @@ def test_every_premise_lies_inside_its_own_area():
 
 def test_sri_muda_holds_the_204_businesses_of_today():
     shown = areas.premises(SRI_MUDA)
-    wet = {rp: sum(1 for p in shown if p["depth_m"][rp]) for rp in ("10", "100", "500")}
-    assert len(shown) == 204 and wet == {"10": 174, "100": 183, "500": 188}
+    wet = {rp: sum(1 for p in shown if p["depth_m"][rp]) for rp in ("10", "20", "50")}
+    assert len(shown) == 204 and wet == {"10": 174, "20": 179, "50": 183}
     assert (areas.default().zoom, areas.default().council) == (15, "MBSA")
 
 
 def test_kota_tinggi_is_the_earlier_hand_picked_build():
     area = areas.get(KOTA_TINGGI)
-    assert areas.counts(area) == {"businesses": 27, "squares": 462, "shelters": 2}
+    assert areas.counts(area) == {"businesses": 27, "squares": 382, "shelters": 2}
+    # re-sampled at 1 in 10, 20 and 50 by tools/resample_area.py (its OpenStreetMap inputs were not kept)
+    assert {rp: sum(1 for p in areas.premises(KOTA_TINGGI) if p["depth_m"][rp]) for rp in ("10", "20", "50")} == {
+        "10": 10, "20": 12, "50": 19}
     assert area.history is None and area.council is None
     assert set(area.notes) == {"businesses", "shelters"} and "Not an official list" in area.notes["shelters"]
 
@@ -234,10 +237,10 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     first = body["data"]["areas"][0]
     assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters"}
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
-        SRI_MUDA, {"businesses": 204, "squares": 1575, "shelters": 0}, True, False)
+        SRI_MUDA, {"businesses": 204, "squares": 1514, "shelters": 0}, True, False)
     kota = listed[KOTA_TINGGI]
     assert (kota["counts"], kota["has_history"], kota["has_shelters"]) == (
-        {"businesses": 27, "squares": 462, "shelters": 2}, False, True)
+        {"businesses": 27, "squares": 382, "shelters": 2}, False, True)
     assert len(listed) == 5 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
 
 
@@ -432,9 +435,9 @@ def test_the_backend_python_names_no_place():
 # ---------- the towns added from the screen of 3 Oct 2026 (05_Raw_Data_Sources/town_screen_2026-10-03)
 
 @pytest.mark.parametrize("area_id, businesses, wet, squares, floods", [
-    ("kuantan", 300, {"10": 27, "100": 219, "500": 250}, 1204, 5),
-    ("kota-bharu", 491, {"10": 85, "100": 115, "500": 138}, 769, 3),
-    ("kuala-terengganu", 158, {"10": 29, "100": 94, "500": 110}, 736, 5),
+    ("kuantan", 300, {"10": 27, "20": 136, "50": 191}, 1085, 5),
+    ("kota-bharu", 491, {"10": 85, "20": 93, "50": 100}, 618, 3),
+    ("kuala-terengganu", 158, {"10": 29, "20": 46, "50": 85}, 588, 5),
 ])
 def test_the_screened_towns_hold_what_was_built(area_id, businesses, wet, squares, floods):
     area = areas.get(area_id)
@@ -446,7 +449,8 @@ def test_the_screened_towns_hold_what_was_built(area_id, businesses, wet, square
     assert all(flood["source"] for flood in area.history["floods"])
 
 
-@pytest.mark.parametrize("area_id, over_5_m", [("kota-bharu", 53), ("kuantan", 19), ("kuala-terengganu", 11)])
+@pytest.mark.parametrize("area_id, over_5_m", [("kota-bharu", 52), ("kuantan", 12), ("kuala-terengganu", 10)])
 def test_the_depth_check_note_counts_what_the_data_holds(area_id, over_5_m):
-    deep = sum(1 for p in areas.premises(area_id) if (p["depth_m"]["100"] or 0) > 5)
-    assert deep == over_5_m and f"more than 5 m of water at {over_5_m} of these businesses" in areas.get(area_id).notes["depths"]
+    deep = sum(1 for p in areas.premises(area_id) if (p["depth_m"]["50"] or 0) > 5)
+    note = areas.get(area_id).notes["depths"]
+    assert deep == over_5_m and f"more than 5 m of water at {over_5_m} of these businesses in a 1 in 50 years flood" in note

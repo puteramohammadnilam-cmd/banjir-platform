@@ -4,9 +4,11 @@ Run from 11_Platform_Draft:  .venv/bin/python -m pytest -q tests/test_build_area
 
 The parity tests rebuild Sri Muda from the raw files it was first built from and compare the bytes with the files in
 app/data/areas/sri-muda. They skip, saying why, when the raw files or the depth rasters are not on this machine.
+The raw files are looked for in ../05_Raw_Data_Sources, or in BANJIR_RAW_DIR when that is set (a git worktree).
 """
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -19,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import build_area as ba  # noqa: E402
 
-RAW = ROOT.parent / "05_Raw_Data_Sources"
+RAW = Path(os.environ.get("BANJIR_RAW_DIR") or ROOT.parent / "05_Raw_Data_Sources")
 SRI_MUDA_RAW = RAW / "shah_alam"
 SRI_MUDA_POIS = SRI_MUDA_RAW / "overpass_sri_muda_pois.json"
 SRI_MUDA_ROADS = SRI_MUDA_RAW / "overpass_sri_muda_roads.json"
@@ -92,8 +94,8 @@ def test_sri_muda_numbers_match_the_handover():
     real_inputs_or_skip()
     premises, town = ba.build(SRI_MUDA_VIEW, ba.load_businesses(SRI_MUDA_POIS), ba.load_roads(
         SRI_MUDA_ROADS, ba.Projection.for_view(SRI_MUDA_VIEW)), [], raster.depth_set())
-    wet = {rp: sum(1 for p in premises if p["depth_m"][rp]) for rp in ("10", "100", "500")}
-    assert (len(premises), wet, len(town["cells"])) == (204, {"10": 174, "100": 183, "500": 188}, 1575)
+    wet = {rp: sum(1 for p in premises if p["depth_m"][rp]) for rp in ("10", "20", "50")}
+    assert (len(premises), wet, len(town["cells"])) == (204, {"10": 174, "20": 179, "50": 183}, 1514)
 
 
 # ---------- the projection: cos(lat) comes from the view's centre
@@ -162,11 +164,11 @@ def test_build_reads_each_premise_from_the_rasters(depths, inputs):
                               ba.load_shelters(shelters), depths)
     assert [p["name"] for p in premises] == ["Dry Cafe", "Bakery", "Unnamed (no name on the map)"]   # eateries, then shops; by name
     by_id = {p["id"]: p for p in premises}
-    assert by_id["node-1"]["depth_m"] == {"10": 2.13, "100": 2.63, "500": 3.13}
-    assert by_id["node-2"]["depth_m"] == {"10": None, "100": None, "500": None}
+    assert by_id["node-1"]["depth_m"] == {"10": 2.13, "20": 2.63, "50": 3.13}
+    assert by_id["node-2"]["depth_m"] == {"10": None, "20": None, "50": None}
     assert by_id["node-1"]["is_chain"] is True and by_id["node-2"]["is_chain"] is False
     assert by_id["node-1"]["road"] == {"name": "Jalan A", "kind": "residential", "distance_m": 0,
-                                       "depth_m": {"10": 2.13, "100": 2.63, "500": 3.13}}
+                                       "depth_m": {"10": 2.13, "20": 2.63, "50": 3.13}}
     apart = math.hypot(0.025 * proj.m_per_deg_lon, 0.025 * ba.M_PER_DEG_LAT)   # 0.025 degrees east and north
     assert by_id["node-1"]["shelter"] == {"name": "Hall", "distance_m": round(apart)}
     assert by_id["node-1"]["map_last_edited"] == "2026-01-02"
@@ -177,7 +179,7 @@ def test_build_town_holds_the_wet_squares_of_the_view(depths, inputs):
     pois, roads, _ = inputs
     proj = ba.Projection.for_view(FIXTURE_VIEW)
     _, town = ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), [], depths)
-    assert town["view"] == FIXTURE_VIEW and town["return_periods"] == (10, 100, 500)
+    assert town["view"] == FIXTURE_VIEW and town["return_periods"] == (10, 20, 50)
     assert town["cell_deg"] == fx.PIXEL and town["shelters"] == []
     assert town["cells"] == depths.view_cells(FIXTURE_VIEW) and town["cells"]
 
@@ -235,7 +237,7 @@ def test_build_refuses_a_view_outside_the_rasters(depths, inputs):
 
 
 def test_check_premises_refuses_nothing_to_show_or_a_repeated_id():
-    wet = {"10": 1.0, "100": 1.0, "500": 1.0}
+    wet = {"10": 1.0, "20": 1.0, "50": 1.0}
     one = {"id": "node-1", "depth_m": wet}
     ba.check_premises([one, {"id": "node-2", "depth_m": wet}])
     with pytest.raises(ValueError, match="no businesses"):
@@ -245,8 +247,8 @@ def test_check_premises_refuses_nothing_to_show_or_a_repeated_id():
 
 
 def test_check_premises_refuses_a_bigger_flood_that_wets_fewer():
-    dry = {"10": None, "100": None, "500": None}
-    wet_10_only = {"10": 1.0, "100": None, "500": None}
+    dry = {"10": None, "20": None, "50": None}
+    wet_10_only = {"10": 1.0, "20": None, "50": None}
     with pytest.raises(ValueError, match="wet"):
         ba.check_premises([{"id": "node-1", "depth_m": wet_10_only}, {"id": "node-2", "depth_m": dry}])
 

@@ -41,7 +41,7 @@ N10_E100/348/77, names the area (about 2 km) in every server and proxy log, a PO
      a block from the edge of what is sent.
   3. Order: north to south, then west to east. A block before the grid's north or west edge, or past its south or east
      edge (DepthSet.block gives None), is left out; one with no water is kept, with no squares.
-  4. cells: the blocks' wet squares in town.json `cells` format, [south, west, depth at 1 in 10, 100, 500], block by
+  4. cells: the blocks' wet squares in town.json `cells` format, [south, west, depth at 1 in 10, 20, 50], block by
      block. At most 4 x BLOCK_CELLS x BLOCK_CELLS squares.
 A covered point always has both keys; a spot that is not_loaded or outside has neither. They are read with the point.
 A damaged file tile in the point's own square is a RasterError, a 503, for the check. One in any of the four blocks

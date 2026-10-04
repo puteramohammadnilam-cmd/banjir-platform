@@ -2,9 +2,9 @@
 // figure is worked out here from the area's own data (its businesses' modelled depths); nothing is asked of the AI.
 import { CHANCE_YEARS, SCENARIOS, UNNAMED_ROAD, chanceWithin, h } from "./dom.js";
 import { t } from "./i18n.js";
+import { DEFAULT_RP } from "./pick.js";
 
 const TOP_STREETS = 5;
-const KEY_RP = "100";
 
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -13,7 +13,7 @@ const median = (values) => {
 };
 
 /** {total, floods: [{rp, wet, percent, median, chance}], streets: [{name, wet}]}: per flood size, how many businesses
- *  get water in the model and the median depth among them; the streets with the most wet businesses at 1 in 100. */
+ *  get water in the model and the median depth among them; the streets with the most wet businesses at the default size (1 in 50). */
 export function areaSummary(premises) {
   const total = premises.length;
   const floods = SCENARIOS.map((rp) => {
@@ -23,7 +23,7 @@ export function areaSummary(premises) {
   });
   const byStreet = new Map();
   for (const p of premises) {
-    if (p.depth_m[KEY_RP] > 0 && p.road?.name && p.road.name !== UNNAMED_ROAD) byStreet.set(p.road.name, (byStreet.get(p.road.name) ?? 0) + 1);
+    if (p.depth_m[DEFAULT_RP] > 0 && p.road?.name && p.road.name !== UNNAMED_ROAD) byStreet.set(p.road.name, (byStreet.get(p.road.name) ?? 0) + 1);
   }
   const streets = [...byStreet].map(([name, wet]) => ({ name, wet }))
     .sort((a, b) => b.wet - a.wet || a.name.localeCompare(b.name)).slice(0, TOP_STREETS);
@@ -55,7 +55,7 @@ export function buildAreaReport({ area, premises, date }) {
     h("h3", {}, t("report.title", { area: area.display_name })),
     h("p", {}, t("report.lead", { total: summary.total })),
     h("div", { class: "table-scroll" }, floodTable(summary)),
-    h("h4", {}, t("report.streets", { rp: KEY_RP })),
+    h("h4", {}, t("report.streets", { rp: DEFAULT_RP })),
     summary.streets.length
       ? h("ul", {}, summary.streets.map((s) => h("li", {}, `${s.name}: ${s.wet}`)))
       : h("p", {}, t("report.noStreets")),

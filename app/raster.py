@@ -1,7 +1,7 @@
 """Flood depth from the JRC GeoTIFFs, read with the standard library only (struct, zlib, array, os.pread).
 
 A port of DepthRaster in tools/build_data.py, which used numpy and PIL, adding bounds checks, several grids and the
-three return periods. Only the layout JRC ships is read: little-endian classic TIFF, one float32 sample, deflate, no
+return periods. Only the layout JRC ships is read: little-endian classic TIFF, one float32 sample, deflate, no
 predictor, square tiles, a pixel scale with one tie point, WGS 84 lat/lon with pixel-is-area. Anything else is refused
 naming the tag, because a misread file gives depths that look right and are wrong.
 
@@ -14,16 +14,19 @@ A header is not trusted. Each tag may claim only so many values, checked before 
 MAX_GEO_KEYS, MAX_TAG_VALUES), and a tag listed twice is refused, so a header cannot make the reader do the work of
 a file the size it claims.
 
-What the files we hold say (ID211_N10_E100_RP{10,100,500}_depth.tif, read 3 Oct 2026; the three agree):
+What the files we hold say (ID211_N10_E100_RP{10,20,50}_depth.tif, read 3 Oct 2026, the 20 and 50 on 4 Oct; they
+agree, and so do the files of the other two grids):
 - GeoKeys: 1024 GTModelType = 2 (geographic), 1025 GTRasterType = 1 (pixel is area), 2048 GeographicType = 4326
   (WGS 84), 2049 GeogCitation = "unknown", 2054 GeogAngularUnits = 9102 (degree), and the WGS 84 ellipsoid again in
   2057 and 2059 (6378137 m, 1/298.257223563). GDAL_NODATA is "-9999".
 - 11999 x 11999 squares in 47 x 47 tiles of 256 px. Tiles with no water are not stored (offset and byte count 0).
 - The pixel scale differs between x (0.0008333333356347339) and y (0.0008333333333325754). Rows here use y. The build
   used x for both, which moves no premise or square of the built areas (the parity tests check this).
-- No square inside the image is 0, a trace or negative: the smallest depth is 0.10 m (every stored tile of the three
-  files scanned, 3 Oct 2026). Zeros sit only in the padding of the partial right and bottom tiles, which the build
-  could read through an index past the edge; here such an index is outside the grid.
+- No square inside the image is 0, a trace or negative: the smallest depth is 0.10 m (every stored tile of the nine
+  files scanned, 4 Oct 2026). The wet squares nest: none is wet at 1 in 10 and dry at 1 in 20, or wet at 1 in 20 and
+  dry at 1 in 50. Depths mostly rise with the return period, but not always: about half a percent of the wet squares
+  are a little deeper in the smaller flood, as the model gives them. Zeros sit only in the padding of the partial right
+  and bottom tiles, which the build could read through an index past the edge; here such an index is outside the grid.
 """
 from __future__ import annotations
 
@@ -44,7 +47,7 @@ from pathlib import Path
 
 log = logging.getLogger("banjir")
 
-RETURN_PERIODS = (10, 100, 500)
+RETURN_PERIODS = (10, 20, 50)   # years; JRC v2.1 also has 75, 100, 200 and 500, which the app does not show
 NODATA_BELOW = -9998.0       # JRC no data is -9999
 TILE_CACHE_TILES = 48        # decoded tiles kept per set: 48 x 256 x 256 x 4 bytes, about 13 MB
 BLOCK_CELLS = 24             # squares a side in a block the map loads
@@ -78,7 +81,7 @@ GEO_RULES = (   # key, name, value needed, value when the key is absent
 )
 
 Depths = dict[str, float | None]
-Cell = list   # [south, west, depth10, depth100, depth500]: the town.json `cells` format
+Cell = list   # [south, west, depth10, depth20, depth50]: the town.json `cells` format
 
 
 class RasterError(Exception):
@@ -456,7 +459,7 @@ class DepthSet:
         return None if found is None else (found[0][0].grid, found[1], found[2])
 
     def depths(self, lon: float, lat: float) -> Depths | None:
-        """{"10": m, "100": m, "500": m} like premises.json `depth_m`, None for a dry return period; or None when no
+        """{"10": m, "20": m, "50": m} like premises.json `depth_m`, None for a dry return period; or None when no
         loaded grid covers the point."""
         found = self._find(lon, lat)
         if found is None:

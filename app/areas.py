@@ -14,6 +14,8 @@ area.json fields:
   council       the local council's short name, or null when no source names one (optional)
   notes         where the area's data came from, by topic (optional)
   history       dated floods from the sources checked, or null when none were collected (optional)
+  bigger_flood_example  a past flood bigger than the largest size shown, for "Floods bigger than 1 in 50 years are not
+                shown{example}", such as "such as December 2021"; null when none is named (optional)
 
 The config is part of the repo, so it is trusted, but it is still checked (load_all, and preload at start-up):
 a typo stops the server at start-up instead of failing in the middle of a chat. Folders whose names start with
@@ -36,7 +38,7 @@ MAX_ID_CHARS = 40
 MAX_ZOOM = 19
 TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
-OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None}
+OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None}
 HISTORY_YEARS = ("first_year", "recent_from", "last_year")
 FLOOD_TEXTS = ("when", "what", "source")
 SKIPPED_PREFIXES = (".", "_")   # hidden or parked folders, never an area id
@@ -63,6 +65,7 @@ class Area:
     is_default: bool = False
     notes: Mapping[str, str] = field(default_factory=lambda: MappingProxyType({}), hash=False)
     history: Mapping | None = field(default=None, hash=False, repr=False)   # read-only, as _freeze leaves it
+    bigger_flood_example: str | None = None
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
@@ -115,7 +118,8 @@ def _load(folder: Path) -> Area:
     return Area(id=config["id"], name=config["name"], display_name=config["display_name"],
                 view=tuple(config["view"]), zoom=config["zoom"], ai_name=config["ai_name"],
                 news_place=config["news_place"], news_region=config["news_region"], council=config["council"],
-                is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]))
+                is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]),
+                bigger_flood_example=config["bigger_flood_example"])
 
 
 def _freeze(value):
@@ -149,6 +153,8 @@ def _problems(raw: dict, folder: str) -> list[str]:
             config["id"] == folder and _is_id(folder),
         f"{', '.join(TEXT_FIELDS)} must be non-empty text": all(_is_text(config[name]) for name in TEXT_FIELDS),
         "council must be non-empty text or null": config["council"] is None or _is_text(config["council"]),
+        "bigger_flood_example must be non-empty text or null":
+            config["bigger_flood_example"] is None or _is_text(config["bigger_flood_example"]),
         "view must be [west, south, east, north] in degrees, west below east and south below north":
             _is_view(config["view"]),
         f"zoom must be a whole number from 1 to {MAX_ZOOM}":
@@ -296,5 +302,7 @@ def summary(area: Area) -> dict:
 
 
 def details(area: Area) -> dict:
-    """The area as GET /api/areas/{id}/data sends it: its summary plus its council, notes and flood history."""
-    return {**summary(area), "council": area.council, "notes": _thaw(area.notes), "history": _thaw(area.history)}
+    """The area as GET /api/areas/{id}/data sends it: its summary plus its council, notes, flood history and the
+    example of a flood bigger than those shown."""
+    return {**summary(area), "council": area.council, "notes": _thaw(area.notes), "history": _thaw(area.history),
+            "bigger_flood_example": area.bigger_flood_example}

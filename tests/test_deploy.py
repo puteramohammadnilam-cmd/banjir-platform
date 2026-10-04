@@ -14,7 +14,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 GRIDS = ("ID211_N10_E100", "ID220_N10_E110", "ID202_N10_E90")   # Peninsula, Sabah and Sarawak, Langkawi
-RASTER_NAMES = tuple(f"{grid}_RP{rp}_depth.tif" for grid in GRIDS for rp in (10, 100, 500))
+RASTER_NAMES = tuple(f"{grid}_RP{rp}_depth.tif" for grid in GRIDS for rp in (10, 20, 50))
 FAKE_URL = "https://banjir-check-test.a.run.app"
 POINT_BODY = '{"lat":3.0297599,"lon":101.5364982,"source":"pin"}'
 POINT_ID = "pt:3.02998,101.53667"
@@ -224,11 +224,11 @@ def without(*names: str) -> tuple[str, ...]:
 
 GUARD_CASES = {
     "none": (),
-    "no RP500 of the Peninsula": without("ID211_N10_E100_RP500_depth.tif"),
+    "no RP50 of the Peninsula": without("ID211_N10_E100_RP50_depth.tif"),
     "no RP10 of the Peninsula": without("ID211_N10_E100_RP10_depth.tif"),
     "Peninsula only": RASTER_NAMES[:3],
     "no Sabah and Sarawak grid": tuple(n for n in RASTER_NAMES if "ID220" not in n),
-    "no Langkawi RP100": without("ID202_N10_E90_RP100_depth.tif"),
+    "no Langkawi RP20": without("ID202_N10_E90_RP20_depth.tif"),
 }
 
 
@@ -241,8 +241,8 @@ def test_a_missing_raster_stops_the_script_before_any_gcloud_call(tmp_path, pres
 
 
 def test_the_guard_names_the_missing_file_and_points_to_the_download_list(tmp_path):
-    run = run_deploy(tmp_path, rasters=without("ID202_N10_E90_RP100_depth.tif"))
-    assert "ID202_N10_E90_RP100_depth.tif" in run.output
+    run = run_deploy(tmp_path, rasters=without("ID202_N10_E90_RP20_depth.tif"))
+    assert "ID202_N10_E90_RP20_depth.tif" in run.output
     assert "ID211" not in run.output   # only what is missing is named
     assert "app/data/rasters/SOURCES.txt" in run.output
     assert "05_Raw_Data_Sources" not in run.output   # a public clone does not have that folder

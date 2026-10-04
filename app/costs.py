@@ -61,7 +61,8 @@ INDIRECT_DEFAULT = ("30% of the direct damage, the JPS guideline's usual allowan
 
 METHOD = (
     "Loss in each flood = direct damage + indirect loss; see 'basis' for how each was worked out here. "
-    "Yearly loss = area under the loss against yearly-chance curve for the 1 in 10, 100 and 500 year floods. "
+    "Yearly loss = area under the loss against yearly-chance curve for the 1 in 10, 20 and 50 year floods, "
+    "with every flood rarer than 1 in 50 years counted at the 1 in 50 loss. "
     "Ten-year loss = yearly loss discounted at 4% a year, the rate used for flood mitigation cost-benefit "
     "studies in Malaysia. A measure that raises stock can only be priced from the owner's own value. It is "
     "credited only with the direct damage it avoids, and is worth it when that saving over ten years is more "
@@ -74,9 +75,11 @@ LIMITS = (
     "years old, is adjusted by general consumer prices only, does not change with depth, and is an average "
     "meant for counting many properties, so for one shop it is only indicative. The guideline does not say "
     "what counts as small or medium, and calls its own method a first approximation that is not a basis for "
-    "cost-benefit analysis for funding. Floods that come more often than once in 10 years are not in the "
-    "model, so a shop that floods often will lose more than shown. A floor height of 0 means the floor is "
-    "taken as level with the street. Daily takings are counted in full, not just the profit. A measure is "
+    "cost-benefit analysis for funding. The yearly figure is a floor at both ends: floods that come more "
+    "often than once in 10 years are not in the model, so a shop that floods often will lose more than "
+    "shown, and floods bigger than 1 in 50 years are counted as if they cost the same as the 1 in 50, though "
+    "they cost more. A floor height of 0 means the floor is taken as level with the street. Daily takings are "
+    "counted in full, not just the profit. A measure is "
     "assumed to lift everything counted in the value at risk; fittings that cannot be raised make the real "
     "saving smaller."
 )
@@ -94,9 +97,11 @@ def damage_share(water_above_floor_m: float) -> float:
 
 
 def expected_yearly(loss_by_return_period: dict[str, float]) -> float:
-    """Average loss per year: trapezoid area under loss against yearly chance (1 / return period)."""
-    # ponytail: no loss is counted for floods more frequent than the smallest return period given.
-    # Add 1 in 2 and 1 in 5 year depth layers to the data to close that gap.
+    """Average loss per year: trapezoid area under loss against yearly chance (1 / return period), plus the rarest
+    flood's chance times its loss for every flood rarer still. For 1 in 10, 20 and 50 years that is
+    0.035 x L50 + 0.04 x L20 + 0.025 x L10. A floor at both ends: see LIMITS."""
+    # ponytail: no loss is counted for floods more frequent than the smallest return period given, and floods rarer
+    # than the largest are counted at its loss. Add 1 in 2 and 1 in 5 year depth layers to close the first gap.
     points = sorted((1 / float(rp), loss) for rp, loss in loss_by_return_period.items())
     rarest_chance, rarest_loss = points[0]
     area = rarest_chance * rarest_loss

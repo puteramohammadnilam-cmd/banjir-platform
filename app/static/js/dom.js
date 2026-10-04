@@ -17,8 +17,8 @@ function fill(node, attrs, children) {
 export const h = (tag, attrs = {}, ...children) => fill(document.createElement(tag), attrs, children);
 export const s = (tag, attrs = {}, ...children) => fill(document.createElementNS(SVG_NS, tag), attrs, children);
 
-export const SCENARIOS = ["10", "100", "500"];
-/** "once in 100 years": a flood size in words, for "in a flood expected …". */
+export const SCENARIOS = ["10", "20", "50"];   // app/raster.py RETURN_PERIODS: the flood sizes the data holds
+/** "once in 50 years": a flood size in words, for "in a flood expected …". */
 export const scenarioLabel = (rp) => t("scenario.label", { rp });
 
 // Things a shop owner can picture, at typical heights: a counter, an adult, a door, a storey. Same colours as tokens.css
@@ -74,10 +74,16 @@ export function scenarioPicker(rp, onPick) {
     }));
 }
 
-/** Put a fresh picker in `slot`, keeping keyboard focus on the chosen size if the old picker had it. */
-export function renderPicker(slot, rp, onPick) {
+/** "Floods bigger than 1 in 50 years are not shown", with the area's own example of one (area.json
+ *  bigger_flood_example, such as "such as December 2021") when it names one. */
+const notShown = (example) => h("p", { class: "scenario-note" },
+  t("scenario.notShown", { rp: SCENARIOS.at(-1), example: example ? `, ${example}` : "" }));
+
+/** Put a fresh picker in `slot`, and the note on floods bigger than it offers, keeping keyboard focus on the chosen size
+ *  if the old picker had it. */
+export function renderPicker(slot, rp, onPick, example = null) {
   const hadFocus = slot.contains(document.activeElement);
-  slot.replaceChildren(scenarioPicker(rp, onPick));
+  slot.replaceChildren(scenarioPicker(rp, onPick), notShown(example));
   if (hadFocus) slot.querySelector('[aria-pressed="true"]')?.focus();
 }
 

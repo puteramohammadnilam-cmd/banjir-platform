@@ -51,7 +51,7 @@ def test_a_covered_point_gives_its_place_and_depths(client):
     data = res.json()["data"]
     assert (data["coverage"], data["region"]) == ("covered", "peninsula")
     assert data["place"] == places.point(*WET) and data["place"]["id"] == WET_ID
-    assert data["place"]["depth_m"] == {"10": 14.14, "100": 14.64, "500": 15.14}
+    assert data["place"]["depth_m"] == {"10": 14.14, "20": 14.64, "50": 15.14}
 
 
 def test_a_covered_point_comes_with_the_wet_squares_of_the_blocks_around_it(client):
@@ -87,7 +87,7 @@ def test_reopening_a_point_link_gets_the_squares_too(client):
 
 def test_the_sea_is_covered_with_all_depths_null(client):
     data = post_point(client, *DRY).json()["data"]
-    assert data["coverage"] == "covered" and data["place"]["depth_m"] == {"10": None, "100": None, "500": None}
+    assert data["coverage"] == "covered" and data["place"]["depth_m"] == {"10": None, "20": None, "50": None}
 
 
 @pytest.mark.parametrize("lat, lon, coverage, region", [
@@ -372,7 +372,7 @@ def test_parity_each_premise_point_returns_its_depth(monkeypatch):
             checked += 1
     assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 204 + 27 + 300 + 491 + 158
     example = post_point(client, 3.0297599, 101.5364982).json()["data"]["place"]   # the plan's checklist point
-    assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["100"] == 1.88
+    assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["50"] == 1.76
 
 
 @pytest.mark.skipif(REAL_DIR is None, reason="no JRC depth files on this machine")

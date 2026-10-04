@@ -2,6 +2,7 @@
 // side by side, with the same modelled figures each one's own page shows. Kept for this visit only, in the page.
 import { SCENARIOS, band, h } from "./dom.js";
 import { formatNumber, t } from "./i18n.js";
+import { DEFAULT_RP } from "./pick.js";
 
 export const MAX_COMPARED = 3;
 
@@ -10,12 +11,12 @@ export const addCompared = (ids, id) => (ids.includes(id) ? ids : [...ids, id].s
 
 const depth = (value) => (band(value) ? t("common.metres", { m: value.toFixed(2) }) : t("compare.noWater"));
 const nameOf = (place) => (place.is_point ? t("compare.square", { lat: place.lat.toFixed(5), lon: place.lon.toFixed(5) }) : place.name);
-const roadWater = (place) => (place.road ? depth(place.road.depth_m["100"]) : "–");
+const roadWater = (place) => (place.road ? depth(place.road.depth_m[DEFAULT_RP]) : "–");
 const shelterOf = (place) => (place.shelter
   ? t("compare.shelter", { name: place.shelter.name, distance: formatNumber(place.shelter.distance_m) }) : t("compare.noShelter"));
 
 function table(places, onOpen) {
-  const heads = [t("compare.colPlace"), ...SCENARIOS.map((rp) => t("common.rpYears", { rp })), t("compare.colRoad"), t("compare.colShelter")];
+  const heads = [t("compare.colPlace"), ...SCENARIOS.map((rp) => t("common.rpYears", { rp })), t("compare.colRoad", { rp: DEFAULT_RP }), t("compare.colShelter")];
   return h("div", { class: "table-scroll" }, h("table", { class: "loss-table compare-table" },
     h("caption", { class: "visually-hidden" }, t("compare.caption")),
     h("thead", {}, h("tr", {}, heads.map((text) => h("th", { scope: "col" }, text)))),

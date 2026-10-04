@@ -16,9 +16,9 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 RASTER_DIR = ROOT / "app" / "data" / "rasters"
 SOURCES = RASTER_DIR / "SOURCES.txt"
-PENINSULA_FILES = tuple(f"ID211_N10_E100_RP{rp}_depth.tif" for rp in (10, 100, 500))
-BORNEO_FILES = tuple(f"ID220_N10_E110_RP{rp}_depth.tif" for rp in (10, 100, 500))     # Sabah and Sarawak
-LANGKAWI_FILES = tuple(f"ID202_N10_E90_RP{rp}_depth.tif" for rp in (10, 100, 500))
+PENINSULA_FILES = tuple(f"ID211_N10_E100_RP{rp}_depth.tif" for rp in (10, 20, 50))
+BORNEO_FILES = tuple(f"ID220_N10_E110_RP{rp}_depth.tif" for rp in (10, 20, 50))     # Sabah and Sarawak
+LANGKAWI_FILES = tuple(f"ID202_N10_E90_RP{rp}_depth.tif" for rp in (10, 20, 50))
 PROBE = "app/data/rasters/x.tif"   # any raster: no ignore file may keep it out of the image
 RASTER_PATHS = (PROBE, *(f"app/data/rasters/{name}" for name in PENINSULA_FILES))
 INCLUDE = "#!include:"   # in .gcloudignore, gcloud reads another file's rules in place of this line
@@ -191,7 +191,7 @@ def test_deploy_script_stops_before_gcloud_when_a_raster_is_missing():
     guard = commands_before_gcloud()
     for grid in ("ID211_N10_E100", "ID220_N10_E110", "ID202_N10_E90"):
         assert grid in guard   # every grid is required, not only the Peninsula
-    for rp in (10, 100, 500):
+    for rp in (10, 20, 50):
         assert f"RP{rp}" in guard or str(rp) in guard
     assert "app/data/rasters/SOURCES.txt" in guard   # where the message says to download them from
     assert "05_Raw_Data_Sources" not in guard   # a public clone does not have that folder

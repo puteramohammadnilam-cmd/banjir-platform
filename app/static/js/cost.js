@@ -1,7 +1,7 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
 import { CHANCE_YEARS, SCENARIOS, chanceWithin, depthText, h, icon, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
-import { emptyState } from "./pick.js";
+import { DEFAULT_RP, emptyState } from "./pick.js";
 import { createStockCard } from "./stock.js";
 
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
@@ -82,7 +82,7 @@ export function results(result) {
     h("div", { class: "headline-figures" },
       // floods more frequent than 1 in 10 years are not in the model (costs.expected_yearly), so this is a floor
       h("div", { class: "figure-box is-key" }, h("p", { class: "kpi-figure" }, t("cost.atLeast", { rm: ringgit(result.expected_yearly_loss_rm) })),
-        h("p", { class: "kpi-label" }, t("cost.yearly")), h("p", { class: "kpi-note" }, t("cost.yearlyNote", { rp: SCENARIOS[0] }))),
+        h("p", { class: "kpi-label" }, t("cost.yearly")), h("p", { class: "kpi-note" }, t("cost.yearlyNote", { rp: SCENARIOS[0], big: SCENARIOS.at(-1) }))),
       chanceBox(result)),
     flat && flatLine(result),
     lossTable(result, flat),
@@ -248,7 +248,7 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind 
   return {
     /** photoFloorCm fills the floor field unless the owner has typed their own for this place. stockState is the
      *  place's stock photo ({busy, result, error}) and rp the flood size on show. */
-    render(place, photoFloorCm, estimate, stockState, rp = "100") {
+    render(place, photoFloorCm, estimate, stockState, rp = DEFAULT_RP) {
       showEmpty(!place);
       if (!place) return;
       stock.render(stockState, rp);

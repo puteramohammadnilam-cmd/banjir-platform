@@ -7,7 +7,7 @@ bottom tiles are partial, and their padding holds water (PADDING), so a reader t
 a depth that cannot be right. Row 0 holds the special values: no data, 0, a negative, rounding cases, NaN and a trace
 that rounds to 0.00.
 
-    write_depth_set(folder)                       # ID211_N10_E100_RP{10,100,500}_depth.tif
+    write_depth_set(folder)                       # ID211_N10_E100_RP{10,20,50}_depth.tif
     write_depth_tiff(path, depth_values(), tags={339: (SHORT, (1,))})   # a variant to reject
     write_depth_tiff(path, depth_values(), ifd_first=True)              # laid out like the real files
 
@@ -34,11 +34,11 @@ EMPTY_TILE = (DOWN - 1) * ACROSS   # bottom-left (3): no bytes stored (offset 0,
 PADDING = 9.99                # past the image edge inside partial tiles
 NODATA = -9999.0
 TRACE = 0.004                 # rounds to 0.00: JRC's smallest depth is 0.10 m, but a reader must treat it as dry
-RETURN_PERIODS = (10, 100, 500)
-RP_EXTRA = {10: 0.0, 100: 0.5, 500: 1.0}
+RETURN_PERIODS = (10, 20, 50)
+RP_EXTRA = {10: 0.0, 20: 0.5, 50: 1.0}
 SPECIAL = {(0, 0): NODATA, (0, 1): 0.0, (0, 2): -0.5, (0, 3): 1.234, (0, 4): 1.236, (0, 5): 0.155, (0, 6): math.nan,
            (0, 7): TRACE}
-ONLY_500 = (1, 0)             # water at 1 in 500 only: 0.42 m
+ONLY_50 = (1, 0)              # water at 1 in 50 only: 0.42 m
 GEO_KEYS = {1024: 2, 1025: 1, 2048: 4326}   # geographic, pixel is area, WGS 84: what the JRC files say
 
 ASCII, SHORT, LONG, RATIONAL, DOUBLE = 2, 3, 4, 5, 12
@@ -48,7 +48,7 @@ HEADER_BYTES = 8              # the magic number and the offset of the first ima
 
 def depth_values(rp: int = 10, shift: float = 0.0) -> list[list[float]]:
     """ROWS x COLS depths for one return period: r + c/100 + 0.1 + RP_EXTRA[rp] + shift, except the SPECIAL squares."""
-    special = {**SPECIAL, ONLY_500: 0.42 if rp == 500 else NODATA}
+    special = {**SPECIAL, ONLY_50: 0.42 if rp == 50 else NODATA}
     return [[special.get((r, c), r + c / 100 + 0.1 + RP_EXTRA[rp] + shift) for c in range(COLS)] for r in range(ROWS)]
 
 

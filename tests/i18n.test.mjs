@@ -57,8 +57,8 @@ test("t fills placeholders and falls back to English, then to the key itself", (
   assert.equal(translate(tables, "ms", "nothing.here"), "nothing.here");
   assert.equal(translate(tables, "en", "a"), "Hello {name}", "a placeholder with no value shows, so it is noticed");
   assert.equal(translate(tables, "en", "a", { name: 0 }), "Hello 0");
-  assert.equal(t("common.rpYears", { rp: 100 }), "1 in 100 years");
-  assert.equal(inLang("ms", () => t("common.rpYears", { rp: 100 })), "1 dalam 100 tahun");
+  assert.equal(t("common.rpYears", { rp: 50 }), "1 in 50 years");
+  assert.equal(inLang("ms", () => t("common.rpYears", { rp: 50 })), "1 dalam 50 tahun");
 });
 
 test("the language comes from the link, then the remembered choice, then English", () => {
@@ -74,8 +74,8 @@ test("the language comes from the link, then the remembered choice, then English
 });
 
 test("switching keeps the page's query and fragment and only sets lang", () => {
-  assert.equal(linkInLang("ms", { search: "?tab=business&rp=100", hash: "#place=pt:3.02998,101.53667" }),
-    "?tab=business&rp=100&lang=ms#place=pt:3.02998,101.53667");
+  assert.equal(linkInLang("ms", { search: "?tab=business&rp=50", hash: "#place=pt:3.02998,101.53667" }),
+    "?tab=business&rp=50&lang=ms#place=pt:3.02998,101.53667");
   assert.equal(linkInLang("en", { search: "?lang=ms&tab=cost", hash: "" }), "?lang=en&tab=cost");
   assert.equal(linkInLang("ms", {}), "?lang=ms");
 });
@@ -228,7 +228,8 @@ test("nothing promises safety or a flood, in either language", () => {
 
 test("the glossary is kept: flood sizes, chance and relief centre read the same everywhere in Bahasa Melayu", () => {
   for (const [key, text] of Object.entries(en)) {
-    if (/1 in \{rp\} years|1 in 1?0?0 years/.test(text)) assert.match(ms[key], /1 dalam (\{rp\}|100) tahun/, key);
+    const size = /1 in (\{rp\}|\d+) years/.exec(text)?.[1];
+    if (size) assert.ok(ms[key].includes(`1 dalam ${size} tahun`), key);
     if (/relief centre/i.test(text)) assert.match(ms[key], /pusat pemindahan/i, key);
   }
   assert.equal(ms["scenario.chance"], "Peluang {pct}% dalam {years} tahun");

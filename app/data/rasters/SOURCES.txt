@@ -2,14 +2,18 @@ JRC flood depth rasters in this folder
 ======================================
 
 app/raster.py reads these files (from this folder, or from BANJIR_RASTER_DIR when that is set) to look up the
-modelled flood depth at a point. They are about 77 MB, so .gitignore keeps the .tif files out of git and only this
+modelled flood depth at a point. They are about 70 MB, so .gitignore keeps the .tif files out of git and only this
 list is committed. deploy.sh stops if one is missing, and tests/test_rasters_shipped.py checks each file below
 against its size and SHA-256 (it skips a file that is absent). To put them back, copy them in:
 
-  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID2*_depth.tif app/data/rasters/
+  cp ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID2*_RP10_depth.tif ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID2*_RP20_depth.tif \
+     ../05_Raw_Data_Sources/jrc_glofas_v2_1/ID2*_RP50_depth.tif app/data/rasters/
 
-or download each one from the JRC portal, at <Download>/RP<10, 100 or 500>/<file name>:
+or download each one from the JRC portal, at <Download>/RP<10, 20 or 50>/<file name>:
   https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/
+
+The app shows three flood sizes, 1 in 10, 20 and 50 years. JRC v2.1 has larger ones too (1 in 75 years and up);
+they are not shipped, and the page says floods bigger than 1 in 50 years are not shown.
 
 Source:    European Commission JRC, global river flood hazard maps v2.1 (Baugh and others, 2024)
 Link:      https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1
@@ -20,23 +24,25 @@ Coverage:  three grids of 10 x 10 degrees, all 0.008-10.007 N:
            N10_E110  109.975-119.975 E  the rest of Sarawak, and Sabah
            N10_E90   89.977-99.976 E    Langkawi
            (rectangles, so they also take in Singapore, Brunei, and parts of Thailand, Sumatra and Kalimantan)
-Date:      2026-10-03
-Copy:      the N10_E100 files byte for byte from 05_Raw_Data_Sources/jrc_glofas_v2_1 (fetched 2026-09-30); the
-           N10_E110 and N10_E90 files downloaded from the link above on 2026-10-03, also kept in that folder
+Date:      2026-10-04
+Copy:      byte for byte from 05_Raw_Data_Sources/jrc_glofas_v2_1. The RP10 files: N10_E100 fetched 2026-09-30,
+           N10_E110 and N10_E90 downloaded from the link above on 2026-10-03. The RP20 and RP50 files of all three
+           grids downloaded from the link above on 2026-10-04 (headers, grid and tiles checked against the RP10 files:
+           the same grid, smallest depth 0.10 m, and the wet squares nest from 1 in 10 to 1 in 20 to 1 in 50)
 
-Files (grid N10_E100: one file for each flood return period of 10, 100 and 500 years)
+Files (grid N10_E100: one file for each flood return period of 10, 20 and 50 years)
 
 File:     ID211_N10_E100_RP10_depth.tif
 Bytes:    10644170
 SHA-256:  43d7657f73d59357b22bd4fee8776a53878377b85d988bcc2cede40c4560b740
 
-File:     ID211_N10_E100_RP100_depth.tif
-Bytes:    13436340
-SHA-256:  f3c26b69e98ee4d7130bc348c9309be1328b1ec41ea0aaea5a114b9ec7a96c8e
+File:     ID211_N10_E100_RP20_depth.tif
+Bytes:    11667178
+SHA-256:  1a256a742359326a052934aad4ae102da1f0806ca9c2a0ffde77050e58e3c3e8
 
-File:     ID211_N10_E100_RP500_depth.tif
-Bytes:    14615056
-SHA-256:  319589380b54ae5b1901ca37fd57763d7a350cbde1352b02155d9e2b407e71a7
+File:     ID211_N10_E100_RP50_depth.tif
+Bytes:    12762472
+SHA-256:  b3da124f13ab6c068d4e7199508c1e8a5f44174e641e4b7cc70ad1545820f548
 
 Files (grid N10_E110: Sabah and Sarawak)
 
@@ -44,25 +50,26 @@ File:     ID220_N10_E110_RP10_depth.tif
 Bytes:    8155284
 SHA-256:  9ff8c8529a6d2e6540d180194aa3a0c05f920741609c8727151cda573268312d
 
-File:     ID220_N10_E110_RP100_depth.tif
-Bytes:    10266949
-SHA-256:  17c57c170c175503366ff894093913a4e692d54b75d51a273a9fd5ae8b87e508
+File:     ID220_N10_E110_RP20_depth.tif
+Bytes:    8944990
+SHA-256:  16f4aa31a8a561771753692ffa72f2f2560003da74b7bfeb4a06481f127eedec
 
-File:     ID220_N10_E110_RP500_depth.tif
-Bytes:    11210578
-SHA-256:  17ef23994c5062ab5763167e149cc8afc79ef972dedffea1c10a5cb5cead8365
+File:     ID220_N10_E110_RP50_depth.tif
+Bytes:    9794082
+SHA-256:  e38bd1f2f18f50e3c813a67c935707ac4e8cad12af72ca3d797c0e7bbd6644c3
 
-Files (grid N10_E90: Langkawi. The model has no flood water anywhere on the island, checked 2026-10-03 on a
-100 m sample grid; likely because its streams are smaller than the rivers the model maps, not checked)
+Files (grid N10_E90: Langkawi. The model has no flood water anywhere on the island: every square of the box
+99.60-99.94 E, 6.18-6.50 N is dry in all three files, checked 2026-10-04. Likely because its streams are smaller than
+the rivers the model maps, not checked)
 
 File:     ID202_N10_E90_RP10_depth.tif
 Bytes:    3317639
 SHA-256:  11b40b9210fe8a220a0c767e5af6f3a4c99fe5cd6b1bdd64daadee6c228176ea
 
-File:     ID202_N10_E90_RP100_depth.tif
-Bytes:    4079919
-SHA-256:  d13287f4fd17eb08773b5cf29fc7c62022342e729b80911e35bf8b6a51439e60
+File:     ID202_N10_E90_RP20_depth.tif
+Bytes:    3635107
+SHA-256:  3ef05beefccbf214220e4e83660542126851b689b16f9188d8325bdab6f78da5
 
-File:     ID202_N10_E90_RP500_depth.tif
-Bytes:    4357301
-SHA-256:  f93873ce448326c2fec73aa863fa77bd487ea0b61bc7f820f76b0872e2e2e252
+File:     ID202_N10_E90_RP50_depth.tif
+Bytes:    3910776
+SHA-256:  7e6b9c6bb5e0c42e207adb6ecefd887ca1ce5bb1e14b1a9b6182932282c46701

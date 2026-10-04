@@ -14,7 +14,7 @@ import { installFakeDom } from "./fake_dom.mjs";
 import { AREAS, HOME, LISTING, point, shop } from "./point_fixtures.mjs";
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));   // let an awaited exchange finish
-const DRY = { 10: null, 100: null, 500: null };
+const DRY = { 10: null, 20: null, 50: null };
 
 // ---------- My business ----------
 
@@ -25,7 +25,7 @@ function mountCard(options = {}) {
   const card = createBusiness(panel, { area: HOME, areas: AREAS, onPhoto() {}, onPick() {}, goto() {}, showOnMap() {}, ...options });
   return { panel, card };
 }
-const show = (card, place, change = {}) => card.render({ premise: place, rp: "100", photo: undefined, listing: undefined, ...change });
+const show = (card, place, change = {}) => card.render({ premise: place, rp: "20", photo: undefined, listing: undefined, ...change });
 const factLabels = (panel) => panel.querySelectorAll(".fact-label").map((label) => label.textContent);
 const head = (panel) => panel.querySelector("header");
 const buttonNamed = (panel, text) => panel.querySelectorAll("button").find((button) => button.textContent === text);
@@ -181,7 +181,7 @@ test("a business chat starts with its five chips and the news button for the pag
 test("with nothing picked yet, the chat asks about the area, not a shop", () => {
   const { chat, chips, input, news } = mountChat();
   chat.render(undefined);
-  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 100 year flood?", "Is heavy rain due today?"]);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?", "Is heavy rain due today?"]);
   assert.equal(input.placeholder, "Ask anything about flooding in this area");
   assert.equal(news.textContent, "Latest flood news for Home Town");
 });
@@ -209,14 +209,14 @@ test("without the Maps key the rain and opening-hours questions are left out", (
   const { chat, chips } = mountChat({ hasMaps: false });
   assert.ok(!chipTexts(chips).some((chip) => /rain|still open/i.test(chip)), chipTexts(chips).join(" | "));
   chat.render(undefined);
-  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 100 year flood?"]);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?"]);
 });
 
 test("a point in a listed area gets point chips, and its news is that area's", async () => {
   const asked = stubServer();
   const { chat, chips, news } = mountChat();
   chat.render(point({ area_id: "far" }));
-  assert.ok(chipTexts(chips).includes("Which businesses in this area stay dry in a 100 year flood?"));
+  assert.ok(chipTexts(chips).includes("Which businesses in this area stay dry in a 1 in 50 years flood?"));
   assert.ok(!chipTexts(chips).includes("Is this shop still open?"));
   assert.equal(news.textContent, "Latest flood news for Far Town");
   news.click();
@@ -310,11 +310,11 @@ test("in Bahasa Melayu the question box, the greeting and the chips are all in B
 
 test("a very deep model depth carries a warning next to the number; a modest one does not", () => {
   const { panel, card } = mountCard();
-  show(card, { ...shop, depth_m: { 10: 4.1, 100: 5.6, 500: 6.2 } });
+  show(card, { ...shop, depth_m: { 10: 4.1, 20: 5.6, 50: 6.2 } });
   assert.match(panel.querySelector(".risk").textContent, /The model can run very deep beside rivers/);
-  show(card, { ...shop, id: "node-2", depth_m: { 10: 0.4, 100: 1.2, 500: 1.9 } });
+  show(card, { ...shop, id: "node-2", depth_m: { 10: 0.4, 20: 1.2, 50: 1.9 } });
   assert.doesNotMatch(panel.querySelector(".risk").textContent, /run very deep/);
-  show(card, point({ depth_m: { 10: 3.2, 100: 3.5, 500: 4 } }));
+  show(card, point({ depth_m: { 10: 3.2, 20: 3.5, 50: 4 } }));
   assert.match(panel.querySelector(".risk").textContent, /The model can run very deep beside rivers/);
 });
 

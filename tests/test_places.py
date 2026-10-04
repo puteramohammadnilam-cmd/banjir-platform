@@ -66,7 +66,7 @@ def test_a_point_snaps_to_its_square_centre_and_id(rasters):
     place = places.point(*WET)
     assert (place["id"], place["lat"], place["lon"]) == (WET_ID, 6.375, 101.125)
     assert place["cell"] == {"grid": GRID, "row": 14, "col": 4, "bounds": [101.0, 6.25, 101.25, 6.5]}
-    assert place["depth_m"] == {"10": 14.14, "100": 14.64, "500": 15.14}
+    assert place["depth_m"] == {"10": 14.14, "20": 14.64, "50": 15.14}
     assert place["is_point"] is True and place["area_id"] is None
     assert (place["name"], place["road"], place["shelter"], place["sector"], place["kind"]) == (None,) * 5
 
@@ -158,7 +158,7 @@ def test_check_says_whether_the_model_covers_a_point(rasters, lat, lon, coverage
 
 
 def test_the_sea_is_covered_with_no_water(rasters):
-    assert places.check(*DRY)["place"]["depth_m"] == {"10": None, "100": None, "500": None}
+    assert places.check(*DRY)["place"]["depth_m"] == {"10": None, "20": None, "50": None}
 
 
 @pytest.mark.parametrize("lat, lon, reason, region", [
@@ -211,7 +211,7 @@ def test_box_edges_meet_squares_both_inside_and_outside(box_rasters):
 
 def test_coverage_lists_the_grids_and_the_regions_in_checking_order(rasters):
     cover = places.coverage()
-    assert {key: cover[key] for key in ("return_periods", "block_cells")} == {"return_periods": [10, 100, 500],
+    assert {key: cover[key] for key in ("return_periods", "block_cells")} == {"return_periods": [10, 20, 50],
                                                                              "block_cells": 24}
     assert [g["name"] for g in cover["grids"]] == [GRID] and cover["data_version"]
     assert cover["regions"] == [{"id": "langkawi", "box": [99.55, 6.1, 99.97, 6.55]},
@@ -292,7 +292,7 @@ def test_check_carries_the_squares_of_a_covered_point_and_none_for_a_spot_it_can
 
 def test_the_sea_is_covered_and_still_has_neighbours(rasters):
     answer = places.check(*DRY)   # no water here, but the blocks around it are not empty
-    assert answer["place"]["depth_m"] == {"10": None, "100": None, "500": None}
+    assert answer["place"]["depth_m"] == {"10": None, "20": None, "50": None}
     assert answer["blocks"] and answer["cells"]
 
 
@@ -330,9 +330,9 @@ def test_a_business_resolves_from_any_area_with_the_place_keys(rasters):
 def test_a_resolved_business_is_a_copy(rasters):
     first = areas.premises("sri-muda")[0]
     place = places.resolve(first["id"])
-    place["depth_m"]["100"] = 99.0
+    place["depth_m"]["20"] = 99.0
     place["road"]["name"] = "changed"
-    assert areas.premises("sri-muda")[0]["depth_m"]["100"] != 99.0 and first["road"]["name"] != "changed"
+    assert areas.premises("sri-muda")[0]["depth_m"]["20"] != 99.0 and first["road"]["name"] != "changed"
 
 
 @pytest.mark.parametrize("ref", ["nope", "node-", "node-12a", "NODE-1", "node-99999999999999999999", ["node-1"], None, 7])
@@ -352,7 +352,7 @@ def test_area_of_gives_the_listed_area_or_none(area_rasters):
 
 def test_a_point_inside_an_area_carries_the_area(area_rasters):
     place = places.point(*IN_SRI_MUDA)
-    assert place["area_id"] == "sri-muda" and place["depth_m"] == {"10": 23.3, "100": 23.8, "500": 24.3}
+    assert place["area_id"] == "sri-muda" and place["depth_m"] == {"10": 23.3, "20": 23.8, "50": 24.3}
     assert place["shelter"] is None   # the area has no relief centre list
 
 

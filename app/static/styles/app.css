@@ -113,6 +113,9 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .scenario button[aria-pressed="true"] { background: var(--brand); color: #fff; box-shadow: var(--shadow-sm); }
 .scenario .chance { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); }
 .scenario button[aria-pressed="true"] .chance { color: var(--band-1); }
+.scenario-note { margin: var(--space-2) 0 0; font-size: var(--text-xs); color: var(--ink-2); }
+.risk .scenario:has(+ .scenario-note) { margin-bottom: 0; }
+.risk .scenario-note { margin-bottom: var(--space-5); }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .chip { padding: var(--space-2) var(--space-3); border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface); font-size: var(--text-sm); text-align: left; cursor: pointer; transition: border-color var(--duration-fast), background-color var(--duration-fast); }

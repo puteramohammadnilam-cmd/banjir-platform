@@ -29,10 +29,10 @@ TOTAL = 204   # shops and eateries on OpenStreetMap around Taman Sri Muda, fetch
 
 
 def test_data_is_the_shah_alam_build():
-    wet = {rp: sum(1 for p in floodtools.premises() if p["depth_m"][rp]) for rp in ("10", "100", "500")}
+    wet = {rp: sum(1 for p in floodtools.premises() if p["depth_m"][rp]) for rp in ("10", "20", "50")}
     west, south, east, north = floodtools.town()["view"]
     assert len(floodtools.premises()) == TOTAL
-    assert wet == {"10": 174, "100": 183, "500": 188}
+    assert wet == {"10": 174, "20": 179, "50": 183}
     assert all(west <= p["lon"] <= east and south <= p["lat"] <= north for p in floodtools.premises())
 
 
@@ -230,9 +230,9 @@ def test_oversized_body_is_rejected_before_parsing(client):
 
 def test_photo_returns_water_above_the_estimated_floor(client):
     res = client.post("/api/photo", json={"business_id": KNOWN_ID, "image": TINY_JPEG})
-    depth = floodtools.get(KNOWN_ID)["depth_m"]["100"]
+    depth = floodtools.get(KNOWN_ID)["depth_m"]["20"]
     assert res.status_code == 200
-    assert res.json()["data"]["water_above_floor_m"]["100"] == round(max(0.0, depth - 0.30), 2)
+    assert res.json()["data"]["water_above_floor_m"]["20"] == round(max(0.0, depth - 0.30), 2)
 
 
 def test_photo_over_4mb_gets_the_too_large_message(client):

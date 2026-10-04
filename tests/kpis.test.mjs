@@ -8,7 +8,7 @@ import { useLang } from "../app/static/js/i18n.js";
 import { createKpis } from "../app/static/js/kpis.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
-const premise = (id, d10, d100, d500) => ({ id, depth_m: { 10: d10, 100: d100, 500: d500 } });
+const premise = (id, d10, d20, d50) => ({ id, depth_m: { 10: d10, 20: d20, 50: d50 } });
 const PREMISES = [premise("a", null, 0.4, 1.0), premise("b", 0.2, 1.0, 2.0), premise("c", null, 2.2, 3.5), premise("d", null, null, null)];
 const RAIN = { configured: true, data: { total_mm: 24, max_chance_pct: 60, hours: 12 } };
 
@@ -65,7 +65,7 @@ test("a rain tile that was shown goes away again if the answer says it is not co
 
 test("the typical-depth tile gets a picture of the median depth when businesses are wet", () => {
   const { kpis, depth } = mount();
-  kpis.setScenario("100");   // wet depths 0.4, 1.0, 1.0, 2.2: the median is 1.0
+  kpis.setScenario("20");   // wet depths 0.4, 1.0, 1.0, 2.2: the median is 1.0
   assert.equal(figure(depth), "1.0 m");
   const picture = art(depth).querySelector("svg");
   assert.ok(picture, "the slot holds a drawing");
@@ -76,10 +76,10 @@ test("the typical-depth tile gets a picture of the median depth when businesses 
 
 test("the picture follows the flood size and is cleared when no business is wet", () => {
   const { kpis, depth } = mount({ premises: [premise("a", null, 0.4, 1.0), premise("b", null, null, null)] });
-  kpis.setScenario("100");
+  kpis.setScenario("20");
   assert.ok(art(depth).querySelector("svg"));
   const before = art(depth).querySelector(".water").getAttribute("height");
-  kpis.setScenario("500");
+  kpis.setScenario("50");
   assert.notEqual(art(depth).querySelector(".water").getAttribute("height"), before);
   kpis.setScenario("10");   // nothing is wet in the 1 in 10 flood
   assert.equal(figure(depth), "–");
@@ -94,6 +94,6 @@ test("the typical-depth tile has no picture before a flood size is chosen", () =
 
 test("the headline tile counts the wet businesses", () => {
   const { kpis, wet } = mount();
-  kpis.setScenario("100");
+  kpis.setScenario("20");
   assert.match(wet.textContent, /3 of 4/);
 });

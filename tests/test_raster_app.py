@@ -24,7 +24,7 @@ TILE_2 = (6.4321, 109.6)          # row 14, column 38: tile 2, inside the Borneo
 POINT_ID = "pt:6.37500,101.12500"
 MODEL_DOWN = "Could not read the flood model just now. Try again."
 POINT_WORDS = "Please check the location and try again."
-RP100 = f"ID211_{GRID}_RP100_depth.tif"
+RP20 = f"ID211_{GRID}_RP20_depth.tif"
 THREADS = 16
 
 
@@ -51,8 +51,8 @@ def client(rasters):
 
 @pytest.fixture
 def damaged(rasters):
-    """Files that load, one of whose tiles (the 100 year file's tile 0) is not deflate data: found only when read."""
-    fx.write_depth_tiff(rasters / RP100, fx.depth_values(100), chunks={0: b"not deflate data"})
+    """Files that load, one of whose tiles (the 1 in 20 years file's tile 0) is not deflate data: found only when read."""
+    fx.write_depth_tiff(rasters / RP20, fx.depth_values(20), chunks={0: b"not deflate data"})
     main._hits.clear()
     return TestClient(main.app)
 
@@ -117,7 +117,7 @@ def test_a_damaged_tile_met_while_serving_is_a_503_in_the_envelope(damaged, capl
     res = damaged.request(method, path, json=body)
     assert res.status_code == 503
     assert res.json() == {"success": False, "data": None, "error": MODEL_DOWN}
-    assert f"{RP100}: tile 0" in caplog.text and "6.43" not in caplog.text and "101.19" not in caplog.text
+    assert f"{RP20}: tile 0" in caplog.text and "6.43" not in caplog.text and "101.19" not in caplog.text
 
 
 def test_a_damaged_tile_beside_a_point_costs_only_the_squares_around_it(rasters, caplog):
@@ -125,18 +125,18 @@ def test_a_damaged_tile_beside_a_point_costs_only_the_squares_around_it(rasters,
     # columns 32 to 47) is in the blocks of a point from column 12 on, and not in those of one in columns 0 to 11. The
     # point's own square is sound, so its depths still come back; the squares around it are null, not a partial set
     # that would look like dry land, and the page says they could not load.
-    fx.write_depth_tiff(rasters / RP100, fx.depth_values(100), chunks={2: b"not deflate data"})
+    fx.write_depth_tiff(rasters / RP20, fx.depth_values(20), chunks={2: b"not deflate data"})
     main._hits.clear()
     client = TestClient(main.app)
     near = post_point(client, *TILE_0)    # column 4: blocks over columns 0 to 23
     assert near.status_code == 200 and near.json()["data"]["cells"]
-    assert near.json()["data"]["place"]["depth_m"] == {"10": 14.14, "100": 14.64, "500": 15.14}
+    assert near.json()["data"]["place"]["depth_m"] == {"10": 14.14, "20": 14.64, "50": 15.14}
     far = post_point(client, *TILE_1)     # column 16: blocks over columns 0 to 39
     assert far.status_code == 200
     data = far.json()["data"]
-    assert data["coverage"] == "covered" and data["place"]["id"] and data["place"]["depth_m"]["100"] is not None
+    assert data["coverage"] == "covered" and data["place"]["id"] and data["place"]["depth_m"]["20"] is not None
     assert data["blocks"] is None and data["cells"] is None
-    assert f"{RP100}: tile 2" in caplog.text and "6.43" not in caplog.text and "104.1" not in caplog.text
+    assert f"{RP20}: tile 2" in caplog.text and "6.43" not in caplog.text and "104.1" not in caplog.text
 
 
 def test_a_damaged_tile_under_the_point_itself_is_still_a_503(damaged):
@@ -146,15 +146,15 @@ def test_a_damaged_tile_under_the_point_itself_is_still_a_503(damaged):
 
 def test_a_file_that_goes_missing_while_serving_is_a_503_in_the_envelope(client, rasters, caplog):
     assert post_point(client, *TILE_0).status_code == 200      # loads the set, and reads tiles 0 and 1 of each file
-    (rasters / RP100).unlink()
+    (rasters / RP20).unlink()
     res = post_point(client, *TILE_2)                          # its own square is in tile 2, not cached: opened now
     assert res.status_code == 503 and res.json() == {"success": False, "data": None, "error": MODEL_DOWN}
-    assert f"{RP100}: tile 2 cannot be read" in caplog.text
+    assert f"{RP20}: tile 2 cannot be read" in caplog.text
 
 
 def test_damaged_flood_data_met_inside_an_ai_call_is_a_503_not_a_502(client, monkeypatch):
     def breaks(*args):
-        raise raster.RasterError(f"{RP100}: tile 0 is not deflate data")
+        raise raster.RasterError(f"{RP20}: tile 0 is not deflate data")
 
     monkeypatch.setattr(main.ai, "ask", breaks)
     res = client.post("/api/ask", json={"question": "Is it safe?"})
@@ -282,12 +282,12 @@ def test_cache_clear_makes_the_next_call_read_the_folder_again(rasters):
 
 
 def test_a_failed_load_is_not_kept_so_repaired_files_load_without_a_restart(rasters):
-    good = (rasters / RP100).read_bytes()
-    fx.write_depth_tiff(rasters / RP100, fx.depth_values(100), tags={339: (fx.SHORT, (1,))})
+    good = (rasters / RP20).read_bytes()
+    fx.write_depth_tiff(rasters / RP20, fx.depth_values(20), tags={339: (fx.SHORT, (1,))})
     for _ in range(2):
         with pytest.raises(raster.RasterError, match="SampleFormat"):
             raster.depth_set()
-    (rasters / RP100).write_bytes(good)
+    (rasters / RP20).write_bytes(good)
     assert [g.name for g in raster.depth_set().grids] == [GRID]
 
 

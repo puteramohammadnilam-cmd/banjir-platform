@@ -39,6 +39,7 @@ test("a first visit with no link picks nothing, and opens on the Area overview",
   assert.equal(state.placeKey, null);
   assert.equal(state.tab, "overview");
   assert.equal(state.rp, DEFAULT_RP);
+  assert.equal(DEFAULT_RP, "50", "the biggest flood size shown");
   assert.deepEqual(state.points, {});
   assert.deepEqual(state.squares, {});
 });
@@ -177,7 +178,7 @@ test("the empty state says what to do, with both ways to do it, and the second o
 function mountBusiness(options = {}) {
   const panel = document.createElement("section");
   const card = createBusiness(panel, { area: HOME, areas: AREAS, onPhoto() {}, onPick() {}, goto() {}, showOnMap() {}, ...options });
-  const show = (premise) => card.render({ premise, rp: "100", photo: undefined, listing: undefined });
+  const show = (premise) => card.render({ premise, rp: "20", photo: undefined, listing: undefined });
   return { panel, show };
 }
 
@@ -195,7 +196,7 @@ test("My business with nothing picked shows the empty state as its only heading,
 test("Flood cost with nothing picked shows the empty state first, and its form is off", () => {
   const panel = document.createElement("section");
   const cost = createCost(panel, { onEstimate() {}, onFind() {}, onCheckPoint: null });
-  assert.doesNotThrow(() => cost.render(undefined, null, undefined, undefined, "100"));
+  assert.doesNotThrow(() => cost.render(undefined, null, undefined, undefined, "20"));
   assert.equal(panel.querySelector("h1").textContent, "Pick your shop first");
   assert.deepEqual(buttonTexts(panel.querySelector(".pick-empty")), ["Find your shop"]);
   assert.ok(panel.querySelector("form").parent.hidden);

@@ -4,9 +4,9 @@ import pytest
 from app import costs, floodtools
 
 WET = next(p for p in floodtools.premises() if p["depth_m"]["10"])
-DRY = next(p for p in floodtools.premises() if not p["depth_m"]["500"])
+DRY = next(p for p in floodtools.premises() if not p["depth_m"]["50"])
 # Worked by hand from the JRC Asia commerce curve: shares 0.304, 0.508, 0.636 of RM 40,000.
-DEPTHS = {"10": 0.4, "100": 0.9, "500": 1.4}
+DEPTHS = {"10": 0.4, "20": 0.9, "50": 1.4}
 ANNUITY_10Y_4PCT = (1 - 1.04 ** -10) / 0.04   # 8.1109, the textbook closed form
 
 
@@ -19,10 +19,30 @@ def test_damage_share_follows_the_published_asia_commerce_curve(depth, share):
 
 def test_expected_yearly_loss_is_the_area_under_the_loss_probability_curve():
     # nothing is assumed for floods more frequent than the most frequent one given
-    yearly = costs.expected_yearly({"10": 1000, "100": 5000, "500": 9000})
+    yearly = costs.expected_yearly({"10": 1000, "20": 5000, "50": 9000})
 
-    assert yearly == pytest.approx(0.09 * 3000 + 0.008 * 7000 + 0.002 * 9000)
-    assert costs.expected_yearly({"100": 5000}) == pytest.approx(50)
+    assert yearly == pytest.approx(0.05 * 3000 + 0.03 * 7000 + 0.02 * 9000)
+    assert costs.expected_yearly({"50": 5000}) == pytest.approx(100)
+
+
+@pytest.mark.parametrize("losses, yearly", [
+    ({"10": 0, "20": 10_000, "50": 20_000}, 1_100),    # 0.035 x 20,000 + 0.04 x 10,000
+    ({"10": 1_000, "20": 1_000, "50": 1_000}, 100),    # the same loss every time: 1 in 10 a year
+    ({"10": 0, "20": 0, "50": 1_000}, 35),             # the 1 in 50 loss, counted again for every rarer flood
+    ({"10": 2_000, "20": 0, "50": 0}, 50),
+])
+def test_expected_yearly_loss_weighs_the_three_floods_by_hand(losses, yearly):
+    # 0.035 x L50 + 0.04 x L20 + 0.025 x L10: trapezoids from 1/10 to 1/50 a year, plus 1/50 x L50 for every rarer
+    # flood, counted as if it cost no more than the 1 in 50. So the figure is a floor at both ends.
+    assert costs.expected_yearly(losses) == pytest.approx(yearly)
+    assert costs.expected_yearly(losses) == pytest.approx(
+        0.035 * losses["50"] + 0.04 * losses["20"] + 0.025 * losses["10"])
+
+
+def test_the_method_and_limits_say_which_floods_the_yearly_figure_leaves_out():
+    assert "1 in 10, 20 and 50 year floods" in costs.METHOD
+    assert "more often than once in 10 years" in costs.LIMITS
+    assert "bigger than 1 in 50 years are counted as if they cost the same as the 1 in 50" in costs.LIMITS
 
 
 def test_present_value_discounts_each_year_at_the_malaysian_rate():
@@ -41,9 +61,9 @@ def test_owner_value_route_matches_the_hand_worked_example():
     assert [f["indirect_loss_rm"] for f in floods.values()] == [3_648, 6_096, 7_632]
     assert [f["total_rm"] for f in floods.values()] == [15_808, 26_416, 33_072]
     assert floods["10"]["damage_share"] == 0.304
-    assert result["expected_yearly_loss_rm"] == 2_204        # 1,695.52 x 1.3
+    assert result["expected_yearly_loss_rm"] == 2_609        # 2,007.20 x 1.3
     assert result["loss_over_years"] == {"years": 10, "discount_rate": 0.04,
-                                         "present_value_rm": round(2_204.176 * ANNUITY_10Y_4PCT)}
+                                         "present_value_rm": round(2_609.36 * ANNUITY_10Y_4PCT)}
     assert "your own value" in result["basis"]["direct"] and "30%" in result["basis"]["indirect"]
     assert result["measure"] is None
 
@@ -52,14 +72,14 @@ def test_owner_closure_figures_replace_the_30_percent_default():
     result = costs.estimate(DEPTHS, value_at_risk_rm=40_000, floor_height_cm=40,
                             daily_takings_rm=800, closed_days=5)
 
-    flood = result["per_flood"]["100"]
+    flood = result["per_flood"]["20"]
     assert flood["water_above_floor_m"] == 0.5
     assert (flood["direct_damage_rm"], flood["indirect_loss_rm"], flood["total_rm"]) == (15_200, 4_000, 19_200)
     assert "days closed" in result["basis"]["indirect"]
 
 
 def test_owner_closure_counts_when_the_street_floods_even_if_water_stays_below_the_floor():
-    result = costs.estimate({"10": 0.1, "100": 0.2, "500": None}, value_at_risk_rm=40_000,
+    result = costs.estimate({"10": 0.1, "20": 0.2, "50": None}, value_at_risk_rm=40_000,
                             floor_height_cm=100, daily_takings_rm=500, closed_days=3)
 
     assert [f["total_rm"] for f in result["per_flood"].values()] == [1_500, 1_500, 0]
@@ -134,15 +154,15 @@ def test_the_owners_own_value_wins_over_the_shop_size():
 
 
 def test_raising_stock_is_credited_with_the_stock_damage_it_avoids_and_nothing_else():
-    # direct loss per year falls from 1,695.52 to 717.76; the indirect loss is left as it was
+    # direct loss per year falls from 2,007.20 to 1,197.60; the indirect loss is left as it was
     for closure in ({}, {"daily_takings_rm": 500, "closed_days": 2}):
         before = costs.estimate(DEPTHS, value_at_risk_rm=40_000, **closure)
 
         measure = costs.estimate(DEPTHS, value_at_risk_rm=40_000, raise_cm=50, measure_cost_rm=1_000, **closure)["measure"]
 
-        assert before["expected_yearly_loss_rm"] - measure["yearly_loss_after_rm"] == pytest.approx(977.76, abs=1)
-        assert measure["benefit_present_value_rm"] == round(977.76 * ANNUITY_10Y_4PCT)
-        assert measure["benefit_cost_ratio"] == 7.93
+        assert before["expected_yearly_loss_rm"] - measure["yearly_loss_after_rm"] == pytest.approx(809.6, abs=1)
+        assert measure["benefit_present_value_rm"] == round(809.6 * ANNUITY_10Y_4PCT)
+        assert measure["benefit_cost_ratio"] == 6.57
         assert measure["worth_it"] is True
 
 
@@ -157,9 +177,9 @@ def test_a_measure_that_saves_nothing_is_not_worth_it():
 
 
 def test_a_cheap_measure_is_judged_on_unrounded_savings():
-    # saves RM 0.46 a year, RM 3.70 over ten years: worth RM 3, not worth RM 4
-    depth = {"10": None, "100": None, "500": 0.5}
-    kwargs = {"value_at_risk_rm": 200, "raise_cm": 50}
+    # saves RM 0.455 a year (RM 13 of direct damage x 0.035), RM 3.69 over ten years: worth RM 3, not worth RM 4
+    depth = {"10": None, "20": None, "50": 0.5}
+    kwargs = {"value_at_risk_rm": 34, "raise_cm": 50}
 
     assert costs.estimate(depth, measure_cost_rm=3, **kwargs)["measure"]["worth_it"] is True
     assert costs.estimate(depth, measure_cost_rm=4, **kwargs)["measure"]["worth_it"] is False

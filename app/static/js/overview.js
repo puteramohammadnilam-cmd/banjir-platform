@@ -118,7 +118,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
     render({ rp, selectedId, rain }) {
       if (rp !== shown.rp) {
         kpis.setScenario(rp);
-        renderPicker(document.querySelector("[data-scenario]"), rp, onPick);
+        renderPicker(document.querySelector("[data-scenario]"), rp, onPick, area.bigger_flood_example);
       }
       if (rain !== shown.rain) kpis.setRain(rain);
       if (rp !== shown.rp || selectedId !== shown.selectedId) {
