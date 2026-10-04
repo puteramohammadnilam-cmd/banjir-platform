@@ -149,7 +149,8 @@ def test_overpass_gets_a_descriptive_user_agent_and_the_query_in_the_body(monkey
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     assert fms.overpass_post(fms.SECTIONS_QUERY) == {"elements": []}
-    assert "banjir-check-research" in seen["agent"] and "@" in seen["agent"], "without one Overpass answers 406"
+    assert "banjir-check-research" in seen["agent"], "without one Overpass answers 406"
+    assert "@" not in seen["agent"], "no personal address in the User-Agent"
     assert seen["url"] == fms.OVERPASS_URL
     assert "rel%28" in seen["body"] and "subarea" in seen["body"]
 

@@ -216,10 +216,11 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
       const photoFloorM = photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm / 100 : 0;
       const floorM = Math.min(photoFloorM, MAX_DRAWN_FLOOR_M);
       if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea }));
-      const key = `${premise.id}|${rp}|${photoFloorM}`;
+      const key = `${premise.id}|${premise.area_id}|${rp}|${photoFloorM}`;
       if (key !== drawnKey) {
         drawnKey = key;
-        renderPicker(picker, rp, onPick, area.bigger_flood_example);
+        const isPageArea = !premise.is_point || premise.area_id === area.id;   // the example is this area's flood
+        renderPicker(picker, rp, onPick, isPageArea ? area.bigger_flood_example : null);
         drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM));
         announcer.textContent = spoken(premise, rp);
       }

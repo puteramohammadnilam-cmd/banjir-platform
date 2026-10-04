@@ -40,6 +40,17 @@ test("a business shows its road, its Google Maps listing, its floor and the page
   assert.ok(!panel.textContent.includes(NO_WATER_NOTE));
 });
 
+test("the bigger-flood example is the page's area's own: a point in another area gets the plain note", () => {
+  const { panel, card } = mountCard({ area: { ...HOME, bigger_flood_example: "2021-12" } });
+  const note = () => panel.querySelector(".scenario-note").textContent;
+  show(card, shop);
+  assert.match(note(), /such as December 2021/);
+  show(card, point({ area_id: "home" }));
+  assert.match(note(), /such as December 2021/);
+  show(card, point({ area_id: "far" }));
+  assert.equal(note(), "Floods bigger than 1 in 50 years are not shown.");
+});
+
 test("a business of an area with no flood record shows no record fact", () => {
   const { panel, card } = mountCard({ area: { ...HOME, history: null } });
   show(card, shop);
