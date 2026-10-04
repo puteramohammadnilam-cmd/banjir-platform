@@ -293,6 +293,11 @@
 .ask-form { display: flex; gap: var(--space-2); }
 .ask-form .field { flex: 1 1 auto; min-width: 0; }
 .mic { flex: none; }
+@media (max-width: 520px) {   /* the box on its own row, so its words are not cut off */
+  .ask-form { flex-wrap: wrap; }
+  .ask-form .field { flex-basis: 100%; }
+  .ask-form .btn { flex: 1 1 0; min-height: 44px; }
+}
 .mic[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 @media (prefers-reduced-motion: no-preference) { .mic[aria-pressed="true"] .icon { animation: mic-pulse 1.2s ease-in-out infinite; } }
 @keyframes mic-pulse { 50% { opacity: 0.4; } }

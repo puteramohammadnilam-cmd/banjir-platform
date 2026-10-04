@@ -359,7 +359,10 @@ export default Object.freeze({
   // ---------- Ask AI: chat.js ----------
   "ask.thisPoint": "this point",
   "ask.placeholderPoint": "Ask anything about flooding at this spot",
-  "ask.greeting": "Hi. Pick a shop on the map, then ask me anything about the flood model there. I answer in Bahasa Melayu or English.",
+  "ask.leadNoMaps": "Gemini reads this tool's flood data. It answers in Bahasa Melayu or English.",
+  "ask.greetingShop": "Hi. Ask me anything about the flood model at {name}. I answer in Bahasa Melayu or English.",
+  "ask.greetingPoint": "Hi. Ask me anything about the flood model at this point. I answer in Bahasa Melayu or English.",
+  "ask.greetingArea": "Hi. Ask me anything about the flood model in {area}, or pick a shop on the map first. I answer in Bahasa Melayu or English.",
   "ask.newsNote": "Flood news is available for the listed areas.",
   "ask.newsFor": "Latest flood news for {name}",
   "ask.checking": "Checking the flood data…",
@@ -408,7 +411,7 @@ export default Object.freeze({
   // ---------- main.js and api.js ----------
   "main.missed": "That link's area or place is not in this build. Showing {area}.",
   "main.showing": "Showing {area}.",
-  "main.aiOff": "The AI assistant is not connected yet. Add a Gemini key to the .env file and restart.",
+  "main.aiOff": "The AI assistant is switched off in this test build. The flood figures on the other tabs still work.",
   "main.loadFailed": "The flood data could not be loaded.",
   "main.loading": "Loading the flood data…",
   "api.unreachable": "Could not reach the server. Check your connection and try again.",

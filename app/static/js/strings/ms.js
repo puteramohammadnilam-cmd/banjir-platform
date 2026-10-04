@@ -360,7 +360,10 @@ export default Object.freeze({
   // ---------- Ask AI: chat.js ----------
   "ask.thisPoint": "titik ini",
   "ask.placeholderPoint": "Tanya apa-apa tentang banjir di lokasi ini",
-  "ask.greeting": "Hai. Pilih kedai di peta, kemudian tanya apa-apa tentang model banjir di situ. Saya menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
+  "ask.leadNoMaps": "Gemini membaca data banjir alat ini. Ia menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
+  "ask.greetingShop": "Hai. Tanya apa-apa tentang model banjir di {name}. Saya menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
+  "ask.greetingPoint": "Hai. Tanya apa-apa tentang model banjir di titik ini. Saya menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
+  "ask.greetingArea": "Hai. Tanya apa-apa tentang model banjir di {area}, atau pilih kedai di peta dahulu. Saya menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
   "ask.newsNote": "Berita banjir tersedia untuk kawasan yang disenaraikan.",
   "ask.newsFor": "Berita banjir terkini untuk {name}",
   "ask.checking": "Menyemak data banjir…",
@@ -409,7 +412,7 @@ export default Object.freeze({
   // ---------- main.js and api.js ----------
   "main.missed": "Kawasan atau tempat dalam pautan itu tiada dalam versi ini. Memaparkan {area}.",
   "main.showing": "Memaparkan {area}.",
-  "main.aiOff": "Pembantu AI belum disambungkan. Tambah kunci Gemini dalam fail .env dan mulakan semula.",
+  "main.aiOff": "Pembantu AI dimatikan dalam versi ujian ini. Angka banjir di tab lain masih berfungsi.",
   "main.loadFailed": "Data banjir tidak dapat dimuatkan.",
   "main.loading": "Memuatkan data banjir…",
   "api.unreachable": "Pelayan tidak dapat dihubungi. Semak sambungan anda dan cuba lagi.",

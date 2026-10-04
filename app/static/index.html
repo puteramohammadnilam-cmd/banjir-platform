@@ -150,11 +150,11 @@
       <header class="view-head">
         <p class="kicker" data-i18n="ask.kicker">Ask AI</p>
         <h1><span data-i18n="ask.about">Ask about</span> <span id="ask-business"></span></h1>
-        <p class="muted" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
+        <p class="muted" id="ask-lead" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
       </header>
       <div class="ask-grid">
         <section class="surface chat" aria-label="Conversation" data-i18n-attr="aria-label:ask.conversation">
-          <p class="alert alert-inline" id="ai-status" hidden></p>
+          <p class="alert alert-inline alert-info" id="ai-status" hidden></p>
           <ol class="messages" id="messages" aria-live="polite"></ol>
           <form id="ask-form" class="ask-form" autocomplete="off">
             <label class="visually-hidden" for="question" data-i18n="ask.question">Your question</label>

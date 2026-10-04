@@ -155,7 +155,7 @@ function mountChat(change = {}) {
   const selected = { ref: "node-1" };
   const chat = createChat({ messages, chips, form, input, news, getPlaceRef: () => selected.ref, areaId: "home", areaName: "Home Town", areas: AREAS, ...change });
   chat.render(shop);   // the page renders the chat with its place straight away
-  return { chat, chips, input, news, section, selected };
+  return { chat, chips, input, news, section, selected, messages, form };
 }
 const chipTexts = (chips) => chips.children.map((chip) => chip.textContent);
 const noteIn = (section) => section.children.at(-1);
@@ -184,6 +184,32 @@ test("with nothing picked yet, the chat asks about the area, not a shop", () => 
   assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 100 year flood?", "Is heavy rain due today?"]);
   assert.equal(input.placeholder, "Ask anything about flooding in this area");
   assert.equal(news.textContent, "Latest flood news for Home Town");
+});
+
+test("the greeting names the shop, the point, or the area when nothing is picked", () => {
+  const { chat, messages } = mountChat();
+  const greeting = () => messages.children[0].textContent;
+  assert.match(greeting(), /at A Shop\./);
+  chat.render(point());
+  assert.match(greeting(), /at this point\./);
+  chat.render(undefined);
+  assert.match(greeting(), /in Home Town, or pick a shop on the map first/);
+});
+
+test("without the AI key every control is off and nothing invites a question", () => {
+  const { chips, input, news, messages, form } = mountChat({ isReady: false });
+  assert.equal(input.disabled, true);
+  assert.equal(form.querySelector("button").disabled, true);
+  assert.equal(news.disabled, true);
+  assert.ok(chips.children.every((chip) => chip.disabled), "every chip is off");
+  assert.equal(messages.children.length, 0, "no greeting asking for a question");
+});
+
+test("without the Maps key the rain and opening-hours questions are left out", () => {
+  const { chat, chips } = mountChat({ hasMaps: false });
+  assert.ok(!chipTexts(chips).some((chip) => /rain|still open/i.test(chip)), chipTexts(chips).join(" | "));
+  chat.render(undefined);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 100 year flood?"]);
 });
 
 test("a point in a listed area gets point chips, and its news is that area's", async () => {

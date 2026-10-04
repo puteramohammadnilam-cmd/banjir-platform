@@ -13,21 +13,24 @@ const CHIP_KEYS = Object.freeze({
   pointArea: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipPointAreaDry", "ask.chipRain"],
   area: ["ask.chipAreaDry", "ask.chipRain"],   // nothing picked yet: only what the area as a whole can answer
 });
-const chipSets = new Map();   // language -> {business, point, pointArea, area}
+const NEEDS_MAPS = new Set(["ask.chipRain", "ask.chipOpen"]);   // Google Weather and the Maps listing share the Maps key
+const chipSets = new Map();   // "language|maps" -> {business, point, pointArea, area}
 
-function chipsIn(language) {
-  if (!chipSets.has(language)) {
-    chipSets.set(language, Object.fromEntries(Object.entries(CHIP_KEYS).map(([kind, keys]) => [kind, Object.freeze(keys.map((key) => t(key)))])));
+function chipsIn(language, hasMaps) {
+  const id = `${language}|${hasMaps}`;
+  if (!chipSets.has(id)) {
+    const usable = (key) => hasMaps || !NEEDS_MAPS.has(key);
+    chipSets.set(id, Object.fromEntries(Object.entries(CHIP_KEYS).map(([kind, keys]) => [kind, Object.freeze(keys.filter(usable).map((key) => t(key)))])));
   }
-  return chipSets.get(language);
+  return chipSets.get(id);
 }
 export const NEWS_NOTE = t("ask.newsNote");
 const MAX_TURN_CHARS = 2000;   // the server rejects longer history turns
 
 /** The chips for the selected place: a business's, or a point's. `page` is the page's own area and `areas` the listed
- *  ones, to tell whether a point lies in one. */
-export function chipsFor(place, page, areas) {
-  const chips = chipsIn(lang);
+ *  ones, to tell whether a point lies in one. Without the Maps key, the rain and "still open" questions are left out. */
+export function chipsFor(place, page, areas, hasMaps = true) {
+  const chips = chipsIn(lang, hasMaps);
   if (!place) return chips.area;
   if (!place.is_point) return chips.business;
   return areaOf(place, page, areas) ? chips.pointArea : chips.point;
@@ -97,6 +100,15 @@ async function exchange({ add, control, userText, waitText, call, show }) {
 
 const newsLabel = ({ name }) => t("ask.newsFor", { name });
 
+/** The first message names what the questions are about: the shop, the point, or the area when nothing is picked. */
+const greetingFor = (place, areaName) => (!place ? t("ask.greetingArea", { area: areaName })
+  : place.is_point ? t("ask.greetingPoint") : t("ask.greetingShop", { name: place.name }));
+
+/** With no AI key every control would only answer with an error, so they are all switched off. */
+function switchOff(controls) {
+  for (const control of controls) control.disabled = true;
+}
+
 /** Shows the news button for an area {areaId, name}, or a note in its place when there is none. Returns the function to
  *  call with the area, or null. The note is made the first time it is needed, so a page that never shows it is as it was. */
 function newsBlock(news) {
@@ -112,8 +124,8 @@ function newsBlock(news) {
   };
 }
 
-const showChips = (box, list, onPick) =>
-  box.replaceChildren(...list.map((text) => h("button", { type: "button", class: "chip", onclick: () => onPick(text) }, text)));
+const showChips = (box, list, onPick, isOff = false) =>
+  box.replaceChildren(...list.map((text) => h("button", { type: "button", class: "chip", disabled: isOff, onclick: () => onPick(text) }, text)));
 
 /** Puts the flood news answer in the conversation, with its sources and Google's search suggestions. */
 const newsAnswer = (add, messages) => (result) => {
@@ -181,13 +193,14 @@ function voiceButton({ record, send, add, isBusy, onRecording, prime }) {
 /** getPlaceRef gives the selected place's id (a business or a point) when a question is sent. areaId and areaName are
  *  the area the page shows (its id and short name from config, which change only with a new page); areas are the listed
  *  areas, to tell which one a point lies in. render(place) is called as the selection changes and shows the chips, the
- *  question box's words and the flood news that fit it: until then, and for a business, the chat is the business chat. */
-export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, areaName, areas = [], voice = realVoice }) {
+ *  question box's words and the flood news that fit it: until then, and for a business, the chat is the business chat.
+ *  isReady is false when the build has no Gemini key: every control is then off. hasMaps is false without the Maps key. */
+export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, areaName, areas = [], voice = realVoice, isReady = true, hasMaps = true }) {
   let history = [];
   const button = form.querySelector("button");
   const page = { id: areaId, name: areaName };
   const showNews = newsBlock(news);
-  let shown = { chips: chipsFor(null, page, areas), news: newsFor(null, page, areas) };
+  let shown = { chips: chipsFor(null, page, areas, hasMaps), news: newsFor(null, page, areas) };
   let shownPlaceId;   // what the chips and the news button are built for
   const add = (kind, text) => addMessage(messages, kind, text);
 
@@ -235,7 +248,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     button.disabled = isOn;
     input.disabled = isOn;
   };
-  const mic = voice.canRecord() ? voiceButton({ record: voice.startRecording, send: sendVoice, add, isBusy: () => button.disabled, onRecording, prime: voice.primeSpeech }) : null;
+  const mic = isReady && voice.canRecord() ? voiceButton({ record: voice.startRecording, send: sendVoice, add, isBusy: () => button.disabled, onRecording, prime: voice.primeSpeech }) : null;
   if (mic) form.after(h("p", { class: "fineprint voice-note" }, VOICE_WORDS.note));
   if (mic) form.append(mic);
 
@@ -250,18 +263,20 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
   }
 
   showNews(shown.news);
-  showChips(chips, shown.chips, send);
+  showChips(chips, shown.chips, send, !isReady);
   news.addEventListener("click", sendNews);
   wireQuestionForm({ form, input, button, send });
   input.placeholder = t("ask.placeholderShop");
-  add("model", t("ask.greeting"));
+  const greeting = isReady ? add("model", greetingFor(null, areaName)) : null;   // the AI-off notice says it all
+  if (!isReady) switchOff([input, button, news]);
   return {
     render(place) {
       if (place?.id !== shownPlaceId) voice.stopSpeaking?.();   // an answer about another place is not read on
       shownPlaceId = place?.id;
       input.placeholder = t(!place ? "ask.placeholderArea" : place.is_point ? "ask.placeholderPoint" : "ask.placeholderShop");
-      const next = { chips: chipsFor(place, page, areas), news: newsFor(place, page, areas) };
-      if (next.chips !== shown.chips) showChips(chips, next.chips, send);
+      if (greeting) greeting.textContent = greetingFor(place, areaName);
+      const next = { chips: chipsFor(place, page, areas, hasMaps), news: newsFor(place, page, areas) };
+      if (next.chips !== shown.chips) showChips(chips, next.chips, send, !isReady);
       if (next.news?.areaId !== shown.news?.areaId) showNews(next.news);
       shown = next;
     },

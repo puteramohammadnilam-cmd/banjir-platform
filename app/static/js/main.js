@@ -391,6 +391,7 @@ function createViews(app) {
   const chat = createChat({
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
+    isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
   });
   return { overview, business, cost, chat, showTab, pin, plan, compare };
 }
@@ -443,6 +444,7 @@ function startApp(start, initial) {
     $("ai-status").textContent = t("main.aiOff");
     $("ai-status").hidden = false;
   }
+  if (!start.status.maps_ready) $("ask-lead").textContent = t("ask.leadNoMaps");   // no Weather or Maps to read
   render(app, views, initial, null);
   loadListing(app, initial.placeKey);
   loadRain(app);
