@@ -77,6 +77,15 @@ def test_the_tif_has_no_score_outside_the_city_outline():
     assert indexes.flash_at(*SRI_MUDA_POINT) == {"score": 7.0, "class": "high"}
 
 
+def test_the_credits_name_the_ndvi_access_date_and_the_score_s_sources():
+    ndvi = ("ESA WorldCover Sentinel-1 and Sentinel-2 10m Annual Composites accessed on 4 October 2026 from "
+            "https://registry.opendata.aws/esa-worldcover-vito-composites")
+    assert ndvi in DOC["credit"] and ndvi in (INDEX_DIR / "SOURCES.txt").read_text(encoding="utf-8")
+    for name in ("README.md", "LICENSE"):
+        assert ndvi in " ".join((ROOT / name).read_text(encoding="utf-8").split()), name
+    assert "WorldPop" in INDEXES["method"]["score"]["credit"] and "ODbL" in INDEXES["method"]["score"]["credit"]
+
+
 def png_chunks(data: bytes) -> dict:
     chunks, at = {}, 8
     while at < len(data):

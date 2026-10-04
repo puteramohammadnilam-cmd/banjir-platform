@@ -220,6 +220,7 @@ def test_the_details_carry_the_method_the_validation_and_the_layer(city, city_in
     assert method["flash"] == {key: ix.FLASH_METHOD[key] for key in indexes.METHOD_KEYS}
     assert method["score"]["deviations"] == ["Rainfall was left out: no source varies inside the city."]
     assert method["score"]["citations"] == ["Leeonis, A. N. et al. (2024) (criteria weights)"]
+    assert method["score"]["credit"] == "Fixture score credit: people and drains."
     assert method["score"]["classes"] == ix.SCORE_CLASSES and method["score"]["breaks"] == [1.5, 2.5, 3.5, 4.5]
     assert method["score"]["weights_used"] == {"slope": 0.6, "elevation": 0.4} and "criteria" not in method["score"]
     assert method["validation"]["n"] == 3 and method["validation"]["hotspots"][0]["score_rank"] == 20

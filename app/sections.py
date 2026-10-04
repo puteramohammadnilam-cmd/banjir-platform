@@ -45,7 +45,7 @@ RP_KEYS = tuple(str(rp) for rp in raster.RETURN_PERIODS)
 SECTION_KEYS = ("id", "name", "bbox", "zoom", "outline", "area_km2", "counts")   # each needs these; others pass on
 INDEX_KEYS = ("id", "name", "kind", "sector", "section")
 SCORE_METHOD_KEYS = ("name", "summary", "weights_used", "weights_total", "classes", "breaks", "break_rule", "citations",
-                     "deviations")
+                     "deviations", "credit")
 MAX_CACHED = 128
 WORD = re.compile(r"\w+")
 
@@ -235,7 +235,7 @@ def _figure_problems(figures, classes: tuple[str, ...] | None) -> list[str]:
 def index_method(area_id: str) -> dict | None:
     """How the area's figures were worked out, as the page is sent it: {flash, score, validation}, the plain-text parts
     of the flash flood potential method (app/indexes.py), the score's classes, breaks, weights, citations and
-    deviations, and the validation. None without an indexes.json."""
+    deviations and its data credit, and the validation. None without an indexes.json."""
     doc = index_doc(area_id)
     if doc is None:
         return None

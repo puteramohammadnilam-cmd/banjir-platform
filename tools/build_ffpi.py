@@ -289,7 +289,7 @@ def write_png(path: Path, grid: go.Grid, values: Sequence[float], shown: Sequenc
                                    palette, alpha, depth=4)
 
 
-def ffpi_doc(grid: go.Grid) -> dict:
+def ffpi_doc(grid: go.Grid, credit: str) -> dict:
     """shah-alam_ffpi.json (tests/fixtures/index_contract.json, ffpi_json)."""
     return {
         "version": 1, "area": ii.NAME, "index": "ffpi",
@@ -304,7 +304,7 @@ def ffpi_doc(grid: go.Grid) -> dict:
         "png": {"width": grid.cols, "height": grid.rows, "transparent_index": 0,
                 "index_of_class": {name: i + 1 for i, name in enumerate(CLASSES)},
                 "masked": "Transparent outside the city outline and over permanent water."},
-        "credit": ffpi_text.CREDIT, "method": ffpi_text.method(),
+        "credit": credit, "method": ffpi_text.method(),
     }
 
 
@@ -326,9 +326,20 @@ def file_line(path: Path) -> str:
     return f"{path.name}: {path.stat().st_size} bytes, SHA-256 {hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
-def write_sources(out: Path, raw: Path, written: Sequence[Path]) -> Path:
-    log = json.loads((raw / "indexes" / "fetch_log.json").read_text(encoding="utf-8"))
-    text = ffpi_text.sources_text(log, [file_line(p) for p in written], max(e["date"] for e in log))
+def fetch_log(raw: Path) -> list[dict]:
+    return json.loads((raw / "indexes" / "fetch_log.json").read_text(encoding="utf-8"))
+
+
+def ndvi_accessed(log: Sequence[dict]) -> str:
+    """The ISO date the NDVI composite was fetched: the latest of its entries (the vegetation folder) in the log."""
+    dates = [e["date"] for e in log if e["file"].startswith("vegetation/")]
+    if not dates:
+        raise ValueError("fetch_log.json has no NDVI composite (vegetation/) entry")
+    return max(dates)
+
+
+def write_sources(out: Path, log: Sequence[dict], written: Sequence[Path], credit: str) -> Path:
+    text = ffpi_text.sources_text(log, [file_line(p) for p in written], max(e["date"] for e in log), credit)
     path = out / "SOURCES.txt"
     path.write_text(text, encoding="utf-8")
     return path
@@ -345,8 +356,10 @@ def build(raw: Path, out: Path, qa: bool = False) -> dict:
     tif, _ = write_tif(out / f"{ii.NAME}_ffpi.tif", grid, values)
     png = write_png(out / f"{ii.NAME}_ffpi.png", grid, values, city)
     doc = out / f"{ii.NAME}_ffpi.json"
-    doc.write_text(json.dumps(ffpi_doc(grid), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    sources = write_sources(out, raw, [tif, png, doc])
+    log = fetch_log(raw)
+    credit = ffpi_text.credit(ndvi_accessed(log))
+    doc.write_text(json.dumps(ffpi_doc(grid, credit), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    sources = write_sources(out, log, [tif, png, doc], credit)
     if qa:
         write_qa(raw, grid, f)
     return {"layers": layers, "factors": f, "scores": values, "files": [tif, png, doc, sources]}

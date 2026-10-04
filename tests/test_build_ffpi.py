@@ -115,6 +115,21 @@ def test_the_breaks_follow_the_paper_s_reading_of_5_to_6_as_medium():
     assert "equal" not in method["classes"] and not any("equal steps" in d for d in method["deviations"])
 
 
+NDVI_WORDS = ("ESA WorldCover Sentinel-1 and Sentinel-2 10m Annual Composites accessed on 4 October 2026 from "
+              "https://registry.opendata.aws/esa-worldcover-vito-composites")
+
+
+def test_the_credit_gives_the_ndvi_composite_s_access_date_in_its_own_words():
+    log = [{"file": "worldcover/a/pieces.json", "date": "2026-10-09"},
+           {"file": "vegetation/ESA_WorldCover_10m_2021_v200_N03E101_NDVI/pieces.json", "date": "2026-10-03"},
+           {"file": "vegetation/ESA_WorldCover_10m_2021_v200_N02E101_NDVI/pieces.json", "date": "2026-10-04"}]
+    assert bf.ndvi_accessed(log) == "2026-10-04"            # the later of the composite's pieces
+    credit = bf.ffpi_text.credit("2026-10-04")
+    assert NDVI_WORDS in credit and "CC BY 4.0" in credit and "Copernicus DEM GLO-30" in credit
+    with pytest.raises(ValueError):
+        bf.ndvi_accessed([{"file": "worldcover/a/pieces.json", "date": "2026-10-04"}])
+
+
 def test_oklch_out_of_the_srgb_gamut_is_refused():
     assert bf.oklch_hex(1.0, 0.0, 0) == "#ffffff" and bf.oklch_hex(0.0, 0.0, 0) == "#000000"
     with pytest.raises(ValueError, match="gamut"):

@@ -125,6 +125,7 @@ export const INDEX_METHOD = Object.freeze({
     name: "Flood risk score (multi-criteria)", summary: "Seven criteria.", weights_used: { river_distance: 0.2432 }, weights_total: 74,
     classes: ["very_low", "low", "moderate", "high", "very_high"], breaks: [1.5, 2.5, 3.5, 4.5], break_rule: "At or above a break: the class above.",
     citations: ["Leeonis, A. N. et al. (2024) Discover Sustainability 5:352."], deviations: ["Rainfall and economic loss are dropped: weights out of 74."],
+    credit: "Section score: WorldPop 2020 constrained (CC BY 4.0); OpenStreetMap contributors (ODbL).",
   },
   validation: { wording: "Compared with past flood records and the river model; this does not validate either index.", n: 56 },
 });

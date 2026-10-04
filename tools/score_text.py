@@ -22,19 +22,18 @@ DEVIATIONS = [
     "gives losses by section. The other seven weights are divided by the 74 left.",
     "The paper's distance classes run to kilometres over a wider area; the distance classes here are ours, in metres "
     "for a city. Elevation, slope and population keep the paper's classes.",
-    "The drainage density classes (under 0.25, 0.5, 1 and 1.5 km of drain per km2, and above) are ours: the paper's "
-    "come from a kernel density of the main rivers in its own units, which do not carry over to mapped drains within "
-    "1 km.",
+    "The drainage density classes (breaks at 0.25, 0.5, 1 and 1.5 km per km2) are ours: the paper's, from a kernel "
+    "density of the main rivers, do not carry over to mapped drains.",
     "Land cover is ESA WorldCover 2021 rated by us: built-up and water 5, bare ground, wetland and mangrove 4, "
     "grassland and cropland 3, shrubland 2, tree cover 1.",
     "Drainage density counts mapped drains and ditches; how much of the city's drainage is mapped differs from place "
     "to place, and a high density may mean a well drained area as easily as a wet one.",
-    "Population is people per section, as in the paper, but WorldPop's 2020 100 m estimate summed over each section "
-    "rather than the council's figures; every square of a section takes the section's rating. The paper rates its "
-    "four ranges 1 to 4; here under 1,000 people rates 1 and the four ranges 2 to 5, so that it runs 1 to 5 like the "
-    "other criteria.",
+    "Population is people per section as in the paper, but from WorldPop 2020 summed by section, not council "
+    "figures; each square takes its section's rating. Under 1,000 rates 1 and the paper's four ranges 2 to 5.",
     "A section's value is the area-weighted mean of its 30 m squares, not the paper's hotspot analysis.",
 ]
+CREDIT = ("Section score: WorldPop 2020 constrained (CC BY 4.0, doi:10.5258/SOTON/WP00660); OpenStreetMap rivers, "
+          "drains and roads, (c) OpenStreetMap contributors, ODbL 1.0.")
 CITATIONS = [
     "Leeonis, A. N., Ahmed, M. F., Halder, B., Mokhtar, M. B., Lim, C. K., Juneng, L. and Khirotdin, R. P. K. (2024). "
     "Mitigating flood risk at Shah Alam, Malaysia for sustainable development. Discover Sustainability 5: 352, "
@@ -51,6 +50,7 @@ def score_method() -> dict:
                    "exposed, 5 the most.",
         "citations": list(CITATIONS),
         "deviations": list(DEVIATIONS),
+        "credit": CREDIT,
     }
 
 

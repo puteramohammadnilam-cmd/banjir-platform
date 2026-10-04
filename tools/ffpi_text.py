@@ -4,11 +4,25 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-CREDIT = ("Flash flood potential: ESA WorldCover 2021 and its Sentinel-2 NDVI composite (contains modified Copernicus "
-          "Sentinel data (2021) processed by ESA WorldCover consortium, CC BY 4.0), SoilGrids 2.0 (ISRIC, CC BY 4.0) "
-          "and Copernicus DEM GLO-30 ((c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided "
-          "under COPERNICUS by the European Union and ESA); method after Smith (2003) as used by Mohd Yassin et al. "
-          "(2023).")
+MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December")
+NDVI_REGISTRY = "https://registry.opendata.aws/esa-worldcover-vito-composites"
+
+
+def long_date(iso: str) -> str:
+    """"2026-10-04" -> "4 October 2026"."""
+    year, month, day = (int(part) for part in iso.split("-"))
+    return f"{day} {MONTHS[month - 1]} {year}"
+
+
+def credit(ndvi_accessed: str) -> str:
+    """The map layer's credit line; ndvi_accessed is the ISO date the NDVI composite was fetched (fetch_log.json)."""
+    return ("Flash flood potential: ESA WorldCover 2021 (ESA WorldCover project 2021 / Contains modified Copernicus "
+            "Sentinel data (2021) processed by ESA WorldCover consortium, CC BY 4.0); ESA WorldCover Sentinel-1 and "
+            f"Sentinel-2 10m Annual Composites accessed on {long_date(ndvi_accessed)} from {NDVI_REGISTRY} (CC BY "
+            "4.0); SoilGrids 2.0 (ISRIC, CC BY 4.0); Copernicus DEM GLO-30 ((c) DLR e.V. 2010-2014 and (c) Airbus "
+            "Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA); method after "
+            "Smith (2003) as used by Mohd Yassin et al. (2023).")
 
 FACTORS = {
     "M": "Slope: from the Copernicus GLO-30 surface after taking the lowest height of each 3 x 3 squares (about 90 m) "
@@ -49,8 +63,7 @@ DEVIATIONS = [
     "Vegetation cover comes from NDVI (Carlson and Ripley's scaled NDVI squared), not from a mapped percentage.",
     "The surface model includes roofs and trees; taking the lowest height of each 3 x 3 squares before the slope "
     "removes most of them, not all.",
-    "The paper names four classes but not their limits. Its Scenario 2 scores of 5 to 6 read as medium, so medium "
-    "here is 4.5 to under 6.5 (5 and 6 once rounded); low is below 4.5, high from 6.5 and extreme from 8.5.",
+    "The paper gives no class limits; as it reads scores of 5 to 6 as medium, the limits here are 4.5, 6.5 and 8.5.",
 ]
 
 
@@ -61,8 +74,8 @@ def method() -> dict:
         "formula": "(1.5 M + L + S + 0.5 V) / 4",
         "summary": "Each 30 m square is rated 1 to 10 for slope (M), land cover (L), soil (S) and bare ground (V); the "
                    "four are weighted as in the paper's Scenario 2 and rounded to 0.1. Higher means water runs off "
-                   "faster and gathers sooner after heavy rain. The classes follow the paper's reading of scores of "
-                   "5 to 6 as medium: low below 4.5, medium from 4.5, high from 6.5, extreme from 8.5.",
+                   "faster and gathers sooner after heavy rain. Classes follow the paper's reading of 5 to 6 as "
+                   "medium: low under 4.5, high from 6.5, extreme from 8.5.",
         "factors": dict(FACTORS),
         "classes": "Four classes, as the paper names them; it gives no limits but reads Scenario 2 scores of 5 to 6 "
                    "as medium, so medium runs from 4.5 to under 6.5 (5 and 6 once rounded): low below 4.5, medium "
@@ -74,7 +87,7 @@ def method() -> dict:
     }
 
 
-def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str) -> str:
+def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str, credit_line: str) -> str:
     """app/data/indexes/SOURCES.txt from the fetch log and the output lines (name, bytes, SHA-256)."""
     lines = [
         "Flash flood potential index (FFPI) in this folder", "=" * 50, "",
@@ -94,7 +107,7 @@ def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str) -> str:
     for entry in log:
         lines += [f"{entry['file']}: {entry['bytes']} bytes, SHA-256 {entry['sha256']}, fetched {entry['date']}",
                   f"  {entry['url']}"]
-    lines += ["", "Credit", "------", CREDIT, "",
+    lines += ["", "Credit", "------", credit_line, "",
               "Licences: ESA WorldCover map and NDVI composite CC BY 4.0; SoilGrids 2.0 CC BY 4.0; WorldPop CC BY 4.0;",
               "OpenStreetMap ODbL 1.0; Copernicus DEM GLO-30 under the Copernicus DEM licence (any use, with the credit).",
               "The rating tables are the published method's; no text or figure of the papers is copied.", ""]

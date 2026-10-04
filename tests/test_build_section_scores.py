@@ -93,6 +93,14 @@ def test_the_deviations_say_which_classes_are_ours_and_how_population_is_counted
     assert "people per section" in bs.score_text.SOURCES["population_density"]
 
 
+def test_the_score_credits_worldpop_and_openstreetmap():
+    credit = bs.score_text.score_method()["credit"]
+    for part in ("WorldPop 2020 constrained", "CC BY 4.0", "doi:10.5258/SOTON/WP00660", "OpenStreetMap contributors",
+                 "ODbL"):
+        assert part in credit, part
+    assert bs.method_doc()["score"]["credit"] == credit
+
+
 def test_land_cover_ratings_mix_by_pixel_share():
     assert bs.land_cover_rating({50: 60, 10: 40}) == pytest.approx((60 * 5 + 40 * 1) / 100)
     assert bs.land_cover_rating({}) is None

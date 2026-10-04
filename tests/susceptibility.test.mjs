@@ -178,9 +178,18 @@ test("the method names the formula, the deviations and the sources, with a link 
   assert.deepEqual(links.map((a) => [a.getAttribute("href"), a.getAttribute("rel")]), [["https://example.org/pm", "noopener noreferrer"]]);
 });
 
+test("the score's own credit line shows with the score, as fine print", () => {
+  const body = methodBody(INDEX_METHOD, { showScore: true, word: SECTION_WORD });
+  const credit = body.find((node) => node.textContent === INDEX_METHOD.score.credit);
+  assert.ok(credit, "the score credit is shown");
+  assert.equal(credit.getAttribute("class"), "fineprint");
+  const withoutCredit = { ...INDEX_METHOD, score: { ...INDEX_METHOD.score, credit: undefined } };
+  assert.doesNotMatch(methodBody(withoutCredit, { showScore: true }).map((node) => node.textContent).join(" "), /WorldPop/);
+});
+
 test("with the score hidden the method leaves it out; with no method only the index's own words show", () => {
   const text = methodBody(INDEX_METHOD, { showScore: false, word: SECTION_WORD }).map((node) => node.textContent).join(" ");
-  assert.doesNotMatch(text, /Leeonis|Rainfall|Compared with/);
+  assert.doesNotMatch(text, /Leeonis|Rainfall|Compared with|WorldPop/);
   const bare = methodBody(null, { showScore: false }).map((node) => node.textContent).join(" ");
   assert.match(bare, /Smith \(2003\)/);
   assert.doesNotMatch(bare, /differ/);

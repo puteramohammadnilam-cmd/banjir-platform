@@ -16,7 +16,7 @@ Outputs
 -------
 shah-alam_ffpi.tif: 284370 bytes, SHA-256 7a0be21a6cfda97eefbb6c67030482037e1e1d04a64d8b9464f17c513e3a32b3
 shah-alam_ffpi.png: 57388 bytes, SHA-256 a6b0d2001691283cfc1356d555ff25e97245fd21ff26f9e90a80cc38c8df02e9
-shah-alam_ffpi.json: 5760 bytes, SHA-256 db8273215ea91d79127ffb426320e5769f2bc9ed48f35e83d8beefb52d0aa9ef
+shah-alam_ffpi.json: 5790 bytes, SHA-256 9777b8375f7378e099bc0796b5e64db63e509000ad3bba36fb148336f26a5d61
 
 Other inputs: app/data/dem/shah-alam_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the
 city outline, shah_alam/mbsa_sections/city_outline.geojson ((c) OpenStreetMap contributors, ODbL).
@@ -50,7 +50,7 @@ osm_drains/drains_shah-alam.json: 1916957 bytes, SHA-256 592fc7dcdcf9ccfc2d078d9
 
 Credit
 ------
-Flash flood potential: ESA WorldCover 2021 and its Sentinel-2 NDVI composite (contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium, CC BY 4.0), SoilGrids 2.0 (ISRIC, CC BY 4.0) and Copernicus DEM GLO-30 ((c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA); method after Smith (2003) as used by Mohd Yassin et al. (2023).
+Flash flood potential: ESA WorldCover 2021 (ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium, CC BY 4.0); ESA WorldCover Sentinel-1 and Sentinel-2 10m Annual Composites accessed on 4 October 2026 from https://registry.opendata.aws/esa-worldcover-vito-composites (CC BY 4.0); SoilGrids 2.0 (ISRIC, CC BY 4.0); Copernicus DEM GLO-30 ((c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA); method after Smith (2003) as used by Mohd Yassin et al. (2023).
 
 Licences: ESA WorldCover map and NDVI composite CC BY 4.0; SoilGrids 2.0 CC BY 4.0; WorldPop CC BY 4.0;
 OpenStreetMap ODbL 1.0; Copernicus DEM GLO-30 under the Copernicus DEM licence (any use, with the credit).
