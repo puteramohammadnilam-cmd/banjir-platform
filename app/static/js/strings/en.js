@@ -15,7 +15,6 @@ export default Object.freeze({
   "tab.overview": "Area overview",
   "tab.business": "My business",
   "tab.cost": "Flood cost",
-  "tab.ask": "Ask AI",
 
   // ---------- common ----------
   "common.retry": "Retry",
@@ -352,8 +351,6 @@ export default Object.freeze({
   "report.footer": "Banjir Check, {date}. Depths are from a global computer model, not an official flood map, not a forecast and not a record of real floods. Flood depth: European Commission JRC, CC BY 4.0. Businesses and roads: © OpenStreetMap contributors, ODbL. For warnings use JPS Public Infobanjir; in an emergency call 999.",
 
   // ---------- Ask AI: index.html ----------
-  "ask.kicker": "Ask AI",
-  "ask.about": "Ask about",
   "ask.lead": "Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.",
   "ask.conversation": "Conversation",
   "ask.question": "Your question",
@@ -387,6 +384,13 @@ export default Object.freeze({
   "ask.chipPointLoss": "Roughly how much could a flood cost here?",
   "ask.chipPointDepth": "How deep would the water be here in a 100 year flood?",
   "ask.chipPointAreaDry": "Which businesses in this area stay dry in a 100 year flood?",
+
+  // ---------- floating chat: index.html, main.js ----------
+  "chat.open": "Ask AI",
+  "chat.title": "Ask AI",
+  "chat.about": "About {place}",
+  "chat.close": "Close",
+
   "voice.speak": "Speak",
   "voice.stop": "Stop",
   "voice.listening": "Listening to your question…",

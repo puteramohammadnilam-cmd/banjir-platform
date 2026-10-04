@@ -172,12 +172,13 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isRea
 }
 
 /** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
- *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onMovePin() puts the pin of a point back in
+ *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onAsk(button) opens the floating chat (the button is
+ *  where focus returns to); onMovePin() puts the pin of a point back in
  *  the map's hands. With no place picked the tab shows the empty state (pick.js), with onFind and onCheckPoint behind
  *  its buttons. isReady and hasMaps are false when the build has no Gemini key or no Google Maps key: the photo button
  *  is then off, and the Ask AI shortcut says what it can read. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
  *  not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
+export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onAsk = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": t("business.riskLabel") });
@@ -224,7 +225,7 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
         sideFacts(shown, { area, goto, onPhoto, isReady }),
         h("div", { class: "next" },
           nextStep(t("business.nextCost"), t("business.nextCostNote"), () => goto("cost"), true),
-          nextStep(t("business.nextAsk"), askNote(isReady, hasMaps), () => goto("ask"))));
+          nextStep(t("business.nextAsk"), askNote(isReady, hasMaps), (event) => onAsk(event.currentTarget))));
     },
   };
 }

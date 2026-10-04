@@ -8,7 +8,7 @@
 import { SCENARIOS } from "./dom.js";
 import { LANGS } from "./i18n.js";
 
-export const TABS = ["overview", "business", "cost", "ask"];
+export const TABS = ["overview", "business", "cost"];
 const BUSINESS_ID = /^(?:node|way|relation)-[0-9]{1,19}$/;
 const POINT_ID = /^pt:(-?[0-9]{1,2}\.[0-9]{5}),(-?[0-9]{1,3}\.[0-9]{5})$/;
 const POINT_PREFIX = "pt:";
@@ -95,8 +95,9 @@ export function overlapsView(view, south, west, { px, py }) {
 const given = (value) => value || null;   // an empty parameter counts as none
 const claimsPoint = (value) => typeof value === "string" && value.startsWith(POINT_PREFIX);   // as places.is_point_id
 
-/** What a link asks for: {area, place, tab, rp, lang, pointInQuery}; area, place, tab, rp and lang are null when not
- *  there. tab, rp and lang are null unless valid. area and place are passed on as given, for the page to check against what this
+/** What a link asks for: {area, place, tab, rp, lang, chat, pointInQuery}; area, place, tab, rp and lang are null when not
+ *  there. tab, rp and lang are null unless valid. chat is true for ?tab=ask, the old Ask AI tab, which is now the floating
+ *  chat: it opens over the page's own tab. area and place are passed on as given, for the page to check against what this
  *  build holds. The place is the fragment's (where points go), else ?place=, else ?shop= from links made before
  *  there were points. A point is read only from the fragment: pointInQuery says the query named one (or anything
  *  starting "pt:"), which is never used, so the page can take it out of its address before it sends any request. */
@@ -111,6 +112,7 @@ export function readUrl({ search = "", hash = "" } = {}) {
     area: given(query.get("area")),
     place: given(fragment.get("place")) ?? given(named.find((value) => value && !claimsPoint(value))),
     tab: TABS.includes(tab) ? tab : null,
+    chat: tab === "ask",
     rp: SCENARIOS.includes(rp) ? rp : null,
     lang: LANGS.includes(lang) ? lang : null,
     pointInQuery: named.some(claimsPoint),

@@ -226,7 +226,7 @@ test("an answer that comes after Cancel is dropped, and so is one that comes aft
   serve(() => later.promise);
   await aim(page);
   page.check.click();
-  page.pin.render({ tab: "ask", place: { id: "node-1", is_point: false } });
+  page.pin.render({ tab: "business", place: { id: "node-1", is_point: false } });
   later.resolve(covering("/api/point", { lat: 3.025, lon: 101.5325 }));
   await flush();
   assert.deepEqual(page.checked, []);

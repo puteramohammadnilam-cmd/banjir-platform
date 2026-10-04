@@ -30,6 +30,7 @@
   <link rel="modulepreload" href="js/point.js">
   <link rel="modulepreload" href="js/card.js">
   <link rel="modulepreload" href="js/chat.js">
+  <link rel="modulepreload" href="js/chat-widget.js">
   <link rel="modulepreload" href="js/cost.js">
   <link rel="modulepreload" href="js/pin-words.js">
   <link rel="modulepreload" href="js/pin-panel.js">
@@ -55,6 +56,7 @@
     <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15.5a4 4 0 0 1 .4-8 5.5 5.5 0 0 1 10.3 1.4A3.4 3.4 0 0 1 17.5 15.5z"/><path d="m8.5 18.5-1 2M12.5 18.5l-1 2M16.5 18.5l-1 2"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
   </svg>
 
@@ -81,7 +83,6 @@
     <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span data-i18n="tab.overview">Area overview</span></button>
     <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span data-i18n="tab.business">My business</span></button>
     <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span data-i18n="tab.cost">Flood cost</span></button>
-    <button type="button" role="tab" id="tab-ask" aria-controls="panel-ask" data-tab="ask"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span data-i18n="tab.ask">Ask AI</span></button>
   </nav>
 
   <main>
@@ -146,37 +147,6 @@
     <section class="panel" id="panel-business" role="tabpanel" aria-labelledby="tab-business" tabindex="-1" hidden></section>
 
     <section class="panel" id="panel-cost" role="tabpanel" aria-labelledby="tab-cost" tabindex="-1" hidden></section>
-
-    <section class="panel" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" tabindex="-1" hidden>
-      <header class="view-head">
-        <p class="kicker" data-i18n="ask.kicker">Ask AI</p>
-        <h1><span data-i18n="ask.about">Ask about</span> <span id="ask-business"></span></h1>
-        <p class="muted" id="ask-lead" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
-      </header>
-      <div class="ask-grid">
-        <section class="surface chat" aria-label="Conversation" data-i18n-attr="aria-label:ask.conversation">
-          <p class="alert alert-inline alert-info" id="ai-status" hidden></p>
-          <ol class="messages" id="messages" aria-live="polite"></ol>
-          <form id="ask-form" class="ask-form" autocomplete="off">
-            <label class="visually-hidden" for="question" data-i18n="ask.question">Your question</label>
-            <input id="question" class="field" name="question" type="text" maxlength="500" required data-i18n-attr="placeholder:ask.placeholderShop" placeholder="Ask anything about flooding at this shop">
-            <button type="submit" class="btn btn-primary" data-i18n="ask.send">Ask</button>
-          </form>
-        </section>
-        <aside class="ask-side">
-          <section class="surface">
-            <h2 class="small-heading" data-i18n="ask.try">Try asking</h2>
-            <div class="chips" id="chips"></div>
-          </section>
-          <section class="surface">
-            <h2 class="small-heading" data-i18n="ask.news">Flood news</h2>
-            <p class="muted small" data-i18n="ask.newsLead">Gemini searches Google for recent news and lists its sources.</p>
-            <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span data-i18n="ask.newsButton">Latest flood news</span></button>
-          </section>
-          <p class="fineprint"><span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
-        </aside>
-      </div>
-    </section>
   </main>
 
   <footer class="about" id="about">
@@ -190,6 +160,43 @@
       <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
     </details>
   </footer>
+
+  <button type="button" class="chat-fab" id="chat-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-dialog" hidden>
+    <span class="chat-fab-mark"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg></span>
+    <span data-i18n="chat.open">Ask AI</span>
+  </button>
+
+  <dialog class="chat-dialog" id="chat-dialog" tabindex="-1" aria-labelledby="chat-title">
+    <header class="chat-head">
+      <div>
+        <h2 id="chat-title" data-i18n="chat.title">Ask AI</h2>
+        <p class="chat-about" id="chat-about"></p>
+      </div>
+      <form method="dialog">
+        <button class="chat-close" id="chat-close" data-i18n-attr="aria-label:chat.close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </form>
+    </header>
+    <section class="chat-body" aria-label="Conversation" data-i18n-attr="aria-label:ask.conversation">
+      <p class="fineprint chat-lead" id="ask-lead" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
+      <p class="alert alert-inline alert-info" id="ai-status" hidden></p>
+      <ol class="messages" id="messages" aria-live="polite"></ol>
+      <div class="chat-try">
+        <h3 class="small-heading" data-i18n="ask.try">Try asking</h3>
+        <div class="chips" id="chips"></div>
+      </div>
+      <form id="ask-form" class="ask-form" autocomplete="off">
+        <label class="visually-hidden" for="question" data-i18n="ask.question">Your question</label>
+        <input id="question" class="field" name="question" type="text" maxlength="500" required data-i18n-attr="placeholder:ask.placeholderShop" placeholder="Ask anything about flooding at this shop">
+        <button type="submit" class="btn btn-primary" data-i18n="ask.send">Ask</button>
+      </form>
+      <details class="chat-news">
+        <summary data-i18n="ask.news">Flood news</summary>
+        <p class="muted small" data-i18n="ask.newsLead">Gemini searches Google for recent news and lists its sources.</p>
+        <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span data-i18n="ask.newsButton">Latest flood news</span></button>
+      </details>
+      <p class="fineprint chat-urgent"><span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
+    </section>
+  </dialog>
 
   <script src="vendor/leaflet.js"></script>
   <script type="module" src="js/main.js"></script>

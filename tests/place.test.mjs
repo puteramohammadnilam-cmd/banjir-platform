@@ -115,7 +115,7 @@ test("the first grid in coverage order that holds the point wins", () => {
   assert.equal(snapToGrid(3.0297599, 101.5364982, [E100, overlap]).grid, "N10_E100");
 });
 
-const NOTHING = { area: null, place: null, tab: null, rp: null, lang: null, pointInQuery: false };
+const NOTHING = { area: null, place: null, tab: null, rp: null, lang: null, chat: false, pointInQuery: false };
 
 test("an old ?shop= link names the place; tab and rp keep their old rules", () => {
   assert.deepEqual(readUrl({ search: "?tab=business&shop=node-13414432501&rp=500", hash: "" }),
@@ -148,7 +148,15 @@ test("a link's tab and rp are kept only when valid; area and place are passed on
   assert.deepEqual(url, { ...NOTHING, area: "Nowhere", place: "<b>" });
   assert.deepEqual(readUrl({ search: "?area=&place=&tab=&rp=", hash: "#place=" }), NOTHING);
   for (const tab of TABS) assert.equal(readUrl({ search: `?tab=${tab}` }).tab, tab);
+  assert.deepEqual(TABS, ["overview", "business", "cost"], "Ask AI is the floating chat, not a tab");
   for (const rp of ["10", "100", "500"]) assert.equal(readUrl({ search: `?rp=${rp}` }).rp, rp);
+});
+
+test("an old ?tab=ask link asks for the chat and no tab; the link written from it never carries it", () => {
+  const url = readUrl({ search: "?area=sri-muda&tab=ask&place=node-1", hash: "" });
+  assert.deepEqual(url, { ...NOTHING, area: "sri-muda", place: "node-1", chat: true });
+  assert.equal(writeUrl({ ...url, tab: url.tab ?? "business" }), "?area=sri-muda&tab=business&place=node-1");
+  assert.equal(readUrl({ search: "?tab=cost", hash: "" }).chat, false);
 });
 
 test("a business goes in the query; a point goes in the fragment and never in the query", () => {
@@ -176,12 +184,12 @@ test("a link round-trips through the browser's URL", () => {
     { area: null, tab: "overview", place: "node-13414432501", rp: "100" },
     { area: "kota-tinggi", tab: "business", place: "node-11075038761", rp: "10" },
     { area: null, tab: "business", place: ANETAS, rp: "100" },
-    { area: "kota-tinggi", tab: "ask", place: "pt:1.72665,103.90000", rp: "500" },
+    { area: "kota-tinggi", tab: "cost", place: "pt:1.72665,103.90000", rp: "500" },
     { area: "kota-tinggi", tab: "cost", place: null, rp: "10" },
   ];
-  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { lang: null, ...view, pointInQuery: false }, JSON.stringify(view));
+  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { lang: null, chat: false, ...view, pointInQuery: false }, JSON.stringify(view));
   const inMalay = { area: "kota-tinggi", tab: "business", place: ANETAS, rp: "100", lang: "ms" };
-  assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, pointInQuery: false });
+  assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, chat: false, pointInQuery: false });
 });
 
 test("the language is kept in a link when set, after the flood size and before a point's fragment", () => {

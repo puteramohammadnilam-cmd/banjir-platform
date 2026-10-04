@@ -2,6 +2,7 @@ import * as api from "./api.js";
 import { createBusiness } from "./card.js";
 import { squaresOf } from "./cells.js";
 import { createChat } from "./chat.js";
+import { createChatWidget } from "./chat-widget.js";
 import { createCost } from "./cost.js";
 import { h } from "./dom.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
@@ -12,6 +13,7 @@ import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, wireFinder } from "./pick.js";
 import { businessPlace, isPoint, parseRef, readUrl, snapToGrid, writeUrl } from "./place.js";
+import * as realVoice from "./voice.js";
 
 const PHOTO_MAX_EDGE = 1280;
 const PHOTO_QUALITY = 0.85;
@@ -362,6 +364,7 @@ function wireWaysIn(app, checkPoint, overview) {
 function createViews(app) {
   const { start, store } = app;
   const pickRp = (rp) => store.update({ rp });
+  const widget = createChatWidget({ button: $("chat-fab"), dialog: $("chat-dialog"), input: $("question"), onClose: realVoice.stopSpeaking });
   // the overview's "Check any point in Malaysia" and the map's own button: aim mode and the location go in pin.js
   const checkPoint = start.status.points_ready ? (opener) => pin.start({ opener }) : null;
   // the same from an empty My business or Flood cost, where the map is first brought on show
@@ -379,7 +382,7 @@ function createViews(app) {
   const business = createBusiness($("panel-business"), {
     area: start.area, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
-    onMovePin: () => movePin(app, pin), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
+    onMovePin: () => movePin(app, pin), onAsk: (opener) => widget.open(opener), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
   });
@@ -394,11 +397,12 @@ function createViews(app) {
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
     isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
+    voice: { ...realVoice, speak: (text, language) => widget.isOpen && realVoice.speak(text, language) },   // a late answer is not read to a closed chat
   });
-  return { overview, business, cost, chat, showTab, pin, plan, compare };
+  return { overview, business, cost, chat, widget, showTab, pin, plan, compare };
 }
 
-/** What the Ask AI heading asks about: the place, or the area while none is picked. */
+/** What the chat's "About" line names: the place, or the area while none is picked. */
 const askingAbout = (app, place) => (!place ? app.start.area.name : place.is_point ? t("ask.thisPoint") : place.name);
 
 /** The flood plan and the compare card are about a place: with none picked they are off. */
@@ -422,7 +426,7 @@ function render(app, views, state, previous) {
     state.stocks[state.placeKey], state.rp);
   renderExtras(app, views, state, place);
   views.chat.render(place);   // the chips, the question box and the flood news that fit the place
-  $("ask-business").textContent = askingAbout(app, place);
+  $("chat-about").textContent = t("chat.about", { place: askingAbout(app, place) });
   views.pin.render({ tab: state.tab, place, squares: state.squares[state.placeKey] });   // ends aim mode off the Area overview; puts a point's pin and its squares on the map
   if (previous && previous.tab !== state.tab) {
     if (state.tab === "overview") views.overview.map.refresh();   // the map was measured while its tab was hidden
@@ -437,7 +441,7 @@ function showAreaName(area) {
   $("area-name").hidden = false;
 }
 
-function startApp(start, initial) {
+function startApp(start, initial, url) {
   const app = { start, byId: new Map(start.premises.map((premise) => [premise.id, premise])), store: createStore(initial) };
   showAreaName(start.area);
   const views = createViews(app);
@@ -447,7 +451,8 @@ function startApp(start, initial) {
     $("ai-status").hidden = false;
   }
   if (!start.status.maps_ready) $("ask-lead").textContent = t("ask.leadNoMaps");   // no Weather or Maps to read
-  render(app, views, initial, null);
+  render(app, views, initial, null);   // also takes ?tab=ask out of the address
+  if (url.chat) views.widget.open();   // the old Ask AI tab's link: the page's own tab, with the chat over it
   loadListing(app, initial.placeKey);
   loadRain(app);
   const follow = linkFollower(app);
@@ -478,7 +483,7 @@ async function main() {
     if (url.pointInQuery) history.replaceState(null, "", writeUrl(url));   // before any request can send it as Referer
     const start = await loadStart(url);
     const { linked, note, isFailed } = await openLink(url, start);
-    const follow = startApp(start, initialState(url, start, linked));
+    const follow = startApp(start, initialState(url, start, linked), url);
     showNote(note, isFailed ? () => follow(url.place) : null);
   } catch (error) {
     showStartError(error);

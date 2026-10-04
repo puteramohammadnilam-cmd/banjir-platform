@@ -74,7 +74,7 @@ Place names live only in `area.json`. The backend and the page scripts carry non
 
 1. Move the map until the cross sits on your premises, or choose "Use my location". The page explains first, then the browser asks.
 2. The page snaps the spot to the 90 m model square it falls in and sends the square's centre to `POST /api/point`. The server snaps it again.
-3. A covered point gives its depths, a square outline, and the wet squares around it. The business, cost and chat tabs then work for the point.
+3. A covered point gives its depths, a square outline, and the wet squares around it. The business and cost tabs and the chat then work for the point.
 
 The result is one 90 m square, not a building. Several shops can share a square, and the model knows no floor heights.
 
@@ -193,7 +193,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/googlemaps.py` | Google Weather and Places calls, server side only. |
 | `app/costs.py` | The ringgit loss arithmetic. No AI, no I/O. See "How the cost estimate works". |
 | `app/main.py` | Web server: page, data, endpoints, limits, compression and security headers. |
-| `app/static/` | The page, in four tabs: area overview, my business, flood cost, ask AI. Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
+| `app/static/` | The page, in three tabs (area overview, my business, flood cost) with the Ask AI chat as a floating button and dialog on every tab (`chat-widget.js`; `?tab=ask` links open it). Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
 | `app/data/areas/` | Built data for each area. |
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
 | `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds Taman Sri Muda byte for byte. The built data is committed, so you do not need to run it. |
