@@ -4,7 +4,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { TABS, businessPlace, isPoint, parseRef, pointId, readUrl, snapToGrid, writeUrl } from "../app/static/js/place.js";
+import { TABS, businessPlace, isPoint, pageLink, parseRef, pointId, readUrl, snapToGrid, writeUrl } from "../app/static/js/place.js";
+import { initialState } from "../app/static/js/pick.js";
 
 // GET /api/coverage `grids`, as the server sends them for the shipped files.
 const E100 = { name: "N10_E100", x0: 99.97625154437965, y0: 10.00706666666666, px: 0.0008333333356347339, py: 0.0008333333333325754, rows: 11999, cols: 11999 };
@@ -238,4 +239,18 @@ test("a section that is not a plain id is no section, so nothing odd reaches an 
 test("a point in a section keeps its square in the fragment: the query names only the page's own section", () => {
   assert.equal(writeUrl({ section: "seksyen-25", tab: "business", place: ANETAS, rp: "50" }), `?section=seksyen-25&tab=business&rp=50#place=${ANETAS}`);
   assert.equal(writeUrl({ section: null, tab: "business", place: ANETAS }), `?tab=business#place=${ANETAS}`, "the city view: no section at all");
+});
+
+test("a point handed to another section's page leaves the query as any move to that page does: no tab, no place", () => {
+  const toSection = pageLink({ section: "seksyen-25", tab: "overview", place: null, rp: "50" });
+  const withPoint = pageLink({ section: "seksyen-25", tab: "business", place: ANETAS, rp: "50" });
+  assert.equal(toSection, "?section=seksyen-25&rp=50");
+  assert.equal(withPoint, `${toSection}#place=${ANETAS}`, "the point only in the fragment, which the browser never sends");
+  assert.equal(pageLink({ area: "kuantan", tab: "business", place: ANETAS, rp: "20" }), `?area=kuantan&rp=20#place=${ANETAS}`);
+  const url = readUrl(asLocation(withPoint));
+  assert.equal(url.tab, null);
+  const start = { area: { id: "shah-alam" }, premises: [], status: { maps_ready: false } };
+  const point = { id: ANETAS, is_point: true };
+  assert.equal(initialState(url, start, { place: point, squares: null }).tab, "business", "the new page opens My business for the point");
+  assert.equal(initialState(readUrl(asLocation(toSection)), start, null).tab, "overview", "and the overview with none");
 });

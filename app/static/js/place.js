@@ -134,3 +134,9 @@ export function writeUrl({ area = null, section = null, place = null, tab = null
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
   return `?${query.join("&")}${ref?.kind === "point" ? `#place=${ref.id}` : ""}`;
 }
+
+/** The link to another page (another area, or a section of a city: each is its own page) with or without a place on
+ *  show. It has no tab, so a point handed to that page (its id only in the fragment) leaves a query no different from
+ *  any other move to that page: no server log can tell a point was checked. The new page opens My business for a
+ *  linked place and the Area overview otherwise (pick.js initialState). */
+export const pageLink = (view) => writeUrl({ ...view, tab: null });

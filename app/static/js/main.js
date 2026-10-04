@@ -11,7 +11,7 @@ import { createPlanCard } from "./plan.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
-import { isPoint, readUrl, writeUrl } from "./place.js";
+import { isPoint, pageLink, readUrl, writeUrl } from "./place.js";
 import { isCityView, linkedPlace, loadCityIndex, loadStart, missedWords, openLink, sectionOf } from "./start.js";
 import * as realVoice from "./voice.js";
 
@@ -77,14 +77,22 @@ function createStore(initial) {
 /** The selected place: a business of the area, or a point checked on this visit. */
 const placeOf = (app, state) => app.byId.get(state.placeKey) ?? state.points[state.placeKey];
 
-/** The page's own link (place.js writeUrl): the area only when it is not the default, the page's section (sectionId:
+/** The view a link names (place.js writeUrl): the area only when it is not the default, the page's section (sectionId:
  *  another section's, null for the whole city), a point only in the fragment, the language only when it is not
  *  English. A link without one opens in the reader's own remembered choice. Another area's link names no section. */
-const linkFor = (app, state, { sectionId = app.start.section?.id ?? null } = {}) => writeUrl({
+const viewFor = (app, state, { sectionId = app.start.section?.id ?? null } = {}) => ({
   area: state.areaId === app.start.list.default ? null : state.areaId,
   section: state.areaId === app.start.area.id ? sectionId : null,
   place: state.placeKey, tab: state.tab, rp: state.rp, lang: lang === DEFAULT_LANG ? null : lang,
 });
+
+/** The page's own link, tab included. */
+const linkFor = (app, state, options) => writeUrl(viewFor(app, state, options));
+
+/** The link to another area's or section's page (place.js pageLink): no tab, so its query is the same whether or not a
+ *  point goes along in the fragment. That page still asks for its own data (a section's is its own request), as every
+ *  visit to it does. */
+const otherPageLink = (app, state, options) => pageLink(viewFor(app, state, options));
 
 /** Switch tab from a button inside the page, and take keyboard focus to the new tab's heading. */
 function goto(app, tab, change = {}) {
@@ -108,7 +116,7 @@ function select(app, id) {
 function openElsewhere(app, id) {
   const section = sectionOf(app.cityIndex ?? app.start.index, id);
   if (!section) return false;
-  location.assign(linkFor(app, { ...app.store.state, tab: "business", placeKey: id }, { sectionId: section }));
+  location.assign(otherPageLink(app, { ...app.store.state, placeKey: id }, { sectionId: section }));
   return true;
 }
 
@@ -137,11 +145,11 @@ function openPoint(app, place, squares) {
 
 /** Another area is another page (location.assign), so nothing of this one carries over but the flood size. */
 function changeArea(app, areaId) {
-  location.assign(linkFor(app, { ...app.store.state, areaId, tab: "overview", placeKey: null }));
+  location.assign(otherPageLink(app, { ...app.store.state, areaId, placeKey: null }));
 }
 
 /** The link to a section's Area overview (null: the whole city's), with the flood size on show. */
-const sectionLink = (app, sectionId) => linkFor(app, { ...app.store.state, tab: "overview", placeKey: null }, { sectionId });
+const sectionLink = (app, sectionId) => otherPageLink(app, { ...app.store.state, placeKey: null }, { sectionId });
 
 /** Another section, or the whole city, is another page too, opened the same way. */
 function changeSection(app, sectionId) {
@@ -394,10 +402,10 @@ function createViews(app) {
     area: start.page, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
     onMovePin: () => movePin(app, pin), onAsk: (opener) => widget.open(opener), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
-    // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
-    onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
-    // a point in another section of this city, or in the whole city's view: that section's page, the point still in the fragment
-    onOpenSection: (sectionId) => location.assign(linkFor(app, store.state, { sectionId })),
+    // a point in another listed area, or in another section of this city (or in the whole city's view): that page, on My
+    // business, the point only in the fragment and the query as any move to that page (otherPageLink)
+    onOpenArea: (areaId) => location.assign(otherPageLink(app, { ...store.state, areaId })),
+    onOpenSection: (sectionId) => location.assign(otherPageLink(app, store.state, { sectionId })),
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
