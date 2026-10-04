@@ -185,3 +185,17 @@ test("with the score hidden the method leaves it out; with no method only the in
   assert.match(bare, /Smith \(2003\)/);
   assert.doesNotMatch(bare, /differ/);
 });
+
+test("the comparison with recorded floods is put in words from its rank correlation", async () => {
+  const { matchKey, comparedNote } = await import("../app/static/js/susceptibility.js");
+  assert.equal(matchKey(0.017), "compare.none");
+  assert.equal(matchKey(-0.183), "compare.none");
+  assert.equal(matchKey(0.3), "compare.weak");
+  assert.equal(matchKey(0.398), "compare.moderate");
+  assert.equal(matchKey(0.64), "compare.strong");
+  const validation = { n: 56, spearman: { flash_vs_history: 0.017, score_vs_history: 0.398 } };
+  assert.equal(comparedNote(validation, "flash", { en: "Section", ms: "Seksyen" }),
+    "Compared with the floods on record, section by section (56 in all): no clear match (rank correlation 0.02).");
+  assert.match(comparedNote(validation, "score", null), /a moderate match \(rank correlation 0\.40\)/);
+  assert.equal(comparedNote({ n: 56 }, "flash"), null, "no figure, no note");
+});

@@ -71,14 +71,29 @@ export function flashFact(place, area = null) {
     h("p", { class: "fineprint" }, t("flash.fineprint")));
 }
 
+// How closely an index's ranking of the sections follows the floods on record (Spearman's rho, index_method.validation).
+const MATCH_WORDS = [[0.2, "compare.none"], [0.35, "compare.weak"], [0.6, "compare.moderate"], [Infinity, "compare.strong"]];
+export const matchKey = (rho) => MATCH_WORDS.find(([below]) => Math.abs(rho) < below)[1];
+
+/** "Compared with the floods on record, section by section (56 in all): a moderate match (rank correlation 0.40)", or
+ *  null when the validation has no such figure. `which` is "flash" or "score". */
+export function comparedNote(validation, which, word = null) {
+  const rho = validation?.spearman?.[`${which}_vs_history`];
+  if (!isNumber(rho) || !isNumber(validation?.n)) return null;
+  const unit = dataWord(word, { lower: true });
+  return t("compare.note", { word: unit, n: validation.n, match: t(matchKey(rho)), rho: rho.toFixed(2) });
+}
+
 const METRIC_WORDS = { depth: "choropleth.metricDepth", flash: "choropleth.metricFlash", score: "choropleth.metricScore" };
 
 /** Under the map: the layer's checkbox (off at first) when `hasLayer`, and a radio per metric key when there are two or
  *  more, the first chosen. onLayer(isOn) and onMetric(key) hear the choices. */
-export function mapControls({ hasLayer, metrics = [], word = null, onLayer = () => {}, onMetric = () => {} }) {
+export function mapControls({ hasLayer, metrics = [], word = null, validation = null, onLayer = () => {}, onMetric = () => {} }) {
+  const compared = hasLayer && comparedNote(validation, "flash", word);   // said where the layer is switched on
   return [
     hasLayer && h("label", { class: "layer-toggle" },
       h("input", { type: "checkbox", onchange: (event) => onLayer(Boolean(event.target.checked)) }), t("flash.toggle")),
+    compared && h("p", { class: "fineprint layer-compared" }, compared),
     metrics.length > 1 && h("fieldset", { class: "metric-choice" },
       h("legend", {}, t("choropleth.metricLegend", { word: dataWord(word, { lower: true }) })),
       metrics.map((key, i) => h("label", {},
@@ -96,8 +111,9 @@ const both = (method, key, showScore) => [...(method?.flash?.[key] ?? []), ...((
 /** "How these are worked out", from the area's `index_method` {flash, score, validation} (null: our words only). */
 export function methodBody(method, { showScore, word = null, credit = null }) {
   return [
-    h("p", {}, t("flash.method")),
-    showScore && h("p", {}, t("score.method", { word: dataWord(word, { lower: true }) }), " ", textOf(method?.validation?.wording ?? "")),
+    h("p", {}, t("flash.method"), " ", comparedNote(method?.validation, "flash", word) ?? ""),
+    showScore && h("p", {}, t("score.method", { word: dataWord(word, { lower: true }) }), " ",
+      comparedNote(method?.validation, "score", word) ?? "", " ", textOf(method?.validation?.wording ?? "")),
     ...listPart(t("flash.deviations"), both(method, "deviations", showScore), (text) => h("li", {}, textOf(text))),
     credit && h("p", { class: "fineprint" }, credit),
     ...listPart(t("flash.sources"), both(method, "citations", showScore), sourceItem),

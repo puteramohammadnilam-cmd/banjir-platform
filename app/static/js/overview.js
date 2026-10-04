@@ -59,7 +59,7 @@ export const indexMetrics = (sections, method) => ["depth",
 
 /** The controls under the map in `slot` (susceptibility.js mapControls) for a `layer` ({url, bounds, credit}, fetched
  *  once ticked) and `metrics`; onChange({isFlashOn, metric}) hears each change. A layer that fails unticks and says so. */
-export function createIndexControls(slot, { map, layer, metrics, word = null, onChange }) {
+export function createIndexControls(slot, { map, layer, metrics, word = null, validation = null, onChange }) {
   let state = { isFlashOn: false, metric: metrics[0] ?? "depth" };
   const alert = h("p", { class: "alert alert-inline layer-error", role: "alert", hidden: true });
   const set = (change) => { state = { ...state, ...change }; onChange(state); };
@@ -72,7 +72,7 @@ export function createIndexControls(slot, { map, layer, metrics, word = null, on
   const picture = layer?.url ? map.addOverlay(({ map: leaflet }) =>
     createPictureLayer(leaflet, layer, { opacity: LAYER_OPACITY, className: "flash-overlay", onError: failed })) : null;
   const nodes = mapControls({
-    hasLayer: Boolean(picture), metrics, word, onMetric: (metric) => set({ metric }),
+    hasLayer: Boolean(picture), metrics, word, validation, onMetric: (metric) => set({ metric }),
     onLayer: (isOn) => { alert.hidden = true; picture.show(isOn); set({ isFlashOn: isOn }); },
   });
   slot.replaceChildren(...(nodes.length ? [...nodes, alert] : []));
@@ -268,7 +268,7 @@ function createIndexParts(map, area, { city, cityParts, hasShelters }) {
   const keyCity = cityParts ? city : null;
   const layer = area.layers?.flash_flood ?? null;
   createIndexControls($("map-controls"), {
-    map, layer, word: city?.word ?? null,
+    map, layer, word: city?.word ?? null, validation: area.index_method?.validation ?? null,
     metrics: cityParts ? indexMetrics(city.sections, area.index_method) : [],
     onChange: (state) => {
       cityParts?.setMetric(state.metric);
