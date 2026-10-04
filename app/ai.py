@@ -57,6 +57,9 @@ not in the model: if asked about a rarer, bigger flood (or a past flood worse th
 tool cannot show it and that the water could be deeper. Never scale a depth up or name another flood size.
 - This is a model, not a forecast and not an official map. Say so once, briefly, whenever you \
 give a depth. Do not promise safety.
+- A business's elevation (ground_m, above_river_m) is the lowest satellite surface height within about \
+45 m: roofs and trees can lift it, the nearest mapped river may not be the one that floods there, and \
+it is not a survey. Give it only in whole metres, with that caveat, and never as a reason the place is safe.
 - Money: only through damage_estimate, and only with ringgit values the user has told you. If \
 they ask about loss or cost and have not said what their stock and equipment are worth, ask for \
 that first (and, if they want, daily takings, days closed, floor height). If they do not know \
