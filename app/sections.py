@@ -1,6 +1,7 @@
 """Areas split into sections: one city in one set of built data, with a page for the city and one for each section.
 
-The built sections.json beside the area's data (app/areas.py reads it) lists the sections in their own order, each as
+The built sections.json beside the area's data (app/areas.py reads it) holds the city's totals and `sections`, the
+sections in their own order (1 to 36, then U1 to U20 for the first city), each as
 
     {"id", "name", "bbox": [west, south, east, north], "zoom", "outline": a simplified GeoJSON Polygon or
      MultiPolygon, "area_km2",
@@ -49,9 +50,12 @@ def has_sections(area: areas.Area) -> bool:
 def listed(area_id: str) -> tuple[Mapping, ...]:
     """The area's sections in their own order, checked; () for an area not split into sections. Raises
     areas.AreaError for a malformed sections.json and KeyError for an unknown area."""
-    found = areas.sections_file(area_id)
-    if found is None:
+    doc = areas.sections_file(area_id)
+    if doc is None:
         return ()
+    found = doc.get("sections") if isinstance(doc, Mapping) else None
+    if not isinstance(found, tuple):
+        raise areas.AreaError(f"{area_id}: sections.json must hold a list of sections.")
     problems = [f"section {index + 1}: {problem}" for index, item in enumerate(found) for problem in _problems(item)]
     ids = [item["id"] for item in found if isinstance(item, Mapping) and "id" in item]
     if len(set(ids)) != len(ids):

@@ -274,9 +274,10 @@ def town(area_id: str) -> dict:
 
 
 @lru_cache(maxsize=MAX_CACHED_AREAS)
-def sections_file(area_id: str) -> tuple | None:
-    """The area's built sections.json as read-only data (app/sections.py checks and uses it), or None for an area that
-    is not split into sections. Raises KeyError for an unknown id."""
+def sections_file(area_id: str) -> Mapping | None:
+    """The area's built sections.json (tools/area_sections.py writes it) as read-only data, or None for an area that
+    is not split into sections: {"sections": [...], and totals}; app/sections.py checks and uses it. Raises KeyError
+    for an unknown id."""
     if get(area_id) is None:
         raise KeyError(f"No area with id {area_id!r}.")
     if not (AREAS_DIR / area_id / SECTIONS_FILE).is_file():
@@ -289,7 +290,10 @@ def section_ids(area_id: str) -> frozenset | None:
     found = sections_file(area_id)
     if found is None:
         return None
-    return frozenset(item.get("id") if isinstance(item, Mapping) else None for item in found)
+    listed = found.get("sections") if isinstance(found, Mapping) else None
+    if not isinstance(listed, tuple):
+        return frozenset()
+    return frozenset(item.get("id") if isinstance(item, Mapping) else None for item in listed)
 
 
 def _read(area_id: str, name: str):

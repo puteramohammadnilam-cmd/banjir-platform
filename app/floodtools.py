@@ -53,6 +53,9 @@ NO_SECTIONS = 'This area is not split into sections. Use "" for the whole area.'
 NO_RECORD = ("No record in the sources checked is not proof that a place has never flooded: say only that no record "
              "was found.")
 NO_HISTORY = "No flood records have been collected for this area. " + NO_RECORD
+RECORDS_AND_MODEL = ("The records include flash floods from heavy rain and blocked drains; the flood model shows only "
+                     "rivers overflowing. So a place can have records where the model shows no water, and the other "
+                     "way round: give both, and do not use one to dismiss the other.")
 RAIN_HOURS = 12
 WEATHER_DECIMALS = 2   # a point outside the listed areas goes to Google Weather rounded to 0.01 degrees, about 1 km
 # What rain_forecast passes on from googlemaps.rain_outlook: the forecast only, never where it was asked for
@@ -317,7 +320,8 @@ def flood_history(section: str = "") -> dict:
     return {"scope": _clean(part["name"]) if part else area.name,
             "years_checked": [record["first_year"], record["last_year"]], "records": len(floods),
             "most_recent": [_flood_for_model(area, flood) for flood in floods[:MAX_FLOODS]],
-            **({"years_with_no_record": record["gaps"]} if "gaps" in record else {}), "note": NO_RECORD}
+            **({"years_with_no_record": record["gaps"]} if "gaps" in record else {}), "note": NO_RECORD,
+            "records_and_model": RECORDS_AND_MODEL}
 
 
 FLOOD_FIELDS = ("when", "what", "depth", "source", "url", "confidence", "account")
