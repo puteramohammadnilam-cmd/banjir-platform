@@ -140,6 +140,18 @@ export default Object.freeze({
   "history.leadEnd": ". Ini bukan rekod yang lengkap.",
   "history.mapNote": "Peta ini menunjukkan banjir sungai yang dijangka sekali dalam 10 tahun atau lebih jarang. Banjir yang lebih kecil dan lebih kerap serta banjir kilat akibat hujan lebat tidak ditunjukkan.{memory}",
   "history.list": "Senarai banjir dan sumbernya",
+  "history.noneFound": "Tiada rekod banjir ditemui untuk {area} dalam sumber yang kami semak ({from}–{to}). Ini tidak bermakna kawasan ini tidak pernah dilanda banjir.",
+  "history.undated": " Bulatan kosong ialah tahun yang ada laporan tetapi tanpa tarikh.",
+  "history.gaps": "Tahun tanpa rekod banjir dalam sumber yang kami semak termasuk {ranges}.",
+  "history.depth": "Kedalaman dilaporkan: {depth}",
+  "history.sources": "Sumber:",
+  "history.typeNews": "Berita",
+  "history.typeOfficial": "Rasmi",
+  "history.typeDataset": "Set data",
+  "history.typePaper": "Kajian",
+  "history.confidenceHigh": "Keyakinan tinggi",
+  "history.confidenceMedium": "Keyakinan sederhana",
+  "history.confidenceLow": "Keyakinan rendah",
 
   // ---------- My business: card.js ----------
   "business.deepNote": "Model ini boleh menjadi sangat dalam di tepi sungai. Laporan banjir sebenar selalunya menunjukkan air yang jauh lebih cetek, jadi baca angka ini sebagai kedalaman dalam model, bukan apa yang patut dijangka.",

@@ -1,0 +1,1834 @@
+{
+ "first_year": 1992,
+ "recent_from": 2019,
+ "last_year": 2026,
+ "checked": "2026-10-04",
+ "section_names": {
+  "seksyen-1": {
+   "en": "Section 1",
+   "ms": "Seksyen 1"
+  },
+  "seksyen-2": {
+   "en": "Section 2",
+   "ms": "Seksyen 2"
+  },
+  "seksyen-3": {
+   "en": "Section 3",
+   "ms": "Seksyen 3"
+  },
+  "seksyen-4": {
+   "en": "Section 4",
+   "ms": "Seksyen 4"
+  },
+  "seksyen-5": {
+   "en": "Section 5",
+   "ms": "Seksyen 5"
+  },
+  "seksyen-6": {
+   "en": "Section 6",
+   "ms": "Seksyen 6"
+  },
+  "seksyen-7": {
+   "en": "Section 7",
+   "ms": "Seksyen 7"
+  },
+  "seksyen-8": {
+   "en": "Section 8",
+   "ms": "Seksyen 8"
+  },
+  "seksyen-9": {
+   "en": "Section 9",
+   "ms": "Seksyen 9"
+  },
+  "seksyen-10": {
+   "en": "Section 10",
+   "ms": "Seksyen 10"
+  },
+  "seksyen-11": {
+   "en": "Section 11",
+   "ms": "Seksyen 11"
+  },
+  "seksyen-12": {
+   "en": "Section 12",
+   "ms": "Seksyen 12"
+  },
+  "seksyen-13": {
+   "en": "Section 13",
+   "ms": "Seksyen 13"
+  },
+  "seksyen-14": {
+   "en": "Section 14",
+   "ms": "Seksyen 14"
+  },
+  "seksyen-15": {
+   "en": "Section 15",
+   "ms": "Seksyen 15"
+  },
+  "seksyen-16": {
+   "en": "Section 16",
+   "ms": "Seksyen 16"
+  },
+  "seksyen-17": {
+   "en": "Section 17",
+   "ms": "Seksyen 17"
+  },
+  "seksyen-18": {
+   "en": "Section 18",
+   "ms": "Seksyen 18"
+  },
+  "seksyen-19": {
+   "en": "Section 19",
+   "ms": "Seksyen 19"
+  },
+  "seksyen-20": {
+   "en": "Section 20",
+   "ms": "Seksyen 20"
+  },
+  "seksyen-21": {
+   "en": "Section 21",
+   "ms": "Seksyen 21"
+  },
+  "seksyen-22": {
+   "en": "Section 22",
+   "ms": "Seksyen 22"
+  },
+  "seksyen-23": {
+   "en": "Section 23",
+   "ms": "Seksyen 23"
+  },
+  "seksyen-24": {
+   "en": "Section 24",
+   "ms": "Seksyen 24"
+  },
+  "seksyen-25": {
+   "en": "Section 25",
+   "ms": "Seksyen 25"
+  },
+  "seksyen-26": {
+   "en": "Section 26",
+   "ms": "Seksyen 26"
+  },
+  "seksyen-27": {
+   "en": "Section 27",
+   "ms": "Seksyen 27"
+  },
+  "seksyen-28": {
+   "en": "Section 28",
+   "ms": "Seksyen 28"
+  },
+  "seksyen-29": {
+   "en": "Section 29",
+   "ms": "Seksyen 29"
+  },
+  "seksyen-30": {
+   "en": "Section 30",
+   "ms": "Seksyen 30"
+  },
+  "seksyen-31": {
+   "en": "Section 31",
+   "ms": "Seksyen 31"
+  },
+  "seksyen-32": {
+   "en": "Section 32",
+   "ms": "Seksyen 32"
+  },
+  "seksyen-33": {
+   "en": "Section 33",
+   "ms": "Seksyen 33"
+  },
+  "seksyen-34": {
+   "en": "Section 34",
+   "ms": "Seksyen 34"
+  },
+  "seksyen-35": {
+   "en": "Section 35",
+   "ms": "Seksyen 35"
+  },
+  "seksyen-36": {
+   "en": "Section 36",
+   "ms": "Seksyen 36"
+  },
+  "seksyen-u1": {
+   "en": "Section U1",
+   "ms": "Seksyen U1"
+  },
+  "seksyen-u2": {
+   "en": "Section U2",
+   "ms": "Seksyen U2"
+  },
+  "seksyen-u3": {
+   "en": "Section U3",
+   "ms": "Seksyen U3"
+  },
+  "seksyen-u4": {
+   "en": "Section U4",
+   "ms": "Seksyen U4"
+  },
+  "seksyen-u5": {
+   "en": "Section U5",
+   "ms": "Seksyen U5"
+  },
+  "seksyen-u6": {
+   "en": "Section U6",
+   "ms": "Seksyen U6"
+  },
+  "seksyen-u7": {
+   "en": "Section U7",
+   "ms": "Seksyen U7"
+  },
+  "seksyen-u8": {
+   "en": "Section U8",
+   "ms": "Seksyen U8"
+  },
+  "seksyen-u9": {
+   "en": "Section U9",
+   "ms": "Seksyen U9"
+  },
+  "seksyen-u10": {
+   "en": "Section U10",
+   "ms": "Seksyen U10"
+  },
+  "seksyen-u11": {
+   "en": "Section U11",
+   "ms": "Seksyen U11"
+  },
+  "seksyen-u12": {
+   "en": "Section U12",
+   "ms": "Seksyen U12"
+  },
+  "seksyen-u13": {
+   "en": "Section U13",
+   "ms": "Seksyen U13"
+  },
+  "seksyen-u14": {
+   "en": "Section U14",
+   "ms": "Seksyen U14"
+  },
+  "seksyen-u15": {
+   "en": "Section U15",
+   "ms": "Seksyen U15"
+  },
+  "seksyen-u16": {
+   "en": "Section U16",
+   "ms": "Seksyen U16"
+  },
+  "seksyen-u17": {
+   "en": "Section U17",
+   "ms": "Seksyen U17"
+  },
+  "seksyen-u18": {
+   "en": "Section U18",
+   "ms": "Seksyen U18"
+  },
+  "seksyen-u19": {
+   "en": "Section U19",
+   "ms": "Seksyen U19"
+  },
+  "seksyen-u20": {
+   "en": "Section U20",
+   "ms": "Seksyen U20"
+  }
+ },
+ "events": [
+  {
+   "id": "sa-1995-04",
+   "date": "1995-04",
+   "when": "April 1995",
+   "place": "Taman Sri Muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "about 1.2 m, as recalled in 2021",
+   "what": "Taman Sri Muda flooded; it was called the worst flood in 10 years at the time, with more than 10,000 people affected. Recalled in a 2021 opinion piece, not a report from 1995.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, opinion, 28 Dec 2021",
+     "url": "https://www.freemalaysiatoday.com/category/opinion/2021/12/28/in-sri-muda-an-age-old-problem-continues-in-surge",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 1995.29
+  },
+  {
+   "id": "sa-1995-12-24",
+   "date": "1995-12-24",
+   "when": "24 Dec 1995",
+   "date_note": "A resident and a 2021 opinion piece give Christmas Eve; a DOSM newsletter gives 24 to 25 Dec.",
+   "place": "Taman Sri Muda (Seksyen 25)",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "a little over 1 m",
+   "what": "Seksyen 25 flooded, water a little over 1 m. Recalled in later reports.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 1 Jan 2022",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2022/01/01/how-taman-sri-muda-drowned-in-other-peoples-water",
+     "type": "news"
+    },
+    {
+     "title": "Malaysia Gazette, 29 Jan 2020 (a resident's account)",
+     "url": "https://malaysiagazette.com/2020/01/29/mb-selangor-tolonglah-selesai-isu-banjir-taman-sri-muda/",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 1995.98
+  },
+  {
+   "id": "sa-2001-account",
+   "date": "2001",
+   "when": "2001",
+   "place": "Taman Sri Muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": null,
+   "what": "One resident recalls her house was flooded for four days.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 14 Apr 2025 (one person's account)",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2025/04/14/taman-sri-muda-folks-to-protest-if-govt-doesnt-act-over-recurring-floods",
+     "type": "news"
+    }
+   ],
+   "confidence": "low",
+   "account": true,
+   "year": 2001.5
+  },
+  {
+   "id": "sa-2006-02-26",
+   "date": "2006-02-26",
+   "when": "26 Feb 2006",
+   "date_note": "The Star printed the report on Monday 27 Feb 2006 and says the flood came on the Sunday; one uncited page gives 2 Mar 2006.",
+   "place": "Taman TTDI Jaya, Kampung Melayu Kebun Bunga, Kampung Melayu Subang, Kampung Baru Hicom, Batu Tiga (Taman Mesra)",
+   "sections": [
+    "seksyen-u2",
+    "seksyen-22",
+    "seksyen-u6",
+    "seksyen-26",
+    "seksyen-u1"
+   ],
+   "depth": "about 1 m in many places, about 2.3 m in a few",
+   "what": "The Sungai Damansara overflowed after heavy rain from 3.30 am. About 3,000 houses flooded and 9,015 people went to 8 relief centres. Taman Sri Muda was not reported flooded.",
+   "sources": [
+    {
+     "title": "The Star, 27 Feb 2006, reprinted by the National House Buyers Association",
+     "url": "https://www.hba.org.my/news/2006/206/residents.htm",
+     "type": "news"
+    },
+    {
+     "title": "Awang Nasrizal Awang Ali, MSc thesis, UiTM, 2011",
+     "url": "https://ir.uitm.edu.my/39477/1/39477.pdf",
+     "type": "paper"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2006.15
+  },
+  {
+   "id": "sa-2006-10",
+   "date": "2006-10",
+   "when": "October 2006",
+   "place": "Taman TTDI Jaya",
+   "sections": [
+    "seksyen-u2"
+   ],
+   "depth": "about knee deep",
+   "what": "Minor floods twice in one festive week, on the eves of Deepavali and Hari Raya.",
+   "sources": [
+    {
+     "title": "The Star (StarMetro), 26 Oct 2006, reprinted by the National House Buyers Association",
+     "url": "https://www.hba.org.my/news/2006/1006/we_are.htm",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2006.79
+  },
+  {
+   "id": "sa-2014-04-24",
+   "date": "2014-04-24",
+   "when": "24 Apr 2014",
+   "place": "Taman Mesra",
+   "sections": [
+    "seksyen-u1"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2014.31
+  },
+  {
+   "id": "sa-2014-08-19",
+   "date": "2014-08-19",
+   "when": "19 Aug 2014",
+   "place": "Taman Sri Muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2014.63
+  },
+  {
+   "id": "sa-2014-09-27",
+   "date": "2014-09-27",
+   "when": "27 Sep 2014",
+   "place": "Kampung Melayu Subang",
+   "sections": [
+    "seksyen-u6"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2014.74
+  },
+  {
+   "id": "sa-2014-12-16",
+   "date": "2014-12-16",
+   "when": "16 Dec 2014",
+   "place": "Kampung Bukit Naga, Kampung Sri Gambut, Bukit Kemuning",
+   "sections": [
+    "seksyen-34",
+    "seksyen-32"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2014.96
+  },
+  {
+   "id": "sa-2014-12-26",
+   "date": "2014-12-26",
+   "when": "26 Dec 2014",
+   "place": "Kampung Kebun Bunga, Jalan Batu 3, Kampung Baru Hicom, Taman Mesra",
+   "sections": [
+    "seksyen-22",
+    "seksyen-26",
+    "seksyen-u1"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2014.98
+  },
+  {
+   "id": "sa-2015-03-31",
+   "date": "2015-03-31",
+   "when": "31 Mar 2015",
+   "place": "Kampung Air Kuning, Padang Jawa",
+   "sections": [
+    "seksyen-16",
+    "seksyen-17"
+   ],
+   "depth": null,
+   "what": "Flood, listed by the state government with 28 victims.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2015.25
+  },
+  {
+   "id": "sa-2015-05-12",
+   "date": "2015-05-12",
+   "when": "12 May 2015",
+   "place": "Seksyen 13",
+   "sections": [
+    "seksyen-13"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2015.36
+  },
+  {
+   "id": "sa-2015-08-11",
+   "date": "2015-08-11",
+   "when": "11 Aug 2015",
+   "place": "Kampung Melayu Subang",
+   "sections": [
+    "seksyen-u6"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2015.61
+  },
+  {
+   "id": "sa-2015-08-16",
+   "date": "2015-08-16",
+   "when": "16 Aug 2015",
+   "place": "Kampung Melayu Subang",
+   "sections": [
+    "seksyen-u6"
+   ],
+   "depth": null,
+   "what": "Flash flood again, five days after the last one, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2015.62
+  },
+  {
+   "id": "sa-2015-10-07",
+   "date": "2015-10-07",
+   "when": "7 Oct 2015",
+   "place": "Kampung Padang Jawa",
+   "sections": [
+    "seksyen-16",
+    "seksyen-17"
+   ],
+   "depth": null,
+   "what": "Flash flood, listed by the state government.",
+   "sources": [
+    {
+     "title": "Selangor State Assembly, written answer 262 (2015), archived copy",
+     "url": "https://web.archive.org/web/2025/https://dewan.selangor.gov.my/question/kejadian-banjir-di-selangor/",
+     "type": "official"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2015.77
+  },
+  {
+   "id": "sa-2015-11-16",
+   "date": "2015-11-16",
+   "when": "16 Nov 2015",
+   "place": "Seksyen 13, Seksyen 20, Seksyen U8, Batu 3 Komuter station, Bukit Jelutong toll",
+   "sections": [
+    "seksyen-13",
+    "seksyen-20",
+    "seksyen-u8"
+   ],
+   "depth": null,
+   "what": "Flash floods after about two hours of rain from 1 pm. Roads were closed to light vehicles, Komuter tracks at Batu 3 went under water and water entered a hospital in Seksyen 20.",
+   "sources": [
+    {
+     "title": "Malaysiakini, 16 Nov 2015",
+     "url": "https://www.malaysiakini.com/news/319723",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2015.88
+  },
+  {
+   "id": "sa-2015-11-17",
+   "date": "2015-11-17",
+   "when": "17 Nov 2015",
+   "place": "Seksyen 13, Seksyen 9, Seksyen U8, Batu Tiga, the Federal Highway",
+   "sections": [
+    "seksyen-13",
+    "seksyen-9",
+    "seksyen-u8"
+   ],
+   "depth": null,
+   "what": "Flash floods for the second day running; cars stood in muddy water and the Komuter line near Batu Tiga stopped.",
+   "sources": [
+    {
+     "title": "Malaysiakini, 17 Nov 2015",
+     "url": "https://www.malaysiakini.com/news/319905",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2015.88
+  },
+  {
+   "id": "sa-2019-10-17",
+   "date": "2019-10-17",
+   "date_end": "2019-10-18",
+   "when": "17 to 18 Oct 2019",
+   "place": "Taman Seri Muda (Seksyen 25), Taman Desa Kemuning (Seksyen 34)",
+   "sections": [
+    "seksyen-25",
+    "seksyen-34"
+   ],
+   "depth": null,
+   "what": "Over 150 mm of rain overnight. Homes and shops flooded and a school closed. The Sungai Klang stood above its bund, so a drain gate stayed shut and water was pumped out of the pond.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 18 Oct 2019",
+     "url": "https://www.sinarharian.com.my/article/52725/EDISI/Selangor-KL/Hujan-lebat-sampah-punca-banjir-di-Taman-Seri-Muda",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2019.79
+  },
+  {
+   "id": "sa-2020-01-29",
+   "date": "2020-01-29",
+   "when": "29 Jan 2020",
+   "place": "Taman Sri Muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": null,
+   "what": "Flash flood; roads under water. A resident said floods had become more frequent since the year before.",
+   "sources": [
+    {
+     "title": "Malaysia Gazette, 29 Jan 2020",
+     "url": "https://malaysiagazette.com/2020/01/29/mb-selangor-tolonglah-selesai-isu-banjir-taman-sri-muda/",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2020.08
+  },
+  {
+   "id": "ds-2021-05-18-seksyen-13",
+   "date": "2021-05-18",
+   "when": "18 May 2021",
+   "year": 2021.38,
+   "place": "Seksyen 13 Shah Alam",
+   "sections": [
+    "seksyen-13"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2021-05-18-seksyen-32",
+   "date": "2021-05-18",
+   "when": "18 May 2021",
+   "year": 2021.38,
+   "place": "Taman Bukit Kemuning",
+   "sections": [
+    "seksyen-32"
+   ],
+   "depth": "0.1 to 0.5 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2021-05-26-seksyen-30",
+   "date": "2021-05-26",
+   "when": "26 May 2021",
+   "year": 2021.4,
+   "place": "Kg Jalan Kebun dan Jalan Kebun tambahan",
+   "sections": [
+    "seksyen-30"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2021-06-27-seksyen-u3",
+   "date": "2021-06-27",
+   "when": "27 Jun 2021",
+   "year": 2021.49,
+   "place": "Kampung Melayu Subang",
+   "sections": [
+    "seksyen-u3"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2021-undated-seksyen-13",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Sekitar Seksyen 13, Taman Mesra, Laluan Motosikal Federal Highway, Shah Alam",
+   "sections": [
+    "seksyen-13"
+   ],
+   "depth": "0.3 to 1 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-16",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Kg Padang Jawa, Shah Alam; Kg. Padang Jawa, Shah Alam",
+   "sections": [
+    "seksyen-16"
+   ],
+   "depth": "0.1 to 0.6 m in the reports",
+   "what": "2 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-17",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Mat Raji, Kg Padang Jawa, Shah Alam",
+   "sections": [
+    "seksyen-17"
+   ],
+   "depth": "0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-22",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Seksyen 22, Shah Alam; Kg. Kebun Bunga",
+   "sections": [
+    "seksyen-22"
+   ],
+   "depth": "0.1 to 1 m in the reports",
+   "what": "3 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-25",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Taman Sri Muda, Klang; Sri muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "0.1 to 1 m in the reports",
+   "what": "2 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-26",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Kampung Baru Hicom; Kg.Baru Hicom, Sek. 26, Shah Alam; Kg. Baru Hicom; and 1 more",
+   "sections": [
+    "seksyen-26"
+   ],
+   "depth": "0.1 to 0.9 m in the reports",
+   "what": "4 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-30",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Tanjung Sauh 30/153; Taman Bunga Raya Seksyen30",
+   "sections": [
+    "seksyen-30"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "2 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-31",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Kampung Bukit Lanchong",
+   "sections": [
+    "seksyen-31"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-32",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Bukit Rimau; Jalan Kebun Barat dan Jalan Ikhsan Kg Jalan Kebun; Taman Bukit Kemuning; and 2 more",
+   "sections": [
+    "seksyen-32"
+   ],
+   "depth": "0.1 to 0.5 m in the reports",
+   "what": "5 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-35",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Kemuning Damai 32/151, Batu 7 batu 8 Jalan Bukit Kemuning, Taman Desa Kemuning",
+   "sections": [
+    "seksyen-35"
+   ],
+   "depth": "0.1 to 0.6 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-36",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Kg Sungai kandis",
+   "sections": [
+    "seksyen-36"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-4",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Seksyen 4 Shah Alam",
+   "sections": [
+    "seksyen-4"
+   ],
+   "depth": "0.1 to 0.6 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-7",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Taman Intan, Bukit Rajah dan sekitarnya; Jalan Meru, Dan Kawasan Bandar Baru Bukit Raja",
+   "sections": [
+    "seksyen-7"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "2 reports in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-u14",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Hamzah dan Jalan Paip, Kampung Budiman",
+   "sections": [
+    "seksyen-u14"
+   ],
+   "depth": "0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-u20",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan 2/1 & Jalan 2/2 Bandar Baru Sungai Buloh",
+   "sections": [
+    "seksyen-u20"
+   ],
+   "depth": "0.5 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2021-undated-seksyen-u3",
+   "date": "2021",
+   "when": "2021, day not given",
+   "year": 2021.5,
+   "place": "Jalan Resak, Jalan Merbau",
+   "sections": [
+    "seksyen-u3"
+   ],
+   "depth": "0.3 m in the reports",
+   "what": "1 report in a public 2021 dataset.",
+   "sources": [
+    {
+     "title": "Public 2021 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=b34cd86cdeb7487d82cb9c6810860797",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "sa-2021-09-26",
+   "date": "2021-09-26",
+   "when": "26 Sep 2021",
+   "place": "Seksyen 4, 9, 10, 13 (around the stadium), Seksyen 25 (Taman Sri Muda)",
+   "sections": [
+    "seksyen-4",
+    "seksyen-9",
+    "seksyen-10",
+    "seksyen-13",
+    "seksyen-25"
+   ],
+   "depth": "1.2 m at a few places around Seksyen 13",
+   "what": "About three hours of heavy rain in the afternoon (148 mm in 5 hours, the council said) and the Sungai Damansara overflowed. The water went down by 9 pm.",
+   "sources": [
+    {
+     "title": "The Star, 27 Sep 2021",
+     "url": "https://www.thestar.com.my/metro/metro-news/2021/09/27/downpour-in-shah-alam-causes-flash-floods-in-several-areas",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2021.74
+  },
+  {
+   "id": "sa-2021-12-18",
+   "date": "2021-12-18",
+   "date_end": "2021-12-20",
+   "when": "18 to 20 Dec 2021",
+   "date_note": "Rain from 17 Dec; water stood for days at Taman Sri Muda.",
+   "place": "Taman Sri Muda; Batu Tiga and much of the city",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "as deep as 4 m in places at Taman Sri Muda; roof level at Batu Tiga",
+   "what": "The big flood. The banks of the Sungai Klang and Sungai Damansara broke where they meet. People were trapped for days at Taman Sri Muda and six were found drowned there by 20 Dec.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 1 Jan 2022",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2022/01/01/how-taman-sri-muda-drowned-in-other-peoples-water",
+     "type": "news"
+    },
+    {
+     "title": "Sinar Harian, 18 Dec 2021",
+     "url": "https://www.sinarharian.com.my/article/178621/BERITA/Semasa/Pertembungan-dua-sungai-punca-banjir-teruk-di-Batu-Tiga",
+     "type": "news"
+    },
+    {
+     "title": "The Vibes, 20 Dec 2021",
+     "url": "https://www.thevibes.com/articles/news/50101/floods-six-individuals-found-drowned-in-taman-sri-muda",
+     "type": "news"
+    },
+    {
+     "title": "Malaysiakini, 19 Dec 2021",
+     "url": "https://www.malaysiakini.com/news/603751",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2021.96
+  },
+  {
+   "id": "sa-2022-01-24",
+   "date": "2022-01-24",
+   "when": "24 Jan 2022",
+   "place": "Taman Sri Muda (Jalan Tokoh 25/28)",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "ankle deep to over 0.3 m in several streets",
+   "what": "Flash flood after rain from about 3 pm; it went down in about an hour.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 24 Jan 2022",
+     "url": "https://www.freemalaysiatoday.com/category/bahasa/tempatan/2022/01/24/beberapa-kawasan-dinaiki-air-penduduk-taman-sri-muda-bimbang-banjir-berulang/",
+     "type": "news"
+    },
+    {
+     "title": "Sinar Harian, 24 Jan 2022",
+     "url": "https://www.sinarharian.com.my/article/184632/EDISI/Sri-Muda-dilanda-banjir-kilat",
+     "type": "news"
+    },
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2022.06
+  },
+  {
+   "id": "ds-2022-02-12-seksyen-34",
+   "date": "2022-02-12",
+   "when": "12 Feb 2022",
+   "year": 2022.12,
+   "place": "Kampung Bukit Naga seksyen 34, Jalan Batu 6, Jalan Gambus, Jalan Rezab Buang dan Jalan Bukit Naga",
+   "sections": [
+    "seksyen-34"
+   ],
+   "depth": "0.1 to 0.5 m in the reports",
+   "what": "1 report in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2022-03-16-city",
+   "date": "2022-03-16",
+   "when": "16 Mar 2022",
+   "year": 2022.2,
+   "place": "Kampung Melayu Subang (Sg Pelumut dan Sg Pelempas)- Jalan Jati",
+   "sections": [],
+   "depth": "0.3 m in the reports",
+   "what": "1 report in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2022-06-22-seksyen-26",
+   "date": "2022-06-22",
+   "when": "22 Jun 2022",
+   "year": 2022.47,
+   "place": "Kampung Baru Hicom - Jalan Bunga Tanjung 2, 2a dan 3",
+   "sections": [
+    "seksyen-26"
+   ],
+   "depth": "0.2 m in the reports",
+   "what": "1 report in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2022-07-03-city",
+   "date": "2022-07-03",
+   "when": "3 Jul 2022",
+   "year": 2022.5,
+   "place": "KAMPUNG PADANG JAWA; JALAN 2/1 dan JALAN 2/2 BANDAR BARU SUNGAI BULOH",
+   "sections": [],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "2 reports in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "undated": false
+  },
+  {
+   "id": "ds-2022-undated-city",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Jalan Cempaka 2, Kampung Paya Jaras Hilir; TAMAN DESA KEMUNING, JALAN BATU BATA, KLANG; KAWASAN PERINDUSTRIAN SB JAYA; and 10 more",
+   "sections": [],
+   "depth": "0.1 to 0.6 m in the reports",
+   "what": "13 reports in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2022-undated-seksyen-25",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Taman Sri Muda, Jalan Tokoh 25/28; Taman Sri Muda, Jalan Makmur 25/64; Taman Sri Muda (Jalan Makmur 25/64); and 1 more",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "4 reports in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2022-undated-seksyen-26",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Kampung Baru HICOM (Jalan Bunga Tanjung 2A)",
+   "sections": [
+    "seksyen-26"
+   ],
+   "depth": "0.3 m in the reports",
+   "what": "1 report in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2022-undated-seksyen-30",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Kawasan Kampung Jalan Kebun (Jalan bakri, Jalan ehsan, persimpangan Jalan bakri, persimpangan Jalan kebun tambahan ke Jalan Kampung lombong)",
+   "sections": [
+    "seksyen-30"
+   ],
+   "depth": "0.1 to 0.3 m in the reports",
+   "what": "1 report in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2022-undated-seksyen-32",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Kawasan Kampung Bukit Naga, Jalan Batu 6; Taman Bukit Kemuning; Jalan Anggerik Tania, Perumahan Jalan Sungai Merbau Seksyen 32, Taman Greenvill",
+   "sections": [
+    "seksyen-32"
+   ],
+   "depth": "0.1 to 0.5 m in the reports",
+   "what": "4 reports in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "ds-2022-undated-seksyen-34",
+   "date": "2022",
+   "when": "2022, day not given",
+   "year": 2022.5,
+   "place": "Kampung Bukit Naga Seksyen 34 (Jalan Klinik, Jalan Batu 6 dan Jalan Bukit Naga); Kampung Bukit Naga Seksyen 34, Jalan Batu 6 dan Jalan Bukit Naga, Taman Maznah, Kampung Sungai Kandis , Kampung Telok Menegun, Kawasan Industri Batu 4",
+   "sections": [
+    "seksyen-34"
+   ],
+   "depth": "0.1 to 0.5 m in the reports",
+   "what": "2 reports in a public 2022 dataset.",
+   "sources": [
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "low",
+   "account": false,
+   "undated": true
+  },
+  {
+   "id": "sa-2022-08-20",
+   "date": "2022-08-20",
+   "when": "20 Aug 2022",
+   "place": "Taman Sri Muda",
+   "sections": [
+    "seksyen-25"
+   ],
+   "depth": null,
+   "what": "Heavy rain from 4 pm; streets and some homes flooded. Residents said the water gates opened about an hour and a half after the flooding began.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 20 Aug 2022",
+     "url": "https://www.freemalaysiatoday.com/category/bahasa/tempatan/2022/08/20/taman-sri-muda-dilanda-banjir-kilat-sekali-lagi/",
+     "type": "news"
+    },
+    {
+     "title": "Public 2022 flood point layer by ArcGIS Online user d1anameera (JPS-style records, not an official publication)",
+     "url": "https://www.arcgis.com/home/item.html?id=e1f9a54ed57d4782a43c89057260d6a8",
+     "type": "dataset"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2022.63
+  },
+  {
+   "id": "sa-2022-11-08",
+   "date": "2022-11-08",
+   "when": "8 Nov 2022",
+   "place": "Seksyen 17 (bus terminal), 24, 25, 32, 36; Padang Jawa; Alam Impian; Bukit Jelutong; Bukit Naga; Bukit Kemuning; Bukit Rimau; Taman Sri Muda",
+   "sections": [
+    "seksyen-17",
+    "seksyen-24",
+    "seksyen-25",
+    "seksyen-32",
+    "seksyen-36"
+   ],
+   "depth": null,
+   "what": "Flash floods after two hours of heavy rain from about 4 pm. Pumps were placed at the sluice gates.",
+   "sources": [
+    {
+     "title": "The Vibes, 8 Nov 2022",
+     "url": "https://www.thevibes.com/articles/news/76627/floods-hit-shah-alam-after-two-hour-heavy-rain",
+     "type": "news"
+    },
+    {
+     "title": "Paul Tan, 8 Nov 2022",
+     "url": "https://paultan.org/2022/11/08/flash-floods-reported-in-several-parts-of-shah-alam-seksyen-17-24-25-padang-jawa-affected/",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2022.85
+  },
+  {
+   "id": "sa-2022-11-10",
+   "date": "2022-11-10",
+   "when": "10 Nov 2022",
+   "place": "Kampung Melayu Subang, Taman Setia Warisan (Seksyen U6)",
+   "sections": [
+    "seksyen-u6"
+   ],
+   "depth": "under 1 m",
+   "what": "Monsoon drains overflowed after rain from 3 pm; about 20 houses at Taman Setia Warisan flooded.",
+   "sources": [
+    {
+     "title": "Malaysiakini, 10 Nov 2022",
+     "url": "https://www.malaysiakini.com/news/643497",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2022.86
+  },
+  {
+   "id": "sa-2022-11-16",
+   "date": "2022-11-16",
+   "date_end": "2022-11-17",
+   "when": "16 to 17 Nov 2022",
+   "place": "Seksyen 13, Seksyen 22, Padang Jawa, i-City, Taman Sri Muda",
+   "sections": [
+    "seksyen-7",
+    "seksyen-13",
+    "seksyen-16",
+    "seksyen-17",
+    "seksyen-22",
+    "seksyen-25"
+   ],
+   "depth": "about 0.3 m at Taman Sri Muda",
+   "what": "Flash floods after rain from 10 pm.",
+   "sources": [
+    {
+     "title": "The Malaysian Insight, 17 Nov 2022",
+     "url": "https://www.themalaysianinsight.com/bahasa/s/412075",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2022.88
+  },
+  {
+   "id": "sa-2023-08-16",
+   "date": "2023-08-16",
+   "when": "16 Aug 2023",
+   "place": "Seksyen 13: Persiaran Sukan, the stadium roundabout, the old MSU road, Perdana apartments",
+   "sections": [
+    "seksyen-13"
+   ],
+   "depth": null,
+   "what": "Flash flood between about 3.40 and 4.37 pm; cars were trapped near shops.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 16 Aug 2023",
+     "url": "https://www.sinarharian.com.my/article/274125/berita/semasa/shah-alam-dilanda-banjir-kilat",
+     "type": "news"
+    },
+    {
+     "title": "MalaysiaNow, 16 Aug 2023",
+     "url": "https://www.malaysianow.com/news/2023/08/16/shah-alam-hit-by-floods-again",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2023.62
+  },
+  {
+   "id": "sa-2023-11-06",
+   "date": "2023-11-06",
+   "when": "6 Nov 2023",
+   "place": "Persiaran Sukan and homes near Laman Seri, Seksyen 13",
+   "sections": [
+    "seksyen-13"
+   ],
+   "depth": null,
+   "what": "Flash flood from about 4.30 pm, gone by about 5.15 pm; the second in Seksyen 13 since August.",
+   "sources": [
+    {
+     "title": "Kosmo, 6 Nov 2023",
+     "url": "https://www.kosmo.com.my/2023/11/06/seksyen-13-dilanda-banjir-kilat-lagi/",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2023.85
+  },
+  {
+   "id": "sa-2023-12-16",
+   "date": "2023-12-16",
+   "when": "16 Dec 2023",
+   "place": "Seksyen 7 and i-City, Seksyen 9, Seksyen 13, Seksyen 16, Seksyen 5, Seksyen 27",
+   "sections": [
+    "seksyen-5",
+    "seksyen-7",
+    "seksyen-9",
+    "seksyen-13",
+    "seksyen-16",
+    "seksyen-27"
+   ],
+   "depth": null,
+   "what": "Roads flooded after evening rain.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 16 Dec 2023",
+     "url": "https://www.sinarharian.com.my/article/640016/berita/semasa/beberapa-kawasan-di-shah-alam-dilanda-banjir",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2023.96
+  },
+  {
+   "id": "sa-2024-06-26",
+   "date": "2024-06-26",
+   "when": "26 Jun 2024",
+   "place": "Jalan Alam Budiman, Setia Alam",
+   "sections": [],
+   "depth": null,
+   "what": "Flash flood at about 6 pm; the road was closed to light vehicles.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 26 Jun 2024",
+     "url": "https://www.sinarharian.com.my/article/672014/edisi/selangor-kl/jalan-alam-budiman---setia-alam-dilanda-banjir-kilat",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2024.48
+  },
+  {
+   "id": "sa-2024-08-20",
+   "date": "2024-08-20",
+   "when": "20 Aug 2024",
+   "place": "SK Padang Jawa (a school)",
+   "sections": [
+    "seksyen-16"
+   ],
+   "depth": null,
+   "what": "Flash flood at the school; the MP blamed drains under the Komuter line.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 21 Aug 2024",
+     "url": "https://www.sinarharian.com.my/article/681426/edisi/selangor-kl/mp-shah-alam-salur-peruntukan-atasi-banjir-kilat-sk-padang-jawa",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2024.64
+  },
+  {
+   "id": "sa-2024-09-26",
+   "date": "2024-09-26",
+   "when": "26 Sep 2024",
+   "place": "Jalan Kebun, Sri Muda, Kota Kemuning",
+   "sections": [
+    "seksyen-25",
+    "seksyen-31"
+   ],
+   "depth": "up to 0.6 m",
+   "what": "Flash floods after rain from 2 pm; a care home for the elderly flooded. No one was moved out.",
+   "sources": [
+    {
+     "title": "Free Malaysia Today, 26 Sep 2024",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2024/09/26/flash-floods-hit-jalan-kebun-sri-muda-and-kota-kemuning-after-continuous-rain",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2024.74
+  },
+  {
+   "id": "sa-2024-10-03",
+   "date": "2024-10-03",
+   "when": "3 Oct 2024",
+   "place": "Paya Jaras (about 70 houses) and Kampung Melayu Subang",
+   "sections": [
+    "seksyen-u19",
+    "seksyen-u6"
+   ],
+   "depth": null,
+   "what": "Flash floods; about 70 houses affected at Paya Jaras.",
+   "sources": [
+    {
+     "title": "The Star, 3 Oct 2024",
+     "url": "https://www.thestar.com.my/news/nation/2024/10/03/selangor-flash-floods-70-houses-affected-in-shah-alam-kampung-melayu-subang-inundated",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2024.76
+  },
+  {
+   "id": "sa-2025-04-11",
+   "date": "2025-04-11",
+   "when": "11 Apr 2025",
+   "place": "Taman Sri Muda, Seksyen 23 (Persiaran Jubli Perak, Persiaran Perusahaan), Seksyen 19, Padang Jawa, Bukit Kemuning, Bukit Lanchong",
+   "sections": [
+    "seksyen-16",
+    "seksyen-17",
+    "seksyen-19",
+    "seksyen-23",
+    "seksyen-25"
+   ],
+   "depth": "knee to waist deep in many homes at Taman Sri Muda",
+   "what": "Flash floods from early morning after rain from midnight. About 700 homes at Taman Sri Muda were affected; 20 houses at Kampung Padang Jawa.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 11 Apr 2025",
+     "url": "https://www.sinarharian.com.my/article/722220/berita/semasa/shah-alam-dilanda-banjir-kilat",
+     "type": "news"
+    },
+    {
+     "title": "Free Malaysia Today, 11 Apr 2025",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2025/04/11/5-districts-in-selangor-hit-by-flash-floods",
+     "type": "news"
+    },
+    {
+     "title": "Free Malaysia Today, 14 Apr 2025",
+     "url": "https://www.freemalaysiatoday.com/category/nation/2025/04/14/taman-sri-muda-folks-to-protest-if-govt-doesnt-act-over-recurring-floods",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2025.28
+  },
+  {
+   "id": "sa-2025-06-20",
+   "date": "2025-06-20",
+   "when": "20 Jun 2025",
+   "place": "Jalan Kebun, Kota Kemuning, Taman Bukit Kemuning",
+   "sections": [
+    "seksyen-31",
+    "seksyen-32"
+   ],
+   "depth": "about 1 m at the worst house",
+   "what": "Flash floods after rain from 6 am; an elderly woman was trapped at home.",
+   "sources": [
+    {
+     "title": "The Star, 20 Jun 2025",
+     "url": "https://www.thestar.com.my/news/nation/2025/06/20/flash-floods-hit-jalan-kebun-and-kota-kemuning-after-heavy-rain",
+     "type": "news"
+    },
+    {
+     "title": "Sinar Harian, 20 Jun 2025",
+     "url": "https://www.sinarharian.com.my/article/734662/edisi/selangor-kl/jalan-kebun-kota-kemuning-dilanda-banjir-kilat",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2025.47
+  },
+  {
+   "id": "sa-2025-07-12",
+   "date": "2025-07-12",
+   "when": "12 Jul 2025",
+   "place": "Jalan Bukit Kemuning and Taman Bukit Kemuning, Bukit Naga",
+   "sections": [
+    "seksyen-32"
+   ],
+   "depth": null,
+   "what": "Flash flood again; the state assemblyman said one or two hours of rain can cause serious flooding there.",
+   "sources": [
+    {
+     "title": "Sinar Harian, 12 Jul 2025",
+     "url": "https://www.sinarharian.com.my/article/738299/edisi/selangor-kl/bukit-kemuning-dilanda-banjir-kilat-lagi",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2025.53
+  },
+  {
+   "id": "sa-2025-11-23",
+   "date": "2025-11-23",
+   "date_end": "2025-11-24",
+   "when": "23 to 24 Nov 2025",
+   "place": "Seksyen 19, Seksyen 24 towards 23, Persiaran Jubli Perak, Persiaran Perusahaan, Seksyen 35, Seksyen U14, Taman Seri Muda, Padang Jawa (Seksyen 16)",
+   "sections": [
+    "seksyen-16",
+    "seksyen-19",
+    "seksyen-23",
+    "seksyen-24",
+    "seksyen-25",
+    "seksyen-35",
+    "seksyen-u14"
+   ],
+   "depth": null,
+   "what": "Flash floods from the evening of 23 Nov; four main roads were closed.",
+   "sources": [
+    {
+     "title": "The Star, 24 Nov 2025",
+     "url": "https://www.thestar.com.my/news/nation/2025/11/24/major-road-closures-in-shah-alam-following-flash-floods",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2025.89
+  },
+  {
+   "id": "sa-2026-04-20",
+   "date": "2026-04-20",
+   "when": "20 Apr 2026",
+   "place": "Seksyen 13 business centre (Jalan Opera, Jalan Lembing, Jalan Renang) and Taman TTDI Jaya",
+   "sections": [
+    "seksyen-13",
+    "seksyen-u2"
+   ],
+   "depth": "0.4 m",
+   "what": "Heavy rain in the upper Sungai Damansara at about 6 pm brought a flash flood.",
+   "sources": [
+    {
+     "title": "NADMA, relaying the city council, 21 Apr 2026",
+     "url": "https://www.nadma.gov.my/bi/media-en/news/6399-seksyen-13-taman-ttdi-jaya-dilanda-banjir-kilat",
+     "type": "official"
+    },
+    {
+     "title": "Sinar Harian, 20 Apr 2026",
+     "url": "https://www.sinarharian.com.my/article/776535/edisi/selangor-kl/jir-kilat-beberapa-jalan-sekitar-seksyen-13-dinaiki-air",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2026.3
+  },
+  {
+   "id": "sa-2026-09-30",
+   "date": "2026-09-30",
+   "when": "30 Sep 2026",
+   "place": "Seksyen 7 (near i-City), Desa Alam, Seksyen 16 (Padang Jawa), UiTM car park",
+   "sections": [
+    "seksyen-7",
+    "seksyen-16"
+   ],
+   "depth": null,
+   "what": "Roads flooded in the afternoon and evening.",
+   "sources": [
+    {
+     "title": "Media Selangor, 30 Sep 2026",
+     "url": "https://mediaselangor.com/en/2026/09/398596",
+     "type": "news"
+    },
+    {
+     "title": "Sinar Harian, 30 Sep 2026",
+     "url": "https://www.sinarharian.com.my/article/798498/berita/semasa/banjir-kilat-landa-kawasan-sekitar-shah-alam-klang",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2026.75
+  }
+ ]
+}
