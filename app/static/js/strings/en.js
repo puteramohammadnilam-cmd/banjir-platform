@@ -114,7 +114,6 @@ export default Object.freeze({
   // {word} is the area's own word for a section, from its data (area.json section_word), lower-cased mid-sentence.
   "scope.wholeCity": "Whole city",
   "scope.hintSections": "Pick an area or a {word}, then Open.",
-  "scope.trail": "Where you are",
   "scope.allOf": "All of {city}",
   "city.mapLead": "Each {word} is shaded by the share of its 90 m squares with water in the model. Tap one to open it.",
   "city.mapLabel": "Map of {area}: each {word} shaded by its share of squares with water. The table under the map has the same figures.",

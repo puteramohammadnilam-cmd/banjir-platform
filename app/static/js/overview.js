@@ -79,10 +79,6 @@ const nextSteps = ({ onCheckPoint, onOtherArea }) => [
   onOtherArea && h("button", { type: "button", class: "btn btn-secondary", onclick: () => onOtherArea() }, t("overview.otherArea")),
 ].filter(Boolean);
 
-/** The city's businesses for a filter, by name, each with the text it looks in: name, kind, road and section's name. */
-const cityEntries = (index, names) => [...index].sort(byName)
-  .map((p) => ({ p, text: `${p.name} ${p.kind} ${roadName(p.road.name)} ${names.get(p.section) ?? ""}`.toLowerCase() }));
-
 /** What the list says over its rows: none mapped here, more matches than it shows, or statusText's words. */
 function listStatus({ text, shown, found, isSearch, area, hasRows }) {
   if (!hasRows) return t("city.noneMapped", { area: area.name });
@@ -93,14 +89,15 @@ function listStatus({ text, shown, found, isSearch, area, hasRows }) {
 /** The area's businesses in one list, with its filter box: typing in `filter` filters them by name, type or road, and
  *  showMatches(text) does the same for a search that did not open one business (pick.js), and says how many it found.
  *  With none on show, `next` holds the ways on: onCheckPoint(button) checks the spot on the map (null when this build
- *  cannot check points) and onOtherArea() goes to the area chooser (null with one area listed). On a section's page,
- *  widen(index, sections, cityName) takes in the city's lean index: from then on a filter also shows the matches in the
- *  rest of the city, after this section's own, each with its section (at most CITY_LIST_MAX of them). */
+ *  cannot check points) and onOtherArea() goes to the area chooser (null with one area listed). widen(index, sections,
+ *  cityName) takes in a city's lean index: then a filter also shows the rest of the city's matches, after the list's
+ *  own, each with its section, at most CITY_LIST_MAX (a section's page, once its city's index is in). `hint` is what
+ *  the list says while its filter is empty and it has no rows of its own (the whole city's). */
 export function createDirectory({ list, filter, status, next, head }, premises,
-  { area, onOpen, onCheckPoint = null, onOtherArea = null }) {
+  { area, onOpen, onCheckPoint = null, onOtherArea = null, hint = null }) {
   const rows = directoryRows(premises, onOpen);
-  let city = null;   // the rest of the city, once widened: {entries, names, area}
-  let more = [];     // its rows on show
+  let city = null;   // {entries, names, area}, once widened
+  let more = [];     // the rows of the rest of the city on show
   let selected = null;
   const mark = () => { for (const row of [...rows, ...more]) row.button.setAttribute("aria-current", String(row.id === selected)); };
   list.replaceChildren(...rows.map((row) => row.item));
@@ -114,12 +111,13 @@ export function createDirectory({ list, filter, status, next, head }, premises,
     if (city) list.replaceChildren(...rows.map((row) => row.item), ...more.map((row) => row.item));
     mark();
     const shown = own + more.length;
-    const isCitywide = Boolean(city && needle);   // what was searched, and so what none-found names
-    status.textContent = listStatus({
+    const isCitywide = Boolean(city && needle);   // the city was searched, so none found names it
+    const isHint = Boolean(hint) && !needle;
+    status.textContent = isHint ? hint : listStatus({
       text, shown, found: own + found.length, isSearch, area: isCitywide ? city.area : area, hasRows: rows.length > 0 || isCitywide,
     });
     head.hidden = shown === 0;
-    next.hidden = shown > 0 || next.children.length === 0;
+    next.hidden = shown > 0 || isHint || next.children.length === 0;
   };
   filter.addEventListener("input", () => apply(filter.value, false));
   if (!rows.length) apply("", false);   // a section with no businesses mapped says so at once
@@ -129,39 +127,20 @@ export function createDirectory({ list, filter, status, next, head }, premises,
     widen: (index, sections, cityName) => {
       const here = new Set(premises.map((p) => p.id));
       const names = new Map(sections.map((section) => [section.id, section.name]));
-      city = { entries: cityEntries(index.filter((p) => !here.has(p.id)), names), names, area: { name: cityName } };
+      const entries = index.filter((p) => !here.has(p.id)).sort(byName)
+        .map((p) => ({ p, text: `${p.name} ${p.kind} ${roadName(p.road.name)} ${names.get(p.section) ?? ""}`.toLowerCase() }));
+      city = { entries, names, area: { name: cityName } };
       if (filter.value.trim()) apply(filter.value, false);
     },
   };
 }
 
-/** The whole city's list: the lean `index` of its businesses, each with its section's name. Nothing shows until a name
- *  is typed, then at most CITY_LIST_MAX rows, built as they are needed; otherwise it reads as createDirectory's list. */
-export function createCityDirectory({ list, filter, status, next, head }, index, { area, sections, onOpen, onCheckPoint = null, onOtherArea = null }) {
-  const names = new Map(sections.map((section) => [section.id, section.name]));
-  const entries = cityEntries(index, names);
-  next.replaceChildren(...nextSteps({ onCheckPoint, onOtherArea }));
-  let rows = [];
-  let selected = null;
-  const mark = () => { for (const row of rows) row.button.setAttribute("aria-current", String(row.id === selected)); };
-  const apply = (text, isSearch) => {
-    const needle = text.trim().toLowerCase();
-    const matches = needle ? entries.filter((entry) => entry.text.includes(needle)) : [];
-    rows = matches.slice(0, CITY_LIST_MAX).map(({ p }) => directoryRow(p, onOpen, names.get(p.section)));
-    list.replaceChildren(...rows.map((row) => row.item));
-    mark();
-    status.textContent = needle
-      ? listStatus({ text, shown: rows.length, found: matches.length, isSearch, area, hasRows: true })
-      : t("city.directoryHint", { count: index.length, area: area.name });
-    head.hidden = rows.length === 0;
-    next.hidden = !needle || rows.length > 0 || next.children.length === 0;
-  };
-  filter.addEventListener("input", () => apply(filter.value, false));
-  apply("", false);
-  return {
-    markSelected: (selectedId) => { selected = selectedId; mark(); },
-    showMatches: (text) => { filter.value = text; apply(text, true); },
-  };
+/** The whole city's list: its lean `index`, each business with its section's name. Nothing shows until a name is
+ *  typed, then at most CITY_LIST_MAX rows, built as they are needed. */
+export function createCityDirectory(parts, index, { area, sections, ...ways }) {
+  const directory = createDirectory(parts, [], { area, ...ways, hint: t("city.directoryHint", { count: index.length, area: area.name }) });
+  directory.widen(index, sections, area.name);
+  return directory;
 }
 
 const setNote = (element, text) => { element.textContent = text ?? ""; element.hidden = !text; };

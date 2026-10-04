@@ -115,7 +115,6 @@ export default Object.freeze({
   // {word} ialah perkataan kawasan itu sendiri bagi bahagiannya, daripada datanya (area.json section_word).
   "scope.wholeCity": "Seluruh bandar",
   "scope.hintSections": "Pilih kawasan atau {word}, kemudian tekan Buka.",
-  "scope.trail": "Lokasi anda",
   "scope.allOf": "Seluruh {city}",
   "city.mapLead": "Setiap {word} diwarnakan mengikut bahagian petak 90 m yang dinaiki air dalam model. Ketik untuk membukanya.",
   "city.mapLabel": "Peta {area}: setiap {word} diwarnakan mengikut bahagian petak yang dinaiki air. Jadual di bawah peta memberi angka yang sama.",
