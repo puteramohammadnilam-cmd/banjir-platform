@@ -20,6 +20,14 @@ What the page is sent (GET /api/areas/{id}/data and /api/areas/{id}/sections/{si
 Squares overlapping a box: the rule of the page's place.js overlapsView, so the squares sent with a section are the
 ones the page itself draws for that box; tests/fixtures/overlap_cases.json pins both to the same answers.
 
+Flash flood potential (app/indexes.py) and our section score: the built indexes.json beside sections.json holds, for
+every section, `flash` {mean score, share of its land squares in each class} and `score` {value, class, ratings} (the
+flash and the score are null for a section with no land square, the score alone may be null), the city's own `flash`
+and `score`, the method (`flash`, whose classes and breaks must be those of the flash flood potential files, and `score`
+with its weights, deviations and citations) and `validation`, how the figures compare with the flood record. A section
+is sent `indexes` {flash, score} (no ratings), the area's details `index_method` {flash, score, validation} and `layers`
+{flash_flood} (app/indexes.py layer): null, or left out of a section, where there are no files.
+
 Flood record: an area's own area.json record, as before, else its built history.json (app/history.py for_scope), cut to
 the city or to one section.
 """
@@ -29,13 +37,15 @@ import re
 from collections.abc import Mapping
 from functools import lru_cache
 
-from . import areas, geo, raster
+from . import areas, geo, indexes, raster
 from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
 RP_KEYS = tuple(str(rp) for rp in raster.RETURN_PERIODS)
 SECTION_KEYS = ("id", "name", "bbox", "zoom", "outline", "area_km2", "counts")   # each needs these; others pass on
 INDEX_KEYS = ("id", "name", "kind", "sector", "section")
+SCORE_METHOD_KEYS = ("name", "summary", "weights_used", "weights_total", "classes", "breaks", "break_rule", "citations",
+                     "deviations")
 MAX_CACHED = 128
 WORD = re.compile(r"\w+")
 
@@ -128,6 +138,7 @@ def preload() -> None:
     clashes, stops the server at start-up rather than answering a page with a 500."""
     for area in areas.load_all():
         listed(area.id)
+        index_doc(area.id)
         _check_history(area)
     found = [entry["id"] for area in areas.load_all() for entry in area.aliases]
     clashes = sorted({alias_id for alias_id in found if found.count(alias_id) > 1 or areas.get(alias_id)})
@@ -151,10 +162,97 @@ def _check_history(area: areas.Area) -> None:
         raise areas.AreaError(f"{area.id}: history.json section_names must be the sections.json ids; differ: {odd}.")
 
 
+# ---------- indexes.json
+
+@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
+def index_doc(area_id: str) -> Mapping | None:
+    """The area's indexes.json, checked against its sections and the classes of its flash flood potential files; None
+    for an area without one. Raises areas.AreaError, naming the area, for one that does not fit, and KeyError for an
+    unknown area."""
+    doc = areas.indexes_file(area_id)
+    if doc is None:
+        return None
+    problems = _index_problems(doc, area_id)
+    if problems:
+        raise areas.AreaError(f"{area_id}: indexes.json: " + "; ".join(problems) + ".")
+    return doc
+
+
+def _index_problems(doc, area_id: str) -> list[str]:
+    top = doc if isinstance(doc, Mapping) else {}
+    found = top.get("sections")
+    checks = {
+        "an area not split into sections has no indexes.json": has_sections(areas.get(area_id)),
+        "method must hold flash and score (with weights_used, classes, breaks, citations and deviations)":
+            _is_method(top.get("method")),
+        "validation must be an object": isinstance(top.get("validation"), Mapping),
+        "sections must be exactly the ids of sections.json":
+            isinstance(found, Mapping) and set(found) == {s["id"] for s in listed(area_id)},
+    }
+    failed = [problem for problem, passed in checks.items() if not passed]
+    if failed:
+        return failed[:1] if "not split" in failed[0] else failed
+    classes = indexes.classes(area_id)
+    problems = _flash_scale_problems(top["method"]["flash"], classes, indexes.breaks(area_id))
+    figures = [*found.items(), *([("city", top["city"])] if "city" in top else [])]
+    return problems + [f"{sid}: {problem}" for sid, one in figures for problem in _figure_problems(one, classes)]
+
+
+def _is_method(method) -> bool:
+    flash, score = (method.get(key) for key in ("flash", "score")) if isinstance(method, Mapping) else (None, None)
+    texts = lambda items: isinstance(items, tuple) and all(areas._is_text(t) for t in items)  # noqa: E731
+    return (isinstance(flash, Mapping) and isinstance(score, Mapping) and isinstance(score.get("weights_used"), Mapping)
+            and all(isinstance(score.get(key), tuple) for key in ("classes", "breaks"))
+            and texts(score.get("citations")) and texts(score.get("deviations")))
+
+
+def _flash_scale_problems(flash: Mapping, classes, breaks) -> list[str]:
+    """method.flash.classes and breaks, when the flash flood potential files are loaded, must be theirs: one place
+    writes the breaks, so a build that disagrees is refused rather than sent."""
+    if classes is None:
+        return []
+    return [] if (tuple(flash.get("classes", ())), tuple(flash.get("breaks", ()))) == (classes, breaks) else [
+        "method.flash must give the classes and breaks of the flash flood potential files"]
+
+
+def _figure_problems(figures, classes: tuple[str, ...] | None) -> list[str]:
+    flash = figures.get("flash") if isinstance(figures, Mapping) else None
+    share = flash.get("share") if isinstance(flash, Mapping) else None
+    score = figures.get("score") if isinstance(figures, Mapping) else None
+    checks = {
+        "flash must be null or hold a mean score and the share of the area in each class": flash is None or (
+            isinstance(share, Mapping) and areas._is_number(flash.get("mean"))
+            and all(areas._is_number(v) for v in share.values())),
+        "flash shares must be by the classes of the flash flood potential files":
+            not isinstance(share, Mapping) or classes is None or tuple(share) == classes,
+        "score must be null or hold a number value and a class": score is None or (
+            isinstance(score, Mapping) and areas._is_number(score.get("value")) and areas._is_text(score.get("class"))),
+        "score must be null where flash is": flash is not None or score is None,
+    }
+    return [problem for problem, passed in checks.items() if not passed]
+
+
+def index_method(area_id: str) -> dict | None:
+    """How the area's figures were worked out, as the page is sent it: {flash, score, validation}, the plain-text parts
+    of the flash flood potential method (app/indexes.py), the score's classes, breaks, weights, citations and
+    deviations, and the validation. None without an indexes.json."""
+    doc = index_doc(area_id)
+    if doc is None:
+        return None
+    score = {key: areas._thaw(value) for key, value in doc["method"]["score"].items() if key in SCORE_METHOD_KEYS}
+    return {"flash": indexes.flash_method(area_id), "score": score, "validation": areas._thaw(doc["validation"])}
+
+
+def city_figures(area_id: str) -> Mapping | None:
+    """The whole city's `flash` and `score` figures from the area's indexes.json, None without it or without a city."""
+    doc = index_doc(area_id)
+    return doc.get("city") if doc else None
+
+
 def clear_caches() -> None:
     """Forget every area and section read so far (for tests that point areas.AREAS_DIR elsewhere)."""
     areas.clear_caches()
-    for cached in (listed, _by_id, _aliases, city_index, section_premises, section_cells):
+    for cached in (listed, _by_id, _aliases, city_index, section_premises, section_cells, index_doc):
         cached.cache_clear()
 
 
@@ -251,15 +349,25 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
     """The `area` of a data answer: the summary, council, notes, the flood record of the area or the section, the
     bigger flood example and, for a split area, the section word and the default section."""
     found = {**summary(area), "council": area.council, "notes": areas._thaw(area.notes),
-             "history": history_for(area, section_id), "bigger_flood_example": area.bigger_flood_example}
+             "history": history_for(area, section_id), "bigger_flood_example": area.bigger_flood_example,
+             "flash_flood_example": area.flash_flood_example, "index_method": index_method(area.id),
+             "layers": {"flash_flood": indexes.layer(area.id)}}
     if has_sections(area):
         found.update(section_word=areas._thaw(area.section_word), default_section=area.default_section)
     return found
 
 
-def public(section: Mapping) -> dict:
-    """A section as the page is sent it: its sections.json entry as built."""
-    return areas._thaw(section)
+def public(section: Mapping, area_id: str | None = None) -> dict:
+    """A section as the page is sent it: its sections.json entry as built and, when its area (area_id) has an
+    indexes.json, its `indexes` {flash: {mean, share}, score: {value, class} | null}."""
+    sent = areas._thaw(section)
+    doc = index_doc(area_id) if area_id else None
+    if doc is not None:
+        figures = doc["sections"][section["id"]]
+        score = figures.get("score")
+        sent["indexes"] = {"flash": areas._thaw(figures["flash"]) if figures.get("flash") else None,
+                           "score": {"value": score["value"], "class": score["class"]} if score else None}
+    return sent
 
 
 @lru_cache(maxsize=areas.MAX_CACHED_AREAS)
@@ -273,7 +381,7 @@ def city_index(area_id: str) -> tuple[dict, ...]:
 def city_data(area: areas.Area) -> dict:
     """GET /api/areas/{id}/data for a split area, less the limits main.py adds."""
     built = areas.town(area.id)
-    return {"area": details(area), "sections": [public(section) for section in listed(area.id)],
+    return {"area": details(area), "sections": [public(section, area.id) for section in listed(area.id)],
             "index": city_index(area.id), "town": {**built, "cells": []}, "premises": []}
 
 
@@ -302,6 +410,6 @@ def section_data(area: areas.Area, section: Mapping) -> dict:
     """GET /api/areas/{id}/sections/{sid}/data, less the limits main.py adds."""
     built = areas.town(area.id)
     town = {**built, "view": list(section["bbox"]), "cells": section_cells(area.id, section["id"])}
-    return {"area": details(area, section["id"]), "section": public(section),
+    return {"area": details(area, section["id"]), "section": public(section, area.id),
             "sections": [{"id": item["id"], "name": item["name"]} for item in listed(area.id)],
             "town": town, "premises": section_premises(area.id, section["id"])}

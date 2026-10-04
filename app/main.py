@@ -24,13 +24,13 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 from fastapi import Depends, FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
-from fastapi.responses import JSONResponse  # noqa: E402
+from fastapi.responses import FileResponse, JSONResponse, Response  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, floodtools, googlemaps, places, plan, raster, sections, stock  # noqa: E402
+from . import ai, areas, floodtools, googlemaps, indexes, places, plan, raster, sections, stock  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -440,6 +440,21 @@ def one_section(area_id: str, section_id: str) -> dict:
     """One section of a split area: its businesses in full and the squares of its box (app/sections.py)."""
     area, section = known_scope(area_id, section_id)
     return ok(area_data(area, section))
+
+
+@app.api_route("/api/areas/{area_id}/layers/flash-flood.png", dependencies=[Depends(map_limit)],
+               methods=GET_AND_HEAD)
+def flash_flood_layer(area_id: str, request: Request) -> Response:
+    """The flash flood potential map layer of an area (app/indexes.py), checked again on every load: an unchanged file
+    (its ETag, from its size and time) is a 304."""
+    path = indexes.png_path(area_id)
+    if path is None:
+        raise HTTPException(404, "No layer.")
+    found = FileResponse(path, media_type="image/png", headers={"Cache-Control": "no-cache"}, stat_result=path.stat())
+    wanted = (tag.strip().removeprefix("W/") for tag in request.headers.get("if-none-match", "").split(","))
+    if found.headers["etag"] in wanted:
+        return Response(status_code=304, headers={key: found.headers[key] for key in ("etag", "cache-control")})
+    return found
 
 
 @app.api_route("/api/data", methods=GET_AND_HEAD)

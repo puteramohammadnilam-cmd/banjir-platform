@@ -24,7 +24,7 @@ NO_FIGURES = {"shop_size": "", "floor_height_cm": 0, "daily_takings_rm": 0, "clo
               "measure_cost_rm": 0}
 TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" * 64).decode()
 JSON = {"content-type": "application/json"}
-POINT_KEYS = {"place", "is_point", "depth_m", "area", "section", "shelter", "scenarios", "limits"}
+POINT_KEYS = {"place", "is_point", "depth_m", "flash_flood", "area", "section", "shelter", "scenarios", "limits"}
 
 # Two fine grids for the privacy checks (squares of 1/1024 degree, about 110 m): one away from the listed areas and one
 # over part of Kota Tinggi. Each point's own numbers, its square's centre and edges, and (away from the areas) the

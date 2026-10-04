@@ -33,3 +33,12 @@ Data. The MIT licence above covers the code. The data is under its own licences:
   (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights
   reserved. Their river levels come from OpenStreetMap rivers, (c) OpenStreetMap contributors, ODbL 1.0 (see
   app/data/dem/SOURCES.txt).
+- The flash flood potential files (app/data/indexes/*, and app/data/areas/*/indexes.json) are derived from: ESA
+  WorldCover 2021 v200 (CC BY 4.0; ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021)
+  processed by ESA WorldCover consortium); the ESA WorldCover Sentinel-1 and Sentinel-2 10 m annual composites (CC BY
+  4.0, https://registry.opendata.aws/esa-worldcover-vito-composites); ISRIC SoilGrids 2.0 (CC BY 4.0, Poggio and others
+  2021, https://doi.org/10.5194/soil-7-217-2021); WorldPop 2020 constrained 100 m (CC BY 4.0,
+  https://doi.org/10.5258/SOTON/WP00660); OpenStreetMap drains, (c) OpenStreetMap contributors, ODbL 1.0; and the
+  Copernicus DEM GLO-30 crop above. The method is cited, not copied: Smith (2003) as used by Yassin and others (2023),
+  Planning Malaysia 21(2); and, for the weights of the section score, Leeonis and others (2024). See
+  app/data/indexes/SOURCES.txt.

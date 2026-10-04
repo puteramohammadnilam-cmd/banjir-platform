@@ -22,9 +22,13 @@ area.json fields:
   section_word  for an area split into sections: the word for one section in each language, {"en": ..., "ms": ...}
                 (optional, null)
   default_section  the section the page opens on, or null for the whole area (optional, null)
+  flash_flood_example  for an area split into sections: the id of a section with flash flood records but little or no
+                water in the river model, for the page's note on what flash flood potential means; null when none is
+                named (optional, null)
 
 An area split into sections also has a built sections.json beside its data (app/sections.py reads it), and each of its
-businesses names its section in premises.json.
+businesses names its section in premises.json. An area with flash flood potential also has an indexes.json beside them
+(app/sections.py checks it) and, in app/data/indexes, the files app/indexes.py reads.
 
 The config is part of the repo, so it is trusted, but it is still checked (load_all, and preload at start-up):
 a typo stops the server at start-up instead of failing in the middle of a chat. Folders whose names start with
@@ -41,7 +45,7 @@ from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 
-from . import elevation
+from . import elevation, indexes
 
 AREAS_DIR = Path(__file__).parent / "data" / "areas"
 AREA_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -50,10 +54,11 @@ MAX_ZOOM = 19
 TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
 OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
-            "aliases": [], "section_word": None, "default_section": None}
+            "aliases": [], "section_word": None, "default_section": None, "flash_flood_example": None}
 ALIAS_FIELDS = frozenset({"id", "section", "names"})
 LANGUAGES = frozenset({"en", "ms"})
 SECTIONS_FILE = "sections.json"
+INDEXES_FILE = "indexes.json"
 HISTORY_YEARS = ("first_year", "recent_from", "last_year")
 FLOOD_TEXTS = ("when", "what", "source")
 SKIPPED_PREFIXES = (".", "_")   # hidden or parked folders, never an area id
@@ -84,6 +89,7 @@ class Area:
     aliases: tuple = field(default=(), hash=False)                     # read-only mappings, as _freeze leaves them
     section_word: Mapping[str, str] | None = field(default=None, hash=False)
     default_section: str | None = None
+    flash_flood_example: str | None = None
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
@@ -138,7 +144,8 @@ def _load(folder: Path) -> Area:
                 news_place=config["news_place"], news_region=config["news_region"], council=config["council"],
                 is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]),
                 bigger_flood_example=config["bigger_flood_example"], aliases=_freeze(config["aliases"]),
-                section_word=_freeze(config["section_word"]), default_section=config["default_section"])
+                section_word=_freeze(config["section_word"]), default_section=config["default_section"],
+                flash_flood_example=config["flash_flood_example"])
 
 
 def _freeze(value):
@@ -191,6 +198,8 @@ def _problems(raw: dict, folder: str) -> list[str]:
                 and all(_is_text(word) for word in config["section_word"].values())),
         "default_section must be null or a section id": config["default_section"] is None
             or (isinstance(config["default_section"], str) and _is_id(config["default_section"])),
+        "flash_flood_example must be null or a section id": config["flash_flood_example"] is None
+            or (isinstance(config["flash_flood_example"], str) and _is_id(config["flash_flood_example"])),
     }
     return [problem for problem, passed in checks.items() if not passed]
 
@@ -261,9 +270,11 @@ def default() -> Area:
 
 @lru_cache(maxsize=MAX_CACHED_AREAS)
 def premises(area_id: str) -> tuple[dict, ...]:
-    """The area's mapped businesses, each with its `elevation` (app/elevation.py: null where none is loaded) looked up
-    once here at its own point. Raises KeyError for an unknown id."""
-    return tuple({**premise, "elevation": elevation.at(premise["lat"], premise["lon"])}
+    """The area's mapped businesses, each with its `elevation` (app/elevation.py) and `flash_flood` ({score, class},
+    app/indexes.py): null where none is loaded, both looked up once here at its own point. Raises KeyError for an
+    unknown id."""
+    return tuple({**premise, "elevation": elevation.at(premise["lat"], premise["lon"]),
+                  "flash_flood": indexes.flash_at(premise["lat"], premise["lon"])}
                  for premise in _read(area_id, "premises.json"))
 
 
@@ -283,6 +294,21 @@ def sections_file(area_id: str) -> Mapping | None:
     if not (AREAS_DIR / area_id / SECTIONS_FILE).is_file():
         return None
     return _freeze(_read(area_id, SECTIONS_FILE))
+
+
+@lru_cache(maxsize=MAX_CACHED_AREAS)
+def indexes_file(area_id: str) -> Mapping | None:
+    """The area's built indexes.json (the section figures of flash flood potential and our score, and how they were
+    worked out) as read-only data, or None for an area without one; app/sections.py checks and uses it. Raises KeyError
+    for an unknown id."""
+    if get(area_id) is None:
+        raise KeyError(f"No area with id {area_id!r}.")
+    if not (AREAS_DIR / area_id / INDEXES_FILE).is_file():
+        return None
+    try:
+        return _freeze(_read(area_id, INDEXES_FILE))
+    except ValueError as error:   # bad JSON or bad UTF-8
+        raise AreaError(f"{area_id}: indexes.json is not valid JSON ({error}).") from error
 
 
 def section_ids(area_id: str) -> frozenset | None:
@@ -305,7 +331,7 @@ def _read(area_id: str, name: str):
 
 def clear_caches() -> None:
     """Forget every area read so far, so the next lookup reads AREAS_DIR again (for tests that point it elsewhere)."""
-    for cached in (_app_areas, _by_id, premises, town, sections_file, _businesses):
+    for cached in (_app_areas, _by_id, premises, town, sections_file, indexes_file, _businesses):
         cached.cache_clear()
 
 
@@ -357,7 +383,8 @@ def check_built(area: Area, shown: tuple, built, sections: frozenset | None = No
 def _section_checks(area: Area, shown: tuple, sections: frozenset | None) -> dict[str, bool]:
     if sections is None:
         return {"aliases, section_word and default_section need a sections.json beside the data":
-                not area.aliases and area.section_word is None and area.default_section is None}
+                not area.aliases and area.section_word is None and area.default_section is None,
+                "flash_flood_example needs a sections.json beside the data": area.flash_flood_example is None}
     return {
         "sections.json must list sections, each with a text id":
             bool(sections) and all(isinstance(section, str) for section in sections),
@@ -367,6 +394,8 @@ def _section_checks(area: Area, shown: tuple, sections: frozenset | None) -> dic
         "every alias and the default section must name a known section":
             all(alias["section"] in sections for alias in area.aliases)
             and (area.default_section is None or area.default_section in sections),
+        "flash_flood_example must name a known section":
+            area.flash_flood_example is None or area.flash_flood_example in sections,
     }
 
 

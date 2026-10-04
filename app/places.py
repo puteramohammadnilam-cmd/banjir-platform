@@ -7,7 +7,7 @@ Both resolve to the same keys (the Place), so the page and the AI tools handle e
 true; name, sector, kind, is_chain, map_last_edited and road null; area_id the listed area whose view holds the
 square's centre, or null; section {id, name} of that area's section holding the centre, or null; shelter the nearest
 relief centre of that area, or null; elevation (app/elevation.py) at the square's centre as the id gives it, or null;
-cell {grid, row, col, bounds}. A business's Place is its premises.json entry (with the elevation areas.premises adds at
+flash_flood ({score, class}, app/indexes.py) at that centre, or null; cell {grid, row, col, bounds}. A business's Place is its premises.json entry (with the elevation and flash_flood areas.premises adds at
 its own point) plus is_point false, its area_id, its section as {id, name} (null in an area not split into sections)
 and cell null.
 
@@ -71,7 +71,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from . import areas, elevation, raster, sections
+from . import areas, elevation, indexes, raster, sections
 
 log = logging.getLogger("banjir")
 
@@ -161,7 +161,7 @@ def _point_place(found: Snap, depth_m: dict) -> dict:
             "lat": lat, "lon": lon, "map_last_edited": None, "area_id": area.id if area else None,
             "section": {"id": section["id"], "name": section["name"]} if section else None,
             "depth_m": depth_m, "road": None, "shelter": nearest_shelter(area, lat, lon) if area else None,
-            "elevation": elevation.at(lat, lon),
+            "elevation": elevation.at(lat, lon), "flash_flood": indexes.flash_at(lat, lon),
             "cell": {"grid": found.grid.name, "row": found.row, "col": found.col, "bounds": bounds}}
 
 

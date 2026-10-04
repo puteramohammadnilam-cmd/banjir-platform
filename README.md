@@ -48,6 +48,7 @@ An area is a folder in `app/data/areas/{id}/`:
 | `area.json` | Name, map view and zoom, the words the AI prompt and the news question use, the council, notes on the data, and past floods if any were collected. Written by hand. |
 | `premises.json` | Businesses mapped on OpenStreetMap, each with its modelled depths and nearest road. |
 | `town.json` | The 90 m flood squares around them, and any relief centres. |
+| `indexes.json` | Only for a city split into sections, and only where flash flood potential is built: each section's share of its area in each flash flood potential class, its average score and our own section score, and how they were worked out (method, deviations, how they compare with the flood record). |
 
 Five areas are built in:
 
@@ -103,6 +104,17 @@ Langkawi is covered, but the model has no flood water anywhere on the island (ev
 
 The app works with any subset of the files: a region whose grid is missing gets a "not in this build yet" answer.
 
+## Flash flood potential
+
+Where `app/data/indexes/{id}_ffpi.{tif,json,png}` exist (Shah Alam only for now), each business and each picked square gets `flash_flood: {score, class}` and the city's sections get `indexes`. It is the Flash Flood Potential Index (Smith 2003, as used by Yassin and others 2023, Planning Malaysia 21(2)): the slope, land cover, soil texture and vegetation of a square of about 30 m, each rated 1 to 10 and combined as (1.5 x slope + land cover + soil + 0.5 x vegetation) / 4. It says how easily rain runs off and pools there. It is **susceptibility, not a water depth and not a chance of flooding**, and flash floods are not in the JRC river model: the page, the legend and the AI say so.
+
+- `{id}_ffpi.tif`: the score, float32 to 0.1, on the 1 arc-second elevation grid, no data -9999 outside the city and over water. Read by `app/indexes.py` through `app/raster.py`.
+- `{id}_ffpi.json`: the class names and the breaks between them (one place; the tool, the server and the page legend all read it), and the credit. A score on a break is in the class above it.
+- `{id}_ffpi.png`: the map layer, an indexed PNG, transparent outside the city. `GET /api/areas/{id}/layers/flash-flood.png`.
+- `BANJIR_INDEX_DIR` points the app at another folder.
+- No files, no figures: every field is `null` (or a section's `indexes` is left out), and the other areas and older deploys work as before. A file that cannot be read is logged with its name and tile, never a point, and gives `null`.
+- `app/sections.py` checks `indexes.json` when the server starts: it must name exactly the city's sections, and each section's shares must be by the classes of the `.json` file.
+
 ## Endpoints
 
 Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 KB or more are gzip-compressed.
@@ -112,6 +124,7 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 | GET `/api/data` | The default area's data, as `/api/areas/{id}/data` gives it |
 | GET `/api/areas` | `{default, areas:[{id, name, display_name, view, zoom, counts, has_history, has_shelters, has_sections, aliases}]}` |
 | GET `/api/areas/{id}/data` | `{area, premises, town, limits}` for one area. An area split into sections (a city) gives its city view instead: `{area, sections, index, town, premises: [], limits}`, with every section's outline and counts, a lean `index` row per business and no squares (`town.cells` is `[]`). An alias id (an old area id that now means one section) gives that section's data. 404 for an unknown id. |
+| GET `/api/areas/{id}/layers/flash-flood.png` | The flash flood potential map layer, a PNG, with `Cache-Control: no-cache` and an `ETag` (an unchanged file is a 304). 404 `No layer.` for an area without one. GET and HEAD. |
 | GET `/api/areas/{id}/sections/{sid}/data` | One section of a city: `{area, section, sections, town, premises, limits}`: the section's flood record in `area.history`, its full entry, every section's `{id, name}`, `town.view` = the section's box with the squares that overlap it and every relief centre of the city, and the section's businesses in full. 404 `Unknown section.` for a section the area does not have. |
 | GET `/api/status` | `{ai_ready, model, maps_ready, points_ready}` |
 | GET `/api/coverage` | `{data_version, return_periods, block_cells, grids, regions}`: what the page needs to snap a point, and coarse boxes for Langkawi, the Peninsula and Borneo |
@@ -138,7 +151,7 @@ Rate limits, per visitor in each 5 minute window, counted in memory by each serv
 | 60 | `/api/rain` and `/api/place/{id}`: Google Maps lookups |
 | 120 | `/api/estimate` |
 | 120 | `/api/point` |
-| 1200 | `/api/coverage` |
+| 1200 | `/api/coverage` and the flash flood potential layer |
 
 The data and status endpoints have no limit. One chat question may make at most 3 Google Maps lookups. A business with no name on the map is never looked up.
 
@@ -188,6 +201,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 |---|---|
 | `app/ai.py` | The only file that talks to an AI model. Swap providers here. |
 | `app/floodtools.py` | Data lookups. Gemini calls these as tools, so its numbers come from the data. |
+| `app/indexes.py` | Flash flood potential at a business or square, and the map layer's description, from `app/data/indexes`. Same pattern as `app/elevation.py`. |
 | `app/raster.py` | Reads the JRC files with the standard library only, and returns the depth at a point. |
 | `app/areas.py` | Loads the curated areas from `app/data/areas`. |
 | `app/places.py` | A place is a business or a point, with one id string. Snaps a point to its square, checks coverage, finds the squares around it. |
@@ -197,6 +211,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/static/` | The page, in three tabs (area overview, my business, flood cost) with the Ask AI chat as a floating button and dialog on every tab (`chat-widget.js`; `?tab=ask` links open it). Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
 | `app/data/areas/` | Built data for each area. |
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
+| `app/data/indexes/` | Flash flood potential: the score file, its classes and breaks, and the map layer. |
 | `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds the old Taman Sri Muda build (kept in `tests/fixtures/sri_muda_built`), Kuantan, Kota Bharu and Kuala Terengganu byte for byte; with `--sections` it builds a city split into sections. The built data is committed, so you do not need to run it. |
 | `tools/resample_area.py` | Re-samples an area built on the old flood sizes (1 in 10, 100, 500) at 1 in 10, 20 and 50 when its OpenStreetMap inputs were not kept (Kota Tinggi): depths read again at each business and square; each road's square found from its stored old depths and distance, and refused if that is ambiguous. Needs the old JRC files. |
 | `deploy.sh` | Cloud Run deploy with a post-deploy smoke test. |
@@ -281,6 +296,7 @@ Only sources with clear terms, so the repo can be public.
 
 - Code: MIT, see `LICENSE`.
 - Flood depth: European Commission JRC global river flood hazard maps v2.1 (Baugh and others, 2024), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1. The nine files in `app/data/rasters/` are used unchanged. Our changes in `app/data/areas/`: depths read at each business and its nearest road (`premises.json`) and for the 90 m squares of each area (`town.json`), rounded to the centimetre.
+- Flash flood potential (`app/data/indexes/`, `app/data/areas/*/indexes.json`): method from Smith (2003) as used by Yassin and others (2023), Planning Malaysia 21(2), cited for the method only; the section score uses the criteria weights of Leeonis and others (2024), cited the same way. Inputs: ESA WorldCover 2021 v200, CC BY 4.0, "ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium"; ESA WorldCover Sentinel-1 and Sentinel-2 10 m annual composites (NDVI), CC BY 4.0, from https://registry.opendata.aws/esa-worldcover-vito-composites; ISRIC SoilGrids 2.0 (Poggio and others 2021, SOIL 7:217-240, doi:10.5194/soil-7-217-2021), CC BY 4.0; WorldPop 2020 constrained 100 m (doi:10.5258/SOTON/WP00660), CC BY 4.0; OpenStreetMap drains, ODbL; and the Copernicus GLO-30 elevation of `app/data/dem`. `app/data/indexes/SOURCES.txt` lists each input with its date, size and SHA-256. Our changes: ratings, smoothing and averaging into the 1 arc-second grid and per section.
 - Businesses, roads, base map: OpenStreetMap contributors, ODbL (https://opendatacommons.org/licenses/odbl/1-0/). Every `app/data/areas/*/premises.json` is built from OpenStreetMap data, so those files are under the Open Database License 1.0. © OpenStreetMap contributors.
 - Kota Tinggi's relief centres were named in news reports and located on OpenStreetMap. They are not an official list.
 - Past floods in Shah Alam: news, official and research reports and the public 2021 and 2022 ArcGIS flood points (credited on the page), paraphrased with their sources in `app/data/areas/shah-alam/history.json` and on the page.

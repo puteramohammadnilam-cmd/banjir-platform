@@ -27,8 +27,13 @@ LIMITS = (
     "It ignores local flood walls, pumps and floor heights. Several shops can share one square. "
     "It shows floods of three sizes, 1 in 10, 20 and 50 years; floods bigger than 1 in 50 years are not in the "
     "model, so a rarer, bigger flood can bring deeper water than any depth here. "
+    "Flash flood potential is susceptibility from slope, land cover, soil and vegetation, not a water depth or a "
+    "chance of flooding; flash floods are not in the river model. "
     "Businesses are points on a public map and have not been checked on the ground."
 )
+SCORE_MEANING = ("Our own rough ranking of sections from several map criteria: not a model, not a water depth and "
+                 "not a chance of flooding.")
+HIGH_CLASSES = ("high", "extreme")   # the flash flood potential classes that count as high in the city ranking
 NO_SHELTERS = ("This tool has no relief centre list for this area yet. "
                "Ask the authorities: JPS Public Infobanjir, {council} or 999.")
 NO_AREA = ("The user picked a point outside the listed areas, so this tool has no area summary and no list of "
@@ -169,8 +174,8 @@ def _clean(name) -> str | None:
 
 
 def _for_model(place: dict) -> dict:
-    """A Place as a tool gives it to the model, with every name and type from the map cleaned. A point goes as
-    _point_for_model gives it."""
+    """A Place as a tool gives it to the model, with every name and type from the map cleaned (its flash_flood is
+    {score, class} or null). A point goes as _point_for_model gives it."""
     if place["is_point"]:
         return _point_for_model(place)
     named = {key: {**place[key], "name": _clean(place[key]["name"])} for key in ("road", "shelter") if place.get(key)}
@@ -179,12 +184,12 @@ def _for_model(place: dict) -> dict:
 
 
 def _point_for_model(place: dict) -> dict:
-    """The selected point as a tool gives it to the model: its depths, its listed area and the nearest relief centre,
-    named SELECTED_POINT. Never its id, coordinates or square, which would tell the model where the user is."""
+    """The selected point as a tool gives it to the model: its depths, flash flood potential, its listed area and the
+    nearest relief centre, named SELECTED_POINT. Never its id, coordinates or square, which would tell the model where the user is."""
     area, shelter = places.area_of(place), place["shelter"]
     section = place.get("section")
     return {"place": SELECTED_POINT, "is_point": True, "depth_m": dict(place["depth_m"]),
-            "area": area.name if area else None, "section": _clean(section["name"]) if section else None,
+            "flash_flood": place.get("flash_flood"), "area": area.name if area else None, "section": _clean(section["name"]) if section else None,
             "shelter": {"name": _clean(shelter["name"]), "distance_m": shelter["distance_m"]} if shelter else None}
 
 
@@ -220,7 +225,9 @@ def flood_check(place_id: str) -> dict:
 
     Returns:
         Depth in metres for the 10, 20 and 50 year floods (null means no water in the model).
-        For a business, also its nearest road and the depth there. The selected point (is_point
+        Also flash_flood, its flash flood potential: a score from 1 to 10 and a class, how easily
+        rain runs off and pools there; it is not a depth or a chance, and null means it was not
+        worked out for this spot. For a business, also its nearest road and the depth there. The selected point (is_point
         true) is one 90 m square of the model, not a mapped business; its listed area, if any, is
         given. Also the nearest relief centre (null means this tool has no list for the area) and
         the limits of the data. Returns an error for an unknown id, or for any other point.
@@ -242,8 +249,11 @@ def area_summary(section: str = "") -> dict:
     Returns:
         For each flood size, how many businesses get water, how many stay dry and the names of
         up to 15 of those; for a whole area split into sections, the 10 sections with the most
-        businesses with water; for one section, how many of its 90 m squares get water. Also the
-        relief centres this tool knows of and the limits of the data. Or an error when the user
+        businesses with water; for one section, how many of its 90 m squares get water. Where
+        flash flood potential is worked out, also the share of a section in each class, its average
+        score and our own section score, and for a whole area the sections that rank highest on
+        score and on the share of high or extreme flash flood potential. Also the relief centres
+        this tool knows of and the limits of the data. Or an error when the user
         picked a point outside the listed areas, or the section is not known.
     """
     area = current_area()
@@ -255,7 +265,7 @@ def area_summary(section: str = "") -> dict:
     shown = sections.section_premises(area.id, part["id"]) if part else areas.premises(area.id)
     shelters = [_clean(s["name"]) for s in areas.town(area.id)["shelters"]]
     return {"total_businesses": len(shown), "scenarios": _scenarios(shown), **_section_counts(area, part),
-            "shelters": shelters or no_shelters(area), "limits": LIMITS, **_area_notes(area)}
+            **_flash_flood(area, part), "shelters": shelters or no_shelters(area), "limits": LIMITS, **_area_notes(area)}
 
 
 def _section_asked(area: areas.Area, section) -> tuple[Mapping | None, str | None]:
@@ -291,6 +301,46 @@ def _section_counts(area: areas.Area, part: Mapping | None) -> dict:
         {"section": _clean(s["name"]), "businesses": s["counts"]["businesses"],
          "businesses_with_water": dict(s["counts"]["wet_businesses"]), "squares": s["counts"]["cells"],
          "squares_with_water": dict(s["counts"]["wet_cells"])} for s in ranked[:MAX_TOP_SECTIONS]]}
+
+
+def _flash_flood(area: areas.Area, part: Mapping | None) -> dict:
+    """The flash flood potential figures of one section, or of the whole area and its top sections; nothing for an area
+    without an indexes.json (app/sections.py) and for a section with no land square."""
+    doc = sections.index_doc(area.id)
+    if doc is None:
+        return {}
+    if part is not None:
+        return _figures_for_model(doc["sections"][part["id"]], "share_of_section", "section_score")
+    named = [(_clean(s["name"]), doc["sections"][s["id"]]) for s in sections.listed(area.id)]
+    scored = sorted(((name, found["score"]) for name, found in named if found.get("score")),
+                    key=lambda item: (-item[1]["value"], item[0]))
+    high = sorted(((name, _high_share(found["flash"]["share"])) for name, found in named if found.get("flash")),
+                  key=lambda item: (-item[1], item[0]))
+    return {**_figures_for_model(doc.get("city") or {}, "share_of_area", "area_score"), "flash_flood_by_section": {
+        "highest_score": [{"section": name, "score": score["value"], "class": _words(score["class"])}
+                          for name, score in scored[:MAX_TOP_SECTIONS]],
+        "most_high_or_extreme": [{"section": name, "share_high_or_extreme": share}
+                                 for name, share in high[:MAX_TOP_SECTIONS]],
+        "meaning": SCORE_MEANING}}
+
+
+def _figures_for_model(figures: Mapping, share_key: str, score_key: str) -> dict:
+    """`flash_flood_potential` (average score and share by class) and the score (as score_key) of one entry of
+    indexes.json."""
+    flash, score = figures.get("flash"), figures.get("score")
+    return {**({"flash_flood_potential": {"average_score": flash["mean"], share_key: dict(flash["share"])}}
+               if flash else {}),
+            **({score_key: {"value": score["value"], "class": _words(score["class"]), "meaning": SCORE_MEANING}}
+               if score else {})}
+
+
+def _words(class_id: str) -> str:
+    """A class id as words, such as very_high as "very high"."""
+    return class_id.replace("_", " ")
+
+
+def _high_share(share: Mapping) -> float:
+    return round(sum(share.get(name, 0) for name in HIGH_CLASSES), 3)
 
 
 def flood_history(section: str = "") -> dict:
