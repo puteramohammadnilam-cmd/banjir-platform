@@ -10,7 +10,8 @@ SOURCES = {
     "land_cover": "ESA WorldCover 2021 (10 m, CC BY 4.0), each class rated and mixed by its share of the square.",
     "slope": "Copernicus DEM GLO-30, from the same lowest surface.",
     "road_distance": "OpenStreetMap vehicle roads, service ways left out ((c) OpenStreetMap contributors, ODbL).",
-    "population_density": "WorldPop 2020 constrained population, 100 m (CC BY 4.0), people per km2.",
+    "population_density": "WorldPop 2020 constrained population, 100 m (CC BY 4.0), summed over each section: "
+                          "people per section.",
 }
 LAND_NAMES = {10: "tree cover", 20: "shrubland", 30: "grassland", 40: "cropland", 50: "built-up",
               60: "bare or sparse vegetation", 70: "snow and ice", 80: "permanent water", 90: "herbaceous wetland",
@@ -20,13 +21,18 @@ DEVIATIONS = [
     "Rainfall (weight 23) and economic loss (3) are left out: one rain record covers the whole city and no source "
     "gives losses by section. The other seven weights are divided by the 74 left.",
     "The paper's distance classes run to kilometres over a wider area; the distance classes here are ours, in metres "
-    "for a city. Elevation, slope and population density keep the paper's classes (population under 1,000 per km2 "
-    "rates 1).",
+    "for a city. Elevation, slope and population keep the paper's classes.",
+    "The drainage density classes (under 0.25, 0.5, 1 and 1.5 km of drain per km2, and above) are ours: the paper's "
+    "come from a kernel density of the main rivers in its own units, which do not carry over to mapped drains within "
+    "1 km.",
     "Land cover is ESA WorldCover 2021 rated by us: built-up and water 5, bare ground, wetland and mangrove 4, "
     "grassland and cropland 3, shrubland 2, tree cover 1.",
     "Drainage density counts mapped drains and ditches; how much of the city's drainage is mapped differs from place "
     "to place, and a high density may mean a well drained area as easily as a wet one.",
-    "Population is WorldPop's 100 m estimate, not the council's section figures the paper used.",
+    "Population is people per section, as in the paper, but WorldPop's 2020 100 m estimate summed over each section "
+    "rather than the council's figures; every square of a section takes the section's rating. The paper rates its "
+    "four ranges 1 to 4; here under 1,000 people rates 1 and the four ranges 2 to 5, so that it runs 1 to 5 like the "
+    "other criteria.",
     "A section's value is the area-weighted mean of its 30 m squares, not the paper's hotspot analysis.",
 ]
 CITATIONS = [

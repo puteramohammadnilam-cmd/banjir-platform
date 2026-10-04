@@ -7,7 +7,7 @@ never from the network.
     cover = load_worldcover(grid, raw)              # {WorldCover class: pixel count per square}
     vegetation = load_vegetation(grid, raw)         # mean fractional vegetation cover per square, 0 to 1
     soil = load_soil(grid, raw)                     # SoilGrids sand/silt/clay %, 0-15 cm, and where it had no value
-    people = load_population(grid, raw)             # WorldPop people per km2
+    people = load_population(grid, raw)             # WorldPop people per square
 
 Place words are fine here: this is a tool, not app code.
 """
@@ -185,21 +185,17 @@ def load_soil(raw: Path) -> Soil:
 
 
 def load_population(grid: go.Grid, raw: Path) -> array:
-    """WorldPop 2020 constrained people per km2 at each square's centre: the 3 arc second pixel's people over its
-    area; 0 where WorldPop has no people (no data: not a settled area)."""
+    """WorldPop 2020 constrained people in each square: the people of the 3 arc second pixel holding the square's
+    centre, shared by area among the squares it holds (so a section's squares add up to its people); 0 where WorldPop
+    has no people (no data: not a settled area)."""
     source = tr.FileSource(raw / "indexes" / "worldpop" / WORLDPOP_FILE)
     image = tr.open_image(source)
     window, src = _window_of(image, grid)
     people = tr.read_window(source, image, *window)
     cleaned = array("d", (v if 0 < v < math.inf else 0.0 for v in people))
     per_pixel = go.sample_nearest(grid, cleaned, src, fill=0.0)
-    out = array("d", [0.0]) * grid.size
-    for r in range(grid.rows):
-        lat = grid.north - (r + 0.5) * grid.py
-        km2 = (image.px * go.M_PER_DEG_LON_AT_EQUATOR * math.cos(math.radians(lat))) * (image.py * go.M_PER_DEG_LAT) / 1e6
-        for c in range(grid.cols):
-            out[r * grid.cols + c] = per_pixel[r * grid.cols + c] / km2
-    return out
+    share = (grid.px * grid.py) / (image.px * image.py)   # a square's area over a pixel's, at the same latitude
+    return array("d", (people * share for people in per_pixel))
 
 
 def osm_lines(path: Path, kinds: set[str], key: str) -> list[list[tuple[float, float]]]:

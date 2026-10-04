@@ -45,6 +45,54 @@ def test_every_criterion_has_one_more_rating_than_breaks_and_rising_breaks():
         assert sorted(c.ratings) == [1, 2, 3, 4, 5], c.id
 
 
+@pytest.mark.parametrize("people, rating", [(0, 1), (999, 1), (1000, 2), (7440, 2), (7441, 3), (18187, 3),
+                                            (18188, 4), (43791, 4), (43792, 5), (86548, 5)])
+def test_population_is_rated_by_the_paper_s_people_per_section(people, rating):
+    population = next(c for c in bs.CRITERIA if c.id == "population_density")
+    assert population.unit == "people per section"
+    assert bs.rate(people, population.breaks, population.ratings) == rating
+
+
+def test_the_people_of_a_section_are_summed_and_given_to_each_of_its_squares():
+    grid, holder, _ = four_by_four()
+    people = array("d", [100.0] * 16)
+    people[6] = 0.0                                       # water: no people, still in the section
+    totals = bs.section_totals(people, holder, 3)
+    assert totals == [800.0, 600.0, 0.0]                  # the north-east square is in no section
+    spread = bs.by_section(totals, holder)
+    assert [spread[i] for i in (0, 2, 6, 15)] == [800.0, 600.0, 600.0, 600.0] and spread[3] == go.NODATA
+
+
+def test_the_population_criterion_rates_every_square_of_a_section_alike():
+    grid, holder, _ = four_by_four()
+    land = array("d", [3.0] * 16)
+    people = array("d", [1500.0] * 16)                    # 12 000 in the west section, 9 000 in the east one
+    values = {c.id: array("d", [0.0] * 16) for c in bs.CRITERIA}
+    values["population_density"] = bs.by_section(bs.section_totals(people, holder, 2), holder)
+    rated = bs.square_ratings(values, land)["population_density"]
+    assert {rated[i] for i in range(16) if holder[i] == 0} == {3.0} == {rated[i] for i in range(16) if holder[i] == 1}
+    assert bs.section_means(rated, holder, grid, 2) == pytest.approx([3.0, 3.0])
+
+
+def test_a_square_without_a_value_has_no_rating_rather_than_the_highest():
+    land = array("d", [3.0, 3.0, go.NODATA])
+    values = {c.id: array("d", [10.0, 10.0, 10.0]) for c in bs.CRITERIA}
+    values["elevation"][0] = go.NODATA                    # a hole in the surface model
+    values["slope"][1] = go.NODATA
+    rated = bs.square_ratings(values, land)
+    assert rated["elevation"][0] == go.NODATA and rated["slope"][1] == go.NODATA
+    assert rated["elevation"][1] == 5 and rated["slope"][0] == 3      # 10 m and 10 %, by the paper's classes
+    assert all(rated[c.id][2] == go.NODATA for c in bs.CRITERIA)     # not land
+
+
+def test_the_deviations_say_which_classes_are_ours_and_how_population_is_counted():
+    text = " ".join(bs.score_text.DEVIATIONS)
+    assert "drainage density classes" in text.lower() and "are ours" in text
+    population = [d for d in bs.score_text.DEVIATIONS if "Population" in d]
+    assert len(population) == 1 and "people per section" in population[0] and "per km2" not in population[0]
+    assert "people per section" in bs.score_text.SOURCES["population_density"]
+
+
 def test_land_cover_ratings_mix_by_pixel_share():
     assert bs.land_cover_rating({50: 60, 10: 40}) == pytest.approx((60 * 5 + 40 * 1) / 100)
     assert bs.land_cover_rating({}) is None

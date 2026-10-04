@@ -112,7 +112,7 @@
             {"id": "land_cover", "weight": 9, "unit": "class", "breaks": [], "ratings": [], "table": {"built-up": 5}, "source": "..."},
             {"id": "slope", "weight": 8, "unit": "%", "breaks": [3.53, 7.05, 11.8, 18.1], "ratings": [5, 4, 3, 2, 1], "source": "..."},
             {"id": "road_distance", "weight": 7, "unit": "m", "breaks": [50, 100, 200, 500], "ratings": [5, 4, 3, 2, 1], "source": "..."},
-            {"id": "population_density", "weight": 6, "unit": "people/km2", "breaks": [1000, 7441, 18188, 43792], "ratings": [1, 2, 3, 4, 5], "source": "..."}
+            {"id": "population_density", "weight": 6, "unit": "people per section", "breaks": [1000, 7441, 18188, 43792], "ratings": [1, 2, 3, 4, 5], "source": "..."}
           ],
           "weights_total": 74,
           "weights_used": {"river_distance": 0.2432, "drainage_density": 0.2162, "elevation": 0.1351, "land_cover": 0.1216,

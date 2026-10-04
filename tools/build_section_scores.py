@@ -22,7 +22,12 @@ the 74 left. The section's value is the area-weighted mean (2 decimals), classed
   land_cover          WorldCover 2021 pixels rated LAND_SCORES, mixed by share
   slope               percent, from that lowest surface, Leeonis et al.'s classes
   road_distance       straight line to the nearest OpenStreetMap road (all vehicle roads but service ways)
-  population_density  WorldPop 2020 constrained people per km2 at the square; Leeonis et al.'s classes, below 1,000 = 1
+  population_density  people per section, as the paper's council figures are: WorldPop 2020 constrained people summed
+                      over the section's squares (all of them, water too), rated with Leeonis et al.'s classes (under
+                      1,000 = 1, their four ranges 2 to 5); every square of the section takes the section's rating, so
+                      the section's mean of it is that rating and the city's is the area-weighted mean of its sections'
+Squares without a value for a criterion (a hole in the surface model) have no rating for it, not the highest; a
+section's mean leaves them out.
 validation: Spearman's rho (average ranks for ties) of the section score, and of the flash high + extreme share,
 against the count of history.json events naming each section and against the share of its 90 m squares wet at 1 in 50
 in the river model (sections.json); and the ranks of the five sections named as flood hotspots. These compare; they do
@@ -80,7 +85,7 @@ CRITERIA = (
     Criterion("land_cover", 9, "class", (), ()),
     Criterion("slope", 8, "%", (3.53, 7.05, 11.8, 18.1), (5, 4, 3, 2, 1)),
     Criterion("road_distance", 7, "m", (50, 100, 200, 500), (5, 4, 3, 2, 1)),
-    Criterion("population_density", 6, "people/km2", (1000, 7441, 18188, 43792), (1, 2, 3, 4, 5)),
+    Criterion("population_density", 6, "people per section", (1000, 7441, 18188, 43792), (1, 2, 3, 4, 5)),
 )
 
 
@@ -123,8 +128,23 @@ def drainage_density(grid: go.Grid, raw: Path, land: Sequence[float]) -> array:
     return array("d", (m / 1000 / disc_km2 for m in metres))
 
 
-def criterion_values(layers: bf.Layers, raw: Path) -> dict[str, array]:
-    """The raw value of each criterion per square (land cover is already a 1-5 rating)."""
+def section_totals(values: Sequence[float], holder: Sequence[int], count: int) -> list[float]:
+    """The sum of the values of each of `count` sections' squares."""
+    totals = [0.0] * count
+    for value, k in zip(values, holder):
+        if k >= 0:
+            totals[k] += value
+    return totals
+
+
+def by_section(totals: Sequence[float], holder: Sequence[int]) -> array:
+    """Each square's section's figure; NODATA for a square in no section."""
+    return array("d", (totals[k] if k >= 0 else go.NODATA for k in holder))
+
+
+def criterion_values(layers: bf.Layers, raw: Path, holder: Sequence[int], count: int) -> dict[str, array]:
+    """The raw value of each criterion per square (land cover is already a 1-5 rating; population is the people of
+    the square's section)."""
     grid = layers.grid
     roads = ii.osm_lines(raw / "city_osm" / "roads.json", ROAD_KINDS, "highway")
     land = array("d", (go.NODATA if layers.land[i] <= go.NODATA_BELOW else
@@ -137,16 +157,16 @@ def criterion_values(layers: bf.Layers, raw: Path) -> dict[str, array]:
         "land_cover": land,
         "slope": layers.slope,
         "road_distance": go.distance_to(go.draw_lines(grid, roads), grid, CAP_M),
-        "population_density": ii.load_population(grid, raw),
+        "population_density": by_section(section_totals(ii.load_population(grid, raw), holder, count), holder),
     }
 
 
 def square_ratings(values: dict[str, array], land: Sequence[float]) -> dict[str, array]:
-    """Each criterion's 1-5 rating per land square; NODATA elsewhere."""
+    """Each criterion's 1-5 rating per land square with a value for it; NODATA elsewhere."""
     out = {}
     for c in CRITERIA:
         source = values[c.id]
-        out[c.id] = array("d", (go.NODATA if land[i] <= go.NODATA_BELOW else
+        out[c.id] = array("d", (go.NODATA if land[i] <= go.NODATA_BELOW or source[i] <= go.NODATA_BELOW else
                                 source[i] if c.id == "land_cover" else rate(source[i], c.breaks, c.ratings)
                                 for i in range(len(land))))
     return out
@@ -288,7 +308,7 @@ def build(raw: Path, ffpi_path: Path, out: Path) -> dict:
     ids = [s["id"] for s in sections]
     holder = go.first_holder(grid, [s["geometry"] for s in sections])
     city_holder = array("i", (0 if h >= 0 else -1 for h in holder))
-    ratings = square_ratings(criterion_values(layers, raw), layers.land)
+    ratings = square_ratings(criterion_values(layers, raw, holder, len(ids)), layers.land)
     means = {c.id: section_means(ratings[c.id], holder, grid, len(ids)) for c in CRITERIA}
     city_means = {c.id: section_means(ratings[c.id], city_holder, grid, 1)[0] for c in CRITERIA}
     scores = read_ffpi(ffpi_path, grid)
