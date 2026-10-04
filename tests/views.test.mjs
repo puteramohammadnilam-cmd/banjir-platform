@@ -1,5 +1,5 @@
 // Run from 11_Platform_Draft:  node --test tests/views.test.mjs
-// The DOM side of a point in the My business tab (card.js) and the Ask AI tab (chat.js), on the small fake DOM in
+// The DOM side of a point in the My business tab (card.js) and the Ask AI chat (chat.js), on the small fake DOM in
 // tests/fake_dom.mjs. The words themselves are tested in tests/point.test.mjs; here: which parts show for a point, which
 // stay away, and what the buttons call. A business is held to what it always showed.
 import assert from "node:assert/strict";
@@ -143,7 +143,7 @@ test("the head is made again for a new place, so nothing of the old one is left"
 
 // ---------- Ask AI ----------
 
-/** The Ask tab's parts as index.html has them, and a chat on them. `selected.ref` is the place a question is about. */
+/** The chat parts as index.html has them, and a chat on them. `selected.ref` is the place a question is about. */
 function mountChat(change = {}) {
   installFakeDom();
   const messages = h("ol");
@@ -347,5 +347,18 @@ test("the two shortcut cards say what the Flood cost tab now answers, and what A
   const off = mountCard({ isReady: false, hasMaps: false });
   show(off.card, shop);
   assert.match(shortcuts(off.panel)[1], /The assistant is switched off in this test build$/);
-  assert.ok(buttonNamed(off.panel, shortcuts(off.panel)[1]), "still a link to the Ask AI tab");
+  assert.ok(buttonNamed(off.panel, shortcuts(off.panel)[1]), "still a way to the chat");
+});
+
+test("the Ask AI shortcut opens the floating chat, with the shortcut itself as the opener, and goes to no tab", () => {
+  const opened = [];
+  const went = [];
+  const { panel, card } = mountCard({ onAsk: (opener) => opened.push(opener), goto: (tab) => went.push(tab) });
+  show(card, shop);
+  const ask = panel.querySelectorAll(".next-step")[1];
+  ask.dispatch("click", { currentTarget: ask });
+  assert.deepEqual(opened, [ask]);
+  assert.deepEqual(went, []);
+  panel.querySelectorAll(".next-step")[0].dispatch("click");
+  assert.deepEqual(went, ["cost"]);
 });

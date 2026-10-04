@@ -16,7 +16,6 @@ export default Object.freeze({
   "tab.overview": "Gambaran kawasan",
   "tab.business": "Perniagaan saya",
   "tab.cost": "Kos banjir",
-  "tab.ask": "Tanya AI",
 
   // ---------- common ----------
   "common.retry": "Cuba lagi",
@@ -356,8 +355,6 @@ export default Object.freeze({
   "report.footer": "Banjir Check, {date}. Kedalaman air diambil daripada model komputer global, bukan peta banjir rasmi, bukan ramalan dan bukan rekod banjir sebenar. Kedalaman banjir: JRC Suruhanjaya Eropah, CC BY 4.0. Perniagaan dan jalan: © penyumbang OpenStreetMap, ODbL. Untuk amaran, guna JPS Public Infobanjir; dalam kecemasan, hubungi 999.",
 
   // ---------- Ask AI: index.html ----------
-  "ask.kicker": "Tanya AI",
-  "ask.about": "Tanya tentang",
   "ask.lead": "Gemini membaca data banjir alat ini, Google Weather dan Google Maps. Ia menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
   "ask.conversation": "Perbualan",
   "ask.question": "Soalan anda",
@@ -391,6 +388,13 @@ export default Object.freeze({
   "ask.chipPointLoss": "Berapa anggaran rugi kalau banjir kat sini?",
   "ask.chipPointDepth": "Berapa dalam air di sini dalam banjir 1 dalam 50 tahun?",
   "ask.chipPointAreaDry": "Perniagaan mana di kawasan ini yang tak kena air dalam banjir 1 dalam 50 tahun?",
+
+  // ---------- floating chat: index.html, main.js ----------
+  "chat.open": "Tanya AI",
+  "chat.title": "Tanya AI",
+  "chat.about": "Tentang {place}",
+  "chat.close": "Tutup",
+
   "voice.speak": "Cakap",
   "voice.stop": "Berhenti",
   "voice.listening": "Mendengar soalan anda…",
