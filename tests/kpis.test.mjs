@@ -97,3 +97,27 @@ test("the headline tile counts the wet businesses", () => {
   kpis.setScenario("20");
   assert.match(wet.textContent, /3 of 4/);
 });
+
+// ---------- a city split into sections ----------
+
+test("the whole city's tiles count its lean index, named after the city, and a section's its own businesses", async () => {
+  const { INDEX, CITY_HISTORY } = await import("./fixtures/city_data.mjs");
+  const { SECTION_DATA } = await import("./fixtures/section_data.mjs");
+  const city = mount({ premises: INDEX, areaName: "Shah Alam", history: CITY_HISTORY });
+  city.kpis.setScenario("50");
+  assert.match(city.wet.textContent, /3 of 5/);
+  assert.match(city.wet.textContent, /businesses in Shah Alam get water/);
+  assert.equal(figure(city.depth), "0.9 m", "the median over the city's wet businesses");
+  const section = mount({ premises: SECTION_DATA.premises, areaName: "Seksyen 25", history: SECTION_DATA.area.history });
+  section.kpis.setScenario("50");
+  assert.match(section.wet.textContent, /2 of 3/);
+  assert.match(section.wet.textContent, /businesses in Seksyen 25 get water/);
+});
+
+test("a section with no businesses mapped shows a dash, not 0 of 0", () => {
+  const { kpis, wet, depth } = mount({ premises: [], areaName: "Seksyen U1" });
+  kpis.setScenario("50");
+  assert.equal(figure(wet), "–");
+  assert.match(wet.textContent, /No businesses mapped here yet/);
+  assert.equal(figure(depth), "–");
+});

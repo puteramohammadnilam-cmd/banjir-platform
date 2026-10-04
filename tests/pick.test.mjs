@@ -9,8 +9,9 @@ import { createBusiness } from "../app/static/js/card.js";
 import { createCompareCard } from "../app/static/js/compare.js";
 import { createCost } from "../app/static/js/cost.js";
 import {
-  DEFAULT_RP, emptyState, finderEntries, initialState, rememberPlace, rememberedPlace, wireFinder,
+  DEFAULT_RP, emptyState, finderEntries, initialState, rememberPlace, rememberedPlace, sectionFinder, wireFinder,
 } from "../app/static/js/pick.js";
+import { ALIASES, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 import { installFakeDom } from "./fake_dom.mjs";
 import { AREAS, HOME, point, shop } from "./point_fixtures.mjs";
 
@@ -156,6 +157,70 @@ test("Enter on a name that matches nothing hands it over, and an empty box opens
   submit(header, "   ");
   assert.deepEqual(opened, []);
   assert.deepEqual(shown, ["nothing like it"]);
+});
+
+// ---------- a city split into sections: its index, its sections and the old areas' names ----------
+
+const CITY_FINDER = sectionFinder(SECTIONS, ALIASES, SECTION_WORD);
+
+function mountCityFinder({ premises = INDEX, ready = null } = {}) {
+  const datalist = document.createElement("datalist");
+  const forms = [[document.createElement("form"), document.createElement("input")]];
+  const opened = [];
+  const shown = [];
+  const finder = wireFinder({ datalist, forms }, premises, (target) => opened.push(target), (text) => shown.push(text),
+    { extra: CITY_FINDER.entries, synonyms: CITY_FINDER.synonyms, ready });
+  return { datalist, form: forms[0], opened, shown, finder };
+}
+
+test("the sections and the old areas' names are suggestions too, after the businesses", () => {
+  const { datalist } = mountCityFinder();
+  const values = datalist.children.map((option) => option.getAttribute("value"));
+  assert.equal(values.length, INDEX.length + SECTIONS.length + 2);
+  assert.deepEqual(values.slice(INDEX.length), ["Seksyen 24", "Seksyen 25", "Seksyen U1", "Taman Sri Muda · Seksyen 25", "Taman Seri Muda · Seksyen 25"]);
+});
+
+test("an old area's name opens its section, typed in full or picked from the list", () => {
+  const { form, opened } = mountCityFinder();
+  submit(form, "Taman Sri Muda");
+  type(form, "Taman Seri Muda · Seksyen 25");
+  submit(form, "taman sri muda");
+  assert.deepEqual(opened, [{ section: "seksyen-25" }, { section: "seksyen-25" }, { section: "seksyen-25" }]);
+});
+
+test("a section opens by its name, its id, or the word for it in either language", () => {
+  const { form, opened } = mountCityFinder();
+  for (const typed of ["Seksyen 25", "SEKSYEN 25", "section 25", "Section U1", "seksyen-u1"]) submit(form, typed);
+  assert.deepEqual(opened, [{ section: "seksyen-25" }, { section: "seksyen-25" }, { section: "seksyen-25" }, { section: "seksyen-u1" }, { section: "seksyen-u1" }]);
+});
+
+test("a business anywhere in the city opens by its name, and one the name could mean several of is shown", () => {
+  const { form, opened, shown } = mountCityFinder();
+  submit(form, "kedai u satu");
+  submit(form, "dobi");
+  assert.deepEqual(opened, ["node-u1"]);
+  assert.deepEqual(shown, ["dobi"]);
+});
+
+test("more places can be handed in later, as the city index arrives on a section's page", () => {
+  const { datalist, form, opened, finder } = mountCityFinder({ premises: INDEX.slice(1, 3) });
+  submit(form, "kedai u satu");
+  assert.deepEqual(opened, []);
+  finder.setPlaces(INDEX);
+  assert.equal(datalist.children.length, INDEX.length + SECTIONS.length + 2);
+  submit(form, "kedai u satu");
+  assert.deepEqual(opened, ["node-u1"]);
+});
+
+test("Enter waits for what `ready` is still loading, then matches against it", async () => {
+  let finder = null;
+  const ready = () => Promise.resolve().then(() => finder.setPlaces(INDEX));
+  const mounted = mountCityFinder({ premises: [], ready });
+  finder = mounted.finder;
+  submit(mounted.form, "kedai u satu");
+  assert.deepEqual(mounted.opened, [], "not before the index is in");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(mounted.opened, ["node-u1"]);
 });
 
 // ---------- nothing picked ----------

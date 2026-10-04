@@ -191,12 +191,14 @@ function voiceButton({ record, send, add, isBusy, onRecording, prime }) {
 }
 
 /** getPlaceRef gives the selected place's id (a business or a point) when a question is sent. areaId and areaName are
- *  the area the page shows (its id and short name from config, which change only with a new page); areas are the listed
+ *  the area the page shows (its id and short name from config, which change only with a new page); sectionId the
+ *  section of a city the page shows, sent with each question and with the page's own news (null: none); areas are the listed
  *  areas, to tell which one a point lies in. render(place) is called as the selection changes and shows the chips, the
  *  question box's words and the flood news that fit it: until then, and for a business, the chat is the business chat.
  *  isReady is false when the build has no Gemini key: every control is then off. hasMaps is false without the Maps key. */
-export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, areaName, areas = [], voice = realVoice, isReady = true, hasMaps = true }) {
+export function createChat({ messages, chips, form, input, news, getPlaceRef, areaId, sectionId = null, areaName, areas = [], voice = realVoice, isReady = true, hasMaps = true }) {
   let history = [];
+  const scope = sectionId ? { area_id: areaId, section_id: sectionId } : { area_id: areaId };
   const button = form.querySelector("button");
   const page = { id: areaId, name: areaName };
   const showNews = newsBlock(news);
@@ -208,7 +210,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     if (button.disabled || !question.trim()) return;
     await exchange({
       add, control: button, userText: question, waitText: t("ask.checking"),
-      call: () => api.ask({ question, place: getPlaceRef(), area_id: areaId, history }),
+      call: () => api.ask({ question, place: getPlaceRef(), ...scope, history }),
       show: ({ answer }) => {
         remember(question, answer);
         add("model", answer);
@@ -227,7 +229,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     button.disabled = true;
     mic.disabled = true;
     try {
-      const { question, language, answer } = await api.askVoice({ audio, place: getPlaceRef(), area_id: areaId, history });
+      const { question, language, answer } = await api.askVoice({ audio, place: getPlaceRef(), ...scope, history });
       waiting.remove();
       add("user", question);
       add("model", answer).append(h("button", { type: "button", class: "btn btn-secondary stop-reading", onclick: voice.stopSpeaking }, VOICE_WORDS.stopReading));
@@ -257,7 +259,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     if (news.disabled || !target) return;
     await exchange({
       add, control: news, userText: newsLabel(target), waitText: t("ask.searching"),
-      call: () => api.getNews({ area_id: target.areaId }),
+      call: () => api.getNews(target.areaId === areaId ? scope : { area_id: target.areaId }),
       show: newsAnswer(add, messages),
     });
   }

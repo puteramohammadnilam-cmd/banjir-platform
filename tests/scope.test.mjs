@@ -68,3 +68,70 @@ test("the bar holds the area choice alone: the way in to any point is the search
   const { slot } = mount({ onCheckPoint: () => assert.fail("the scope bar has no check-point button") });
   assert.deepEqual(slot.querySelectorAll("button").map((button) => button.textContent), ["Open"]);
 });
+
+// ---------- a city split into sections ----------
+
+const SECTIONS = [{ id: "seksyen-24", name: "Seksyen 24" }, { id: "seksyen-25", name: "Seksyen 25" }];
+const WORD = { en: "Section", ms: "Seksyen" };
+
+function mountCity({ sectionId = null, wholeCity = true } = {}) {
+  const slot = document.createElement("div");
+  const sections = [];
+  createScopeBar(slot, {
+    areas: AREAS, areaId: "sri-muda", onArea() {}, sections: SECTIONS, sectionId, word: WORD, wholeCity,
+    onSection: (id) => sections.push(id), cityHref: "?", cityName: "The City",
+  });
+  const select = slot.querySelector('[id="section-select"]');
+  const open = slot.querySelectorAll("button").filter((button) => button.textContent === "Open")[1];
+  return { slot, select, open, sections };
+}
+
+test("a city adds a section select, in the area's own word, with the whole city first", () => {
+  const { slot, select } = mountCity();
+  assert.equal(slot.querySelector('[for="section-select"]').textContent, "Section");
+  assert.deepEqual(select.children.map((option) => [option.getAttribute("value"), option.textContent]),
+    [["", "Whole city"], ["seksyen-24", "Seksyen 24"], ["seksyen-25", "Seksyen 25"]]);
+  assert.equal(select.value, "", "the whole city is on show");
+  assert.equal(slot.querySelector('[id="area-hint"]').textContent, "Pick an area or a section, then Open.");
+  assert.equal(select.getAttribute("aria-describedby"), "area-hint");
+});
+
+test("choosing a section only chooses it; Open opens it, and the whole city with null", () => {
+  const { select, open, sections } = mountCity({ sectionId: "seksyen-25" });
+  assert.equal(open.disabled, true, "the section on show");
+  choose(select, "seksyen-24");
+  assert.deepEqual(sections, []);
+  assert.equal(open.disabled, false);
+  open.click();
+  choose(select, "");
+  open.click();
+  assert.deepEqual(sections, ["seksyen-24", null]);
+});
+
+test("a section's page has a plain link back to the whole city; the whole city's page has none", () => {
+  const onSection = mountCity({ sectionId: "seksyen-25" });
+  const back = onSection.slot.querySelector("a");
+  assert.equal(back.getAttribute("href"), "?");
+  assert.equal(back.textContent, "All of The City");
+  assert.equal(mountCity().slot.querySelector("a"), null);
+});
+
+test("a city with a default section has no whole-city view to offer", () => {
+  const { select } = mountCity({ sectionId: "seksyen-25", wholeCity: false });
+  assert.deepEqual(select.children.map((option) => option.getAttribute("value")), ["seksyen-24", "seksyen-25"]);
+});
+
+test("back from the cache, the section select shows the page's own section again", () => {
+  const { select, open } = mountCity({ sectionId: "seksyen-25" });
+  choose(select, "seksyen-24");
+  pageShow({ persisted: true });
+  assert.equal(select.value, "seksyen-25");
+  assert.equal(open.disabled, true);
+});
+
+test("a plain area's bar is as it was: one select, one Open, the plain hint", () => {
+  const { slot } = mount();
+  assert.equal(slot.querySelectorAll("select").length, 1);
+  assert.equal(slot.querySelector('[id="area-hint"]').textContent, "Pick an area, then Open.");
+  assert.equal(slot.querySelector("a"), null);
+});

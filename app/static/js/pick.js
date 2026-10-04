@@ -69,36 +69,76 @@ export function finderEntries(premises) {
   return ids;
 }
 
-/** The ids of the businesses a search means: the suggestion it is, else the one business whose name it is, else every
- *  business whose suggestion holds it. */
-function matchesOf(ids, typed) {
-  if (ids.has(typed)) return [ids.get(typed)];
-  const needle = typed.toLowerCase();
-  const hits = [...ids].filter(([text]) => text.toLowerCase().includes(needle));
-  const named = hits.filter(([text]) => text.slice(0, text.lastIndexOf(" · ")).toLowerCase() === needle);
-  return (named.length === 1 ? named : hits).map(([, id]) => id);
+/** The words a section can be searched by, lower-cased, beyond its suggestion: its id, and its name with the area's
+ *  word for a section in either language (the English word for a name the data writes in Malay, say). */
+function sectionKeys(section, word) {
+  const [first, ...rest] = section.name.split(" ");
+  const words = Object.values(word ?? {});
+  const label = words.some((w) => w.toLowerCase() === first.toLowerCase()) ? rest.join(" ") : null;
+  return [section.id, ...(label ? words.map((w) => `${w} ${label}`) : [])].map((key) => key.toLowerCase());
 }
 
-function wireForm(form, input, ids, onOpen, onShowMatches) {
-  const open = (id) => { input.value = ""; input.blur(); onOpen(id); };
-  input.addEventListener("input", () => { if (ids.has(input.value)) open(ids.get(input.value)); });
+/** A city's sections and its old areas' names (`aliases`, such as an area that is now one section) for the finder:
+ *  `entries`, suggestions to show after the businesses ([text, {section}]), and `synonyms`, more words that open a
+ *  section when typed in full (a Map of lower-cased text to {section}). */
+export function sectionFinder(sections, aliases = [], word = null) {
+  const byId = new Map(sections.map((section) => [section.id, section]));
+  const entries = sections.map((section) => [section.name, { section: section.id }]);
+  for (const alias of aliases) {
+    const section = byId.get(alias.section);
+    for (const name of section ? alias.names : []) entries.push([`${name} · ${section.name}`, { section: section.id }]);
+  }
+  const synonyms = new Map(sections.flatMap((section) => sectionKeys(section, word).map((key) => [key, { section: section.id }])));
+  return { entries, synonyms };
+}
+
+/** A suggestion's name: what comes before its last " · " (a business's road, an old area's section), else all of it. */
+const nameOf = (text) => (text.includes(" · ") ? text.slice(0, text.lastIndexOf(" · ")) : text);
+
+/** What a search means: the suggestion it is, else a section's other name typed in full, else the one entry whose name
+ *  it is, else every entry whose suggestion holds it. A business is its id; a section is {section}. */
+function matchesOf({ ids, synonyms }, typed) {
+  if (ids.has(typed)) return [ids.get(typed)];
+  const needle = typed.toLowerCase();
+  if (synonyms.has(needle)) return [synonyms.get(needle)];
+  const hits = [...ids].filter(([text]) => text.toLowerCase().includes(needle));
+  const named = hits.filter(([text]) => nameOf(text).toLowerCase() === needle);
+  return (named.length === 1 ? named : hits).map(([, target]) => target);
+}
+
+function wireForm(form, input, finder, { onOpen, onShowMatches, ready }) {
+  const open = (target) => { input.value = ""; input.blur(); onOpen(target); };
+  input.addEventListener("input", () => { if (finder.ids.has(input.value)) open(finder.ids.get(input.value)); });
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const typed = input.value.trim();
     if (!typed) { input.focus(); return; }   // an empty Search sends the reader to the box
-    const matches = matchesOf(ids, typed);
-    if (matches.length === 1) open(matches[0]);
-    else onShowMatches(typed);   // several, or none: the list of businesses, filtered by it, says which
+    const go = () => {
+      const matches = matchesOf(finder, typed);
+      if (matches.length === 1) open(matches[0]);
+      else onShowMatches(typed);   // several, or none: the list of businesses, filtered by it, says which
+    };
+    const waiting = ready?.();   // places still loading (a city's index on a section's page): match once they are in
+    if (waiting) waiting.then(go, go);
+    else go();
   });
 }
 
-/** The browser's own suggestion list in `datalist`, built once, shared by every [form, input] pair in `forms`: picking
- *  a suggestion opens its business at once. Enter opens the one business the text means; when it could mean several,
- *  or none, onShowMatches(text) shows them, as a business picked for someone would be a stranger's shop. */
-export function wireFinder({ datalist, forms }, premises, onOpen, onShowMatches) {
-  const ids = finderEntries(premises);
-  datalist.replaceChildren(...[...ids.keys()].map((text) => h("option", { value: text })));
-  for (const [form, input] of forms) wireForm(form, input, ids, onOpen, onShowMatches);
+/** The browser's own suggestion list in `datalist`, shared by every [form, input] pair in `forms`: picking a suggestion
+ *  opens it at once (onOpen(id) for a business, onOpen({section}) for a section). Enter opens the one place the text
+ *  means; when it could mean several, or none, onShowMatches(text) shows them, as a business picked for someone would
+ *  be a stranger's shop. `extra` are more suggestions after the businesses and `synonyms` more words for them
+ *  (sectionFinder); ready() may give a promise of places still loading, which Enter waits for. setPlaces(premises) puts
+ *  in a new list of businesses. */
+export function wireFinder({ datalist, forms }, premises, onOpen, onShowMatches, { extra = [], synonyms = new Map(), ready = null } = {}) {
+  const finder = { ids: new Map(), synonyms };
+  const setPlaces = (places) => {
+    finder.ids = new Map([...finderEntries(places), ...extra]);
+    datalist.replaceChildren(...[...finder.ids.keys()].map((text) => h("option", { value: text })));
+  };
+  setPlaces(premises);
+  for (const [form, input] of forms) wireForm(form, input, finder, { onOpen, onShowMatches, ready });
+  return { setPlaces };
 }
 
 // ---------- nothing picked yet ----------

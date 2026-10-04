@@ -19,10 +19,13 @@
   <link rel="modulepreload" href="js/strings/ms.js">
   <link rel="modulepreload" href="js/dom.js">
   <link rel="modulepreload" href="js/place.js">
+  <link rel="modulepreload" href="js/start.js">
   <link rel="modulepreload" href="js/pick.js">
   <link rel="modulepreload" href="js/cells.js">
   <link rel="modulepreload" href="js/map.js">
   <link rel="modulepreload" href="js/scope.js">
+  <link rel="modulepreload" href="js/choropleth.js">
+  <link rel="modulepreload" href="js/section-table.js">
   <link rel="modulepreload" href="js/history.js">
   <link rel="modulepreload" href="js/kpis.js">
   <link rel="modulepreload" href="js/overview.js">
@@ -112,7 +115,7 @@
           <div class="surface-head">
             <div>
               <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
-              <p class="muted small" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
+              <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
             </div>
             <div class="scenario-slot" data-scenario></div>
           </div>
@@ -131,6 +134,11 @@
           </section>
         </div>
       </div>
+      <section class="surface sections-surface" id="sections-surface" aria-labelledby="sections-heading" hidden>
+        <h2 id="sections-heading"></h2>
+        <p class="muted small" id="sections-lead"></p>
+        <div class="table-scroll sections-scroll" id="sections-table"></div>
+      </section>
       <section class="surface directory" aria-labelledby="directory-heading">
         <div class="surface-head">
           <h2 id="directory-heading" data-i18n="overview.businesses">Businesses</h2>

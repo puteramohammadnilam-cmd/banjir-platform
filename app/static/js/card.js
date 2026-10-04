@@ -135,14 +135,16 @@ function businessHead(premise, showOnMap) {
   ];
 }
 
-/** Where a point lies, when that is a listed area other than the page's: said, and a way to open that area. Without
- *  onOpenArea only the sentence shows. */
-const elsewhereOffer = ({ id, text, action }, onOpenArea) => h("p", { class: "fact-note" }, text, " ",
-  onOpenArea && h("button", { type: "button", class: "btn btn-link", onclick: () => onOpenArea(id) }, action));
+/** Where a point lies, when that is a listed area, or a section of the page's city, other than the page's: said, and a
+ *  way to open it (onOpenArea, or onOpenSection for a section). Without that callback only the sentence shows. */
+const elsewhereOffer = ({ kind, id, text, action }, { onOpenArea, onOpenSection }) => {
+  const onOpen = kind === "section" ? onOpenSection : onOpenArea;
+  return h("p", { class: "fact-note" }, text, " ", onOpen && h("button", { type: "button", class: "btn btn-link", onclick: () => onOpen(id) }, action));
+};
 
 /** A point, a model square someone picked, has no name, kind or road of its own: its words are in point.js. "Move the
  *  pin" shows only where the page can move the pin (onMovePin). */
-function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea }) {
+function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea, onOpenSection }) {
   const words = pointHeader(place, area, areas);
   const move = onMovePin && h("button", { type: "button", class: "btn btn-secondary", onclick: () => onMovePin() }, icon("map"), t("business.movePin"));
   return [
@@ -151,7 +153,7 @@ function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea }) {
       h("h1", { class: "view-title" }, words.title),
       words.subline && h("p", { class: "muted small" }, words.subline),
       h("ul", { class: "tags" }, words.tags.map((tag) => h("li", { class: "tag" }, tag))),
-      words.elsewhere && elsewhereOffer(words.elsewhere, onOpenArea)),
+      words.elsewhere && elsewhereOffer(words.elsewhere, { onOpenArea, onOpenSection })),
     h("div", { class: "biz-actions" }, move, " ", seeOnMap(showOnMap)),
   ];
 }
@@ -174,13 +176,14 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isRea
 }
 
 /** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
- *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onAsk(button) opens the floating chat (the button is
+ *  lies in; onOpenArea(areaId) opens that area when it is not the page's, and onOpenSection(sectionId) a section of the
+ *  page's city; onAsk(button) opens the floating chat (the button is
  *  where focus returns to); onMovePin() puts the pin of a point back in
  *  the map's hands. With no place picked the tab shows the empty state (pick.js), with onFind and onCheckPoint behind
  *  its buttons. isReady and hasMaps are false when the build has no Gemini key or no Google Maps key: the photo button
  *  is then off, and the Ask AI shortcut says what it can read. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
  *  not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onAsk = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
+export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onOpenSection = null, onAsk = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": t("business.riskLabel") });
@@ -215,7 +218,7 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
       grid.hidden = false;
       const photoFloorM = photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm / 100 : 0;
       const floorM = Math.min(photoFloorM, MAX_DRAWN_FLOOR_M);
-      if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea }));
+      if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea, onOpenSection }));
       const key = `${premise.id}|${premise.area_id}|${rp}|${photoFloorM}`;
       if (key !== drawnKey) {
         drawnKey = key;

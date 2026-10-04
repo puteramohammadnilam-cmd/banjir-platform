@@ -10,7 +10,9 @@ import { useLang } from "../app/static/js/i18n.js";
 import { costTitle } from "../app/static/js/cost.js";
 import { businessPlace } from "../app/static/js/place.js";
 import { NO_WATER_NOTE, areaOf, pointHeader } from "../app/static/js/point.js";
+import { pageArea } from "../app/static/js/start.js";
 import { AREAS, FAR, HOME, point, shop } from "./point_fixtures.mjs";
+import { CITY_AREA, SECTIONS } from "./fixtures/city_data.mjs";
 
 test("a point in the page's own area is titled with that area, and says which square it is", () => {
   assert.deepEqual(pointHeader(point(), HOME, AREAS), {
@@ -31,7 +33,7 @@ test("the square's centre is written with 5 decimals, whatever its digits", () =
 test("a point in another listed area names it and offers to open it", () => {
   const header = pointHeader(point({ area_id: "far" }), HOME, AREAS);
   assert.equal(header.title, "Point in Far Town centre, Other State");
-  assert.deepEqual(header.elsewhere, { id: "far", text: "This point is in Far Town.", action: "Open Far Town" });
+  assert.deepEqual(header.elsewhere, { kind: "area", id: "far", text: "This point is in Far Town.", action: "Open Far Town" });
 });
 
 test("a point in no listed area is a point you picked, with nothing to open", () => {
@@ -158,4 +160,39 @@ test("flood news follows the place: a business's area, a point's area, nothing f
   assert.deepEqual(newsFor(point({ area_id: "far" }), HOME, AREAS), { areaId: "far", name: "Far Town" });
   for (const area_id of [null, "nowhere"]) assert.equal(newsFor(point({ area_id }), HOME, AREAS), null, String(area_id));
   assert.equal(NEWS_NOTE, "Flood news is available for the listed areas.");
+});
+
+// ---------- a point in a city split into sections ----------
+
+const IN_25 = { id: "seksyen-25", name: "Seksyen 25" };
+const cityPoint = (section = IN_25) => point({ area_id: "shah-alam", section });
+const CITY_LIST = [{ id: "shah-alam", name: "Shah Alam", display_name: "Shah Alam, Selangor" }, FAR];
+
+test("on the whole city's page a point names its section and offers to open it: never opened on its own", () => {
+  const header = pointHeader(cityPoint(), CITY_AREA, CITY_LIST);
+  assert.equal(header.title, "Point in Seksyen 25, Shah Alam");
+  assert.deepEqual(header.elsewhere, { kind: "section", id: "seksyen-25", text: "This point is in Seksyen 25.", action: "Open Seksyen 25" });
+});
+
+test("on its own section's page a point names the section and offers nothing; in another section it offers that one", () => {
+  const here = pointHeader(cityPoint(), pageArea(CITY_AREA, SECTIONS[1]), CITY_LIST);
+  assert.equal(here.title, "Point in Seksyen 25, Shah Alam");
+  assert.equal(here.elsewhere, null);
+  const next = pointHeader(cityPoint(), pageArea(CITY_AREA, SECTIONS[0]), CITY_LIST);
+  assert.equal(next.title, "Point in Seksyen 25, Shah Alam");
+  assert.equal(next.elsewhere.kind, "section");
+  assert.equal(next.elsewhere.id, "seksyen-25");
+});
+
+test("a point of the city in no section is titled with the city, with nothing to open", () => {
+  const header = pointHeader(cityPoint(null), CITY_AREA, CITY_LIST);
+  assert.equal(header.title, "Point in Shah Alam, Selangor");
+  assert.equal(header.elsewhere, null);
+});
+
+test("a point in a section of another listed city offers that city, not the section", () => {
+  const header = pointHeader(cityPoint(), HOME, CITY_LIST);
+  assert.equal(header.title, "Point in Seksyen 25, Shah Alam");
+  assert.equal(header.elsewhere.kind, "area");
+  assert.equal(header.elsewhere.id, "shah-alam");
 });

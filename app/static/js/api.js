@@ -28,6 +28,8 @@ export const getAreas = () => call("/api/areas");
 export const getAreaData = (id) => call(`/api/areas/${area(id)}/data`);
 /** The default area's data, in the same shape: asked for at once when a link names no area, beside getAreas. */
 export const getDefaultData = () => call("/api/data");
+/** One section of a city split into sections: its businesses in full and its squares (GET .../sections/{id}/data). */
+export const getSectionData = (areaId, sectionId) => call(`/api/areas/${area(areaId)}/sections/${encodeURIComponent(sectionId)}/data`);
 export const getStatus = () => call("/api/status");
 export const getCoverage = () => call("/api/coverage");
 /** A point goes in the body of a POST, never in a URL, so it stays out of server and proxy logs. The answer carries the
@@ -40,7 +42,9 @@ export const askVoice = (payload) => call("/api/voice", payload);
 export const sendPhoto = (payload) => call("/api/photo", payload);
 export const sendStock = (payload) => call("/api/stock", payload);
 export const writePlan = (payload) => call("/api/plan", payload);
-export const getRain = (areaId) => call(`/api/rain?area=${area(areaId)}`);
+/** The rain due over the area, or over the section on show (the page's own link names it already). */
+export const getRain = (areaId, sectionId = null) =>
+  call(`/api/rain?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);
 export const estimate = (payload) => call("/api/estimate", payload);

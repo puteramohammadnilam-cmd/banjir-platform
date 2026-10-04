@@ -4,8 +4,10 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { areaSummary, buildAreaReport } from "../app/static/js/area-report.js";
+import { areaSummary, buildAreaReport, topSections } from "../app/static/js/area-report.js";
+import { pageArea } from "../app/static/js/start.js";
 import { installFakeDom } from "./fake_dom.mjs";
+import { CITY_AREA, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 
 const road = (name) => ({ name, kind: "residential", distance_m: 5, depth_m: { 10: null, 20: null, 50: null } });
 const biz = (id, roadName, d10, d20, d50) => ({ id, name: id, road: road(roadName), depth_m: { 10: d10, 20: d20, 50: d50 } });
@@ -64,6 +66,48 @@ test("in Bahasa Melayu the sheet's labels say dalam model", () => {
     const text = buildAreaReport({ area: AREA, premises: PREMISES, date: "3 Okt 2026" }).textContent;
     assert.match(text, /Perniagaan yang dimasuki air, dalam model/);
     assert.match(text, /1 dalam 50 tahun/);
+  } finally {
+    useLang("en");
+  }
+});
+
+// ---------- a city split into sections ----------
+
+const cityReport = () => buildAreaReport({ area: CITY_AREA, premises: INDEX, sections: SECTIONS, word: SECTION_WORD, date: "5 Oct 2026" });
+
+test("the city's sections with the most businesses with water, at 1 in 50, biggest first, none with none", () => {
+  assert.deepEqual(topSections(SECTIONS).map(({ id, wet, total }) => [id, wet, total]), [["seksyen-25", 2, 3], ["seksyen-24", 1, 1]]);
+  const many = Array.from({ length: 14 }, (_, i) => ({ ...SECTIONS[0], id: `s-${i}`, counts: { ...SECTIONS[0].counts, wet_businesses: { 10: 0, 20: 0, 50: i + 1 } } }));
+  assert.equal(topSections(many).length, 10, "ten at most");
+  assert.equal(topSections(many)[0].id, "s-13");
+});
+
+test("the city's sheet is the whole city's, from its index, and adds the table of sections", () => {
+  const sheet = cityReport();
+  assert.equal(sheet.querySelector("h3").textContent, "Flood summary: Shah Alam, Selangor");
+  assert.match(sheet.textContent, /5 businesses mapped/);
+  const headings = sheet.querySelectorAll("h4").map((heading) => heading.textContent);
+  assert.ok(headings.includes("The sections with the most businesses with water in the model, 1 in 50 years"), headings.join(" | "));
+  const [, sections] = sheet.querySelectorAll("table");
+  assert.deepEqual(sections.querySelectorAll("th").map((cell) => cell.textContent), ["Section", "Businesses with water", "Squares with water", "Seksyen 25", "Seksyen 24"]);
+  assert.deepEqual(sections.querySelectorAll("td").map((cell) => cell.textContent), ["2 of 3", "58%", "1 of 1", "11%"]);
+  assert.match(sheet.textContent, /Jalan Sungai: 2/, "the streets come from the index too");
+});
+
+test("a section's sheet is the section's, with no table of sections; a plain area's is as it was", () => {
+  const page = pageArea(CITY_AREA, SECTIONS[1]);
+  const sheet = buildAreaReport({ area: page, premises: INDEX.slice(1, 4), sections: null, word: SECTION_WORD, date: "5 Oct 2026" });
+  assert.equal(sheet.querySelector("h3").textContent, "Flood summary: Seksyen 25, Shah Alam");
+  assert.equal(sheet.querySelectorAll("table").length, 1);
+  assert.equal(buildAreaReport({ area: AREA, premises: PREMISES, date: "5 Oct 2026" }).querySelectorAll("table").length, 1);
+});
+
+test("in Bahasa Melayu the table of sections uses the area's own word", () => {
+  useLang("ms");
+  try {
+    const sheet = cityReport();
+    assert.ok(sheet.querySelectorAll("h4").some((heading) => heading.textContent.startsWith("Senarai seksyen dengan paling banyak")));
+    assert.equal(sheet.querySelectorAll("table")[1].querySelector("th").textContent, "Seksyen");
   } finally {
     useLang("en");
   }
