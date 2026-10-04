@@ -8,7 +8,7 @@ import { beforeEach, test } from "node:test";
 import { useLang } from "../app/static/js/i18n.js";
 import { createSectionTable, sectionRows, sortRows } from "../app/static/js/section-table.js";
 import { installFakeDom } from "./fake_dom.mjs";
-import { SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
+import { INDEXED_SECTIONS, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 
 beforeEach(() => installFakeDom());
 
@@ -124,6 +124,63 @@ test("in Bahasa Melayu the headers use the area's own word and the order reads n
     assert.deepEqual(headers(slot).map((th) => th.textContent.trim()), ["Seksyen", "Petak dinaiki air", "Perniagaan dimasuki air"]);
     sortButton(slot, 1).click();
     assert.equal(live(slot).textContent, "Disusun mengikut Petak dinaiki air, menaik.");
+  } finally {
+    useLang("en");
+  }
+});
+
+// ---------- flash flood potential and our score ----------
+
+function mountIndexed({ showScore = true, sections = INDEXED_SECTIONS } = {}) {
+  const slot = document.createElement("div");
+  createSectionTable(slot, { sections, word: SECTION_WORD, hrefOf: (id) => `?section=${id}`, showScore }).show("50");
+  return slot;
+}
+
+test("with the index, two more columns: high or extreme flash flood potential, and our score", () => {
+  const slot = mountIndexed();
+  assert.deepEqual(headers(slot).map((th) => th.textContent.trim()),
+    ["Section", "Squares with water", "Businesses with water", "High flash flood potential", "Our score (1–5)"]);
+  const cells = (i) => slot.querySelectorAll("tbody")[0].children[i].children.map((cell) => cell.textContent);
+  assert.deepEqual(cells(0).slice(3), ["5%", "4.6"]);
+  assert.deepEqual(cells(2).slice(3), ["70%", "not worked out"], "Seksyen U1 has no score");
+});
+
+test("rows carry the flash share and the score, null where not worked out", () => {
+  const rows = sectionRows(INDEXED_SECTIONS, "50");
+  assert.deepEqual(rows.map(({ flash, score }) => [flash, score]), [[0.2, 3.2], [0.05, 4.6], [0.7, null]]);
+  assert.deepEqual(sectionRows(SECTIONS, "50").map(({ flash, score }) => [flash, score]), [[null, null], [null, null], [null, null]]);
+});
+
+test("a figure not worked out sorts last whichever way the list runs", () => {
+  const rows = sectionRows(INDEXED_SECTIONS, "50");
+  assert.deepEqual(sortRows(rows, "score", "descending").map(({ id }) => id), ["seksyen-25", "seksyen-24", "seksyen-u1"]);
+  assert.deepEqual(sortRows(rows, "score", "ascending").map(({ id }) => id), ["seksyen-24", "seksyen-25", "seksyen-u1"]);
+  assert.deepEqual(sortRows(rows, "flash", "descending").map(({ id }) => id), ["seksyen-u1", "seksyen-24", "seksyen-25"]);
+});
+
+test("the new columns sort, set aria-sort on their own header and say so", () => {
+  const slot = mountIndexed();
+  sortButton(slot, 3).click();
+  assert.deepEqual(names(slot), ["Seksyen U1", "Seksyen 24", "Seksyen 25"]);
+  assert.deepEqual(headers(slot).map((th) => th.getAttribute("aria-sort")), [null, null, null, "descending", null]);
+  assert.equal(live(slot).textContent, "Sorted by High flash flood potential, descending.");
+  sortButton(slot, 4).click();
+  assert.deepEqual(names(slot), ["Seksyen 25", "Seksyen 24", "Seksyen U1"]);
+  assert.deepEqual(headers(slot).map((th) => th.getAttribute("aria-sort")), [null, null, null, null, "descending"]);
+  sortButton(slot, 4).click();
+  assert.equal(live(slot).textContent, "Sorted by Our score (1–5), ascending.");
+});
+
+test("the score column waits for the data's say-so, and neither column shows without the index", () => {
+  assert.equal(headers(mountIndexed({ showScore: false })).length, 4, "score hidden");
+  assert.equal(headers(mountIndexed({ sections: SECTIONS })).length, 3, "an older server: the table as it was");
+});
+
+test("in Bahasa Melayu the new headers read naturally", () => {
+  useLang("ms");
+  try {
+    assert.deepEqual(headers(mountIndexed()).slice(3).map((th) => th.textContent.trim()), ["Potensi banjir kilat tinggi", "Skor kami (1–5)"]);
   } finally {
     useLang("en");
   }

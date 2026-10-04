@@ -505,3 +505,26 @@ body[data-tab="overview"] .finder { display: none; }
 @media (max-width: 520px) {
   .directory-next .btn { flex: 1 1 100%; }
 }
+
+/* ---------- flash flood potential: its layer, the controls under the map, and swatches of a ramp on the map's ground ---------- */
+.flash-overlay { image-rendering: pixelated; }   /* each ~30 m square stays a square: a susceptibility, not a smooth surface */
+.map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-5); margin-top: var(--space-3); padding: var(--space-1) var(--space-3); border-radius: var(--radius-md); background: var(--surface-sunk); font-size: var(--text-sm); }
+.map-controls label { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; cursor: pointer; }
+.map-controls input { width: 1.1rem; height: 1.1rem; margin: 0; accent-color: var(--brand); }
+.layer-toggle { font-weight: 700; }
+.metric-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-2); }
+.metric-choice legend { float: left; margin-right: var(--space-2); font-weight: 700; }
+.metric-choice label { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface); transition: border-color var(--duration-fast), background-color var(--duration-fast); }
+.metric-choice label:hover { border-color: var(--brand); }
+.metric-choice label:has(:checked) { border-color: var(--brand); background: var(--brand-wash); color: var(--brand-deep); font-weight: 600; }
+.map-controls .alert { flex-basis: 100%; margin: 0 0 var(--space-2); }
+.ramp-swatch, .choro-swatch[style] { background: linear-gradient(var(--sw), var(--sw)), var(--map-ground); }
+.ramp-swatch { flex: none; display: inline-block; width: 22px; height: 14px; border: 1px solid var(--line-strong); border-radius: 3px; }
+.flash-fact .ramp-swatch { margin-right: var(--space-2); vertical-align: -1px; }
+.index-cell { white-space: nowrap; }
+.index-cell .choro-swatch { display: inline-block; width: 12px; height: 12px; margin-right: var(--space-2); vertical-align: -1px; }
+.index-method { margin-top: var(--space-3); }
+.index-method-body { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); font-size: var(--text-sm); color: var(--ink-2); }
+.index-method-body ul { padding-left: 1.2rem; list-style: disc; }
+.section-table:has(.col-flash) .col-share { width: 26%; }   /* room for the index's columns */
+.col-score .sort-button { white-space: nowrap; }

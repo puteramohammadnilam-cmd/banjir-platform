@@ -7,9 +7,15 @@ import { beforeEach, test } from "node:test";
 
 import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, h } from "../app/static/js/dom.js";
-import { createCityDirectory, createDirectory, renderAreaLabels, renderLegend } from "../app/static/js/overview.js";
+import { DEPTH_METRIC, FLASH_METRIC } from "../app/static/js/choropleth.js";
+import {
+  createCityDirectory, createDirectory, createIndexControls, indexMetrics, renderAreaLabels, renderLegend, renderMethod,
+} from "../app/static/js/overview.js";
+import { FLASH_RAMP, swatchStyle } from "../app/static/js/susceptibility.js";
 import { pageArea } from "../app/static/js/start.js";
-import { CITY_AREA, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
+import {
+  CITY_AREA, FLASH_LAYER, INDEX, INDEXED_AREA, INDEXED_SECTIONS, INDEX_METHOD, SECTIONS, SECTION_WORD,
+} from "./fixtures/city_data.mjs";
 import { installFakeDom } from "./fake_dom.mjs";
 import { HOME, shop } from "./point_fixtures.mjs";
 
@@ -271,4 +277,134 @@ test("where floods are on record but the river model shows no water, the map say
   assert.equal(riverOnlyNote(pageArea(CITY_AREA, SECTIONS[1]), SECTIONS[1]), null, "wet in the model: nothing to explain");
   assert.equal(riverOnlyNote({ ...page, history: { ...CITY_AREA.history, floods: [] } }, dry), null, "no record: nothing disagrees");
   assert.equal(riverOnlyNote(CITY_AREA, null), null, "the whole city has its own map");
+});
+
+// ---------- flash flood potential: the checkbox, the "Colour by" radios, the key and the method ----------
+
+/** A stand-in for the map: addOverlay hands over a Leaflet map with panes, and L.imageOverlay records what it draws. */
+function fakeMap() {
+  const panes = new Map();
+  const leaflet = {
+    getPane: (name) => panes.get(name),
+    createPane: (name) => { panes.set(name, { style: {} }); return panes.get(name); },
+  };
+  const drawn = [];
+  globalThis.L = {
+    imageOverlay: (url, bounds, options) => {
+      const overlay = { url, bounds, options, onMap: false, events: new Map() };
+      overlay.on = (type, listener) => { overlay.events.set(type, listener); return overlay; };
+      overlay.addTo = () => { overlay.onMap = true; return overlay; };
+      overlay.remove = () => { overlay.onMap = false; return overlay; };
+      drawn.push(overlay);
+      return overlay;
+    },
+  };
+  return { map: { addOverlay: (build) => build({ map: leaflet, renderer: {}, isAiming: () => false }) }, drawn, panes };
+}
+
+function mountControls({ layer = FLASH_LAYER, metrics = [] } = {}) {
+  const slot = h("div");
+  const fake = fakeMap();
+  const changes = [];
+  const controls = createIndexControls(slot, { map: fake.map, layer, metrics, word: SECTION_WORD, onChange: (state) => changes.push(state) });
+  return { slot, controls, changes, ...fake };
+}
+
+test("the layer is fetched only once the box is ticked, then drawn at 0.7, pixelated, in a pane under the dots", () => {
+  const { slot, drawn, panes, changes } = mountControls();
+  assert.equal(slot.hidden, false);
+  assert.equal(drawn.length, 0, "nothing is fetched while the box is off");
+  const box = slot.querySelector("input");
+  box.checked = true;
+  box.dispatch("change");
+  assert.equal(drawn.length, 1);
+  const [overlay] = drawn;
+  assert.equal(overlay.url, FLASH_LAYER.url);
+  assert.deepEqual(overlay.bounds, [[2.95, 101.43], [3.23, 101.59]], "[west, south, east, north] as Leaflet's corners");
+  assert.equal(overlay.options.opacity, 0.7);
+  assert.match(overlay.options.className, /flash-overlay/);
+  assert.equal(overlay.options.interactive, false);
+  assert.ok(Number(panes.get(overlay.options.pane).style.zIndex) < 400, "under the overlay pane, where the squares and dots are");
+  assert.equal(overlay.onMap, true);
+  box.checked = false;
+  box.dispatch("change");
+  assert.equal(overlay.onMap, false);
+  box.checked = true;
+  box.dispatch("change");
+  assert.equal(drawn.length, 1, "the same layer comes back; nothing is fetched again");
+  assert.deepEqual(changes.map(({ isFlashOn }) => isFlashOn), [true, false, true]);
+});
+
+test("a layer that fails to load unticks the box and says so, and the next tick tries again", () => {
+  const { slot, drawn, changes } = mountControls();
+  const box = slot.querySelector("input");
+  box.checked = true;
+  box.dispatch("change");
+  drawn[0].events.get("error")();
+  assert.equal(box.checked, false);
+  assert.equal(drawn[0].onMap, false);
+  assert.match(slot.querySelector('[role="alert"]').textContent, /could not be loaded/);
+  assert.equal(changes.at(-1).isFlashOn, false);
+  box.checked = true;
+  box.dispatch("change");
+  assert.equal(drawn.length, 2);
+  assert.equal(slot.querySelector('[role="alert"]').hidden, true);
+});
+
+test("no layer and one metric: no controls at all, the slot stays hidden", () => {
+  const { slot } = mountControls({ layer: null, metrics: ["depth"] });
+  assert.equal(slot.hidden, true);
+  assert.equal(slot.children.length, 0);
+});
+
+test("the radios hand on the metric picked", () => {
+  const { slot, changes } = mountControls({ metrics: ["depth", "flash", "score"] });
+  slot.querySelectorAll("input").find((input) => input.getAttribute("value") === "score").dispatch("change");
+  assert.deepEqual(changes, [{ isFlashOn: false, metric: "score" }]);
+});
+
+test("the metrics on offer: the river model, then flash if any section has it, then the score only if the data says so", () => {
+  assert.deepEqual(indexMetrics(INDEXED_SECTIONS, INDEX_METHOD), ["depth", "flash", "score"]);
+  assert.deepEqual(indexMetrics(INDEXED_SECTIONS, { ...INDEX_METHOD, show_score: false }), ["depth", "flash"]);
+  assert.deepEqual(indexMetrics(INDEXED_SECTIONS, { ...INDEX_METHOD, show_score: undefined }), ["depth", "flash"], "no flag: hidden");
+  assert.deepEqual(indexMetrics(INDEXED_SECTIONS, null), ["depth", "flash"]);
+  assert.deepEqual(indexMetrics(SECTIONS, INDEX_METHOD), ["depth"], "an older server: the river model only");
+});
+
+test("with the layer on, the key gains a group in the warm ramp, labelled a susceptibility, not a depth, with its credit", () => {
+  const legend = h("ul");
+  renderLegend(legend, true, null, { isFlashOn: true, credit: FLASH_LAYER.credit });
+  const groups = legend.children;
+  assert.equal(groups.length, 3);
+  const flash = groups[2];
+  assert.equal(flash.querySelector(".legend-heading").textContent, "Flash flood potential: a susceptibility, not a depth");
+  assert.deepEqual(flash.querySelectorAll("li").map((item) => item.textContent), ["Low", "Medium", "High", "Extreme"]);
+  assert.deepEqual(flash.querySelectorAll(".ramp-swatch").map((swatch) => swatch.getAttribute("style")), FLASH_RAMP.map(swatchStyle));
+  assert.equal(flash.querySelector(".fineprint").textContent, FLASH_LAYER.credit, "the layer's data credit, under the map while it is on");
+  renderLegend(legend, true);
+  assert.equal(legend.children.length, 2, "off again: the key as it was");
+});
+
+test("the city's key follows the metric picked, and keeps the flash group while the layer is on", () => {
+  const legend = h("ul");
+  renderLegend(legend, false, { word: SECTION_WORD }, { metric: FLASH_METRIC, isFlashOn: true });
+  assert.match(legend.children[0].querySelector(".legend-heading").textContent, /high or extreme flash flood potential/);
+  assert.equal(legend.children.length, 3);
+  renderLegend(legend, false, { word: SECTION_WORD }, { metric: DEPTH_METRIC });
+  assert.match(legend.children[0].querySelector(".legend-heading").textContent, /90 m squares with water/);
+});
+
+test("'How these are worked out' shows with the index, hides without it, and leaves the score out until allowed", () => {
+  const details = h("details");
+  const body = h("div");
+  renderMethod(details, body, INDEXED_AREA, { word: SECTION_WORD });
+  assert.equal(details.hidden, false);
+  assert.match(body.textContent, /Smith \(2003\).*Leeonis et al\. \(2024\)/);
+  assert.match(body.textContent, /ESA WorldCover 2021, SoilGrids 2\.0/);
+  renderMethod(details, body, { ...INDEXED_AREA, index_method: { ...INDEX_METHOD, show_score: false } }, { word: SECTION_WORD });
+  assert.doesNotMatch(body.textContent, /Leeonis/);
+  renderMethod(details, body, CITY_AREA, { word: SECTION_WORD });
+  assert.equal(details.hidden, true, "an older server: no method to explain");
+  renderMethod(details, body, { ...CITY_AREA, layers: { flash_flood: null }, index_method: null }, { word: SECTION_WORD });
+  assert.equal(details.hidden, true, "another area: the fields are there, and null");
 });
