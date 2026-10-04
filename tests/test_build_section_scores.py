@@ -125,13 +125,13 @@ def test_section_means_weight_each_square_by_its_area():
 
 def test_flash_shares_are_area_weighted_and_add_up_to_one():
     grid, holder, _ = four_by_four()
-    scores = array("d", [2.0, 4.0, 6.0, 9.0, 8.0, 5.5, go.NODATA, 3.3, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 7.8, 7.7])
+    scores = array("d", [2.0, 4.0, 6.5, 9.0, 8.0, 5.5, go.NODATA, 4.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 8.5, 8.4])
     found = bs.flash_summary(scores, holder, grid, 2)
     w = [math.cos(math.radians(lat)) for lat in (52.5, 37.5, 22.5, 7.5)]
     east = w[0] + w[1] + 2 * w[2] + 2 * w[3]
-    assert found[1]["share"]["high"] == round((w[0] + w[3]) / east, 3)            # 6.0 and 7.7
-    assert found[1]["share"]["extreme"] == round(w[3] / east, 3)                  # 7.8
-    assert found[1]["share"]["medium"] == round(w[1] / east, 3)                   # 3.3
+    assert found[1]["share"]["high"] == round((w[0] + w[3]) / east, 3)            # 6.5 and 8.4
+    assert found[1]["share"]["extreme"] == round(w[3] / east, 3)                  # 8.5
+    assert found[1]["share"]["medium"] == round(w[1] / east, 3)                   # 4.5
     assert sum(found[0]["share"].values()) == pytest.approx(1.0, abs=0.002)
     assert list(found[0]["share"]) == ["low", "medium", "high", "extreme"]
 

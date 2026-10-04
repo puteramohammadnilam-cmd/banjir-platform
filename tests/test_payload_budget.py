@@ -94,7 +94,7 @@ def made_up_doc(rng: random.Random) -> dict:
              "classes": ["very_low", "low", "moderate", "high", "very_high"], "breaks": [1.5, 2.5, 3.5, 4.5],
              "break_rule": sentence(rng, 12), "citations": [sentence(rng, 18) for _ in range(2)],
              "deviations": [sentence(rng, 25) for _ in range(5)]}
-    return {"method": {"flash": {"classes": CLASSES, "breaks": [3.25, 5.5, 7.75]}, "score": score},
+    return {"method": {"flash": {"classes": CLASSES, "breaks": [4.5, 6.5, 8.5]}, "score": score},
             "sections": found, "city": found[next(iter(found))],
             "validation": {"wording": sentence(rng, 15), "n": 56,
                            "spearman": {w: round(rng.uniform(-1, 1), 2) for w in WORDS[:4]},
@@ -111,13 +111,13 @@ def made_up_flash_method() -> dict:
 
 def made_up_layer() -> dict:
     return {"url": indexes.LAYER_URL.format(id=CITY), "bounds": [101.4277, 2.9496, 101.5914, 3.2298],
-            "breaks": [3.25, 5.5, 7.75], "credit": sentence(random.Random(3), 40)}
+            "breaks": [4.5, 6.5, 8.5], "credit": sentence(random.Random(3), 40)}
 
 
 def made_up_score(lat: float, lon: float) -> dict:
     """A figure that varies smoothly over the city, as a real one does over slope and land cover."""
     value = round(1 + 8.9 * abs(((lat * 40 + lon * 25) % 2) - 1), 1)
-    return {"score": value, "class": "low" if value < 3.25 else "medium" if value < 5.5 else "high"}
+    return {"score": value, "class": "low" if value < 4.5 else "medium" if value < 6.5 else "high"}
 
 
 @contextlib.contextmanager

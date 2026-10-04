@@ -5,7 +5,7 @@
     "path": "app/data/indexes/{area}_ffpi.json",
     "rules": [
       "classes: exactly [\"low\", \"medium\", \"high\", \"extreme\"], in this order (rising potential).",
-      "breaks: 3 ascending numbers on the 1-10 scale. A score at or above breaks[i] belongs to classes[i + 1]; below breaks[0] is classes[0]. The real values are equal intervals of 1-10: [3.25, 5.5, 7.75].",
+      "breaks: 3 ascending numbers on the 1-10 scale. A score at or above breaks[i] belongs to classes[i + 1]; below breaks[0] is classes[0]. The real values follow the paper's reading of Scenario-2 scores 5-6 as medium: [4.5, 6.5, 8.5].",
       "Class is always worked out from the stored score (rounded to scale.decimals), so the tif, the JSON and the runtime agree.",
       "legend: one entry per class in classes order; colour is #rrggbb lower case (sRGB of the oklch triple [L, C, h]); same colours as the PNG palette.",
       "grid: the tif's grid; pixel is area; west/north are the outer edges; px/py degrees per square (1 arc second); row 0 north, col 0 west.",
@@ -20,7 +20,7 @@
       "index": "ffpi",
       "scale": {"min": 1, "max": 10, "decimals": 1},
       "classes": ["low", "medium", "high", "extreme"],
-      "breaks": [3.25, 5.5, 7.75],
+      "breaks": [4.5, 6.5, 8.5],
       "break_rule": "A score at or above a break belongs to the class above it.",
       "legend": [
         {"class": "low", "colour": "#fbd9c7", "oklch": [0.91, 0.045, 50]},
@@ -99,7 +99,7 @@
         "flash": {
           "source": "shah-alam_ffpi.json",
           "classes": ["low", "medium", "high", "extreme"],
-          "breaks": [3.25, 5.5, 7.75],
+          "breaks": [4.5, 6.5, 8.5],
           "per_section": "Mean score and share of the section's land squares in each class; permanent water left out."
         },
         "score": {

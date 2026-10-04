@@ -14,9 +14,9 @@ shah-alam_ffpi.json; the section figures' in tools/build_section_scores.py.
 
 Outputs
 -------
-shah-alam_ffpi.tif: 632422 bytes, SHA-256 c0a9d37c496756d6019c737554ac2ac5de254a9095ec95992ab0eb851cd5468e
-shah-alam_ffpi.png: 42572 bytes, SHA-256 005298fc920bf97282d6b29af8800f74c08e444825b9c531ac461b5810e37ac2
-shah-alam_ffpi.json: 5335 bytes, SHA-256 7725f8d6ea1a3685441e7b0341509cfad93da15208a9e805f06b6098422e6f6f
+shah-alam_ffpi.tif: 284370 bytes, SHA-256 7a0be21a6cfda97eefbb6c67030482037e1e1d04a64d8b9464f17c513e3a32b3
+shah-alam_ffpi.png: 57388 bytes, SHA-256 a6b0d2001691283cfc1356d555ff25e97245fd21ff26f9e90a80cc38c8df02e9
+shah-alam_ffpi.json: 5760 bytes, SHA-256 db8273215ea91d79127ffb426320e5769f2bc9ed48f35e83d8beefb52d0aa9ef
 
 Other inputs: app/data/dem/shah-alam_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the
 city outline, shah_alam/mbsa_sections/city_outline.geojson ((c) OpenStreetMap contributors, ODbL).

@@ -88,8 +88,9 @@ def test_scenario_2_weights_slope_by_1_5_and_vegetation_by_half():
     assert bf.ffpi(1, 1, 1, 1) == 1 and bf.ffpi(10, 10, 10, 10) == 10
 
 
-@pytest.mark.parametrize("score, name", [(1.0, "low"), (3.2, "low"), (3.3, "medium"), (5.4, "medium"), (5.5, "high"),
-                                         (7.7, "high"), (7.8, "extreme"), (10.0, "extreme")])
+@pytest.mark.parametrize("score, name", [(1.0, "low"), (4.4, "low"), (4.5, "medium"), (5.0, "medium"), (6.0, "medium"),
+                                         (6.4, "medium"), (6.5, "high"), (8.4, "high"), (8.5, "extreme"),
+                                         (10.0, "extreme")])
 def test_class_edges_belong_to_the_class_above(score, name):
     stored = struct.unpack("<f", struct.pack("<f", score))[0]   # as read back from the float32 file
     assert bf.class_of(stored) == name
@@ -103,6 +104,15 @@ def test_the_classes_breaks_and_colours_are_the_contract_s():
     assert [c["colour"] for c in colours] == [c["colour"] for c in example["legend"]]
     lightness = [c["oklch"][0] for c in colours]
     assert lightness == sorted(lightness, reverse=True) and all(c["oklch"][2] == 50 for c in colours)
+
+
+def test_the_breaks_follow_the_paper_s_reading_of_5_to_6_as_medium():
+    assert bf.BREAKS == (4.5, 6.5, 8.5)
+    method = bf.ffpi_text.method()
+    for text in (method["classes"], method["summary"]):
+        assert "5 to 6" in text and "medium" in text, text
+    assert "4.5" in method["classes"] and "6.5" in method["classes"] and "8.5" in method["classes"]
+    assert "equal" not in method["classes"] and not any("equal steps" in d for d in method["deviations"])
 
 
 def test_oklch_out_of_the_srgb_gamut_is_refused():
@@ -125,6 +135,25 @@ def test_slope_percent_follows_horn_on_a_plane_and_leaves_no_data_alone():
     plane[12] = go.NODATA
     assert go.slope_percent(plane, 5, 5, 10.0, 10.0)[12] == go.NODATA
     assert grid.size == 25
+
+
+@pytest.mark.parametrize("east, north, expected", [(2.0, 0.0, 20.0), (0.0, 3.0, 15.0),
+                                                    (2.0, 3.0, 100 * math.hypot(2 / 10, 3 / 20))])
+def test_horn_slope_takes_each_axis_with_its_own_spacing(east, north, expected):
+    """Planes rising east (per 10 m) and north (per 20 m): rows run north to south, so a swapped or flipped axis, or
+    spacings taken the wrong way round, give another slope."""
+    rows, cols, dx, dy = 5, 6, 10.0, 20.0
+    plane = array("d", (east * c + north * (rows - 1 - r) for r in range(rows) for c in range(cols)))
+    slope = go.slope_percent(plane, rows, cols, dx, dy)
+    assert slope[2 * cols + 3] == pytest.approx(expected)
+    tilted = array("d", (east * (rows - 1 - r) + north * c for r in range(rows) for c in range(cols)))
+    if east != north:                                   # the same rises on the other axes: another answer
+        assert go.slope_percent(tilted, rows, cols, dx, dy)[2 * cols + 3] != pytest.approx(expected)
+
+
+def test_the_scores_are_no_data_outside_the_city_outline():
+    values = array("d", [5.0, 6.0, go.NODATA, 7.0])
+    assert list(bf.inside(values, bytearray([1, 0, 1, 1]))) == [5.0, go.NODATA, go.NODATA, 7.0]
 
 
 def test_three_by_three_lowest_and_mean_leave_out_no_data():
@@ -203,7 +232,7 @@ def read_png(path: Path) -> tuple[dict, list[list[int]]]:
 
 def test_the_png_holds_class_indices_with_index_0_transparent(tmp_path):
     grid = small_grid(2, 3)
-    scores = array("d", [1.0, 4.0, 6.0, 9.0, go.NODATA, 6.0])
+    scores = array("d", [1.0, 5.0, 7.0, 9.0, go.NODATA, 6.0])
     shown = bytearray([1, 1, 1, 1, 1, 0])
     path = bf.write_png(tmp_path / "x.png", grid, scores, shown)
     info, rows = read_png(path)

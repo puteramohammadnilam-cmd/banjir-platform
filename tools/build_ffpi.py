@@ -5,8 +5,9 @@ flash floods, after Smith (2003) as used by Mohd Yassin et al. (2023, Planning M
 
 Run from 11_Platform_Draft after tools/fetch_indexes.py. Reads only saved files (index_inputs.py) and writes, in
 app/data/indexes (or --out):
-  shah-alam_ffpi.tif    float32 scores 1.0 to 10.0 in 0.1 steps, no data -9999 (permanent water, or no input), on the
-                        grid of app/data/dem (1 arc second, the city box plus 2 km), in the layout app/raster.py reads;
+  shah-alam_ffpi.tif    float32 scores 1.0 to 10.0 in 0.1 steps, no data -9999 (outside the city outline, permanent
+                        water, or no input), on the grid of app/data/dem (1 arc second, the city box plus 2 km), in the
+                        layout app/raster.py reads;
                         every value is read back through app/raster.py and the build stops unless each matches
   shah-alam_ffpi.png    the four classes as an indexed PNG on the same squares, transparent outside the city outline,
                         over permanent water and on no data, for the map
@@ -29,8 +30,10 @@ Method (each factor rated 1 to 10 with Table 2 of Mohd Yassin et al. 2023; Scena
   V vegetation: fractional cover from the WorldCover 2021 NDVI composite's median band, ((NDVI - 0.2) / (0.86 - 0.2))
     squared, kept to 0..1 (Carlson & Ripley 1997), averaged over the square's 10 m pixels; 90-100 % rates 1, each 10 %
     less one more, under 10 % rates 10. 0.86 sits near the top of the grid's own values (99.5th percentile 0.848).
-  Classes: equal steps of the 1-10 scale, as the paper names four levels but not their limits: low below 3.25, medium
-    from 3.25, high from 5.5, extreme from 7.75 (a score on a break goes up).
+  Classes: the paper names four levels but not their limits, and reads Scenario 2 scores of 5 to 6 as medium; so
+    medium is 4.5 to under 6.5 (5 and 6 rounded), low below it, high from 6.5 and extreme from 8.5, two points wide
+    like medium (a score on a break goes up).
+  Squares outside the city outline (the one the PNG is cut to) are no data in the tif too.
 """
 from __future__ import annotations
 
@@ -58,7 +61,7 @@ import ffpi_text  # noqa: E402
 
 OUT_DIR = ROOT / "app" / "data" / "indexes"
 CLASSES = ("low", "medium", "high", "extreme")
-BREAKS = (3.25, 5.5, 7.75)
+BREAKS = (4.5, 6.5, 8.5)                 # medium holds the paper's 5 to 6 (rounded); see the docstring
 SCALE = (1, 10)
 DECIMALS = 1
 WEIGHTS = (1.5, 1.0, 1.0, 0.5)          # M, L, S, V
@@ -250,6 +253,11 @@ def scores(f: Factors) -> array:
                        for m, l, s, v in zip(f.m, f.l, f.s, f.v)))
 
 
+def inside(values: Sequence[float], shown: Sequence[int]) -> array:
+    """The values where `shown` (the city outline), NODATA elsewhere."""
+    return array("d", (v if shown[i] else go.NODATA for i, v in enumerate(values)))
+
+
 # --- outputs ---
 
 def rows_of(values: Sequence[float], grid: go.Grid) -> list[list[float]]:
@@ -330,11 +338,12 @@ def build(raw: Path, out: Path, qa: bool = False) -> dict:
     """Write the four files; returns what the run found, for the report and the tests."""
     layers = load_layers(raw)
     f = factors(layers, ii.load_soil(raw))
-    values = scores(f)
     grid = layers.grid
+    city = city_mask(grid, raw)
+    values = inside(scores(f), city)
     out.mkdir(parents=True, exist_ok=True)
     tif, _ = write_tif(out / f"{ii.NAME}_ffpi.tif", grid, values)
-    png = write_png(out / f"{ii.NAME}_ffpi.png", grid, values, city_mask(grid, raw))
+    png = write_png(out / f"{ii.NAME}_ffpi.png", grid, values, city)
     doc = out / f"{ii.NAME}_ffpi.json"
     doc.write_text(json.dumps(ffpi_doc(grid), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     sources = write_sources(out, raw, [tif, png, doc])
@@ -352,7 +361,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     found = build(args.raw, args.out, args.qa)
     held = [v for v in found["scores"] if v > go.NODATA_BELOW]
     shares = {name: sum(class_of(v) == name for v in held) / len(held) for name in CLASSES}
-    print(f"{len(held)} squares scored of {len(found['scores'])}; classes over the whole grid: "
+    print(f"{len(held)} squares scored of {len(found['scores'])}; classes over the city: "
           + ", ".join(f"{k} {v:.1%}" for k, v in shares.items()))
     for path in found["files"]:
         print(file_line(path))

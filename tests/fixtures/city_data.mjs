@@ -130,7 +130,7 @@ export const INDEX_METHOD = Object.freeze({
 });
 
 export const FLASH_LAYER = Object.freeze({
-  url: "/api/areas/shah-alam/layers/flash-flood.png", bounds: [101.43, 2.95, 101.59, 3.23], breaks: [3.25, 5.5, 7.75],
+  url: "/api/areas/shah-alam/layers/flash-flood.png", bounds: [101.43, 2.95, 101.59, 3.23], breaks: [4.5, 6.5, 8.5],
   credit: "Flash flood potential: ESA WorldCover 2021, SoilGrids 2.0.",
 });
 

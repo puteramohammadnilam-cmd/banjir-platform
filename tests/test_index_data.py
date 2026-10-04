@@ -66,6 +66,17 @@ def test_spot_values_stay_as_built():
     assert round(value, 1) == 7.0 and bf.class_of(value) == "high"
 
 
+def test_the_tif_has_no_score_outside_the_city_outline():
+    """The grid is the city's box plus 2 km: its north-west corner is outside the city, so it has no score, at the
+    tif and at flash_at, as the PNG shows nothing there."""
+    from app import indexes
+    crop = raster.DepthFile.open(TIF, "ffpi")
+    assert crop.value_at(0, 0, float) == -9999 and crop.value_at(0, crop.grid.cols - 1, float) == -9999
+    lat, lon = DOC["grid"]["north"] - DOC["grid"]["py"] / 2, DOC["grid"]["west"] + DOC["grid"]["px"] / 2
+    assert indexes.flash_at(lat, lon) is None
+    assert indexes.flash_at(*SRI_MUDA_POINT) == {"score": 7.0, "class": "high"}
+
+
 def png_chunks(data: bytes) -> dict:
     chunks, at = {}, 8
     while at < len(data):

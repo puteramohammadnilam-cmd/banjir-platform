@@ -49,7 +49,8 @@ DEVIATIONS = [
     "Vegetation cover comes from NDVI (Carlson and Ripley's scaled NDVI squared), not from a mapped percentage.",
     "The surface model includes roofs and trees; taking the lowest height of each 3 x 3 squares before the slope "
     "removes most of them, not all.",
-    "The paper names four classes but not their limits; equal steps of the 1-10 scale are used.",
+    "The paper names four classes but not their limits. Its Scenario 2 scores of 5 to 6 read as medium, so medium "
+    "here is 4.5 to under 6.5 (5 and 6 once rounded); low is below 4.5, high from 6.5 and extreme from 8.5.",
 ]
 
 
@@ -60,10 +61,12 @@ def method() -> dict:
         "formula": "(1.5 M + L + S + 0.5 V) / 4",
         "summary": "Each 30 m square is rated 1 to 10 for slope (M), land cover (L), soil (S) and bare ground (V); the "
                    "four are weighted as in the paper's Scenario 2 and rounded to 0.1. Higher means water runs off "
-                   "faster and gathers sooner after heavy rain.",
+                   "faster and gathers sooner after heavy rain. The classes follow the paper's reading of scores of "
+                   "5 to 6 as medium: low below 4.5, medium from 4.5, high from 6.5, extreme from 8.5.",
         "factors": dict(FACTORS),
-        "classes": "Four equal steps of the 1-10 scale: low below 3.25, medium from 3.25, high from 5.5, extreme "
-                   "from 7.75.",
+        "classes": "Four classes, as the paper names them; it gives no limits but reads Scenario 2 scores of 5 to 6 "
+                   "as medium, so medium runs from 4.5 to under 6.5 (5 and 6 once rounded): low below 4.5, medium "
+                   "from 4.5, high from 6.5, extreme from 8.5. A score on a limit is in the class above.",
         "citations": list(CITATIONS),
         "deviations": list(DEVIATIONS),
         "not": "A susceptibility to flash floods, not a water depth and not a chance of flooding. Drains, their size "
