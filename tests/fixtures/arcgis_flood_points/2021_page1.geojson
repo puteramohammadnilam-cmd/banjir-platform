@@ -1,0 +1,182 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "exceededTransferLimit": false
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "id": 1,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.4374,
+     3.0453
+    ]
+   },
+   "properties": {
+    "Date": "2021-05-05",
+    "RUJ__No": "LBS- SEL- KLG- 2021-\n017",
+    "NEGERI": "SELANGO R",
+    "DAERAH": "KLANG",
+    "KWSN_BANJIR": "Taman Melawis",
+    "Latitude": 3.0453,
+    "Longitude": 101.4374,
+    "SUNGAI": "Sg.Klang",
+    "KEDALAMAN": "0.1-0.3",
+    "STESEN": "Bandar Klang",
+    "Rain": 22,
+    "Tempoh_Hujan_Max": 3,
+    "Tempoh_ulang": "NORMA L",
+    "Nama_Stesen": "Bandar Klang",
+    "Water_Level": 1.43,
+    "Status": "NORMAL",
+    "ObjectId": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 2,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.4519,
+     3.057
+    ]
+   },
+   "properties": {
+    "Date": "2021-07-05",
+    "RUJ__No": "LBS- SEL- KLG- 2021-\n019",
+    "NEGERI": "SELANGO R",
+    "DAERAH": "KLANG",
+    "KWSN_BANJIR": "Kawasan Pantai Bharu, Jalan Meru",
+    "Latitude": 3.057,
+    "Longitude": 101.4519,
+    "SUNGAI": "Sg.Klang",
+    "KEDALAMAN": "0.10-0.30",
+    "STESEN": "Bandar Klang",
+    "Rain": 70.5,
+    "Tempoh_Hujan_Max": 2,
+    "Tempoh_ulang": "NORMA L",
+    "Nama_Stesen": "Bandar Klang",
+    "Water_Level": 1.86,
+    "Status": "NORMAL",
+    "ObjectId": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 19,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.5178,
+     2.98739999999999
+    ]
+   },
+   "properties": {
+    "Date": null,
+    "RUJ__No": null,
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": "Jalan Bukit Rimau",
+    "Latitude": 2.9874,
+    "Longitude": 101.5178,
+    "SUNGAI": "Sg. Klang",
+    "KEDALAMAN": "0.1-0.5",
+    "STESEN": null,
+    "Rain": null,
+    "Tempoh_Hujan_Max": null,
+    "Tempoh_ulang": null,
+    "Nama_Stesen": null,
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 19
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 3,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.7768,
+     3.02040000000001
+    ]
+   },
+   "properties": {
+    "Date": "2021-05-05",
+    "RUJ__No": "LBS- SEL- HLT- 2021-\n018",
+    "NEGERI": "SELANGO R",
+    "DAERAH": "HULU LANGAT",
+    "KWSN_BANJIR": "Kampung Sungai Sekamat",
+    "Latitude": 3.0204,
+    "Longitude": 101.7768,
+    "SUNGAI": "Sg.Langat",
+    "KEDALAMAN": "0.1-0.3",
+    "STESEN": "Sg Kantan",
+    "Rain": 126.5,
+    "Tempoh_Hujan_Max": 2,
+    "Tempoh_ulang": "70",
+    "Nama_Stesen": "Sg Kantan",
+    "Water_Level": 30.12,
+    "Status": "BAHAYA",
+    "ObjectId": 3
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 4,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.8055,
+     2.98819999999999
+    ]
+   },
+   "properties": {
+    "Date": null,
+    "RUJ__No": null,
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": "Jalan Persekutuan FT Semenyih",
+    "Latitude": 2.9882,
+    "Longitude": 101.8055,
+    "SUNGAI": "Sg.Langat",
+    "KEDALAMAN": "0.1-0.5",
+    "STESEN": null,
+    "Rain": null,
+    "Tempoh_Hujan_Max": null,
+    "Tempoh_ulang": null,
+    "Nama_Stesen": null,
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 4
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 28,
+   "geometry": null,
+   "properties": {
+    "Date": null,
+    "RUJ__No": "2021-\n028",
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": null,
+    "Latitude": null,
+    "Longitude": null,
+    "SUNGAI": null,
+    "KEDALAMAN": null,
+    "STESEN": null,
+    "Rain": null,
+    "Tempoh_Hujan_Max": null,
+    "Tempoh_ulang": null,
+    "Nama_Stesen": null,
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 28
+   }
+  }
+ ]
+}

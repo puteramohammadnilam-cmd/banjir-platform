@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { SQUARES_FAILED, createCellLayer, squareStyle, squaresOf } from "../app/static/js/cells.js";
+import { SQUARES_FAILED, SQUARE_RAMP, createCellLayer, squareStyle, squaresOf } from "../app/static/js/cells.js";
 import { BANDS, DRY_COLOR } from "../app/static/js/dom.js";
 
 const GRID = { name: "N10_E100", px: 0.001, py: 0.002 };
@@ -82,14 +82,25 @@ test("a wet square is a rectangle on the canvas, one square wide and high, paint
   assert.equal(only.options.stroke, false);
   assert.equal(only.options.interactive, false);
   assert.equal(only.options.renderer.kind, "canvas", "one canvas for all of them, not an element each");
-  assert.equal(only.options.fillColor, BANDS[1].color, "1.0 m at 1 in 100");
-  assert.equal(only.options.fillOpacity, 0.28);
+  assert.equal(only.options.fillColor, SQUARE_RAMP[1].color, "1.0 m at the second flood size is the second step");
+  assert.equal(only.options.fillOpacity, SQUARE_RAMP[1].opacity);
 });
 
-test("a square is painted the colour of its depth for the flood size on show, and clear when it is dry there", () => {
+test("the squares' ramp has a step for each depth band, on the same thresholds, darker and thicker with depth", () => {
+  assert.equal(SQUARE_RAMP.length, BANDS.length);
+  SQUARE_RAMP.forEach((step, i) => {
+    assert.equal(step.below, BANDS[i].below, `step ${i + 1} changes at the depth the dots' band does`);
+    if (i) assert.ok(step.opacity > SQUARE_RAMP[i - 1].opacity, `step ${i + 1} is laid thicker than the one before`);
+  });
+  assert.ok(SQUARE_RAMP.every((step) => !BANDS.some((b) => b.color === step.color)), "the squares do not borrow the dots' colours");
+});
+
+test("a square is painted the step of its depth for the flood size on show, and clear when it is dry there", () => {
   assert.deepEqual(squareStyle([null, 0, 0.5], 0), { fillColor: DRY_COLOR, fillOpacity: 0 });
-  assert.deepEqual(squareStyle([null, 0, 0.5], 2), { fillColor: BANDS[0].color, fillOpacity: 0.28 });
+  assert.deepEqual(squareStyle([null, 0, 0.5], 2), { fillColor: SQUARE_RAMP[0].color, fillOpacity: SQUARE_RAMP[0].opacity });
   assert.deepEqual(squareStyle([1, 2, 3.5], 5), { fillColor: DRY_COLOR, fillOpacity: 0 }, "a flood size that is not there is dry");
+  const depths = [0.5, 1.0, 1.8, 2.5, 3.5];   // one in each band
+  depths.forEach((_, i) => assert.deepEqual(squareStyle(depths, i), { fillColor: SQUARE_RAMP[i].color, fillOpacity: SQUARE_RAMP[i].opacity }, `band ${i + 1}`));
 });
 
 test("all the squares of a neighbourhood's blocks are drawn together, and no request is made", () => {
@@ -181,12 +192,13 @@ test("blocks or cells that are not lists draw nothing and ask for nothing", () =
 test("changing the flood size repaints every square on the map, and squares drawn after it are painted for it", () => {
   const squares = layer();
   squares.show(GRID, [block(1, 1)], [cell(3.0, 101.0, 0.5, 1.0, 2.5)]);
-  assert.equal(drawn()[0].options.fillColor, BANDS[1].color);
+  assert.equal(drawn()[0].options.fillColor, SQUARE_RAMP[1].color);
   shown = 2;
   squares.restyle();
-  assert.equal(drawn()[0].style.fillColor, BANDS[3].color, "2.5 m is over the door");
+  assert.equal(drawn()[0].style.fillColor, SQUARE_RAMP[3].color, "2.5 m is over the door");
+  assert.equal(drawn()[0].style.fillOpacity, SQUARE_RAMP[3].opacity);
   squares.show(GRID, [block(2, 2)], [cell(3.1, 101.0, 0.5, 1.0, 2.5)]);
-  assert.equal(drawn()[1].options.fillColor, BANDS[3].color);
+  assert.equal(drawn()[1].options.fillColor, SQUARE_RAMP[3].color);
   assert.equal(FLOOD_SIZES[shown], "50");
   assert.deepEqual(requested, []);
 });

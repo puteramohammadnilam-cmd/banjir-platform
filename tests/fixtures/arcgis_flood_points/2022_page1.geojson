@@ -1,0 +1,182 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "exceededTransferLimit": false
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "id": 5,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.58,
+     3.01999999999999
+    ]
+   },
+   "properties": {
+    "Date": "2022-01-19",
+    "RUJ__No": "LBS-SEL- PTL-2022- 004",
+    "NEGERI": "SELANGOR",
+    "DAERAH": "PETALING",
+    "KWSN_BANJIR": "Kampung Tengah, Puchong - Jalan Tempenis",
+    "Latitude": 3.02,
+    "Longitude": 101.58,
+    "SUNGAI": "Sungai Klang",
+    "KEDALAMAN": "0.30",
+    "STESEN": "Puchong Drop",
+    "Rain": 54.5,
+    "Tempoh_Hujan_Max": 4,
+    "Tempoh_ulang": "NORMAL",
+    "Nama_Stesen": "Puchong Drop / SungaiKlang",
+    "Water_Level": 6.25,
+    "Status": "NORMAL",
+    "ObjectId": 5
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 6,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.49,
+     3.05
+    ]
+   },
+   "properties": {
+    "Date": "2022-01-19",
+    "RUJ__No": "LBS-SEL- GBK-2022- 005",
+    "NEGERI": "SELANGOR",
+    "DAERAH": "GOMBAK",
+    "KWSN_BANJIR": "Sekitar kawasan Persimpangan Bukit Botak",
+    "Latitude": 3.05,
+    "Longitude": 101.49,
+    "SUNGAI": "Sungai Klang",
+    "KEDALAMAN": "0.3 – 0.5",
+    "STESEN": "Selayang Baru",
+    "Rain": 56,
+    "Tempoh_Hujan_Max": 3,
+    "Tempoh_ulang": "NORMAL",
+    "Nama_Stesen": "Batu 10 Gombak  / Sungai Salak",
+    "Water_Level": 76.16,
+    "Status": "NORMAL",
+    "ObjectId": 6
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 19,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.53,
+     3.19999999999999
+    ]
+   },
+   "properties": {
+    "Date": null,
+    "RUJ__No": null,
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": "Jalan Cempaka 2, Kampung Paya\nJaras Hilir",
+    "Latitude": 3.2,
+    "Longitude": 101.53,
+    "SUNGAI": "Sg Buloh",
+    "KEDALAMAN": "0.20",
+    "STESEN": null,
+    "Rain": null,
+    "Tempoh_Hujan_Max": null,
+    "Tempoh_ulang": null,
+    "Nama_Stesen": null,
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 19
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 1,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.49,
+     2.80999999999999
+    ]
+   },
+   "properties": {
+    "Date": "2022-02-01",
+    "RUJ__No": "LBS-SEL- KLT-2022- 001",
+    "NEGERI": "SELANGOR",
+    "DAERAH": "KUALA LANGAT",
+    "KWSN_BANJIR": "Kampung Sungai Nangka",
+    "Latitude": 2.81,
+    "Longitude": 101.49,
+    "SUNGAI": "Sungai Langat",
+    "KEDALAMAN": "0.1-0.3",
+    "STESEN": "JPS Sg\nMaggis",
+    "Rain": 12.5,
+    "Tempoh_Hujan_Max": 3,
+    "Tempoh_ulang": "NORMAL",
+    "Nama_Stesen": "Sungai Langat di Sungai Manggis",
+    "Water_Level": 2.46,
+    "Status": "NORMAL",
+    "ObjectId": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 2,
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     101.43,
+     2.80999999999999
+    ]
+   },
+   "properties": {
+    "Date": null,
+    "RUJ__No": null,
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": "KOA Kelanang",
+    "Latitude": 2.81,
+    "Longitude": 101.43,
+    "SUNGAI": "Sungai Langat",
+    "KEDALAMAN": "0.1-0.5",
+    "STESEN": "Pintu Air Kelanang",
+    "Rain": 49,
+    "Tempoh_Hujan_Max": 3,
+    "Tempoh_ulang": "NORMAL",
+    "Nama_Stesen": null,
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "id": 55,
+   "geometry": null,
+   "properties": {
+    "Date": null,
+    "RUJ__No": null,
+    "NEGERI": null,
+    "DAERAH": null,
+    "KWSN_BANJIR": null,
+    "Latitude": null,
+    "Longitude": null,
+    "SUNGAI": null,
+    "KEDALAMAN": null,
+    "STESEN": "Kundang",
+    "Rain": null,
+    "Tempoh_Hujan_Max": null,
+    "Tempoh_ulang": null,
+    "Nama_Stesen": "Kuang",
+    "Water_Level": null,
+    "Status": null,
+    "ObjectId": 55
+   }
+  }
+ ]
+}
