@@ -15,6 +15,8 @@
   "news_region": "Shah Alam and the Klang Valley, Selangor, Malaysia",
   "council": "Majlis Bandaraya Shah Alam (MBSA)",
   "bigger_flood_example": "2021-12",
+  "flash_flood_example": "seksyen-13",
+  "show_index_score": false,
   "aliases": [
     {
       "id": "sri-muda",

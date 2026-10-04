@@ -309,6 +309,8 @@ def _flash_flood(area: areas.Area, part: Mapping | None) -> dict:
     doc = sections.index_doc(area.id)
     if doc is None:
         return {}
+    if not area.show_index_score:   # the score is held back until its comparison with recorded floods is reviewed
+        return _flash_only(doc, area, part)
     if part is not None:
         return _figures_for_model(doc["sections"][part["id"]], "share_of_section", "section_score")
     named = [(_clean(s["name"]), doc["sections"][s["id"]]) for s in sections.listed(area.id)]
@@ -332,6 +334,19 @@ def _figures_for_model(figures: Mapping, share_key: str, score_key: str) -> dict
                if flash else {}),
             **({score_key: {"value": score["value"], "class": _words(score["class"]), "meaning": SCORE_MEANING}}
                if score else {})}
+
+
+def _flash_only(doc: Mapping, area: areas.Area, part: Mapping | None) -> dict:
+    """The flash flood potential figures without the held-back score: one section's, or the whole area's and its top
+    sections by high or extreme share."""
+    if part is not None:
+        return _figures_for_model({"flash": doc["sections"][part["id"]].get("flash")}, "share_of_section", "")
+    named = [(_clean(s["name"]), doc["sections"][s["id"]]) for s in sections.listed(area.id)]
+    high = sorted(((name, _high_share(found["flash"]["share"])) for name, found in named if found.get("flash")),
+                  key=lambda item: (-item[1], item[0]))
+    return {**_figures_for_model({"flash": (doc.get("city") or {}).get("flash")}, "share_of_area", ""),
+            "flash_flood_by_section": {"most_high_or_extreme": [{"section": name, "share_high_or_extreme": share}
+                                                                for name, share in high[:MAX_TOP_SECTIONS]]}}
 
 
 def _words(class_id: str) -> str:

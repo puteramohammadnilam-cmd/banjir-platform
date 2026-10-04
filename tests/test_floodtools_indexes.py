@@ -44,8 +44,26 @@ def figures(city, tmp_path, monkeypatch):
         found["flash"]["share"] = SHARES[sid]
         found["score"] = {"value": SCORES[sid], "class": "very_high" if SCORES[sid] > 3.5 else "moderate", "ratings": {}}
     (city / CITY / "indexes.json").write_text(json.dumps(doc), encoding="utf-8")
-    sections.clear_caches()
+    show_score(city, True)   # these tests are about the score as shown; the held-back case has its own test
     return where
+
+
+def show_score(city, shown: bool):
+    config_path = city / CITY / "area.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config_path.write_text(json.dumps({**config, "show_index_score": shown}), encoding="utf-8")
+    sections.clear_caches()
+
+
+def test_the_score_is_held_back_until_the_area_says_to_show_it(question, figures, city):
+    show_score(city, False)
+    question("zon-2")
+    found = floodtools.area_summary("zon-2")
+    assert "flash_flood_potential" in found and "section_score" not in found
+    question()
+    whole = floodtools.area_summary()
+    assert "area_score" not in whole and "highest_score" not in whole["flash_flood_by_section"]
+    assert sections.index_method(CITY)["show_score"] is False
 
 
 # ---------- flood_check

@@ -240,7 +240,8 @@ def index_method(area_id: str) -> dict | None:
     if doc is None:
         return None
     score = {key: areas._thaw(value) for key, value in doc["method"]["score"].items() if key in SCORE_METHOD_KEYS}
-    return {"flash": indexes.flash_method(area_id), "score": score, "validation": areas._thaw(doc["validation"])}
+    return {"flash": indexes.flash_method(area_id), "score": score, "validation": areas._thaw(doc["validation"]),
+            "show_score": areas.get(area_id).show_index_score}   # the page shows the score only when this is true
 
 
 def city_figures(area_id: str) -> Mapping | None:

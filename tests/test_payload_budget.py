@@ -70,7 +70,8 @@ def test_every_section_is_within_its_budget_and_the_checklist_section_within_its
 
 # ---------- flash flood potential (phase 3)
 
-FLASH_CITY_ADDS, FLASH_SECTION_ADDS = 4 * KB, 2 * KB
+# a section page carries the method write-up too (~3 KB gz with the real indexes.json); still far under its 80 KB
+FLASH_CITY_ADDS, FLASH_SECTION_ADDS = 4 * KB, 4 * KB
 CLASSES = ("low", "medium", "high", "extreme")
 WORDS = "rainfall elevation drainage density river land cover slope road population rating source weight".split()
 

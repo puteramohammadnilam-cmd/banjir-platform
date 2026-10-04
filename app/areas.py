@@ -25,6 +25,8 @@ area.json fields:
   flash_flood_example  for an area split into sections: the id of a section with flash flood records but little or no
                 water in the river model, for the page's note on what flash flood potential means; null when none is
                 named (optional, null)
+  show_index_score  whether the page and the assistant may show the multi-criteria score of indexes.json, which is
+                held back until someone has looked at how it compares with the recorded floods (optional, false)
 
 An area split into sections also has a built sections.json beside its data (app/sections.py reads it), and each of its
 businesses names its section in premises.json. An area with flash flood potential also has an indexes.json beside them
@@ -54,7 +56,8 @@ MAX_ZOOM = 19
 TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
 OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
-            "aliases": [], "section_word": None, "default_section": None, "flash_flood_example": None}
+            "aliases": [], "section_word": None, "default_section": None, "flash_flood_example": None,
+            "show_index_score": False}
 ALIAS_FIELDS = frozenset({"id", "section", "names"})
 LANGUAGES = frozenset({"en", "ms"})
 SECTIONS_FILE = "sections.json"
@@ -90,6 +93,7 @@ class Area:
     section_word: Mapping[str, str] | None = field(default=None, hash=False)
     default_section: str | None = None
     flash_flood_example: str | None = None
+    show_index_score: bool = False
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
@@ -145,7 +149,7 @@ def _load(folder: Path) -> Area:
                 is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]),
                 bigger_flood_example=config["bigger_flood_example"], aliases=_freeze(config["aliases"]),
                 section_word=_freeze(config["section_word"]), default_section=config["default_section"],
-                flash_flood_example=config["flash_flood_example"])
+                flash_flood_example=config["flash_flood_example"], show_index_score=config["show_index_score"])
 
 
 def _freeze(value):
@@ -198,6 +202,7 @@ def _problems(raw: dict, folder: str) -> list[str]:
                 and all(_is_text(word) for word in config["section_word"].values())),
         "default_section must be null or a section id": config["default_section"] is None
             or (isinstance(config["default_section"], str) and _is_id(config["default_section"])),
+        "show_index_score must be true or false": isinstance(config["show_index_score"], bool),
         "flash_flood_example must be null or a section id": config["flash_flood_example"] is None
             or (isinstance(config["flash_flood_example"], str) and _is_id(config["flash_flood_example"])),
     }
