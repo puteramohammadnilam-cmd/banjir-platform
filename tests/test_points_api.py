@@ -262,7 +262,7 @@ def test_coverage_has_the_map_bucket(client, monkeypatch):
 
 def test_ask_takes_a_point_and_its_area(client, monkeypatch):
     seen = []
-    monkeypatch.setattr(ai, "ask", lambda question, place, history, area: seen.append((place, area)) or "ok")
+    monkeypatch.setattr(ai, "ask", lambda question, place, history, area, section=None: seen.append((place, area)) or "ok")
     assert client.post("/api/ask", json={"question": "Banjir tak?", "place": WET_ID}).status_code == 200
     assert client.post("/api/ask", json={"question": "hi", "place": WET_ID, "area_id": "kota-tinggi"}).status_code == 200
     assert client.post("/api/ask", json={"question": "hi", "business_id": SRI_MUDA_ID}).status_code == 200
@@ -287,7 +287,7 @@ def test_ask_refuses_a_place_it_cannot_find(client, monkeypatch, body, status, e
 
 def test_place_wins_over_business_id_even_when_it_is_null(client, monkeypatch):
     seen = []
-    monkeypatch.setattr(ai, "ask", lambda question, place, history, area: seen.append(place) or "ok")
+    monkeypatch.setattr(ai, "ask", lambda question, place, history, area, section=None: seen.append(place) or "ok")
     for place in (None, WET_ID):
         body = {"question": "hi", "place": place, "business_id": SRI_MUDA_ID}
         assert client.post("/api/ask", json=body).status_code == 200

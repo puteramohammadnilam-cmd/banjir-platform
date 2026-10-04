@@ -13,6 +13,7 @@ import logging
 import threading
 import time
 from collections import defaultdict, deque
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -29,7 +30,7 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, floodtools, googlemaps, places, plan, raster, stock  # noqa: E402
+from . import ai, areas, floodtools, googlemaps, places, plan, raster, sections, stock  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -95,6 +96,7 @@ VALIDATION_WORDS = (   # (path prefix, message) for a request body or path that 
     ("/api/voice", "The recording could not be sent. Please try again."),
     ("/api/stock", "The photo could not be sent. Please choose it again, and check the floor height (0 to 300 cm)."),
 )
+UNKNOWN_SECTION = "Unknown section."
 PLACE_ERRORS = {"malformed": (422, POINT_WORDS), "unknown": (404, "Unknown business.")}   # else NOT_COVERED_WORDS
 # FastAPI's 400 for a body json.loads cannot read without a JSONDecodeError: bad UTF-8, an integer of more than 4,300
 # digits, nesting too deep. It is answered like any body that does not fit, in VALIDATION_WORDS.
@@ -107,6 +109,7 @@ _hits: dict[str, deque[float]] = defaultdict(deque)
 _hits_lock = threading.Lock()
 _ai_slots = threading.BoundedSemaphore(MAX_AI_CALLS)
 areas.preload()   # a malformed area file stops the server here, at start-up, not in the middle of a request
+sections.preload()
 
 
 class Turn(BaseModel):
@@ -118,12 +121,14 @@ class AskIn(BaseModel):
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_QUESTION_CHARS)]
     place: str | None = Field(default=None, max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
     area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
+    section_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
     history: list[Turn] = Field(default_factory=list, max_length=MAX_TURNS)
 
 
 class NewsIn(BaseModel):
-    """The news question is fixed: only the area it is about can be chosen. Other fields are ignored."""
+    """The news question is fixed: only the area (and section) it is about can be chosen. Other fields are ignored."""
     area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
+    section_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
 
 
 class PhotoIn(BaseModel):
@@ -136,6 +141,7 @@ class VoiceIn(BaseModel):
     audio: str = Field(min_length=32)
     place: str | None = Field(default=None, max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
     area_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
+    section_id: str | None = Field(default=None, max_length=MAX_ID_CHARS)
     history: list[Turn] = Field(default_factory=list, max_length=MAX_TURNS)
 
 
@@ -215,13 +221,23 @@ def map_limit(request: Request) -> None:
 
 
 def known_area(area_id: str | None) -> areas.Area:
-    """The area with this id; the default area when none is given."""
-    if not area_id:
-        return areas.default()
-    area = areas.get(area_id)
-    if area is None:
+    """The area with this id (or alias); the default area when none is given."""
+    return known_scope(area_id)[0]
+
+
+def known_scope(area_id: str | None, section_id: str | None = None) -> tuple[areas.Area, Mapping | None]:
+    """(area, section) asked for: the default area when none is given, and an alias (an id that now means one section
+    of an area) stands for its area and section. A section_id must be one of the area's; 404 otherwise."""
+    area = areas.get(area_id) if area_id else areas.default()
+    found = (area, None) if area else sections.alias(area_id)
+    if found is None:
         raise HTTPException(404, "Unknown area.")
-    return area
+    area, section = found
+    if section_id:
+        section = sections.get(area, section_id)
+        if section is None:
+            raise HTTPException(404, UNKNOWN_SECTION)
+    return area, section
 
 
 def known_business(business_id: str) -> dict:
@@ -242,18 +258,19 @@ def known_place(ref: str) -> dict:
         raise HTTPException(status, words) from None
 
 
-def question_area(area_id: str | None, place_ref: str | None) -> areas.Area | None:
-    """The area a chat question is about: the selected place's, else the one asked for, else the default. A selected
-    business must be in the area asked for. A point brings its own area, None outside the listed areas, since the
-    page's area need not hold it."""
-    asked = known_area(area_id) if area_id else None
+def question_scope(area_id: str | None, section_id: str | None,
+                   place_ref: str | None) -> tuple[areas.Area | None, Mapping | None]:
+    """(area, section) a chat question is about: the selected place's, else the ones asked for, else the default area.
+    A selected business must be in the area asked for. A point brings its own area and section, None outside the
+    listed areas, since the page's area need not hold it."""
+    asked, section = known_scope(area_id, section_id) if area_id or section_id else (None, None)
     if not place_ref:
-        return asked or areas.default()
+        return asked or areas.default(), section
     place = known_place(place_ref)
     area = places.area_of(place)
     if not place["is_point"] and asked is not None and area.id != asked.id:
         raise HTTPException(404, "Unknown business.")
-    return area
+    return area, sections.get(area, (place["section"] or {}).get("id")) if area else None
 
 
 def decode_photo(data_url: str) -> tuple[bytes, str]:
@@ -396,19 +413,33 @@ for _path in POST_ONLY:
 GET_AND_HEAD = ["GET", "HEAD"]   # a monitor's HEAD gets the status line and headers of the same answer
 
 
-def area_data(area: areas.Area) -> dict:
-    return {"premises": areas.premises(area.id), "town": areas.town(area.id), "limits": floodtools.LIMITS}
+def area_data(area: areas.Area, section: Mapping | None = None) -> dict:
+    """An area's data for the page (app/sections.py says what a split area's city and section pages hold)."""
+    if section is not None:
+        found = sections.section_data(area, section)
+    elif sections.has_sections(area):
+        found = sections.city_data(area)
+    else:
+        found = {"area": sections.details(area), "premises": areas.premises(area.id), "town": areas.town(area.id)}
+    return {**found, "limits": floodtools.LIMITS}
 
 
 @app.api_route("/api/areas", methods=GET_AND_HEAD)
 def area_list() -> dict:
-    return ok({"default": areas.default().id, "areas": [areas.summary(area) for area in areas.load_all()]})
+    return ok({"default": areas.default().id, "areas": [sections.summary(area) for area in areas.load_all()]})
 
 
 @app.api_route("/api/areas/{area_id}/data", methods=GET_AND_HEAD)
 def one_area(area_id: str) -> dict:
-    area = known_area(area_id)
-    return ok({"area": areas.details(area), **area_data(area)})
+    """An area's data; an alias's is its section's."""
+    return ok(area_data(*known_scope(area_id)))
+
+
+@app.api_route("/api/areas/{area_id}/sections/{section_id}/data", methods=GET_AND_HEAD)
+def one_section(area_id: str, section_id: str) -> dict:
+    """One section of a split area: its businesses in full and the squares of its box (app/sections.py)."""
+    area, section = known_scope(area_id, section_id)
+    return ok(area_data(area, section))
 
 
 @app.api_route("/api/data", methods=GET_AND_HEAD)
@@ -439,9 +470,9 @@ def coverage() -> dict:
 
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])
 def ask(body: AskIn) -> dict:
-    area = question_area(body.area_id, body.place)
+    area, section = question_scope(body.area_id, body.section_id, body.place)
     history = [turn.model_dump() for turn in body.history]
-    return ok({"answer": call_ai(ai.ask, body.question, body.place, history, area)})
+    return ok({"answer": call_ai(ai.ask, body.question, body.place, history, area, section)})
 
 
 @app.post("/api/voice", dependencies=[Depends(rate_limit)])
@@ -449,7 +480,7 @@ def voice(body: VoiceIn, request: Request) -> dict:
     """A spoken question: Gemini writes down the words (ai.transcribe), which are then asked like typed ones. It is two
     Gemini calls, so a recording that can be used counts twice in the AI bucket. Neither the recording nor the words
     are logged."""
-    area = question_area(body.area_id, body.place)
+    area, section = question_scope(body.area_id, body.section_id, body.place)
     raw, mime = decode_audio(body.audio)
     rate_limit(request)
     heard = call_ai(ai.transcribe, raw, mime)
@@ -458,7 +489,7 @@ def voice(body: VoiceIn, request: Request) -> dict:
         raise HTTPException(422, NOT_HEARD)
     history = [turn.model_dump() for turn in body.history]
     return ok({"question": question, "language": heard.language,
-               "answer": call_ai(ai.ask, question, body.place, history, area)})
+               "answer": call_ai(ai.ask, question, body.place, history, area, section)})
 
 
 @app.post("/api/photo", dependencies=[Depends(rate_limit)])
@@ -549,8 +580,10 @@ def call_maps(fn, *args):
 
 
 @app.get("/api/rain", dependencies=[Depends(maps_limit)])   # GET only: each answer is a billed Maps call
-def rain(area: str | None = None) -> dict:
-    lat, lon = known_area(area).centre()
+def rain(area: str | None = None, section: str | None = None) -> dict:
+    """Rain over the middle of the area, or of one of its sections."""
+    found, part = known_scope(area, section)
+    lat, lon = sections.centre(part) if part else found.centre()
     if not googlemaps.is_configured():
         return ok({"configured": False, "rain": None})
     return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
@@ -573,8 +606,8 @@ def news(body: NewsIn | None = None) -> dict:
     # ponytail: only the area comes from the request; the question is fixed in ai.NEWS_QUESTION.
     # Grounded results may not be cached or framed (Gemini API terms), so each press is one Gemini call,
     # bounded by the per-visitor limit and the quotas set in Google Cloud.
-    area = known_area(body.area_id if body else None)
-    return ok(call_ai(ai.flood_news, area))
+    area, section = known_scope(body.area_id, body.section_id) if body else (areas.default(), None)
+    return ok(call_ai(ai.flood_news, area, section))
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

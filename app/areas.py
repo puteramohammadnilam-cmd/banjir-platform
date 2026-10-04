@@ -17,6 +17,14 @@ area.json fields:
   bigger_flood_example  the month of a past flood bigger than the largest size shown, as "YYYY-MM" (e.g. "2021-12"),
                 for "Floods bigger than 1 in 50 years, such as December 2021, are not shown"; the page writes the
                 month in its own language; null when none is named (optional)
+  aliases       for an area split into sections: older area ids and other names that now mean one of its sections,
+                as [{"id": ..., "section": ..., "names": [...]}] (optional, none)
+  section_word  for an area split into sections: the word for one section in each language, {"en": ..., "ms": ...}
+                (optional, null)
+  default_section  the section the page opens on, or null for the whole area (optional, null)
+
+An area split into sections also has a built sections.json beside its data (app/sections.py reads it), and each of its
+businesses names its section in premises.json.
 
 The config is part of the repo, so it is trusted, but it is still checked (load_all, and preload at start-up):
 a typo stops the server at start-up instead of failing in the middle of a chat. Folders whose names start with
@@ -41,7 +49,11 @@ MAX_ID_CHARS = 40
 MAX_ZOOM = 19
 TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
-OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None}
+OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
+            "aliases": [], "section_word": None, "default_section": None}
+ALIAS_FIELDS = frozenset({"id", "section", "names"})
+LANGUAGES = frozenset({"en", "ms"})
+SECTIONS_FILE = "sections.json"
 HISTORY_YEARS = ("first_year", "recent_from", "last_year")
 FLOOD_TEXTS = ("when", "what", "source")
 SKIPPED_PREFIXES = (".", "_")   # hidden or parked folders, never an area id
@@ -69,6 +81,9 @@ class Area:
     notes: Mapping[str, str] = field(default_factory=lambda: MappingProxyType({}), hash=False)
     history: Mapping | None = field(default=None, hash=False, repr=False)   # read-only, as _freeze leaves it
     bigger_flood_example: str | None = None
+    aliases: tuple = field(default=(), hash=False)                     # read-only mappings, as _freeze leaves them
+    section_word: Mapping[str, str] | None = field(default=None, hash=False)
+    default_section: str | None = None
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
@@ -122,7 +137,8 @@ def _load(folder: Path) -> Area:
                 view=tuple(config["view"]), zoom=config["zoom"], ai_name=config["ai_name"],
                 news_place=config["news_place"], news_region=config["news_region"], council=config["council"],
                 is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]),
-                bigger_flood_example=config["bigger_flood_example"])
+                bigger_flood_example=config["bigger_flood_example"], aliases=_freeze(config["aliases"]),
+                section_word=_freeze(config["section_word"]), default_section=config["default_section"])
 
 
 def _freeze(value):
@@ -168,12 +184,27 @@ def _problems(raw: dict, folder: str) -> list[str]:
         "history must be null, or hold first_year, recent_from, last_year in order and a list of floods dated "
         "within those years":
             config["history"] is None or _is_history(config["history"]),
+        'aliases must be a list of {"id", "section", "names"}: ids like an area id and a list of names':
+            _is_aliases(config["aliases"]),
+        'section_word must be null or {"en": text, "ms": text}': config["section_word"] is None
+            or (isinstance(config["section_word"], dict) and config["section_word"].keys() == LANGUAGES
+                and all(_is_text(word) for word in config["section_word"].values())),
+        "default_section must be null or a section id": config["default_section"] is None
+            or (isinstance(config["default_section"], str) and _is_id(config["default_section"])),
     }
     return [problem for problem, passed in checks.items() if not passed]
 
 
 def _is_id(text: str) -> bool:
     return len(text) <= MAX_ID_CHARS and AREA_ID.fullmatch(text) is not None
+
+
+def _is_aliases(aliases) -> bool:
+    return isinstance(aliases, list) and all(
+        isinstance(alias, dict) and alias.keys() == ALIAS_FIELDS
+        and all(isinstance(alias[name], str) and _is_id(alias[name]) for name in ("id", "section"))
+        and isinstance(alias["names"], list) and all(_is_text(name) for name in alias["names"])
+        for alias in aliases)
 
 
 def _is_month(value) -> bool:
@@ -242,11 +273,36 @@ def town(area_id: str) -> dict:
     return _read(area_id, "town.json")
 
 
+@lru_cache(maxsize=MAX_CACHED_AREAS)
+def sections_file(area_id: str) -> tuple | None:
+    """The area's built sections.json as read-only data (app/sections.py checks and uses it), or None for an area that
+    is not split into sections. Raises KeyError for an unknown id."""
+    if get(area_id) is None:
+        raise KeyError(f"No area with id {area_id!r}.")
+    if not (AREAS_DIR / area_id / SECTIONS_FILE).is_file():
+        return None
+    return _freeze(_read(area_id, SECTIONS_FILE))
+
+
+def section_ids(area_id: str) -> frozenset | None:
+    """The ids in the area's sections.json, or None for an area that is not split into sections."""
+    found = sections_file(area_id)
+    if found is None:
+        return None
+    return frozenset(item.get("id") if isinstance(item, Mapping) else None for item in found)
+
+
 def _read(area_id: str, name: str):
     area = get(area_id)
     if area is None:
         raise KeyError(f"No area with id {area_id!r}.")
     return json.loads((AREAS_DIR / area.id / name).read_text(encoding="utf-8"))
+
+
+def clear_caches() -> None:
+    """Forget every area read so far, so the next lookup reads AREAS_DIR again (for tests that point it elsewhere)."""
+    for cached in (_app_areas, _by_id, premises, town, sections_file, _businesses):
+        cached.cache_clear()
 
 
 @lru_cache(maxsize=1)
@@ -272,12 +328,13 @@ def preload() -> None:
     """Read and check every area's config and data now, so a bad file or a repeated business id stops the server
     at start-up instead of failing a visitor's request."""
     for area in load_all():
-        check_built(area, premises(area.id), town(area.id))
+        check_built(area, premises(area.id), town(area.id), section_ids(area.id))
     _businesses()
 
 
-def check_built(area: Area, shown: tuple, built) -> None:
-    """Raise AreaError unless an area's built data fits its config."""
+def check_built(area: Area, shown: tuple, built, sections: frozenset | None = None) -> None:
+    """Raise AreaError unless an area's built data fits its config. `sections` holds the section ids of an area split
+    into sections, None for one that is not: then every business, alias and the default section must name one."""
     checks = {
         "town.json must hold the same view as area.json":
             isinstance(built, dict) and built.get("view") == list(area.view),
@@ -286,10 +343,27 @@ def check_built(area: Area, shown: tuple, built) -> None:
             and isinstance(built.get("shelters"), list),
         "every business in premises.json needs a text id and a point inside the view":
             all(isinstance(p, dict) and isinstance(p.get("id"), str) and _is_inside(area, p) for p in shown),
+        **_section_checks(area, shown, sections),
     }
     failed = [problem for problem, passed in checks.items() if not passed]
     if failed:
         raise AreaError(f"{area.id}: " + "; ".join(failed) + ".")
+
+
+def _section_checks(area: Area, shown: tuple, sections: frozenset | None) -> dict[str, bool]:
+    if sections is None:
+        return {"aliases, section_word and default_section need a sections.json beside the data":
+                not area.aliases and area.section_word is None and area.default_section is None}
+    return {
+        "sections.json must list sections, each with a text id":
+            bool(sections) and all(isinstance(section, str) for section in sections),
+        "every business in premises.json needs a known section":
+            all(isinstance(p, dict) and p.get("section") in sections for p in shown),
+        "an area split into sections needs a section_word": area.section_word is not None,
+        "every alias and the default section must name a known section":
+            all(alias["section"] in sections for alias in area.aliases)
+            and (area.default_section is None or area.default_section in sections),
+    }
 
 
 def _is_inside(area: Area, point: dict) -> bool:

@@ -1,0 +1,37 @@
+{
+ "id": "test-city",
+ "default": true,
+ "name": "Test City",
+ "display_name": "Test City, Test State",
+ "view": [
+  101.5,
+  3.0,
+  101.56,
+  3.06
+ ],
+ "zoom": 13,
+ "ai_name": "Test City, Test State, Malaysia",
+ "news_place": "Test City",
+ "news_region": "Test City and Test State, Malaysia",
+ "council": "TCC",
+ "bigger_flood_example": "2021-12",
+ "notes": {
+  "businesses": "Made up for the tests."
+ },
+ "history": null,
+ "aliases": [
+  {
+   "id": "old-town",
+   "section": "zon-2",
+   "names": [
+    "Old Town",
+    "Olde Town"
+   ]
+  }
+ ],
+ "section_word": {
+  "en": "Zone",
+  "ms": "Zon"
+ },
+ "default_section": null
+}

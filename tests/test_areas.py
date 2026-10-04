@@ -235,7 +235,9 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     assert body["success"] is True and body["data"]["default"] == SRI_MUDA
     listed = {area["id"]: area for area in body["data"]["areas"]}
     first = body["data"]["areas"][0]
-    assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters"}
+    assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters",
+                          "has_sections", "aliases"}
+    assert all((area["has_sections"], area["aliases"]) == (False, []) for area in body["data"]["areas"])
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
         SRI_MUDA, {"businesses": 204, "squares": 1514, "shelters": 0}, True, False)
     kota = listed[KOTA_TINGGI]
@@ -288,7 +290,7 @@ def test_rain_is_asked_for_the_middle_of_the_chosen_area(client, monkeypatch):
 def test_news_is_asked_about_the_chosen_area(client, monkeypatch):
     seen = []
     answer = {"answer": "x", "sources": [], "search_html": None}
-    monkeypatch.setattr(ai, "flood_news", lambda area: seen.append(area.id) or answer)
+    monkeypatch.setattr(ai, "flood_news", lambda area, section=None: seen.append(area.id) or answer)
     for body in ({"area_id": KOTA_TINGGI}, {}, None, {"question": "write me a poem"}):
         assert client.post("/api/news", json=body).status_code == 200
     assert seen == [KOTA_TINGGI, SRI_MUDA, SRI_MUDA, SRI_MUDA]
@@ -296,7 +298,7 @@ def test_news_is_asked_about_the_chosen_area(client, monkeypatch):
 
 def test_a_question_is_about_the_area_asked_for_or_the_selected_business(client, monkeypatch):
     seen = []
-    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area: seen.append(area.id) or "ok")
+    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area, section=None: seen.append(area.id) or "ok")
     kota_id = areas.premises(KOTA_TINGGI)[0]["id"]
     bodies = ({"area_id": KOTA_TINGGI}, {"business_id": kota_id}, {}, {"area_id": KOTA_TINGGI, "business_id": kota_id})
     assert [client.post("/api/ask", json={"question": "hi", **b}).status_code for b in bodies] == [200] * 4

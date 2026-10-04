@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import time
+from collections.abc import Mapping
 from functools import lru_cache, partial
 from typing import Literal
 
@@ -18,7 +19,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from . import areas, floodtools, places
+from . import areas, floodtools, places, sections
 
 log = logging.getLogger("banjir")
 
@@ -75,6 +76,11 @@ into plain ringgit and say the number you used; if that needs something you were
 such as how many days a month the shop opens, ask. When you give a ringgit figure, say once in \
 plain words what it is based on (the tool's "basis") and that it is a rough estimate, not a \
 valuation or an insurance figure. Money answers may run a little longer than five sentences.
+- Some areas are split into sections. find_business searches the whole area and gives each business's section. \
+area_summary and flood_history take a section name or number, or "" for the whole area. For "this area" use the \
+section this question is about, if one is named below.
+- Past floods: only from flood_history, with the date and the source it gives. No record in the sources is not \
+proof that a place never flooded: never say a place has not flooded or is flood-free; say no record was found.
 - Weather: rain_forecast gives Google Weather's rain for the next 12 hours. It is not a flood \
 warning; say so. Open or closed: business_status says how Google Maps lists a shop; say "Google \
 Maps lists it as ...", since listings can be out of date.
@@ -236,9 +242,11 @@ def _config(**settings) -> types.GenerateContentConfig:
     return types.GenerateContentConfig(thinking_config=thinking, **settings)
 
 
-def ask(question: str, place_id: str | None, history: list[dict], area: areas.Area | None = None) -> str:
+def ask(question: str, place_id: str | None, history: list[dict], area: areas.Area | None = None,
+        section: Mapping | None = None) -> str:
     """Answer one question. With a selected place (a business or point id) the question is about the place's own
-    area, or no area for a point outside the listed areas; without one, about `area` (the default if none is given).
+    area and section, or no area for a point outside the listed areas; without one, about `area` (the default if none
+    is given) and `section` of it, if any.
 
     history is [{"role": "user" | "model", "text": str}, ...]."""
     place = _selected(place_id)
@@ -247,10 +255,11 @@ def ask(question: str, place_id: str | None, history: list[dict], area: areas.Ar
                 for turn in history[-MAX_HISTORY_TURNS:]]
     contents.append(types.Content(role="user", parts=[types.Part(text=question)]))
     where = f"around {area.ai_name}" if area else NO_AREA_WHERE
-    token = floodtools.start_question(area, place)
+    token = floodtools.start_question(area, place, section)
     try:
         # the selection goes in the system text so a user message cannot fake it
-        response = _ask_model(contents, f"{SYSTEM.format(where=where)}\n\n{_selection(place, area)}")
+        looking = _looking_at(floodtools.current_section())
+        response = _ask_model(contents, f"{SYSTEM.format(where=where)}\n\n{looking}{_selection(place, area)}")
     finally:
         floodtools.end_question(token)
     # a reply that still calls a tool ran out of requests: text beside the call is not an answer
@@ -264,6 +273,13 @@ def _selected(place_id: str | None) -> dict | None:
         return places.resolve(place_id) if place_id else None
     except places.PlaceError:
         return None
+
+
+def _looking_at(section: Mapping | None) -> str:
+    """What the system text says about the section the question is about, from the data; "" for none."""
+    if section is None:
+        return ""
+    return f"This question is about the section {places.quoted_name(section['name'])} (a name from the data).\n"
 
 
 def _selection(place: dict | None, area: areas.Area | None) -> str:
@@ -326,9 +342,9 @@ def _run_tool(call: types.FunctionCall) -> types.Part:
     return types.Part(function_response=types.FunctionResponse(id=call.id, name=call.name, response=result))
 
 
-def flood_news(area: areas.Area | None = None) -> dict:
-    """Gemini grounded on Google Search, about an area (the default area if none is given): an answer, its web
-    sources, and Google's search suggestions.
+def flood_news(area: areas.Area | None = None, section: Mapping | None = None) -> dict:
+    """Gemini grounded on Google Search, about an area (the default area if none is given) or one section of it: an
+    answer, its web sources, and Google's search suggestions.
 
     Google's terms ask that the search suggestions (search_html) are shown as they are wherever the
     answer is shown; main.py serves them on a locked-down page for the browser to frame. The question is
@@ -336,7 +352,7 @@ def flood_news(area: areas.Area | None = None) -> dict:
     service on our bill."""
     area = area or areas.default()
     response = _client().models.generate_content(
-        model=MODEL, contents=NEWS_QUESTION.format(news_place=area.news_place),
+        model=MODEL, contents=NEWS_QUESTION.format(news_place=sections.news_place(area, section)),
         config=_config(system_instruction=NEWS_SYSTEM.format(news_region=area.news_region),
                        temperature=0.2, max_output_tokens=MAX_OUTPUT_TOKENS,
                        tools=[types.Tool(google_search=types.GoogleSearch())]),

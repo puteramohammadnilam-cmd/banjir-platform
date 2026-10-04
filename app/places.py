@@ -5,9 +5,15 @@
 
 Both resolve to the same keys (the Place), so the page and the AI tools handle either. A point's Place has is_point
 true; name, sector, kind, is_chain, map_last_edited and road null; area_id the listed area whose view holds the
-square's centre, or null; shelter the nearest relief centre of that area, or null; elevation (app/elevation.py) at the
-square's centre as the id gives it, or null; cell {grid, row, col, bounds}. A business's Place is its premises.json
-entry (with the elevation areas.premises adds at its own point) plus is_point false, its area_id and cell null.
+square's centre, or null; section {id, name} of that area's section holding the centre, or null; shelter the nearest
+relief centre of that area, or null; elevation (app/elevation.py) at the square's centre as the id gives it, or null;
+cell {grid, row, col, bounds}. A business's Place is its premises.json entry (with the elevation areas.premises adds at
+its own point) plus is_point false, its area_id, its section as {id, name} (null in an area not split into sections)
+and cell null.
+
+A point in an area split into sections is in that area only when it is in one of its sections (app/sections.py
+section_at: in an outline, or within NEAREST_SECTION_M of one); else it is in no listed area there. The section is
+worked out here and sent only in POST /api/point's answer, never put in a URL or a log.
 
 Snapping rule. Task A5 repeats it in JavaScript (place.js snapToGrid): change the two together.
   1. Grids: GET /api/coverage `grids`, in the order listed (by name). Each has x0 (west edge) and y0 (north edge)
@@ -65,7 +71,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from . import areas, elevation, raster
+from . import areas, elevation, raster, sections
 
 log = logging.getLogger("banjir")
 
@@ -149,10 +155,11 @@ def _located(lat: float, lon: float) -> tuple[dict, str]:
 
 def _point_place(found: Snap, depth_m: dict) -> dict:
     lat, lon = parse_point_id(found.id)
-    area = areas.area_at(lat, lon)
+    area, section = sections.listed_area_at(lat, lon)
     bounds = [round(edge, BOUNDS_DECIMALS) for edge in found.grid.bounds(found.row, found.col)]
     return {"id": found.id, "is_point": True, "name": None, "sector": None, "kind": None, "is_chain": None,
             "lat": lat, "lon": lon, "map_last_edited": None, "area_id": area.id if area else None,
+            "section": {"id": section["id"], "name": section["name"]} if section else None,
             "depth_m": depth_m, "road": None, "shelter": nearest_shelter(area, lat, lon) if area else None,
             "elevation": elevation.at(lat, lon),
             "cell": {"grid": found.grid.name, "row": found.row, "col": found.col, "bounds": bounds}}
@@ -206,7 +213,8 @@ def resolve(ref) -> dict:
     if found is None:
         raise PlaceError("unknown")
     premise, area = found
-    return {**copy.deepcopy(premise), "is_point": False, "area_id": area.id, "cell": None}
+    return {**copy.deepcopy(premise), "is_point": False, "area_id": area.id, "cell": None,
+            "section": sections.ref(area, premise.get("section"))}
 
 
 def area_of(place: dict) -> areas.Area | None:

@@ -1,0 +1,87 @@
+{
+ "first_year": 1992,
+ "recent_from": 2019,
+ "last_year": 2026,
+ "checked": "2026-10-04",
+ "section_names": {
+  "zon-1": {
+   "en": "Zone 1",
+   "ms": "Zon 1"
+  },
+  "zon-2": {
+   "en": "Zone 2",
+   "ms": "Zon 2"
+  },
+  "zon-u3": {
+   "en": "Zone U3",
+   "ms": "Zon U3"
+  }
+ },
+ "events": [
+  {
+   "id": "tc-2006-02-26",
+   "date": "2006-02-26",
+   "when": "26 Feb 2006",
+   "place": "The north of the city",
+   "sections": [
+    "zon-u3"
+   ],
+   "depth": null,
+   "what": "A flood in the north.",
+   "sources": [
+    {
+     "title": "A newspaper, 26 Feb 2006",
+     "url": "https://example.org/tc-2006-02-26",
+     "type": "news"
+    }
+   ],
+   "confidence": "medium",
+   "account": false,
+   "year": 2006.15
+  },
+  {
+   "id": "tc-2021-12-18",
+   "date": "2021-12-18",
+   "when": "18 to 19 Dec 2021",
+   "place": "The river side",
+   "sections": [
+    "zon-2",
+    "zon-1"
+   ],
+   "depth": "over 1 m",
+   "what": "The big flood.",
+   "sources": [
+    {
+     "title": "A newspaper, 18 to 19 Dec 2021",
+     "url": "https://example.org/tc-2021-12-18",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2021.96,
+   "date_end": "2021-12-19"
+  },
+  {
+   "id": "tc-2025-04-11",
+   "date": "2025-04-11",
+   "when": "11 Apr 2025",
+   "place": "Old Town",
+   "sections": [
+    "zon-2"
+   ],
+   "depth": "0.5 to 1 m",
+   "what": "Knee deep.",
+   "sources": [
+    {
+     "title": "A newspaper, 11 Apr 2025",
+     "url": "https://example.org/tc-2025-04-11",
+     "type": "news"
+    }
+   ],
+   "confidence": "high",
+   "account": false,
+   "year": 2025.28
+  }
+ ]
+}

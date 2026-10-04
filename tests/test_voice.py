@@ -33,7 +33,7 @@ def client(monkeypatch):
     main._hits.clear()
     asked = []
     monkeypatch.setattr(ai, "transcribe", lambda audio, mime: ai.Heard.model_validate(HEARD))
-    monkeypatch.setattr(ai, "ask", lambda question, place, history, area: asked.append((question, place, history)) or "Dalam model, 1.88 m.")
+    monkeypatch.setattr(ai, "ask", lambda question, place, history, area, section=None: asked.append((question, place, history)) or "Dalam model, 1.88 m.")
     test_client = TestClient(main.app)
     test_client.asked = asked
     return test_client

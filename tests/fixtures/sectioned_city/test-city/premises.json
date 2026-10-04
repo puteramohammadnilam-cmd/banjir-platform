@@ -1,0 +1,164 @@
+[
+ {
+  "id": "node-990000001",
+  "name": "Kedai Satu",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 3.012,
+  "lon": 101.512,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Satu",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": null,
+  "section": "zon-1"
+ },
+ {
+  "id": "node-990000002",
+  "name": "Kopi Dua",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 3.021,
+  "lon": 101.522,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": 0.1,
+   "20": 0.2,
+   "50": 0.3
+  },
+  "road": {
+   "name": "Jalan Dua",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": 0.1,
+    "20": 0.2,
+    "50": 0.3
+   }
+  },
+  "shelter": null,
+  "section": "zon-1"
+ },
+ {
+  "id": "node-990000003",
+  "name": "Kedai Tiga",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "lat": 3.0297599,
+  "lon": 101.5364982,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": 1.35,
+   "20": 1.54,
+   "50": 1.76
+  },
+  "road": {
+   "name": "Jalan Satu",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": 1.35,
+    "20": 1.54,
+    "50": 1.76
+   }
+  },
+  "shelter": null,
+  "section": "zon-2"
+ },
+ {
+  "id": "node-990000004",
+  "name": "Dobi Empat",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "lat": 3.035,
+  "lon": 101.545,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.4
+  },
+  "road": {
+   "name": "Jalan Empat",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.4
+   }
+  },
+  "shelter": null,
+  "section": "zon-2"
+ },
+ {
+  "id": "node-990000005",
+  "name": "Kedai Lima",
+  "sector": "shop",
+  "kind": "hardware",
+  "is_chain": false,
+  "lat": 3.038,
+  "lon": 101.552,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Satu",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": null,
+  "section": "zon-2"
+ },
+ {
+  "id": "node-990000006",
+  "name": "Kopi Enam",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "lat": 3.05,
+  "lon": 101.515,
+  "map_last_edited": "2026-01-01",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Enam",
+   "kind": "service",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": null,
+  "section": "zon-u3"
+ }
+]

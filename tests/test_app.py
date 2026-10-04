@@ -18,7 +18,7 @@ TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" 
 @pytest.fixture
 def client(monkeypatch):
     main._hits.clear()
-    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area: f"echo:{business_id}:{len(history)}")
+    monkeypatch.setattr(ai, "ask", lambda question, business_id, history, area, section=None: f"echo:{business_id}:{len(history)}")
     monkeypatch.setattr(ai, "read_shop_photo", lambda image, mime: ai.PhotoEstimate(
         is_shop_front=True, floor_height_cm=30, steps_counted=2, stock_at_floor_level="yes",
         confidence="low", reasoning="Two steps."))
@@ -59,7 +59,8 @@ def test_flood_check_returns_limits_and_reports_unknown_id():
 def test_area_summary_counts_add_up():
     summary = floodtools.area_summary()
     for scenario in summary["scenarios"].values():
-        assert scenario["businesses_with_water"] + len(scenario["stay_dry"]) == TOTAL
+        assert scenario["businesses_with_water"] + scenario["stay_dry"] == TOTAL
+        assert len(scenario["some_that_stay_dry"]) == min(scenario["stay_dry"], floodtools.MAX_DRY_NAMES)
 
 
 def test_data_endpoint_sends_security_headers(client):

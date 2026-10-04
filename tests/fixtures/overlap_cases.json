@@ -1,0 +1,15 @@
+{
+  "about": "Whether a flood square overlaps a [west, south, east, north] box: place.js overlapsView and sections.overlaps_view must give these answers (tests/pin.test.mjs and tests/test_sections_api.py).",
+  "view": [101.515, 3.008, 101.55, 3.042],
+  "size": {"px": 0.0008333333356347339, "py": 0.0008333333333325754},
+  "cases": [
+    {"south": 3.02, "west": 101.53, "overlaps": true, "why": "inside"},
+    {"south": 3.0415, "west": 101.549, "overlaps": true, "why": "straddling the north-east corner"},
+    {"south": 3.0079, "west": 101.514585, "overlaps": true, "why": "the south-west corner square"},
+    {"south": 3.0425, "west": 101.53, "overlaps": false, "why": "just north of the box"},
+    {"south": 3.02, "west": 101.5505, "overlaps": false, "why": "just east of it"},
+    {"south": 3.0071666666666674, "west": 101.53, "overlaps": false, "why": "touching the south edge from outside"},
+    {"south": 3.02, "west": 101.51416666666437, "overlaps": false, "why": "touching the west edge from outside"},
+    {"south": 3.14748, "west": 101.695, "overlaps": false, "why": "far away"}
+  ]
+}

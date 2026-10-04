@@ -1,7 +1,8 @@
 """Read-only lookups over the built data. These are also the tools the AI model may call.
 
 Gemini reads each tool's docstring as the tool's description, so no docstring names a place. A chat question's scope
-(start_question) holds its area and the place the user selected, and the area's config fills the prompts.
+(start_question) holds its area, the section of it the user is looking at (for an area split into sections) and the
+place the user selected, and the area's config fills the prompts. The section words and names come from the data.
 
 Tools take a place id: a mapped business from any area, or SELECTED ("selected") for the place the user selected, which
 is looked up here on the server. The model is never told a point's id or coordinates, and no tool result for a point
@@ -13,9 +14,10 @@ Names from the map and from Google are cleaned before the model sees them.
 from __future__ import annotations
 
 import contextvars
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
-from . import areas, costs, googlemaps, places
+from . import areas, costs, googlemaps, places, sections
 
 SCENARIOS = {"10": "a flood expected once in 10 years", "20": "a flood expected once in 20 years",
              "50": "a flood expected once in 50 years"}
@@ -41,6 +43,16 @@ UNKNOWN_BUSINESS = "No business with that id. Call find_business first."
 NOT_COVERED = "That point is not in the flood model."
 NOT_A_BUSINESS = "A point picked on the map is not a business, so it has no Google Maps listing."
 MAX_MATCHES = 8
+MAX_DRY_NAMES = 15        # area_summary names this many businesses that stay dry, then gives the count
+MAX_TOP_SECTIONS = 10     # area_summary of a whole split area: the sections with the most businesses with water
+MAX_FLOODS = 20           # flood_history: the most recent records, then the count
+KEY_RP = "50"             # the flood size area_summary ranks sections by: the largest the model has
+UNKNOWN_SECTION = ('No section by that name. Use a section name or number as the prompt or find_business gives it, or '
+                   '"" for the whole area.')
+NO_SECTIONS = 'This area is not split into sections. Use "" for the whole area.'
+NO_RECORD = ("No record in the sources checked is not proof that a place has never flooded: say only that no record "
+             "was found.")
+NO_HISTORY = "No flood records have been collected for this area. " + NO_RECORD
 RAIN_HOURS = 12
 WEATHER_DECIMALS = 2   # a point outside the listed areas goes to Google Weather rounded to 0.01 degrees, about 1 km
 # What rain_forecast passes on from googlemaps.rain_outlook: the forecast only, never where it was asked for
@@ -56,11 +68,13 @@ ESTIMATE_MAX = {"value_at_risk_rm": 50_000_000, "floor_height_cm": 300, "daily_t
 @dataclass(frozen=True)
 class QuestionScope:
     """What one chat question works within: its area (None for a point outside the listed areas), the id of the
-    place the user selected (None when nothing is selected), and how many Google lookups it has left."""
+    place the user selected (None when nothing is selected), how many Google lookups it has left, and the section of
+    the area the question is about (None for the whole area, or an area not split into sections)."""
 
     area: areas.Area | None
     place: str | None
     maps_left: int
+    section: Mapping | None = None
 
 
 _scope: contextvars.ContextVar[QuestionScope | None] = contextvars.ContextVar("question_scope", default=None)
@@ -71,6 +85,17 @@ def current_area() -> areas.Area | None:
     (a test or a script): the default area."""
     scope = _scope.get()
     return scope.area if scope else areas.default()
+
+
+def current_section() -> Mapping | None:
+    """The section the chat question being answered is about, if any."""
+    scope = _scope.get()
+    return scope.section if scope else None
+
+
+def _section_name(area: areas.Area | None, section_id) -> str | None:
+    found = sections.get(area, section_id) if area else None
+    return _clean(found["name"]) if found else None
 
 
 def selected_place() -> str | None:
@@ -146,15 +171,17 @@ def _for_model(place: dict) -> dict:
     if place["is_point"]:
         return _point_for_model(place)
     named = {key: {**place[key], "name": _clean(place[key]["name"])} for key in ("road", "shelter") if place.get(key)}
-    return {**place, "name": _clean(place["name"]), "kind": _clean(place["kind"]), **named}
+    section = {"section": _clean(place["section"]["name"]) if place["section"] else None} if "section" in place else {}
+    return {**place, "name": _clean(place["name"]), "kind": _clean(place["kind"]), **named, **section}
 
 
 def _point_for_model(place: dict) -> dict:
     """The selected point as a tool gives it to the model: its depths, its listed area and the nearest relief centre,
     named SELECTED_POINT. Never its id, coordinates or square, which would tell the model where the user is."""
     area, shelter = places.area_of(place), place["shelter"]
+    section = place.get("section")
     return {"place": SELECTED_POINT, "is_point": True, "depth_m": dict(place["depth_m"]),
-            "area": area.name if area else None,
+            "area": area.name if area else None, "section": _clean(section["name"]) if section else None,
             "shelter": {"name": _clean(shelter["name"]), "distance_m": shelter["distance_m"]} if shelter else None}
 
 
@@ -165,14 +192,20 @@ def find_business(name: str) -> list[dict]:
         name: Part of a business name or type, for example "KFC", "kedai runcit" or "restaurant".
 
     Returns:
-        Up to 8 matching businesses with their id, name, type and the road they are near. Chains
-        have several outlets with the same name: ask which road if it is not clear. Use the id
-        with flood_check.
+        Up to 8 matching businesses with their id, name, type, the road they are near and, where
+        the area is split into sections, the section they are in (the section the user is looking
+        at first). Chains have several outlets with the same name: ask which road or section if it
+        is not clear. Use the id with flood_check.
     """
     needle = name.strip().lower() if isinstance(name, str) else ""
     hits = [p for p in premises() if needle and (needle in p["name"].lower() or needle in p["kind"].lower())]
+    here = (current_section() or {}).get("id")
+    hits.sort(key=lambda p: here is None or p.get("section") != here)   # stable: the map's order otherwise
+    area = current_area()
+    named = area is not None and sections.has_sections(area)
     return [{"id": p["id"], "name": _clean(p["name"]), "type": p["sector"], "kind": _clean(p["kind"]),
-             "near": _clean(p["road"]["name"])} for p in hits[:MAX_MATCHES]]
+             "near": _clean(p["road"]["name"]), **({"section": _section_name(area, p.get("section"))} if named else {})}
+            for p in hits[:MAX_MATCHES]]
 
 
 def flood_check(place_id: str) -> dict:
@@ -195,24 +228,105 @@ def flood_check(place_id: str) -> dict:
     return {**_for_model(place), "scenarios": SCENARIOS, "limits": LIMITS, **_area_notes(places.area_of(place))}
 
 
-def area_summary() -> dict:
-    """Summarise flood exposure across all mapped businesses in the area this chat is about.
+def area_summary(section: str = "") -> dict:
+    """Summarise flood exposure across the mapped businesses in the area this chat is about, or in one
+    section of it.
+
+    Args:
+        section: For an area split into sections, a section's name or number as the prompt or
+            find_business gives it, to summarise that section only. "" for the whole area.
 
     Returns:
-        For each flood size, how many businesses get water and which stay dry, plus the
-        relief centres this tool knows of and the limits of the data. Or an error when the
-        user picked a point outside the listed areas.
+        For each flood size, how many businesses get water, how many stay dry and the names of
+        up to 15 of those; for a whole area split into sections, the 10 sections with the most
+        businesses with water; for one section, how many of its 90 m squares get water. Also the
+        relief centres this tool knows of and the limits of the data. Or an error when the user
+        picked a point outside the listed areas, or the section is not known.
     """
     area = current_area()
     if area is None:
         return {"error": NO_AREA}
-    shown = areas.premises(area.id)
-    scenarios = {rp: {"meaning": label, "businesses_with_water": sum(1 for p in shown if p["depth_m"][rp]),
-                      "stay_dry": [_clean(p["name"]) for p in shown if not p["depth_m"][rp]]}
-                 for rp, label in SCENARIOS.items()}
+    part, error = _section_asked(area, section)
+    if error:
+        return {"error": error}
+    shown = sections.section_premises(area.id, part["id"]) if part else areas.premises(area.id)
     shelters = [_clean(s["name"]) for s in areas.town(area.id)["shelters"]]
-    return {"total_businesses": len(shown), "scenarios": scenarios, "shelters": shelters or no_shelters(area),
-            "limits": LIMITS, **_area_notes(area)}
+    return {"total_businesses": len(shown), "scenarios": _scenarios(shown), **_section_counts(area, part),
+            "shelters": shelters or no_shelters(area), "limits": LIMITS, **_area_notes(area)}
+
+
+def _section_asked(area: areas.Area, section) -> tuple[Mapping | None, str | None]:
+    """(the section a tool was asked about, None), (None, None) for the whole area, or (None, the error)."""
+    if not isinstance(section, str) or not section.strip():
+        return None, None
+    if not sections.has_sections(area):
+        return None, NO_SECTIONS
+    found = sections.find_section(area, section)
+    return (found, None) if found else (None, UNKNOWN_SECTION)
+
+
+def _scenarios(shown) -> dict:
+    found = {}
+    for rp, label in SCENARIOS.items():
+        dry = [_clean(p["name"]) for p in shown if not p["depth_m"][rp]]
+        found[rp] = {"meaning": label, "businesses_with_water": len(shown) - len(dry), "stay_dry": len(dry),
+                     "some_that_stay_dry": dry[:MAX_DRY_NAMES]}
+    return found
+
+
+def _section_counts(area: areas.Area, part: Mapping | None) -> dict:
+    """For one section: its name and how many of its squares get water; for a whole split area: the sections with the
+    most businesses with water at the largest flood size; nothing for an area not split into sections."""
+    if part is not None:
+        counts = part["counts"]
+        return {"section": _clean(part["name"]), "squares": counts["cells"],
+                "squares_with_water": dict(counts["wet_cells"])}
+    if not sections.has_sections(area):
+        return {}
+    ranked = sorted(sections.listed(area.id), key=lambda s: -s["counts"]["wet_businesses"][KEY_RP])
+    return {"sections": len(ranked), "sections_with_most_businesses_with_water": [
+        {"section": _clean(s["name"]), "businesses": s["counts"]["businesses"],
+         "businesses_with_water": dict(s["counts"]["wet_businesses"]), "squares": s["counts"]["cells"],
+         "squares_with_water": dict(s["counts"]["wet_cells"])} for s in ranked[:MAX_TOP_SECTIONS]]}
+
+
+def flood_history(section: str = "") -> dict:
+    """List recorded past floods in the area this chat is about, or in one section of it, from the
+    news, official and research sources that were checked.
+
+    Args:
+        section: For an area split into sections, a section's name or number as the prompt or
+            find_business gives it. "" for the whole area.
+
+    Returns:
+        The years the sources cover, the 20 most recent records (date, what happened, depth as
+        reported, the sections named, the source and its link) and how many there are in all,
+        the runs of years with no record, and a note. No record is not proof of no flood: never
+        say a place has never flooded. Or an error.
+    """
+    area = current_area()
+    if area is None:
+        return {"error": NO_AREA}
+    part, error = _section_asked(area, section)
+    if error:
+        return {"error": error}
+    record = sections.history_for(area, part["id"] if part else None)
+    if record is None:
+        return {"error": NO_HISTORY}
+    floods = sorted(record["floods"], key=lambda flood: -flood["year"])
+    return {"scope": _clean(part["name"]) if part else area.name,
+            "years_checked": [record["first_year"], record["last_year"]], "records": len(floods),
+            "most_recent": [_flood_for_model(area, flood) for flood in floods[:MAX_FLOODS]],
+            **({"years_with_no_record": record["gaps"]} if "gaps" in record else {}), "note": NO_RECORD}
+
+
+FLOOD_FIELDS = ("when", "what", "depth", "source", "url", "confidence", "account")
+
+
+def _flood_for_model(area: areas.Area, flood: Mapping) -> dict:
+    found = {key: flood[key] for key in FLOOD_FIELDS if flood.get(key) is not None}
+    named = [_section_name(area, section_id) for section_id in flood.get("sections", ())]
+    return {**found, **({"sections": [name for name in named if name]} if named else {})}
 
 
 def damage_estimate(place_id: str, value_at_risk_rm: float, shop_size: str, floor_height_cm: float,
@@ -294,12 +408,18 @@ def _figures_error(given: dict, size: str | None) -> str | None:
     return None
 
 
-def start_question(area: areas.Area | None = None, place: dict | None = None) -> contextvars.Token:
+def start_question(area: areas.Area | None = None, place: dict | None = None,
+                   section: Mapping | None = None) -> contextvars.Token:
     """Open one chat question's scope and its allowance of Google lookups. With a selected place (a Place from
-    places.resolve) the area is the place's own: the area holding the business or point, or None for a point outside
-    the listed areas. Without one, the area given, or the default area. Pass the token to end_question."""
-    scope_area = places.area_of(place) if place else (area or areas.default())
-    return _scope.set(QuestionScope(scope_area, place["id"] if place else None, MAX_MAPS_LOOKUPS))
+    places.resolve) the area and section are the place's own: the area holding the business or point, or None for a
+    point outside the listed areas. Without one, the area and section given, or the default area. Pass the token to
+    end_question."""
+    if place:
+        scope_area = places.area_of(place)
+        section = sections.get(scope_area, (place.get("section") or {}).get("id")) if scope_area else None
+    else:
+        scope_area = area or areas.default()
+    return _scope.set(QuestionScope(scope_area, place["id"] if place else None, MAX_MAPS_LOOKUPS, section))
 
 
 def end_question(token: contextvars.Token) -> None:
@@ -319,9 +439,12 @@ def _may_look_up() -> bool:
 
 
 def _rain_at() -> tuple[float, float]:
-    """Where to ask for rain: the area's middle, or for a point outside the listed areas its square's centre rounded
-    to WEATHER_DECIMALS, so Google gets no more than about a kilometre of where the user is."""
-    area = current_area()
+    """Where to ask for rain: the middle of the question's section, else of its area, or for a point outside the listed
+    areas its square's centre rounded to WEATHER_DECIMALS, so Google gets no more than about a kilometre of where the
+    user is."""
+    area, section = current_area(), current_section()
+    if section is not None:
+        return sections.centre(section)
     if area is not None:
         return area.centre()
     lat, lon = places.parse_point_id(selected_place() or "")
@@ -378,4 +501,4 @@ def business_status(business_id: str) -> dict:
     return {"business": _clean(p["name"]), "found": listing is not None, **shown}
 
 
-TOOLS = [find_business, flood_check, area_summary, damage_estimate, rain_forecast, business_status]
+TOOLS = [find_business, flood_check, area_summary, flood_history, damage_estimate, rain_forecast, business_status]

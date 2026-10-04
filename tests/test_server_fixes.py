@@ -30,7 +30,7 @@ def data_url(mime: str, raw: bytes) -> str:
 @pytest.fixture
 def client(monkeypatch):
     main._hits.clear()
-    monkeypatch.setattr(ai, "ask", lambda question, place, history, area: "answer")
+    monkeypatch.setattr(ai, "ask", lambda question, place, history, area, section=None: "answer")
     monkeypatch.setattr(ai, "read_shop_photo", lambda image, mime: ai.PhotoEstimate(
         is_shop_front=True, floor_height_cm=30, steps_counted=2, stock_at_floor_level="yes",
         confidence="low", reasoning="Two steps."))
