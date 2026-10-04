@@ -55,7 +55,7 @@ test("the picker offers the three sizes with their chance, the biggest pressed, 
 });
 
 test("the note names the area's own example of a bigger flood, in either language", () => {
-  assert.equal(picked("such as December 2021").note.textContent, "Floods bigger than 1 in 50 years are not shown, such as December 2021.");
+  assert.equal(picked("2021-12").note.textContent, "Floods bigger than 1 in 50 years, such as December 2021, are not shown.");
   useLang("ms");
   try {
     assert.equal(picked(undefined).note.textContent, "Banjir lebih besar daripada 1 dalam 50 tahun tidak ditunjukkan.");

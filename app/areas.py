@@ -14,8 +14,9 @@ area.json fields:
   council       the local council's short name, or null when no source names one (optional)
   notes         where the area's data came from, by topic (optional)
   history       dated floods from the sources checked, or null when none were collected (optional)
-  bigger_flood_example  a past flood bigger than the largest size shown, for "Floods bigger than 1 in 50 years are not
-                shown{example}", such as "such as December 2021"; null when none is named (optional)
+  bigger_flood_example  the month of a past flood bigger than the largest size shown, as "YYYY-MM" (e.g. "2021-12"),
+                for "Floods bigger than 1 in 50 years, such as December 2021, are not shown"; the page writes the
+                month in its own language; null when none is named (optional)
 
 The config is part of the repo, so it is trusted, but it is still checked (load_all, and preload at start-up):
 a typo stops the server at start-up instead of failing in the middle of a chat. Folders whose names start with
@@ -155,8 +156,8 @@ def _problems(raw: dict, folder: str) -> list[str]:
             config["id"] == folder and _is_id(folder),
         f"{', '.join(TEXT_FIELDS)} must be non-empty text": all(_is_text(config[name]) for name in TEXT_FIELDS),
         "council must be non-empty text or null": config["council"] is None or _is_text(config["council"]),
-        "bigger_flood_example must be non-empty text or null":
-            config["bigger_flood_example"] is None or _is_text(config["bigger_flood_example"]),
+        "bigger_flood_example must be a month as YYYY-MM or null":
+            config["bigger_flood_example"] is None or _is_month(config["bigger_flood_example"]),
         "view must be [west, south, east, north] in degrees, west below east and south below north":
             _is_view(config["view"]),
         f"zoom must be a whole number from 1 to {MAX_ZOOM}":
@@ -173,6 +174,10 @@ def _problems(raw: dict, folder: str) -> list[str]:
 
 def _is_id(text: str) -> bool:
     return len(text) <= MAX_ID_CHARS and AREA_ID.fullmatch(text) is not None
+
+
+def _is_month(value) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", value) is not None
 
 
 def _is_text(value) -> bool:

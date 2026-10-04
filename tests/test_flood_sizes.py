@@ -115,14 +115,14 @@ def test_the_limits_the_model_reads_say_bigger_floods_are_not_shown():
 
 def test_only_sri_muda_names_a_bigger_flood_and_the_data_route_sends_it():
     examples = {area.id: area.bigger_flood_example for area in areas.load_all()}
-    assert examples.pop("sri-muda") == "such as December 2021"
+    assert examples.pop("sri-muda") == "2021-12"
     assert set(examples.values()) == {None}
-    assert areas.details(areas.get("sri-muda"))["bigger_flood_example"] == "such as December 2021"
+    assert areas.details(areas.get("sri-muda"))["bigger_flood_example"] == "2021-12"
     assert areas.details(areas.get("kuantan"))["bigger_flood_example"] is None
 
 
-@pytest.mark.parametrize("value", ["", "  ", 5, ["such as 2021"]])
-def test_a_bigger_flood_example_must_be_text_or_null(tmp_path, value):
+@pytest.mark.parametrize("value", ["", "  ", 5, ["2021-12"], "such as December 2021", "2021-13", "2021-1"])
+def test_a_bigger_flood_example_must_be_a_month_or_null(tmp_path, value):
     folder = tmp_path / "test-town"
     folder.mkdir()
     config = {"id": "test-town", "default": True, "name": "T", "display_name": "T", "view": [100.0, 2.0, 100.1, 2.1],

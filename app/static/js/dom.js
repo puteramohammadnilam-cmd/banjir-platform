@@ -1,5 +1,5 @@
 // Small DOM helpers. Text goes in through textContent only, so nothing is parsed as HTML.
-import { numberLocale, t } from "./i18n.js";
+import { dateLocale, numberLocale, t } from "./i18n.js";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 function fill(node, attrs, children) {
@@ -74,10 +74,14 @@ export function scenarioPicker(rp, onPick) {
     }));
 }
 
+/** The month of a past flood ("2021-12"), written in the page's language: "December 2021", "Disember 2021". */
+const monthText = (month) => new Date(`${month}-01T00:00:00`).toLocaleDateString(dateLocale(), { month: "long", year: "numeric" });
+
 /** "Floods bigger than 1 in 50 years are not shown", with the area's own example of one (area.json
- *  bigger_flood_example, such as "such as December 2021") when it names one. */
-const notShown = (example) => h("p", { class: "scenario-note" },
-  t("scenario.notShown", { rp: SCENARIOS.at(-1), example: example ? `, ${example}` : "" }));
+ *  bigger_flood_example, a month such as "2021-12") when it names one. */
+const notShown = (example) => h("p", { class: "scenario-note" }, example
+  ? t("scenario.notShownSuch", { rp: SCENARIOS.at(-1), when: monthText(example) })
+  : t("scenario.notShown", { rp: SCENARIOS.at(-1) }));
 
 /** Put a fresh picker in `slot`, and the note on floods bigger than it offers, keeping keyboard focus on the chosen size
  *  if the old picker had it. */
