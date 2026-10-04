@@ -79,31 +79,59 @@ const nextSteps = ({ onCheckPoint, onOtherArea }) => [
   onOtherArea && h("button", { type: "button", class: "btn btn-secondary", onclick: () => onOtherArea() }, t("overview.otherArea")),
 ].filter(Boolean);
 
+/** The city's businesses for a filter, by name, each with the text it looks in: name, kind, road and section's name. */
+const cityEntries = (index, names) => [...index].sort(byName)
+  .map((p) => ({ p, text: `${p.name} ${p.kind} ${roadName(p.road.name)} ${names.get(p.section) ?? ""}`.toLowerCase() }));
+
+/** What the list says over its rows: none mapped here, more matches than it shows, or statusText's words. */
+function listStatus({ text, shown, found, isSearch, area, hasRows }) {
+  if (!hasRows) return t("city.noneMapped", { area: area.name });
+  if (found > shown) return t("city.directoryMore", { shown, count: found });
+  return statusText({ text: text.trim(), shown, isSearch, area });
+}
+
 /** The area's businesses in one list, with its filter box: typing in `filter` filters them by name, type or road, and
  *  showMatches(text) does the same for a search that did not open one business (pick.js), and says how many it found.
  *  With none on show, `next` holds the ways on: onCheckPoint(button) checks the spot on the map (null when this build
- *  cannot check points) and onOtherArea() goes to the area chooser (null with one area listed). */
+ *  cannot check points) and onOtherArea() goes to the area chooser (null with one area listed). On a section's page,
+ *  widen(index, sections, cityName) takes in the city's lean index: from then on a filter also shows the matches in the
+ *  rest of the city, after this section's own, each with its section (at most CITY_LIST_MAX of them). */
 export function createDirectory({ list, filter, status, next, head }, premises,
   { area, onOpen, onCheckPoint = null, onOtherArea = null }) {
   const rows = directoryRows(premises, onOpen);
+  let city = null;   // the rest of the city, once widened: {entries, names, area}
+  let more = [];     // its rows on show
+  let selected = null;
+  const mark = () => { for (const row of [...rows, ...more]) row.button.setAttribute("aria-current", String(row.id === selected)); };
   list.replaceChildren(...rows.map((row) => row.item));
   next.replaceChildren(...nextSteps({ onCheckPoint, onOtherArea }));
   const apply = (text, isSearch) => {
     const needle = text.trim().toLowerCase();
-    let shown = 0;
-    for (const row of rows) {
-      row.item.hidden = Boolean(needle) && !row.text.includes(needle);
-      if (!row.item.hidden) shown += 1;
-    }
-    status.textContent = rows.length ? statusText({ text: text.trim(), shown, isSearch, area }) : t("city.noneMapped", { area: area.name });
+    for (const row of rows) row.item.hidden = Boolean(needle) && !row.text.includes(needle);
+    const own = rows.filter((row) => !row.item.hidden).length;
+    const found = city && needle ? city.entries.filter((entry) => entry.text.includes(needle)) : [];
+    more = found.slice(0, CITY_LIST_MAX).map(({ p }) => directoryRow(p, onOpen, city.names.get(p.section)));
+    if (city) list.replaceChildren(...rows.map((row) => row.item), ...more.map((row) => row.item));
+    mark();
+    const shown = own + more.length;
+    const isCitywide = Boolean(city && needle);   // what was searched, and so what none-found names
+    status.textContent = listStatus({
+      text, shown, found: own + found.length, isSearch, area: isCitywide ? city.area : area, hasRows: rows.length > 0 || isCitywide,
+    });
     head.hidden = shown === 0;
     next.hidden = shown > 0 || next.children.length === 0;
   };
   filter.addEventListener("input", () => apply(filter.value, false));
   if (!rows.length) apply("", false);   // a section with no businesses mapped says so at once
   return {
-    markSelected: (selectedId) => { for (const row of rows) row.button.setAttribute("aria-current", String(row.id === selectedId)); },
+    markSelected: (selectedId) => { selected = selectedId; mark(); },
     showMatches: (text) => { filter.value = text; apply(text, true); },
+    widen: (index, sections, cityName) => {
+      const here = new Set(premises.map((p) => p.id));
+      const names = new Map(sections.map((section) => [section.id, section.name]));
+      city = { entries: cityEntries(index.filter((p) => !here.has(p.id)), names), names, area: { name: cityName } };
+      if (filter.value.trim()) apply(filter.value, false);
+    },
   };
 }
 
@@ -111,7 +139,7 @@ export function createDirectory({ list, filter, status, next, head }, premises,
  *  is typed, then at most CITY_LIST_MAX rows, built as they are needed; otherwise it reads as createDirectory's list. */
 export function createCityDirectory({ list, filter, status, next, head }, index, { area, sections, onOpen, onCheckPoint = null, onOtherArea = null }) {
   const names = new Map(sections.map((section) => [section.id, section.name]));
-  const entries = [...index].sort(byName).map((p) => ({ p, text: `${p.name} ${p.kind} ${roadName(p.road.name)} ${names.get(p.section) ?? ""}`.toLowerCase() }));
+  const entries = cityEntries(index, names);
   next.replaceChildren(...nextSteps({ onCheckPoint, onOtherArea }));
   let rows = [];
   let selected = null;
@@ -122,9 +150,9 @@ export function createCityDirectory({ list, filter, status, next, head }, index,
     rows = matches.slice(0, CITY_LIST_MAX).map(({ p }) => directoryRow(p, onOpen, names.get(p.section)));
     list.replaceChildren(...rows.map((row) => row.item));
     mark();
-    if (!needle) status.textContent = t("city.directoryHint", { count: index.length, area: area.name });
-    else if (matches.length > CITY_LIST_MAX) status.textContent = t("city.directoryMore", { shown: CITY_LIST_MAX, count: matches.length });
-    else status.textContent = statusText({ text: text.trim(), shown: rows.length, isSearch, area });
+    status.textContent = needle
+      ? listStatus({ text, shown: rows.length, found: matches.length, isSearch, area, hasRows: true })
+      : t("city.directoryHint", { count: index.length, area: area.name });
     head.hidden = rows.length === 0;
     next.hidden = !needle || rows.length > 0 || next.children.length === 0;
   };
@@ -231,6 +259,8 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   return {
     map,
     showMatches: directory.showMatches,
+    /** On a section's page: the city's lean index is in, so the list's filter and a search reach the whole city. */
+    widen: (index) => { if (city?.section) directory.widen(index, city.sections, city.cityName); },
     /** Each part changes only when its own inputs do, so focus and the live figures stay put. */
     render({ rp, selectedId, rain }) {
       if (rp !== shown.rp) {

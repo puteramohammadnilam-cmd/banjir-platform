@@ -136,6 +136,46 @@ test("a section's page names the section, with its city, in the search's heading
   assert.equal(elements.get("map").getAttribute("aria-label"), "Map of Seksyen 25, Shah Alam, with modelled flood depth at each business");
 });
 
+// ---------- a section's page, once its city's index is in ----------
+
+const SECTION_PREMISES = INDEX.filter((row) => row.section === "seksyen-25");
+
+function mountSection() {
+  const parts = { list: h("ol"), filter: h("input"), status: h("p"), next: h("div"), head: h("div") };
+  const opened = [];
+  const directory = createDirectory(parts, SECTION_PREMISES, {
+    area: pageArea(CITY_AREA, SECTIONS[1]), onOpen: (id) => opened.push(id), onCheckPoint: () => {},
+  });
+  return { ...parts, directory, opened };
+}
+
+test("on a section's page a search matching only other sections shows those, with their sections, once the city's index is in", () => {
+  const { list, status, directory, opened } = mountSection();
+  directory.showMatches("kedai");
+  assert.deepEqual(shownNames(list), [], "before the index: this section's list only");
+  directory.widen(INDEX, SECTIONS, "Shah Alam");
+  directory.showMatches("kedai");
+  assert.deepEqual(shownNames(list), ["Kedai Dua Empat", "Kedai U Satu"]);
+  assert.match(list.children.find((item) => item.textContent.includes("U Satu")).querySelector(".meta").textContent, /· Seksyen U1$/);
+  assert.equal(status.textContent, "2 businesses match “kedai”. Pick yours.");
+  list.children.find((item) => item.textContent.includes("U Satu")).querySelector("button").click();
+  assert.deepEqual(opened, ["node-u1"], "the page opens it on its own section's page (main.js)");
+});
+
+test("a widened search lists this section's matches first, once each, and the city's none-found names the city", () => {
+  const { list, status, filter, directory } = mountSection();
+  directory.widen(INDEX, SECTIONS, "Shah Alam");
+  directory.showMatches("a");
+  const names = shownNames(list);
+  assert.deepEqual(names.slice(0, 2), ["A Shop", "Dobi Kering"], "this section's own first");
+  assert.equal(new Set(names).size, names.length, "a business of this section is not listed twice");
+  directory.showMatches("Kedai Runcit Pak Ali");
+  assert.equal(status.textContent, "Not on our list for Shah Alam. Our list comes from a public map and misses some shops.");
+  filter.value = "";
+  filter.dispatch("input");
+  assert.deepEqual(shownNames(list), ["A Shop", "Dobi Kering", "Dobi Queen"], "an empty filter: this section's list again");
+});
+
 // ---------- the whole city ----------
 
 function mountCity(index = INDEX) {

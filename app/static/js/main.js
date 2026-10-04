@@ -328,10 +328,11 @@ const withCity = (premises, index) => {
   return [...premises, ...index.filter((row) => !here.has(row.id))];
 };
 
-/** On a section's page the search reaches the whole city once the city's index is in: asked for the first time a search
- *  box is used, and waited for by Enter. Gives back the function that starts it (null on other pages). A failed load is
- *  asked for again on the next search; until then the search covers this section, its city's sections and their names. */
-function cityIndexLoader(app, finder) {
+/** On a section's page the search, and the list's filter, reach the whole city once the city's index is in: asked for
+ *  the first time a search box or the filter is used, and waited for by Enter. Gives back the function that starts it
+ *  (null on other pages). A failed load is asked for again on the next search; until then the search covers this
+ *  section, its city's sections and their names. */
+function cityIndexLoader(app, finder, overview) {
   if (!app.start.section) return null;
   let loading = null;
   return () => {
@@ -339,6 +340,7 @@ function cityIndexLoader(app, finder) {
     loading ??= loadCityIndex(app.start).then((index) => {
       app.cityIndex = index;
       finder.current.setPlaces(withCity(app.start.premises, index));
+      overview.widen(index);   // a search several businesses of the city match lists them all, from any section
     }, () => { loading = null; });
     return loading;
   };
@@ -354,7 +356,7 @@ function wireWaysIn(app, checkPoint, overview) {
   const named = start.area.has_sections
     ? sectionFinder(start.sections, start.area.aliases, start.area.section_word, start.area.name) : { entries: [], synonyms: new Map() };
   const finder = { current: null };
-  const ready = cityIndexLoader(app, finder);
+  const ready = cityIndexLoader(app, finder, overview);
   finder.current = wireFinder({ datalist: $("business-names"), forms }, isCityView(start) ? start.index : start.premises,
     (target) => (typeof target === "string" ? open(app, target) : changeSection(app, target.section)), (text) => {
       overview.showMatches(text);
@@ -362,7 +364,7 @@ function wireWaysIn(app, checkPoint, overview) {
       $("directory-filter").scrollIntoView({ block: "center" });
       $("directory-filter").focus({ preventScroll: true });   // where the typed name now is, and the list it filters
     }, { extra: named.entries, synonyms: named.synonyms, ready });
-  if (ready) for (const [, input] of forms) input.addEventListener("focus", ready);
+  if (ready) for (const input of [...forms.map(([, box]) => box), $("directory-filter")]) input.addEventListener("focus", ready);
   if (!checkPoint) return;
   $("hero-check").addEventListener("click", (event) => checkPoint(event.currentTarget));
   $("hero-point").hidden = false;
