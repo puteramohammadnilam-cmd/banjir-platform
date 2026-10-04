@@ -6,10 +6,13 @@ import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
 import { SQUARE_RAMP } from "../app/static/js/cells.js";
-import { SHARE_CLASSES, choroplethKey, createChoropleth, shareClass, shareOf, shareText, tooltipLines } from "../app/static/js/choropleth.js";
+import {
+  DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, SHARE_CLASSES, choroplethKey, createChoropleth, shareClass, shareOf, shareText, tooltipLines,
+} from "../app/static/js/choropleth.js";
 import { useLang } from "../app/static/js/i18n.js";
 import { installFakeDom } from "./fake_dom.mjs";
-import { SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
+import { FLASH_RAMP, SCORE_RAMP, swatchStyle } from "../app/static/js/susceptibility.js";
+import { INDEXED_SECTIONS, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 
 class FakePath {
   constructor(geometry, options) {
@@ -54,9 +57,9 @@ beforeEach(() => {
 });
 
 const RENDERER = { kind: "canvas" };
-function mount({ aiming = false } = {}) {
+function mount({ aiming = false, sections = SECTIONS } = {}) {
   const opened = [];
-  const choropleth = createChoropleth(map, RENDERER, SECTIONS, { onOpen: (id) => opened.push(id), isAiming: () => aiming });
+  const choropleth = createChoropleth(map, RENDERER, sections, { onOpen: (id) => opened.push(id), isAiming: () => aiming });
   return { choropleth, opened };
 }
 
@@ -172,4 +175,58 @@ test("zoomed in to street level the shading steps back to a wash, so a point's o
   map.zoom = 12;
   zoomed();
   assert.equal(map.layers[1].style.fillOpacity, full);
+});
+
+// ---------- what the shading shows: a metric {value, class, classes, tooltip} ----------
+
+test("the river model's metric is the share of squares with water, as before", () => {
+  assert.equal(DEPTH_METRIC.value(SECTIONS[1], "50"), shareOf(SECTIONS[1], "50"));
+  assert.equal(DEPTH_METRIC.class(0.58), shareClass(0.58));
+  assert.equal(DEPTH_METRIC.classes, SHARE_CLASSES);
+  assert.deepEqual(DEPTH_METRIC.tooltip(SECTIONS[1], "50"), tooltipLines(SECTIONS[1], "50"));
+});
+
+test("flash flood potential shades by the share of ground at high or extreme, in the warm ramp, none when not worked out", () => {
+  assert.equal(FLASH_METRIC.value(INDEXED_SECTIONS[0]), 0.2);
+  assert.equal(FLASH_METRIC.value(SECTIONS[0]), null);
+  const cases = [[null, 0], [0, 0], [0.05, 1], [0.0999, 1], [0.1, 2], [0.25, 3], [0.5, 3], [0.51, 4], [1, 4]];
+  for (const [share, expected] of cases) assert.equal(FLASH_METRIC.class(share), expected, String(share));
+  assert.deepEqual(FLASH_METRIC.classes.slice(1).map(({ color }) => color), FLASH_RAMP.map(({ color }) => color));
+  assert.deepEqual(FLASH_METRIC.classes.map((step) => step.words()), ["None", "Under 10%", "10–25%", "25–50%", "Over 50%"]);
+  assert.deepEqual(FLASH_METRIC.tooltip(INDEXED_SECTIONS[2]), ["Seksyen U1", "70% of its ground at high or extreme flash flood potential", "Tap to open"]);
+  assert.equal(FLASH_METRIC.tooltip(SECTIONS[2])[1], "Flash flood potential not worked out here yet");
+});
+
+test("our score shades by its class, 1 to 5, in a ramp of its own; a section with none is outlined only", () => {
+  assert.equal(SCORE_METRIC.value(INDEXED_SECTIONS[1]), 4.6);
+  assert.equal(SCORE_METRIC.class(4.6), 5);
+  assert.equal(SCORE_METRIC.class(null), 0);
+  assert.equal(SCORE_METRIC.classes[0].opacity, 0);
+  assert.deepEqual(SCORE_METRIC.classes.slice(1).map(({ color }) => color), SCORE_RAMP.map(({ color }) => color));
+  assert.deepEqual(SCORE_METRIC.classes.map((step) => step.words()), ["Not worked out", "1 · very low", "2 · low", "3 · moderate", "4 · high", "5 · very high"]);
+  assert.deepEqual(SCORE_METRIC.tooltip(INDEXED_SECTIONS[1]).slice(1), ["Our score: 4.6 of 5", "Tap to open"]);
+});
+
+test("switching the metric repaints the sections and their tooltips at once, and back again", () => {
+  const { choropleth } = mount({ sections: INDEXED_SECTIONS });
+  choropleth.show("50");
+  const depth = map.layers.map((path) => path.style.fillColor);
+  choropleth.setMetric(FLASH_METRIC);
+  assert.deepEqual(map.layers.map((path) => path.style.fillColor), [2, 1, 4].map((i) => FLASH_METRIC.classes[i].color));
+  assert.match(map.layers[2].tooltip.content().textContent, /70% of its ground/);
+  choropleth.setMetric(SCORE_METRIC);
+  assert.equal(map.layers[1].style.fillColor, SCORE_RAMP[4].color);
+  assert.equal(map.layers[2].style.fillOpacity, 0, "no score: outlined only");
+  choropleth.setMetric(DEPTH_METRIC);
+  assert.deepEqual(map.layers.map((path) => path.style.fillColor), depth);
+});
+
+test("the key follows the metric: its heading and a swatch per class in that metric's colours", () => {
+  const key = choroplethKey(SECTION_WORD, null, FLASH_METRIC);
+  assert.equal(key.querySelector(".legend-heading").textContent, "Shading: share of each section's ground at high or extreme flash flood potential");
+  const swatches = key.querySelectorAll(".choro-swatch");
+  assert.equal(swatches.length, 5);
+  assert.equal(swatches[3].getAttribute("style"), swatchStyle(FLASH_RAMP[2]));
+  assert.match(choroplethKey(SECTION_WORD, null, SCORE_METRIC).querySelector(".legend-heading").textContent, /our score for each section/);
+  assert.equal(choroplethKey(SECTION_WORD).querySelectorAll(".choro-swatch")[1].getAttribute("class"), "choro-swatch sq-1", "the river model's key as it was");
 });

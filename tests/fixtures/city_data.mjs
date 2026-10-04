@@ -98,3 +98,43 @@ export const PLAIN_DATA = Object.freeze({
   ],
   limits: "Depths come from a global computer model.",
 });
+
+// ---------- flash flood potential and our score (plan Phase 3; tests/fixtures/index_contract.json on p3-index-data) ----------
+// A section gains `indexes` {flash {mean (1-10), share {low, medium, high, extreme}} | null, score {value (1-5), class
+// (very_low .. very_high)} | null} (the key absent where the area has none); the area's details always carry
+// `layers.flash_flood` {url, bounds [west, south, east, north], breaks, credit} | null, `index_method` {flash, score,
+// validation, show_score} | null and `flash_flood_example` (a section id) | null; a business or a point gains
+// `flash_flood` {score, class} | null. Older servers send none of these.
+const indexes = (mean, [low, medium, high, extreme], score) => ({ flash: { mean, share: { low, medium, high, extreme } }, score });
+const SECTION_INDEXES = {
+  "seksyen-24": indexes(4.1, [0.5, 0.3, 0.15, 0.05], { value: 3.2, class: "moderate" }),
+  "seksyen-25": indexes(3.0, [0.7, 0.25, 0.04, 0.01], { value: 4.6, class: "very_high" }),
+  "seksyen-u1": indexes(6.8, [0.1, 0.2, 0.4, 0.3], null),
+};
+export const INDEXED_SECTIONS = Object.freeze(SECTIONS.map((section) => ({ ...section, indexes: SECTION_INDEXES[section.id] })));
+
+export const INDEX_METHOD = Object.freeze({
+  show_score: true,
+  flash: {
+    name: "Flash Flood Potential Index (FFPI)", formula: "(1.5 M + L + S + 0.5 V) / 4", summary: "Each 30 m square rated 1 to 10.",
+    citations: ["Smith, G. (2003). Flash flood potential.", { text: "Yassin et al. (2023). Planning Malaysia 21(2).", url: "https://example.org/pm" }],
+    deviations: ["Vegetation cover from a satellite greenness composite.", "Built-up land with no soil data is rated impervious."],
+    not: "A susceptibility to flash floods, not a water depth and not a chance of flooding.",
+  },
+  score: {
+    name: "Flood risk score (multi-criteria)", summary: "Seven criteria.", weights_used: { river_distance: 0.2432 }, weights_total: 74,
+    classes: ["very_low", "low", "moderate", "high", "very_high"], breaks: [1.5, 2.5, 3.5, 4.5], break_rule: "At or above a break: the class above.",
+    citations: ["Leeonis, A. N. et al. (2024) Discover Sustainability 5:352."], deviations: ["Rainfall and economic loss are dropped: weights out of 74."],
+  },
+  validation: { wording: "Compared with past flood records and the river model; this does not validate either index.", n: 56 },
+});
+
+export const FLASH_LAYER = Object.freeze({
+  url: "/api/areas/shah-alam/layers/flash-flood.png", bounds: [101.43, 2.95, 101.59, 3.23], breaks: [3.25, 5.5, 7.75],
+  credit: "Flash flood potential: ESA WorldCover 2021, SoilGrids 2.0.",
+});
+
+/** The city's details with the index fields; its example of flash floods is a section its record names. */
+export const INDEXED_AREA = Object.freeze({
+  ...CITY_AREA, index_method: INDEX_METHOD, layers: { flash_flood: FLASH_LAYER }, flash_flood_example: "seksyen-24",
+});

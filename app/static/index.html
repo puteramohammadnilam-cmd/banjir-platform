@@ -21,6 +21,7 @@
   <link rel="modulepreload" href="js/place.js">
   <link rel="modulepreload" href="js/start.js">
   <link rel="modulepreload" href="js/pick.js">
+  <link rel="modulepreload" href="js/susceptibility.js">
   <link rel="modulepreload" href="js/cells.js">
   <link rel="modulepreload" href="js/map.js">
   <link rel="modulepreload" href="js/scope.js">
@@ -121,8 +122,13 @@
           </div>
           <div class="map-stage">
             <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
+            <div class="map-controls" id="map-controls" hidden></div>
             <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
             <p class="fineprint area-note" id="map-note" hidden></p>
+            <details class="about-more index-method" id="index-method" hidden>
+              <summary data-i18n="flash.methodHeading">How these are worked out</summary>
+              <div class="index-method-body" id="index-method-body"></div>
+            </details>
           </div>
         </section>
         <div class="overview-side">

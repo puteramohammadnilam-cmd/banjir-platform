@@ -106,6 +106,37 @@ function focusMarker(map, entry) {
   entry.marker.openPopup();
 }
 
+// ---------- a picture on the map (flash flood potential), over the tiles, under the squares and dots ----------
+
+const PICTURE_PANE = "picture";
+/** [[south, west], [north, east]] for [west, south, east, north], or corners as given. */
+const corners = (bounds) => (Array.isArray(bounds[0]) ? bounds : [[bounds[1], bounds[0]], [bounds[3], bounds[2]]]);
+
+/** `layer` {url, bounds} as an image overlay, made (so fetched) on the first show(true). A load error takes it
+ *  off and calls onError(); the next show(true) tries again. */
+export function createPictureLayer(map, { url, bounds }, { opacity, className, onError = () => {} }) {
+  let picture = null;
+  const make = () => {
+    if (!map.getPane(PICTURE_PANE)) Object.assign(map.createPane(PICTURE_PANE).style, { zIndex: "350", pointerEvents: "none" });
+    const made = L.imageOverlay(url, corners(bounds), { pane: PICTURE_PANE, opacity, className, interactive: false });
+    return made.on("error", () => {
+      made.remove();
+      if (picture === made) picture = null;
+      onError();
+    });
+  };
+  return {
+    show(isOn) {
+      if (!isOn) {
+        picture?.remove();
+        return;
+      }
+      picture ??= make();
+      picture.addTo(map);
+    },
+  };
+}
+
 // ---------- a point someone checked: a pin, and the 90 m square it stands for ----------
 
 const pinIcon = () => L.divIcon({

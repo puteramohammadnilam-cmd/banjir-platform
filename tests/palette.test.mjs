@@ -8,6 +8,7 @@ import { test } from "node:test";
 
 import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, DRY_COLOR } from "../app/static/js/dom.js";
+import { FLASH_RAMP, LAYER_OPACITY, SCORE_RAMP } from "../app/static/js/susceptibility.js";
 
 const css = (file) => readFileSync(new URL(`../app/static/styles/${file}`, import.meta.url), "utf8");
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -98,4 +99,46 @@ test("each square step, laid on the map, is at least 8 apart from the next, and 
 
 test("the squares do not reuse any of the dots' colours", () => {
   for (const { color } of SQUARE_RAMP) assert.ok(!colours.includes(color), color);
+});
+
+// ---------- flash flood potential and our score: ramps of their own ----------
+
+const hueGap = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+const NEW_RAMPS = { flash: FLASH_RAMP, score: SCORE_RAMP };
+
+test("the flash ramp is warm (OKLCH hue about 50) and the layer and its key share one opacity", () => {
+  FLASH_RAMP.forEach(({ color, opacity }) => {
+    const hue = hueDegrees(color);
+    assert.ok(hue >= 30 && hue <= 70, `${color} hue ${hue.toFixed(0)}`);
+    assert.equal(opacity, LAYER_OPACITY);
+  });
+});
+
+test("each new ramp sits at least 60 degrees of hue from the squares, and from each other", () => {
+  const squares = SQUARE_RAMP.map(({ color }) => hueDegrees(color));
+  for (const [name, ramp] of Object.entries(NEW_RAMPS)) {
+    for (const { color } of ramp) {
+      for (const square of squares) assert.ok(hueGap(hueDegrees(color), square) >= 60, `${name} ${color} is too near the squares' blue`);
+    }
+  }
+  for (const flash of FLASH_RAMP) {
+    for (const score of SCORE_RAMP) assert.ok(hueGap(hueDegrees(flash.color), hueDegrees(score.color)) >= 60, `${flash.color} ${score.color}`);
+  }
+});
+
+test("each new ramp darkens step by step, and each step, laid on the map, is at least 8 apart from the next", () => {
+  for (const [name, ramp] of Object.entries(NEW_RAMPS)) {
+    ramp.slice(1).forEach((step, i) => {
+      assert.ok(oklab(step.color)[0] < oklab(ramp[i].color)[0], `${name} step ${i + 2} is darker than step ${i + 1}`);
+      const gap = deltaE(laid(ramp[i]), laid(step));
+      assert.ok(gap >= 8, `${name} steps ${i + 1} and ${i + 2} are only ${gap.toFixed(1)} apart`);
+    });
+    assert.ok(deltaE(laid(ramp[0]), MAP_GROUND) >= 3.5, `${name}'s palest step can be seen on the map`);
+  }
+});
+
+test("the warm ramp is apart from the five dot colours, so a dot (ringed in white) on the layer still reads", () => {
+  for (const step of FLASH_RAMP) {
+    for (const dot of colours) assert.ok(deltaE(laid(step), dot) >= 7.5, `${step.color} against dot ${dot}`);   // a dot also wears a white ring and a dark hairline
+  }
 });

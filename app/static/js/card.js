@@ -6,6 +6,7 @@ import { floodCounts } from "./history.js";
 import { formatNumber, t } from "./i18n.js";
 import { emptyState } from "./pick.js";
 import { NO_WATER_NOTE, pointHeader } from "./point.js";
+import { flashFact } from "./susceptibility.js";
 
 // Past this, the global model is often far deeper than reports of real floods (5 to 10 m against 0.1 to 2 m in the
 // towns screened on 3 Oct 2026), so the number gets a warning beside it, not only in the area's notes.
@@ -169,6 +170,7 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isRea
   return h("div", { class: "facts" },
     !isPoint && premise.road && roadFact(premise, rp),
     elevationFact(premise),
+    flashFact(premise, hasPageRecord && area),   // the example is the page's area's
     premise.shelter && shelterFact(premise.shelter),
     !isPoint && listingFact(listing),
     floorFact(rp, photo, onPhoto, isReady),

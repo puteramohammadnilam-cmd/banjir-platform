@@ -5,6 +5,7 @@ import { shareOf, shareText } from "./choropleth.js";
 import { isSearched } from "./history.js";
 import { dataWord, t } from "./i18n.js";
 import { DEFAULT_RP } from "./pick.js";
+import { highShare, oneDecimal, scoreOf, showsScore } from "./susceptibility.js";
 
 const TOP_STREETS = 5;
 const TOP_SECTIONS = 10;
@@ -74,6 +75,41 @@ function sectionsPart(sections, word) {
       : h("p", {}, t("report.noStreets"))];
 }
 
+/** The sections with the most ground at high or extreme flash flood potential, at most TOP_SECTIONS: [{id, name, share, mean}]. */
+export function topFlash(sections) {
+  return sections.map((section) => ({ id: section.id, name: section.name, share: highShare(section), mean: section.indexes?.flash?.mean ?? null }))
+    .filter((row) => row.share > 0).sort((a, b) => b.share - a.share).slice(0, TOP_SECTIONS);
+}
+
+/** The sections with our highest score, at most TOP_SECTIONS: [{id, name, score}]. */
+export function topScores(sections) {
+  return sections.map((section) => ({ id: section.id, name: section.name, score: scoreOf(section) }))
+    .filter((row) => row.score !== null).sort((a, b) => b.score - a.score).slice(0, TOP_SECTIONS);
+}
+
+const figure = (value) => (value === null ? t("report.none") : oneDecimal(value));
+
+/** A heading and a table: `head` its column words, each of `rows` [name, figures...]. */
+const tablePart = (heading, head, rows) => [h("h4", {}, heading), h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
+  h("thead", {}, h("tr", {}, head.map((text) => h("th", { scope: "col" }, text)))),
+  h("tbody", {}, rows.map(([name, ...figures]) => h("tr", {}, h("th", { scope: "row" }, name), figures.map((figure) => h("td", {}, figure)))))))];
+
+/** The whole city's sheet adds the sections highest for flash flood potential, and for our score once `method` allows
+ *  it, with what these are not; nothing where they are not worked out. */
+function indexPart(sections, word, method) {
+  const flash = topFlash(sections);
+  if (!flash.length) return [];
+  const scores = showsScore(method) ? topScores(sections) : [];
+  const lower = dataWord(word, { lower: true });
+  return [
+    ...tablePart(t("report.flashHeading", { word: lower }), [dataWord(word), t("report.flashCol"), t("report.flashMean")],
+      flash.map((row) => [row.name, shareText(row.share), figure(row.mean)])),
+    ...(scores.length ? tablePart(t("report.flashScoreHeading", { word: lower }), [dataWord(word), t("report.flashScoreCol")],
+      scores.map((row) => [row.name, figure(row.score)])) : []),
+    h("p", { class: "fineprint" }, t("report.flashNote")),
+  ];
+}
+
 /** The sheet. `date` is the day it is printed, as text. For a whole city `premises` is its lean index and `sections`
  *  its sections (with `word`, the area's word for one); otherwise sections is null. */
 export function buildAreaReport({ area, premises, date, sections = null, word = null }) {
@@ -88,6 +124,7 @@ export function buildAreaReport({ area, premises, date, sections = null, word = 
       ? h("ul", {}, summary.streets.map((s) => h("li", {}, `${s.name}: ${s.wet}`)))
       : h("p", {}, t("report.noStreets")),
     ...(sections ? sectionsPart(sections, word) : []),
+    ...(sections ? indexPart(sections, word, area.index_method) : []),
     h("h4", {}, t("report.floods")), ...record(area),
     ...(notes.length ? [h("h4", {}, t("report.notes")), h("ul", {}, notes.map((n) => h("li", {}, n)))] : []),
     area.council ? h("p", {}, t("report.council", { council: area.council })) : null,

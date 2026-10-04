@@ -3,7 +3,7 @@
 // the section select and the finder), the town cut to the section (view = its bbox, the squares that overlap it, every
 // shelter of the city) and the section's businesses in full, each with its `section`. An unknown section is a 404
 // envelope, {success: false, error: "Unknown section."}.
-import { CITY_AREA, CITY_HISTORY, CITY_SHELTERS, SECTIONS } from "./city_data.mjs";
+import { CITY_AREA, CITY_HISTORY, CITY_SHELTERS, FLASH_LAYER, INDEXED_AREA, INDEXED_SECTIONS, SECTIONS } from "./city_data.mjs";
 
 const [, SEKSYEN_25] = SECTIONS;
 
@@ -41,4 +41,13 @@ export const QUIET_SECTION_DATA = Object.freeze({
   area: { ...CITY_AREA, history: { ...SECTION_HISTORY, scope: "seksyen-u1", section_names: {}, gaps: [[1992, 2026]], floods: [] } },
   section: SECTIONS[2],
   premises: [],
+});
+
+// ---------- flash flood potential (plan Phase 3): a section's page with the index fields ----------
+/** The section's page when the server has the index: its section with `indexes`, each business with `flash_flood`. */
+export const INDEXED_SECTION_DATA = Object.freeze({
+  ...SECTION_DATA,
+  area: { ...INDEXED_AREA, history: SECTION_HISTORY, layers: { flash_flood: FLASH_LAYER } },
+  section: INDEXED_SECTIONS[1],
+  premises: SECTION_DATA.premises.map((p, i) => ({ ...p, flash_flood: [{ score: 7.2, class: "high" }, { score: 2.04, class: "low" }, null][i] })),
 });

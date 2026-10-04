@@ -1,16 +1,20 @@
 // The "Area overview" tab: the area chooser, headline figures, the map, past floods and the area's businesses in one list.
 // A city split into sections has two kinds of page: a section's, which is an area's page for the section, and the whole
 // city's, where the map shades each section (choropleth.js), a table ranks them (section-table.js) and the list of
-// businesses waits for a name, as the city has thousands.
+// businesses waits for a name, as the city has thousands. Under the map: flash flood potential's checkbox, and on the
+// whole city's map what the sections are shaded by (susceptibility.js).
 import { SQUARE_RAMP } from "./cells.js";
-import { choroplethKey, createChoropleth } from "./choropleth.js";
+import { DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, choroplethKey, createChoropleth } from "./choropleth.js";
 import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
 import { renderHistory } from "./history.js";
 import { dataWord, t } from "./i18n.js";
 import { createKpis } from "./kpis.js";
-import { createMap } from "./map.js";
+import { createMap, createPictureLayer } from "./map.js";
 import { createScopeBar } from "./scope.js";
 import { createSectionTable } from "./section-table.js";
+import {
+  FLASH_RAMP, LAYER_OPACITY, flashWord, highShare, mapControls, methodBody, rampSwatch, scoreOf, showsScore,
+} from "./susceptibility.js";
 
 const $ = (id) => document.getElementById(id);
 const CITY_LIST_MAX = 100;   // rows the whole city's list shows for one filter; typing more narrows them
@@ -31,13 +35,56 @@ const squareKey = () => h("div", { class: "square-key" },
   h("span", { class: "square-strip", "aria-hidden": "true" }, SQUARE_RAMP.map((_, i) => h("span", { class: `sq-${i + 1}` }))),
   h("span", { class: "muted" }, BANDS[BANDS.length - 1].range));
 
+const flashKey = (credit) => legendGroup(t("flash.legend"), [h("ul", { class: "legend-items ramp-key" },
+  FLASH_RAMP.map((step) => h("li", {}, rampSwatch(step), flashWord(step.key)))), credit && h("p", { class: "fineprint" }, credit)]);
+
 /** The map's key. On the whole city's map (`city` given, with the area's `word` for a section) the sections' shading
- *  takes the dots' place, as no business is drawn there. */
-export function renderLegend(element, hasShelters, city = null) {
+ *  by `metric` takes the dots' place, as no business is drawn there. With the flash flood layer on, its classes and the
+ *  layer's data `credit` too. */
+export function renderLegend(element, hasShelters, city = null, { metric = DEPTH_METRIC, isFlashOn = false, credit = null } = {}) {
   const first = city
-    ? choroplethKey(city.word, hasShelters ? h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")) : null)
+    ? choroplethKey(city.word, hasShelters ? h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")) : null, metric)
     : legendGroup(t("legend.dots"), dotKey(hasShelters));
-  element.replaceChildren(first, legendGroup(t("legend.squares"), squareKey()));
+  element.replaceChildren(...[first, legendGroup(t("legend.squares"), squareKey()), isFlashOn && flashKey(credit)].filter(Boolean));
+}
+
+const METRICS = { depth: DEPTH_METRIC, flash: FLASH_METRIC, score: SCORE_METRIC };
+const METRIC_LEADS = { depth: "city.mapLead", flash: "choropleth.metricFlashLead", score: "choropleth.metricScoreLead" };
+
+/** What the whole city's sections can be shaded by: the river model, flash flood potential and our score, where the
+ *  sections have them (and the area's `method` allows the score). */
+export const indexMetrics = (sections, method) => ["depth",
+  ...(sections.some((section) => highShare(section) !== null) ? ["flash"] : []),
+  ...(showsScore(method) && sections.some((section) => scoreOf(section) !== null) ? ["score"] : [])];
+
+/** The controls under the map in `slot` (susceptibility.js mapControls) for a `layer` ({url, bounds, credit}, fetched
+ *  once ticked) and `metrics`; onChange({isFlashOn, metric}) hears each change. A layer that fails unticks and says so. */
+export function createIndexControls(slot, { map, layer, metrics, word = null, onChange }) {
+  let state = { isFlashOn: false, metric: metrics[0] ?? "depth" };
+  const alert = h("p", { class: "alert alert-inline layer-error", role: "alert", hidden: true });
+  const set = (change) => { state = { ...state, ...change }; onChange(state); };
+  const failed = () => {
+    slot.querySelector('[type="checkbox"]').checked = false;
+    alert.textContent = t("flash.layerError");
+    alert.hidden = false;
+    set({ isFlashOn: false });
+  };
+  const picture = layer?.url ? map.addOverlay(({ map: leaflet }) =>
+    createPictureLayer(leaflet, layer, { opacity: LAYER_OPACITY, className: "flash-overlay", onError: failed })) : null;
+  const nodes = mapControls({
+    hasLayer: Boolean(picture), metrics, word, onMetric: (metric) => set({ metric }),
+    onLayer: (isOn) => { alert.hidden = true; picture.show(isOn); set({ isFlashOn: isOn }); },
+  });
+  slot.replaceChildren(...(nodes.length ? [...nodes, alert] : []));
+  slot.hidden = nodes.length === 0;
+}
+
+/** "How these are worked out" (`details`, its words in `body`), where the area has the index's method or layer. */
+export function renderMethod(details, body, area, { word = null } = {}) {
+  const method = area.index_method ?? null;
+  const layer = area.layers?.flash_flood ?? null;
+  details.hidden = !method && !layer;
+  body.replaceChildren(...(details.hidden ? [] : methodBody(method, { showScore: showsScore(method), word, credit: layer?.credit ?? null })));
 }
 
 const depthChip = (depth, rp) => {
@@ -193,20 +240,42 @@ export function riverOnlyNote(area, section) {
   return isDry ? t("city.riverOnly", { area: area.name }) : null;
 }
 
-/** The whole city's own parts: the shading on the map and the table under it, each repainted for a flood size. */
-function createCityParts(map, city) {
+/** The whole city's own parts: the shading on the map and the table under it, each repainted for a flood size, and the
+ *  shading and the map's lead for the metric picked. */
+function createCityParts(map, city, showScore) {
   const word = dataWord(city.word, { lower: true });
   const choropleth = map.addOverlay(({ map: leaflet, renderer, isAiming }) =>
     createChoropleth(leaflet, renderer, city.sections, { onOpen: city.onSection, isAiming }));
   $("sections-surface").hidden = false;
-  const table = createSectionTable($("sections-table"), { sections: city.sections, word: city.word, hrefOf: city.hrefOf, onHighlight: choropleth.highlight });
+  const table = createSectionTable($("sections-table"), {
+    sections: city.sections, word: city.word, hrefOf: city.hrefOf, onHighlight: choropleth.highlight, showScore,
+  });
   return {
     show(rp) {
       choropleth.show(rp);
       table.show(rp);
       $("sections-lead").textContent = t("sections.lead", { rp, word });
     },
+    setMetric(key) {
+      choropleth.setMetric(METRICS[key]);
+      $("map-lead").textContent = t(METRIC_LEADS[key], { word });
+    },
   };
+}
+
+/** The controls under the map, which repaint the key (and the city's shading), and "How these are worked out". */
+function createIndexParts(map, area, { city, cityParts, hasShelters }) {
+  const keyCity = cityParts ? city : null;
+  const layer = area.layers?.flash_flood ?? null;
+  createIndexControls($("map-controls"), {
+    map, layer, word: city?.word ?? null,
+    metrics: cityParts ? indexMetrics(city.sections, area.index_method) : [],
+    onChange: (state) => {
+      cityParts?.setMetric(state.metric);
+      renderLegend($("legend"), hasShelters, keyCity, { metric: METRICS[state.metric], isFlashOn: state.isFlashOn, credit: layer?.credit });
+    },
+  });
+  renderMethod($("index-method"), $("index-method-body"), area, { word: area.section_word ?? null });
 }
 
 /** `area` is the page's area config (GET /api/areas/{id}/data; for a section, the section dressed as an area, start.js
@@ -232,7 +301,8 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   renderLegend($("legend"), town.shelters.length > 0, isWholeCity ? city : null);
   renderHistory($("history"), area);   // area.history is the whole city's or the section's, as the server cut it
   const kpis = createKpis($("kpis"), { history: area.history, areaName: area.name, premises: isWholeCity ? city.index : premises });
-  const cityParts = isWholeCity ? createCityParts(map, city) : null;
+  const cityParts = isWholeCity ? createCityParts(map, city, showsScore(area.index_method)) : null;
+  createIndexParts(map, area, { city, cityParts, hasShelters: town.shelters.length > 0 });
   let shown = {};
 
   return {

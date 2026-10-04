@@ -4,10 +4,10 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { areaSummary, buildAreaReport, topSections } from "../app/static/js/area-report.js";
+import { areaSummary, buildAreaReport, topFlash, topScores, topSections } from "../app/static/js/area-report.js";
 import { pageArea } from "../app/static/js/start.js";
 import { installFakeDom } from "./fake_dom.mjs";
-import { CITY_AREA, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
+import { CITY_AREA, INDEX, INDEXED_AREA, INDEXED_SECTIONS, INDEX_METHOD, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 
 const road = (name) => ({ name, kind: "residential", distance_m: 5, depth_m: { 10: null, 20: null, 50: null } });
 const biz = (id, roadName, d10, d20, d50) => ({ id, name: id, road: road(roadName), depth_m: { 10: d10, 20: d20, 50: d50 } });
@@ -125,4 +125,34 @@ test("a section searched with no flood found says so, with the years checked, in
   } finally {
     useLang("en");
   }
+});
+
+// ---------- flash flood potential and our score ----------
+
+const indexedReport = (area = INDEXED_AREA) =>
+  buildAreaReport({ area, premises: INDEX, sections: INDEXED_SECTIONS, word: SECTION_WORD, date: "5 Oct 2026" });
+const headingsOf = (sheet) => sheet.querySelectorAll("h4").map((heading) => heading.textContent);
+
+test("the sections with the most ground at high or extreme flash flood potential, and with our highest score", () => {
+  assert.deepEqual(topFlash(INDEXED_SECTIONS).map(({ id, share, mean }) => [id, share, mean]),
+    [["seksyen-u1", 0.7, 6.8], ["seksyen-24", 0.2, 4.1], ["seksyen-25", 0.05, 3.0]]);
+  assert.deepEqual(topScores(INDEXED_SECTIONS).map(({ id, score }) => [id, score]), [["seksyen-25", 4.6], ["seksyen-24", 3.2]]);
+  assert.deepEqual(topFlash(SECTIONS), [], "no index: no rows");
+});
+
+test("the city's sheet adds flash flood potential, says it is not a depth, and our score when allowed", () => {
+  const sheet = indexedReport();
+  const headings = headingsOf(sheet);
+  assert.ok(headings.includes("The sections with the most ground at high or extreme flash flood potential"), headings.join(" | "));
+  assert.ok(headings.includes("The sections with our highest score (1–5)"));
+  assert.match(sheet.textContent, /Seksyen U170%6\.8/);
+  assert.match(sheet.textContent, /a susceptibility, not a water depth or a chance of flooding/);
+  const hidden = headingsOf(indexedReport({ ...INDEXED_AREA, index_method: { ...INDEX_METHOD, show_score: false } }));
+  assert.ok(!hidden.some((heading) => heading.includes("our highest score")), "the score waits for the data's say-so");
+});
+
+test("without the index the sheet is as it was", () => {
+  const sheet = buildAreaReport({ area: CITY_AREA, premises: INDEX, sections: SECTIONS, word: SECTION_WORD, date: "5 Oct 2026" });
+  assert.ok(!sheet.textContent.includes("flash flood potential"));
+  assert.equal(sheet.querySelectorAll("table").length, 2);
 });
