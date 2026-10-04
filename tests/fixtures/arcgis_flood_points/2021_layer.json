@@ -1,0 +1,76 @@
+{
+ "name": "2021",
+ "type": "Feature Layer",
+ "geometryType": "esriGeometryPoint",
+ "maxRecordCount": 1000,
+ "fields": [
+  {
+   "name": "Date",
+   "type": "esriFieldTypeDateOnly"
+  },
+  {
+   "name": "RUJ__No",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "NEGERI",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "DAERAH",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "KWSN_BANJIR",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "Latitude",
+   "type": "esriFieldTypeDouble"
+  },
+  {
+   "name": "Longitude",
+   "type": "esriFieldTypeDouble"
+  },
+  {
+   "name": "SUNGAI",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "KEDALAMAN",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "STESEN",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "Rain",
+   "type": "esriFieldTypeDouble"
+  },
+  {
+   "name": "Tempoh_Hujan_Max",
+   "type": "esriFieldTypeDouble"
+  },
+  {
+   "name": "Tempoh_ulang",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "Nama_Stesen",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "Water_Level",
+   "type": "esriFieldTypeDouble"
+  },
+  {
+   "name": "Status",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "ObjectId",
+   "type": "esriFieldTypeOID"
+  }
+ ]
+}
