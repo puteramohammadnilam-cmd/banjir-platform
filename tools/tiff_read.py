@@ -9,12 +9,14 @@ anything else naming the tag, because a misread file gives values that look righ
 
 Read: little-endian classic TIFF; 8 bit unsigned, 16 bit signed or unsigned, 32 bit float samples; one or more samples
 per pixel, interleaved (PlanarConfiguration 1) or one plane each (2); tiles or strips; no compression, LZW (5) or deflate
-(8, 32946); no predictor (1), horizontal differencing (2, integers) or the floating point predictor (3); a pixel scale
-with one tie point on WGS 84 lat/lon (GeoKeys 1024 = 2, 2048 = 4326), pixel is area or point. Big-endian files,
-BigTIFF, JPEG and a ModelTransformation are refused.
+(8, 32946); no predictor (1), horizontal differencing (2, integers) or the floating point predictor (3, with one
+sample a pixel or one plane per sample: with interleaved samples libtiff sums its bytes a pixel apart, which is not
+undone here); a pixel scale with one tie point on WGS 84 lat/lon (GeoKeys 1024 = 2, 2048 = 4326), pixel is area or
+point. Big-endian files, BigTIFF, JPEG and a ModelTransformation are refused.
 
 PieceSource keeps a remote file as the byte ranges actually fetched (HTTP Range), one file per range plus pieces.json
-(url, size, and each range's offset, length and SHA-256), so a build runs offline from exactly the bytes downloaded.
+(url, size, and each range's offset, length and SHA-256), so a build runs offline from exactly the bytes downloaded:
+each piece is checked against its SHA-256 the first time it is read, and one that does not match is refused.
 """
 from __future__ import annotations
 
@@ -85,13 +87,14 @@ class PieceSource:
         self.url = url or held.get("url")
         self.size = size or held.get("size")
         self.pieces = [(p["offset"], p["length"]) for p in held.get("pieces", [])]
+        self.hashes = {(p["offset"], p["length"]): p.get("sha256") for p in held.get("pieces", [])}
+        self.checked: set[tuple[int, int]] = set()   # pieces whose bytes matched their SHA-256 once
         self.name = (self.url or str(self.folder)).rsplit("/", 1)[-1]
 
     def read(self, offset: int, length: int) -> bytes:
         for start, count in self.pieces:
             if start <= offset and offset + length <= start + count:
-                data = (self.folder / f"r{start}-{count}.bin").read_bytes()
-                return data[offset - start:offset - start + length]
+                return self._piece(start, count)[offset - start:offset - start + length]
         if self.getter is None:
             raise TiffError(f"{self.name}: bytes {offset} to {offset + length} were not downloaded")
         self.fetch([(offset, length)])
@@ -114,13 +117,26 @@ class PieceSource:
             self.folder.mkdir(parents=True, exist_ok=True)
             (self.folder / f"r{start}-{count}.bin").write_bytes(data)
             self.pieces.append((start, count))
+            self.hashes[(start, count)] = hashlib.sha256(data).hexdigest()
+            self.checked.add((start, count))
         self._save()
         return sum(count for _, count in joined)
 
+    def _piece(self, start: int, count: int) -> bytes:
+        """A saved piece's bytes, refused unless they match the SHA-256 that pieces.json gives for it."""
+        name = f"r{start}-{count}.bin"
+        data = (self.folder / name).read_bytes()
+        if (start, count) not in self.checked:
+            want = self.hashes.get((start, count))
+            if not want:
+                raise TiffError(f"{self.name}: {name} has no SHA-256 in pieces.json")
+            if hashlib.sha256(data).hexdigest() != want:
+                raise TiffError(f"{self.name}: {name} does not match its SHA-256 in pieces.json")
+            self.checked.add((start, count))
+        return data
+
     def _save(self) -> None:
-        pieces = [{"offset": s, "length": n,
-                   "sha256": hashlib.sha256((self.folder / f"r{s}-{n}.bin").read_bytes()).hexdigest()}
-                  for s, n in sorted(self.pieces)]
+        pieces = [{"offset": s, "length": n, "sha256": self.hashes[(s, n)]} for s, n in sorted(self.pieces)]
         doc = {"url": self.url, "size": self.size, "pieces": pieces}
         (self.folder / "pieces.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
 
@@ -247,6 +263,9 @@ def open_image(source) -> Image:
     height = _need(source, tags, HEIGHT, lambda v: v[0] > 0, "a height")[0]
     code, samples, compression, predictor = _layout(source, tags)
     planar = _need(source, tags, PLANAR, lambda v: v[0] in (1, 2), "1 or 2", default=(1,))[0]
+    if predictor == 3 and planar == 1 and samples > 1:   # its bytes are summed a pixel apart: not read here
+        raise TiffError(f"{source.name}: tag {PREDICTOR} {TAG_NAMES[PREDICTOR]} 3 with {samples} interleaved samples; "
+                        "need one sample a pixel, or one plane per sample")
     block_w, block_h, offsets, counts = _blocks(source, tags, width, height)
     planes = samples if planar == 2 else 1
     blocks = -(-width // block_w) * -(-height // block_h) * planes
@@ -316,7 +335,7 @@ def _undo_difference(values: array, row: int, stride: int, mask: int) -> array:
 
 def undo_float_predictor(data: bytes, width: int, samples: int = 1) -> bytes:
     """TIFF's floating point predictor undone: bytes summed back per row, then each value's four byte planes, most
-    significant first, put back together little-endian."""
+    significant first, put back together little-endian. Right for one sample a pixel only (open_image refuses more)."""
     count = width * samples
     row_bytes, out = count * 4, bytearray(len(data))
     for start in range(0, len(data), row_bytes):

@@ -1,6 +1,7 @@
 """tools/tiff_read.py on small made-up files, no network: a round trip through tools/geotiff_write.py, uint8 with three
 interleaved samples and horizontal differencing, int16 strips in LZW (the TIFF 6.0 spec's own code sequence first),
 pixel-is-point tie points, saved byte ranges, and refusals that name the tag."""
+import json
 import struct
 import sys
 import zlib
@@ -207,3 +208,49 @@ def test_the_pixel_window_of_a_box_holds_the_pixels_whose_centres_are_in_it(tmp_
     assert tr.pixel_window(image, (101.0, 3.5, 101.25, 4.0)) == (0, 0, 8, 4)
     assert tr.pixel_window(image, (101.04, 3.0, 101.1, 3.97)) == (0, 1, 16, 1)
     assert tr.blocks_for(image, 0, 0, 20, 24) == [0, 1, 2, 3]
+
+
+def test_the_float_predictor_with_interleaved_samples_is_refused_naming_the_tag(tmp_path):
+    """TIFF's floating point predictor sums bytes a pixel's samples apart; undo_float_predictor sums neighbours, which
+    is right only for one sample a pixel. A file with more is refused rather than misread."""
+    tags = {258: (gw.SHORT, (32, 32, 32)), 277: (gw.SHORT, (3,)), 339: (gw.SHORT, (3, 3, 3)), 317: (gw.SHORT, (3,))}
+    path = gw.write_tiff(tmp_path / "x.tif", floats(4, 4), tile=16, origin=ORIGIN, pixel=(PX, PX), padding=0.0,
+                         tags=tags)
+    with pytest.raises(tr.TiffError, match="tag 317 Predictor 3 with 3 interleaved samples"):
+        tr.open_image(tr.FileSource(path))
+    planar = {**tags, 284: (gw.SHORT, (2,))}   # one plane per sample: each block holds one sample a pixel, read
+    path = gw.write_tiff(tmp_path / "p.tif", floats(4, 4), tile=16, origin=ORIGIN, pixel=(PX, PX), padding=0.0,
+                         tags=planar)
+    with pytest.raises(tr.TiffError, match="block offsets"):   # past the predictor check: 1 tile, 3 planes wanted
+        tr.open_image(tr.FileSource(path))
+
+
+def saved_pieces(tmp_path) -> tuple[Path, bytes]:
+    path = gw.write_tiff(tmp_path / "f.tif", floats(40, 40), tile=16, origin=ORIGIN, pixel=(PX, PX), padding=0.0,
+                         ifd_first=True)
+    whole = path.read_bytes()
+    online = tr.PieceSource(tmp_path / "pieces", url="https://example.org/f.tif",
+                            getter=lambda url, start, length: whole[start:start + length], size=len(whole))
+    online.fetch([(0, len(whole))])
+    return tmp_path / "pieces", whole
+
+
+def test_a_saved_piece_that_no_longer_matches_its_sha256_is_refused(tmp_path):
+    folder, whole = saved_pieces(tmp_path)
+    assert tr.PieceSource(folder).read(0, 8) == whole[:8]
+    piece = folder / f"r0-{len(whole)}.bin"
+    damaged = bytearray(piece.read_bytes())
+    damaged[-1] ^= 0xFF
+    piece.write_bytes(bytes(damaged))
+    with pytest.raises(tr.TiffError, match=f"r0-{len(whole)}.bin does not match its SHA-256 in pieces.json"):
+        tr.PieceSource(folder).read(0, 8)
+
+
+def test_a_saved_piece_without_a_sha256_is_refused(tmp_path):
+    folder, _ = saved_pieces(tmp_path)
+    manifest = folder / "pieces.json"
+    doc = json.loads(manifest.read_text(encoding="utf-8"))
+    del doc["pieces"][0]["sha256"]
+    manifest.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(tr.TiffError, match="has no SHA-256 in pieces.json"):
+        tr.PieceSource(folder).read(0, 8)
