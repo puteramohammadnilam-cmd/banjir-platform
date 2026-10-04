@@ -2,7 +2,7 @@
 
 Banjir Check shows a small business how much river flood water a place could get in the model, and what that could roughly cost. It is an entry for the AI Builder Cup 2026.
 
-You pick a business on the map, or check any point in Malaysia by dropping a pin or using GPS. You see the modelled water depth for a 10, 100 and 500 year flood. A form turns that into a rough ringgit loss. An assistant powered by Gemini answers questions about it in Bahasa Melayu or English. It reads its numbers from the data through tools, and never does the sums itself.
+You pick a business on the map, or check any point in Malaysia by dropping a pin or using GPS. You see the modelled water depth for a 1 in 10, 20 and 50 years flood; floods bigger than 1 in 50 years are not shown. A form turns that into a rough ringgit loss. An assistant powered by Gemini answers questions about it in Bahasa Melayu or English. It reads its numbers from the data through tools, and never does the sums itself.
 
 What Gemini does here:
 - **Chat with tools:** function calling over the flood data, the cost engine, Google Weather and Google Maps.
@@ -37,7 +37,7 @@ curl -s -X POST localhost:8081/api/point -H 'content-type: application/json' \
   -d '{"lat":3.0297599,"lon":101.5364982,"source":"pin"}'
 ```
 
-That is a spot in Taman Sri Muda. The answer names its square `pt:3.02998,101.53667` and gives 1.35, 1.88 and 2.11 m for the 10, 100 and 500 year floods.
+That is a spot in Taman Sri Muda. The answer names its square `pt:3.02998,101.53667` and gives 1.35, 1.54 and 1.76 m for the 1 in 10, 20 and 50 years floods.
 
 ## Areas
 
@@ -51,13 +51,13 @@ An area is a folder in `app/data/areas/{id}/`:
 
 Five areas are built in:
 
-| Area | Businesses | Wet at 1 in 100 (model) | Flood squares | Past floods in the sources checked |
+| Area | Businesses | Wet at 1 in 50 (model) | Flood squares | Past floods in the sources checked |
 |---|---|---|---|---|
-| Taman Sri Muda, Shah Alam, Selangor (the default) | 204 | 183 | 1,575 | 10 |
-| Kuantan town centre, Pahang | 300 | 219 | 1,204 | 5 (2012 to 2021) |
-| Kota Bharu town centre, Kelantan | 491 | 115 | 769 | 3 (2014 to 2025) |
-| Kuala Terengganu town centre, Terengganu | 158 | 94 | 736 | 5 (1999 to 2025) |
-| Kota Tinggi town centre, Johor | 27, picked by hand | 21 | 462 | none collected; 2 relief centres |
+| Taman Sri Muda, Shah Alam, Selangor (the default) | 204 | 183 | 1,514 | 10 |
+| Kuantan town centre, Pahang | 300 | 191 | 1,085 | 5 (2012 to 2021) |
+| Kota Bharu town centre, Kelantan | 491 | 100 | 618 | 3 (2014 to 2025) |
+| Kuala Terengganu town centre, Terengganu | 158 | 85 | 588 | 5 (1999 to 2025) |
+| Kota Tinggi town centre, Johor | 27, picked by hand | 19 | 382 | none collected; 2 relief centres |
 
 Kuantan, Kota Bharu and Kuala Terengganu were picked on 3 Oct 2026 from a screen of eleven river towns (OpenStreetMap
 business count and the share wet in the model) and built with `tools/build_area.py`. In all three the model gives
@@ -82,15 +82,15 @@ A point is named by its square, for example `pt:3.02998,101.53667`. A shared lin
 
 ## Flood depth rasters
 
-The depths come from nine JRC GeoTIFF files: three 10 x 10 degree grids, each with one file per return period (10, 100 and 500 years):
+The depths come from nine JRC GeoTIFF files: three 10 x 10 degree grids, each with one file per return period (10, 20 and 50 years):
 
 ```
-ID211_N10_E100_RP{10,100,500}_depth.tif   Peninsular Malaysia (except Langkawi), far west Sarawak
-ID220_N10_E110_RP{10,100,500}_depth.tif   the rest of Sarawak, and Sabah
-ID202_N10_E90_RP{10,100,500}_depth.tif    Langkawi
+ID211_N10_E100_RP{10,20,50}_depth.tif     Peninsular Malaysia (except Langkawi), far west Sarawak
+ID220_N10_E110_RP{10,20,50}_depth.tif     the rest of Sarawak, and Sabah
+ID202_N10_E90_RP{10,20,50}_depth.tif      Langkawi
 ```
 
-They are about 77 MB together, so they are not in git (`.gitignore` skips `app/data/rasters/*.tif`). Download them from the JRC portal (https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/, folder `RP10`, `RP100` or `RP500`) into `app/data/rasters/`. The dataset is described at https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1 (the link recorded in `SOURCES.txt`).
+They are about 73 MB together, so they are not in git (`.gitignore` skips `app/data/rasters/*.tif`). Download them from the JRC portal (https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/, folder `RP10`, `RP20` or `RP50`) into `app/data/rasters/`. The dataset is described at https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1 (the link recorded in `SOURCES.txt`).
 
 - `app/data/rasters/SOURCES.txt` is committed. It records the source, licence, size and SHA-256 of each file. `tests/test_rasters_shipped.py` checks your copies against it, and skips a file that is absent.
 - `BANJIR_RASTER_DIR` points the app at another folder, for example one outside the repo.
@@ -99,7 +99,7 @@ They are about 77 MB together, so they are not in git (`.gitignore` skips `app/d
 
 What they cover: 89.977 to 119.975 E and 0.008 to 10.007 N, which holds all of Malaysia. The grids are rectangles, so they also take in Singapore, Brunei, southern Thailand, eastern Sumatra and part of Kalimantan. In this build the app uses coarse boxes, not national borders, so it answers for points there too. A point outside every box gets "outside".
 
-Langkawi is covered, but the model has no flood water anywhere on the island (checked on a 100 m sample grid), so every point there reads "No water in the model".
+Langkawi is covered, but the model has no flood water anywhere on the island (every square checked), so every point there reads "No water in the model".
 
 The app works with any subset of the files: a region whose grid is missing gets a "not in this build yet" answer.
 
@@ -164,7 +164,7 @@ These are the claims this app makes about your location, and what backs each one
 - Points anywhere in Malaysia have depths. Langkawi has no flood water in the model. See "Flood depth rasters".
 - Only the two built areas have mapped businesses. The counts are "businesses mapped on OpenStreetMap", not all businesses. Nobody has checked them on the ground. Banks, clinics and fuel stations are left out.
 - Relief centres: Kota Tinggi's two were named in news reports and located on OpenStreetMap. They are not an official list. Taman Sri Muda has none.
-- Floods more frequent than 1 in 10 years are not in the data.
+- Floods more frequent than 1 in 10 years, and bigger than 1 in 50 years, are not in the data. The JRC set has bigger ones (1 in 75 years and up); the app shows 1 in 10, 20 and 50 only, and says bigger floods are not shown.
 - Past floods are collected only for Taman Sri Muda.
 
 ## Google services used
@@ -196,7 +196,8 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/static/` | The page, in four tabs: area overview, my business, flood cost, ask AI. Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
 | `app/data/areas/` | Built data for each area. |
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
-| `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds Taman Sri Muda byte for byte. The built data is committed, so you do not need to run it. |
+| `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds Taman Sri Muda, Kuantan, Kota Bharu and Kuala Terengganu byte for byte. The built data is committed, so you do not need to run it. |
+| `tools/resample_area.py` | Re-samples an area built on the old flood sizes (1 in 10, 100, 500) at 1 in 10, 20 and 50 when its OpenStreetMap inputs were not kept (Kota Tinggi): depths read again at each business and square; each road's square found from its stored old depths and distance, and refused if that is ambiguous. Needs the old JRC files. |
 | `deploy.sh` | Cloud Run deploy with a post-deploy smoke test. |
 
 ## How the cost estimate works
@@ -210,7 +211,7 @@ An owner asks the chat what a flood would cost them. Gemini passes what the owne
 | Direct damage, owner does not | figure for a small shop, a medium shop or a large complex × 1.65 for prices × 0.8 | JPS / KTA Tenaga 2003, Rapid Assessment Method | RM12,000 / 24,000 / 160,000 from the study of the 2001 Klang Valley flood; 0.8 is the ratio in the guideline's worked examples (it gives 0.5 to 0.9) |
 | Indirect loss, owner gives closure | daily takings × days closed | Fadel et al. 2018, Table 2 | the owner's own figures |
 | Indirect loss, otherwise | 30% of direct damage | JPS / KTA Tenaga 2003, section 3.5.1 | the guideline's allowance for most areas (it gives 20% to 45%) |
-| Average loss per year | area under loss against yearly chance, for the 1 in 10, 100 and 500 year floods | Fadel et al. 2018, eq. 7; JPS 2003 calls it average annual damage | — |
+| Average loss per year | area under loss against yearly chance, for the 1 in 10, 20 and 50 years floods, with rarer floods counted at the 1 in 50 loss: 0.035 × L50 + 0.04 × L20 + 0.025 × L10 | Fadel et al. 2018, eq. 7; JPS 2003 calls it average annual damage | — |
 | Loss over 10 years | yearly loss discounted at 4% | Zuriyati Yusof et al. 2024 (JPS), eq. 2–3 | 4% is the rate used for flood mitigation cost-benefit studies in Malaysia |
 | Is a measure worth it | direct damage avoided over 10 years ÷ cost of the measure > 1. Only from the owner's own value; a shop-size figure cannot price a measure. | Zuriyati Yusof et al. 2024 (JPS), eq. 1 | — |
 
@@ -221,7 +222,7 @@ Still not Malaysian, or weak, and said so in every answer:
 - With the owner's own value, the damage share is the Asia average for shops (Huizinga et al. 2017, JRC, Table 3-6). None of the documents we hold gives a Malaysian depth-damage curve as numbers. To replace it, change `CURVE_DEPTH_M` and `CURVE_SHARE` in `app/costs.py`.
 - The shop-size figures are from a 2001 flood, do not change with depth, and are adjusted by general consumer prices only (the guideline does not state its price year; we took 2001). They are averages meant for counting many properties, so using one for a single shop is our own stretch. The guideline does not define small or medium; its large class is "Large (Complexes)". It calls the method a first approximation and says it is not a basis for cost-benefit analysis for funding.
 - Raising stock is assumed to lift everything the owner counted as value at risk. Fittings that cannot be raised make the real saving smaller.
-- Floods more frequent than 1 in 10 years are not in the depth data, so the yearly loss is a floor, not a ceiling, for shops that flood often.
+- The yearly loss is a floor at both ends: floods more frequent than 1 in 10 years are not in the depth data, so shops that flood often lose more, and floods bigger than 1 in 50 years are counted as if they cost the same as the 1 in 50.
 - The 10 year horizon is our own choice.
 
 ## Tests
