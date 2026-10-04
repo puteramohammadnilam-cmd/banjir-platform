@@ -1,5 +1,6 @@
 // The "My business" tab: the depth for one business, drawn to scale, with what it means and what to do next.
 import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName, scenarioLabel } from "./dom.js";
+import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
 import { formatNumber, t } from "./i18n.js";
@@ -165,6 +166,7 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isRea
   const hasPageRecord = !isPoint || premise.area_id === area.id;
   return h("div", { class: "facts" },
     !isPoint && premise.road && roadFact(premise, rp),
+    elevationFact(premise),
     premise.shelter && shelterFact(premise.shelter),
     !isPoint && listingFact(listing),
     floorFact(rp, photo, onPhoto, isReady),

@@ -1,0 +1,59 @@
+Elevation crops in this folder
+=============================
+
+app/elevation.py reads these files (from this folder, or from BANJIR_DEM_DIR when that is set) to give the height of
+the ground at a business or a picked square. They are small, so unlike the flood depth rasters they are kept in git.
+tests/test_elevation.py checks each file below against its size and SHA-256. To make them again, from 11_Platform_Draft:
+
+  .venv/bin/python tools/build_elevation.py fetch --name shah-alam --bbox 101.43 2.95 101.59 3.23 \
+      --raw ../05_Raw_Data_Sources/copernicus_glo30
+  .venv/bin/python tools/build_elevation.py build --name shah-alam --bbox 101.43 2.95 101.59 3.23 \
+      --raw ../05_Raw_Data_Sources/copernicus_glo30
+
+`fetch` asks Overpass again, so the rivers (and the files) can differ from the ones below; `build` alone, on the saved
+inputs listed here, gives the same bytes (run twice on 4 Oct 2026). The method is in the tool's docstring.
+
+Height:    Copernicus DEM GLO-30 (the 30 m digital surface model), from the AWS open data bucket copernicus-dem-30m
+Link:      https://registry.opendata.aws/copernicus-dem/
+Licence:   the Copernicus DEM GLO-30 licence (free of charge for any use, commercial included; see the link above),
+           with this credit: (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under
+           COPERNICUS by the European Union and ESA; all rights reserved
+Rivers:    OpenStreetMap, (c) OpenStreetMap contributors, ODbL 1.0, through the Overpass API
+Date:      2026-10-04
+
+Inputs (kept in ../05_Raw_Data_Sources/copernicus_glo30, with SOURCES.md)
+
+File:     Copernicus_DSM_COG_10_N03_00_E101_00_DEM.tif   (3-4 N, 101-102 E)
+Bytes:    44187222
+SHA-256:  fd6118e48029c4b974d9a020bd146e6da97ff524f096bcfc75bb052c2267f8bf
+
+File:     Copernicus_DSM_COG_10_N02_00_E101_00_DEM.tif   (2-3 N, 101-102 E)
+Bytes:    18785487
+SHA-256:  2c983d6d4c16549b62e9fc9e35b490cdf423b56e633b600b1d1e594b3aa4ce3f
+
+File:     rivers_shah-alam.json   (Overpass answer, OSM data as of 2026-10-04T07:56:49Z; 391 elements)
+Bytes:    1323288
+SHA-256:  f856b4cdb6c1eed5c770bb9f0b9d6dbbecad8132de2bf40da8f8eeae02c022e7
+
+Coverage:  Shah Alam, the box 2.95-3.23 N, 101.43-101.59 E plus 2 km on each side: 1139 x 705 squares of 1 arc second
+           (about 31 m), west edge 101.4120833 E, north edge 3.2481944 N, pixel is area, WGS 84. Elsewhere the page
+           says the height is not loaded for that spot yet.
+Values:    float32 metres rounded to 0.1 m, 256 px deflate tiles, no data -9999.
+           surface      the GLO-30 height above the EGM2008 geoid (about mean sea level): roofs and trees are in it
+           above_river  surface minus the level of the nearest mapped river within 3 km (no data beyond: 79,301
+                        squares); negative where the surface is below that river level
+Checked:   every value read back through app/raster.py byte for byte as written; the surface crop byte for byte equal
+           to the source tiles' heights rounded to 0.1 m (decoded a second way with numpy, 4 Oct 2026); hills against
+           OpenStreetMap peak heights (Bukit Sapu Tangan 204 m: 216.8; Bukit Nibung Gila 120 m: 118.6; Bukit Lipat
+           Kajang 64 m: 65.2; trees add a few metres); river levels in the Taman Sri Muda view 2.0 to 7.3 m, median 2.7;
+           the nearest river square right at 3,000 random squares against a search of every river square.
+
+Files
+
+File:     shah-alam_surface.tif
+Bytes:    1208016
+SHA-256:  f2b81aa8a2cdaa0299e9f923c4902cd4c32723292490969795528f11542e0075
+
+File:     shah-alam_above_river.tif
+Bytes:    1109220
+SHA-256:  d735c54dc628119455c73c1ab02c761f9f4208428ba2e9e7fb5427de89465919

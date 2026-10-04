@@ -5,8 +5,9 @@
 
 Both resolve to the same keys (the Place), so the page and the AI tools handle either. A point's Place has is_point
 true; name, sector, kind, is_chain, map_last_edited and road null; area_id the listed area whose view holds the
-square's centre, or null; shelter the nearest relief centre of that area, or null; cell {grid, row, col, bounds}.
-A business's Place is its premises.json entry plus is_point false, its area_id and cell null.
+square's centre, or null; shelter the nearest relief centre of that area, or null; elevation (app/elevation.py) at the
+square's centre as the id gives it, or null; cell {grid, row, col, bounds}. A business's Place is its premises.json
+entry (with the elevation areas.premises adds at its own point) plus is_point false, its area_id and cell null.
 
 Snapping rule. Task A5 repeats it in JavaScript (place.js snapToGrid): change the two together.
   1. Grids: GET /api/coverage `grids`, in the order listed (by name). Each has x0 (west edge) and y0 (north edge)
@@ -64,7 +65,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from . import areas, raster
+from . import areas, elevation, raster
 
 log = logging.getLogger("banjir")
 
@@ -153,6 +154,7 @@ def _point_place(found: Snap, depth_m: dict) -> dict:
     return {"id": found.id, "is_point": True, "name": None, "sector": None, "kind": None, "is_chain": None,
             "lat": lat, "lon": lon, "map_last_edited": None, "area_id": area.id if area else None,
             "depth_m": depth_m, "road": None, "shelter": nearest_shelter(area, lat, lon) if area else None,
+            "elevation": elevation.at(lat, lon),
             "cell": {"grid": found.grid.name, "row": found.row, "col": found.col, "bounds": bounds}}
 
 

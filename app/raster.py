@@ -333,8 +333,13 @@ class DepthFile:
                    TileCache() if cache is None else cache)
 
     def at_cell(self, row: int, col: int) -> float | None:
-        """Metres at one square, 2 decimals; None when dry, no data or outside the grid. An index outside the grid
-        never wraps to another tile, and the padding of a partial tile is never read."""
+        """Metres at one square, 2 decimals; None when dry, no data or outside the grid."""
+        return self.value_at(row, col, depth_value)
+
+    def value_at(self, row: int, col: int, convert: Callable[[float], float | None]) -> float | None:
+        """`convert` of the stored value at one square (the float32 widened to a Python float); None outside the grid
+        or in a tile not stored. An index outside the grid never wraps to another tile, and the padding of a partial
+        tile is never read. app/elevation.py reads heights with its own `convert`, which keeps zero and negatives."""
         if not self.grid.has(row, col):
             return None
         index = (row // self.tile) * self.across + col // self.tile
@@ -344,7 +349,7 @@ class DepthFile:
         tile = self.cache.get(key)
         if tile is None:
             tile = self.cache.put(key, self._decode(index))
-        return depth_value(tile[(row % self.tile) * self.tile + col % self.tile])
+        return convert(tile[(row % self.tile) * self.tile + col % self.tile])
 
     def _decode(self, index: int) -> array:
         """Read one tile with os.pread and inflate it to tile x tile float32 values."""
