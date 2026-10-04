@@ -101,7 +101,12 @@ function mountFinder(premises = START.premises) {
   return { datalist, header, hero, opened, shown };
 }
 
-const type = ([, input], text) => { input.value = text; input.dispatch("input"); };
+/** A pick from the browser's suggestion list: an input event with no inputType (Chrome) or "insertReplacementText". */
+const type = ([, input], text, inputType = undefined) => { input.value = text; input.dispatch("input", { inputType }); };
+/** Typing, key by key: each key is an input event of its own, with inputType "insertText". */
+const typeKeys = ([, input], text) => {
+  for (let end = 1; end <= text.length; end += 1) { input.value = text.slice(0, end); input.dispatch("input", { inputType: "insertText" }); }
+};
 const submit = ([form, input], text) => { input.value = text; form.dispatch("submit"); };
 
 test("one suggestion list, by name, serves both search boxes", () => {
@@ -161,7 +166,7 @@ test("Enter on a name that matches nothing hands it over, and an empty box opens
 
 // ---------- a city split into sections: its index, its sections and the old areas' names ----------
 
-const CITY_FINDER = sectionFinder(SECTIONS, ALIASES, SECTION_WORD);
+const CITY_FINDER = sectionFinder(SECTIONS, ALIASES, SECTION_WORD, "Shah Alam");
 
 function mountCityFinder({ premises = INDEX, ready = null } = {}) {
   const datalist = document.createElement("datalist");
@@ -177,7 +182,42 @@ test("the sections and the old areas' names are suggestions too, after the busin
   const { datalist } = mountCityFinder();
   const values = datalist.children.map((option) => option.getAttribute("value"));
   assert.equal(values.length, INDEX.length + SECTIONS.length + 2);
-  assert.deepEqual(values.slice(INDEX.length), ["Seksyen 24", "Seksyen 25", "Seksyen U1", "Taman Sri Muda · Seksyen 25", "Taman Seri Muda · Seksyen 25"]);
+  assert.deepEqual(values.slice(INDEX.length), ["Seksyen 24 · Shah Alam", "Seksyen 25 · Shah Alam", "Seksyen U1 · Shah Alam",
+    "Taman Sri Muda · Seksyen 25", "Taman Seri Muda · Seksyen 25"]);
+});
+
+// A section's name is the start of others' ("Seksyen 2" of "Seksyen 25", "Seksyen U1" of "Seksyen U10"): what is typed
+// must never open a page on its own (WCAG 3.2.2). Only a pick from the list, or Enter, does.
+const PREFIXED = [{ id: "seksyen-2", name: "Seksyen 2" }, { id: "seksyen-25", name: "Seksyen 25" }];
+
+function mountPrefixed() {
+  const named = sectionFinder(PREFIXED, [], SECTION_WORD, "Shah Alam");
+  const datalist = document.createElement("datalist");
+  const form = [document.createElement("form"), document.createElement("input")];
+  const opened = [];
+  wireFinder({ datalist, forms: [form] }, [], (target) => opened.push(target), () => {}, { extra: named.entries, synonyms: named.synonyms });
+  return { form, opened };
+}
+
+test("typing a section's name, or a suggestion's whole text, opens nothing until Enter or a pick", () => {
+  const { form, opened } = mountPrefixed();
+  typeKeys(form, "Seksyen 2");
+  typeKeys(form, "Seksyen 25");
+  typeKeys(form, "Seksyen 2 · Shah Alam");
+  type(form, "Seksyen 2 · Shah Alam", "insertFromPaste");
+  assert.deepEqual(opened, [], "nothing opens while typing or pasting");
+  submit(form, "Seksyen 25");
+  assert.deepEqual(opened, [{ section: "seksyen-25" }]);
+  submit(form, "Seksyen 2");
+  assert.deepEqual(opened, [{ section: "seksyen-25" }, { section: "seksyen-2" }]);
+});
+
+test("a pick from the suggestion list opens at once, as Chrome and as Firefox and Safari report it", () => {
+  const { form, opened } = mountPrefixed();
+  type(form, "Seksyen 2 · Shah Alam");
+  type(form, "Seksyen 25 · Shah Alam", "insertReplacementText");
+  assert.deepEqual(opened, [{ section: "seksyen-2" }, { section: "seksyen-25" }]);
+  assert.equal(form[1].value, "", "an opened section clears the box");
 });
 
 test("an old area's name opens its section, typed in full or picked from the list", () => {

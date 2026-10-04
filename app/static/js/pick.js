@@ -80,10 +80,11 @@ function sectionKeys(section, word) {
 
 /** A city's sections and its old areas' names (`aliases`, such as an area that is now one section) for the finder:
  *  `entries`, suggestions to show after the businesses ([text, {section}]), and `synonyms`, more words that open a
- *  section when typed in full (a Map of lower-cased text to {section}). */
-export function sectionFinder(sections, aliases = [], word = null) {
+ *  section when typed in full (a Map of lower-cased text to {section}). A section's suggestion carries its city's name
+ *  (`cityName`), as a business's carries its road, so that no suggestion is the start of another ("2" of "25"). */
+export function sectionFinder(sections, aliases = [], word = null, cityName = "") {
   const byId = new Map(sections.map((section) => [section.id, section]));
-  const entries = sections.map((section) => [section.name, { section: section.id }]);
+  const entries = sections.map((section) => [cityName ? `${section.name} · ${cityName}` : section.name, { section: section.id }]);
   for (const alias of aliases) {
     const section = byId.get(alias.section);
     for (const name of section ? alias.names : []) entries.push([`${name} · ${section.name}`, { section: section.id }]);
@@ -106,9 +107,14 @@ function matchesOf({ ids, synonyms }, typed) {
   return (named.length === 1 ? named : hits).map(([, target]) => target);
 }
 
+/** Whether an input event is a pick from the suggestion list: Chrome sends it with no inputType, Firefox and Safari as
+ *  "insertReplacementText". Typing ("insertText"), pasting and deleting are not, so text that only happens to be a
+ *  suggestion (section "2" on the way to "25") never opens a page (WCAG 3.2.2): Enter does. */
+const isPick = (event) => event.inputType === undefined || event.inputType === "insertReplacementText";
+
 function wireForm(form, input, finder, { onOpen, onShowMatches, ready }) {
   const open = (target) => { input.value = ""; input.blur(); onOpen(target); };
-  input.addEventListener("input", () => { if (finder.ids.has(input.value)) open(finder.ids.get(input.value)); });
+  input.addEventListener("input", (event) => { if (isPick(event) && finder.ids.has(input.value)) open(finder.ids.get(input.value)); });
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const typed = input.value.trim();

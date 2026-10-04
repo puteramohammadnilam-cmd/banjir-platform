@@ -343,7 +343,8 @@ function cityIndexLoader(app, finder) {
 function wireWaysIn(app, checkPoint, overview) {
   const { start } = app;
   const forms = [[$("finder"), $("finder-input")], [$("finder-hero"), $("finder-hero-input")]];
-  const named = start.area.has_sections ? sectionFinder(start.sections, start.area.aliases, start.area.section_word) : { entries: [], synonyms: new Map() };
+  const named = start.area.has_sections
+    ? sectionFinder(start.sections, start.area.aliases, start.area.section_word, start.area.name) : { entries: [], synonyms: new Map() };
   const finder = { current: null };
   const ready = cityIndexLoader(app, finder);
   finder.current = wireFinder({ datalist: $("business-names"), forms }, isCityView(start) ? start.index : start.premises,
