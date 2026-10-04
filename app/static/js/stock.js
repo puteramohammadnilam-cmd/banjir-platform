@@ -46,8 +46,9 @@ function findings(result, rp, onUse) {
 
 /** The card. render(state, rp) with state {busy, result, error} (the answer of POST /api/stock as `result`) and the
  *  flood size on show. onPhoto(file) sends a photo; onUse(value) puts the suggested value in the cost form. The picker
- *  and the live region are built once and changed in place, so focus and announcements stay. */
-export function createStockCard({ onPhoto, onUse }) {
+ *  and the live region are built once and changed in place, so focus and announcements stay. isReady is false when the
+ *  build has no Gemini key: the picker is then off, with a line that says why. */
+export function createStockCard({ onPhoto, onUse, isReady = true }) {
   const input = h("input", { type: "file", accept: "image/jpeg,image/png,image/webp", class: "visually-hidden",
     onchange: (event) => { onPhoto(event.target.files[0]); event.target.value = ""; } });
   const words = h("span");
@@ -57,7 +58,7 @@ export function createStockCard({ onPhoto, onUse }) {
   const node = h("section", { class: "surface stock-card", "aria-labelledby": "stock-heading" },
     h("h2", { id: "stock-heading", class: "small-heading" }, t("stock.heading")),
     h("p", { class: "hint" }, t("stock.hint")),
-    picker, alert, live,
+    picker, !isReady && h("p", { class: "fact-note ai-off" }, t("common.needsAi")), alert, live,
     h("p", { class: "fineprint" }, t("common.photoPrivacy")));
   let shown = {};
   return {
@@ -66,10 +67,11 @@ export function createStockCard({ onPhoto, onUse }) {
       if (state === shown.state && rp === shown.rp) return;
       const isDone = Boolean(shown.state?.busy) && !state?.busy;
       shown = { state, rp };
-      input.disabled = Boolean(state?.busy);
+      const isOff = Boolean(state?.busy) || !isReady;
+      input.disabled = isOff;
       // a disabled picker loses focus to the page: give it back once the photo is read (or failed)
       if (isDone && [input, document.body].includes(document.activeElement)) input.focus();
-      if (state?.busy) picker.setAttribute("aria-disabled", "true");
+      if (isOff) picker.setAttribute("aria-disabled", "true");
       else picker.removeAttribute("aria-disabled");
       words.textContent = t(state?.busy ? "common.photoReading" : state?.result ? "common.photoAgain" : "stock.add");
       alert.textContent = state?.error ?? "";

@@ -317,3 +317,35 @@ test("a very deep model depth carries a warning next to the number; a modest one
   show(card, point({ depth_m: { 10: 3.2, 100: 3.5, 500: 4 } }));
   assert.match(panel.querySelector(".risk").textContent, /The model can run very deep beside rivers/);
 });
+
+// ---------- AI and Google Maps off (the demo build) ----------
+
+const shortcuts = (panel) => panel.querySelectorAll(".next-step").map((step) => step.textContent);
+
+test("the shop-front photo button is off, with a line, when the AI is switched off, and on otherwise", () => {
+  const off = mountCard({ isReady: false });
+  show(off.card, shop);
+  const label = off.panel.querySelector(".photo-button");
+  assert.equal(label.getAttribute("aria-disabled"), "true");
+  assert.equal(label.querySelector("input").disabled, true);
+  assert.match(off.panel.textContent, /Needs the AI assistant, which is switched off in this test build\./);
+  const on = mountCard();
+  show(on.card, shop);
+  assert.equal(on.panel.querySelector(".photo-button").querySelector("input").disabled, false);
+  assert.doesNotMatch(on.panel.textContent, /switched off/);
+});
+
+test("the two shortcut cards say what the Flood cost tab now answers, and what Ask AI can read", () => {
+  const full = mountCard();
+  show(full.card, shop);
+  assert.deepEqual(shortcuts(full.panel), [
+    "What would a flood cost you?Loss per flood and per year, and the chance in the next 10 years",
+    "Ask in Bahasa Melayu or EnglishGemini, with Google Weather and Google Maps"]);
+  const noMaps = mountCard({ hasMaps: false });
+  show(noMaps.card, shop);
+  assert.match(shortcuts(noMaps.panel)[1], /Gemini, with this tool's flood data$/);
+  const off = mountCard({ isReady: false, hasMaps: false });
+  show(off.card, shop);
+  assert.match(shortcuts(off.panel)[1], /The assistant is switched off in this test build$/);
+  assert.ok(buttonNamed(off.panel, shortcuts(off.panel)[1]), "still a link to the Ask AI tab");
+});

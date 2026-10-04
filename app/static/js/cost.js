@@ -7,6 +7,10 @@ import { createStockCard } from "./stock.js";
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
 const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, closed_days: 365, raise_cm: 300, measure_cost_rm: 50_000_000 };
 const SIZES = [["small", "cost.sizeSmall"], ["medium", "cost.sizeMedium"], ["complex", "cost.sizeComplex"]];
+// The form starts ready to answer: a typical figure for a medium shop, so one press of Estimate gives a result. The owner
+// who knows their stock's worth switches to their own value.
+const DEFAULT_MODE = "size";
+const DEFAULT_SIZE = "medium";
 
 function numberField(name, label, unit, extra = {}) {
   const input = h("input", { class: "field", type: "number", name, id: `cost-${name}`, min: 0, max: MAX[name], step: "any", inputmode: "decimal", ...extra });
@@ -105,9 +109,10 @@ const depthsLine = (place) =>
 function buildFields() {
   const size = h("select", { class: "field", name: "shop_size", id: "cost-shop_size" },
     h("option", { value: "" }, t("cost.choose")), SIZES.map(([key, text]) => h("option", { value: key }, t(text))));
+  size.value = DEFAULT_SIZE;
   const raise = numberField("raise_cm", t("cost.raiseBy"), "cm");
   const measureCost = numberField("measure_cost_rm", t("cost.measureCost"), "RM");
-  return {
+  const fields = {
     numbers: {
       value: numberField("value_at_risk_rm", t("cost.value"), "RM", { min: 1, required: true, placeholder: "50000" }),
       floor: numberField("floor_height_cm", t("cost.floor"), "cm", { placeholder: "0" }),
@@ -126,6 +131,8 @@ function buildFields() {
     error: h("p", { class: "form-error", role: "alert" }),
     submit: h("button", { type: "submit", class: "btn btn-primary" }, t("cost.submit")),
   };
+  setMode(fields, DEFAULT_MODE);
+  return fields;
 }
 
 /** Show the value field or the shop size choice, as `mode` ("value" or "size") asks. */
@@ -166,8 +173,8 @@ function buildForm(fields, onEstimate) {
   } },
   h("fieldset", {}, h("legend", {}, t("cost.stockLegend")),
     h("p", { class: "hint" }, t("cost.stockHint")),
-    modeChoice("value", t("cost.modeValue"), true),
-    modeChoice("size", t("cost.modeSize"), false),
+    modeChoice("value", t("cost.modeValue"), DEFAULT_MODE === "value"),
+    modeChoice("size", t("cost.modeSize"), DEFAULT_MODE === "size"),
     numbers.value.node, valueNote, sizeBox),
   h("fieldset", {}, h("legend", {}, t("cost.shopLegend")), numbers.floor.node, floorNote),
   h("fieldset", {}, h("legend", {}, t("cost.tradeLegend")),
@@ -189,8 +196,8 @@ function createDrafts(form, fields) {
   });
   function restore(draft) {
     for (const [key, field] of Object.entries(numbers)) field.input.value = draft?.[key] ?? "";
-    size.value = draft?.size ?? "";
-    form.elements.mode.value = draft?.mode ?? "value";
+    size.value = draft?.size ?? DEFAULT_SIZE;
+    form.elements.mode.value = draft?.mode ?? DEFAULT_MODE;
     setMode(fields, form.elements.mode.value);
     measure.open = draft?.open ?? false;
     if (draft?.touched) numbers.floor.input.dataset.touched = "true";
@@ -213,15 +220,16 @@ function useStockValue(form, fields, value) {
 }
 
 /** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up.
- *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form. With no place picked the
+ *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form; isReady is false when the
+ *  build has no Gemini key, which switches the photo off. With no place picked the
  *  tab shows the empty state (pick.js), with onFind and onCheckPoint behind its buttons. */
-export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null }) {
+export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true }) {
   const title = h("h1", { class: "view-title" });
   const depths = h("p", { class: "muted" });
   const fields = buildFields();
   const { numbers, floorNote, error, submit } = fields;
   const form = buildForm(fields, onEstimate);
-  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value) });
+  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value), isReady });
   const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": t("cost.output") });
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const parts = [h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths),

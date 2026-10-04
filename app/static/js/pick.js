@@ -1,7 +1,8 @@
 // Picking the place to show. Nothing is picked for anyone: the page starts on the place its link names, else the
 // business this browser last picked in the area, else none, and My business and Flood cost then say how to pick one
-// (the empty state). The finder forms, the header's and the Area overview's own, open a business by its name. Only the
-// elements handed in are touched, so node can test all of it (tests/pick.test.mjs).
+// (the empty state). The finder forms, the header's and the Area overview's own, open a business by its name, or show
+// the businesses a name could mean. Only the elements handed in are touched, so node can test all of it
+// (tests/pick.test.mjs).
 import { h, icon, roadName } from "./dom.js";
 import { lang, t } from "./i18n.js";
 
@@ -68,26 +69,36 @@ export function finderEntries(premises) {
   return ids;
 }
 
-function wireForm(form, input, ids, onOpen, onNoMatch) {
+/** The ids of the businesses a search means: the suggestion it is, else the one business whose name it is, else every
+ *  business whose suggestion holds it. */
+function matchesOf(ids, typed) {
+  if (ids.has(typed)) return [ids.get(typed)];
+  const needle = typed.toLowerCase();
+  const hits = [...ids].filter(([text]) => text.toLowerCase().includes(needle));
+  const named = hits.filter(([text]) => text.slice(0, text.lastIndexOf(" · ")).toLowerCase() === needle);
+  return (named.length === 1 ? named : hits).map(([, id]) => id);
+}
+
+function wireForm(form, input, ids, onOpen, onShowMatches) {
   const open = (id) => { input.value = ""; input.blur(); onOpen(id); };
   input.addEventListener("input", () => { if (ids.has(input.value)) open(ids.get(input.value)); });
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const needle = input.value.trim().toLowerCase();
-    if (!needle) { input.focus(); return; }   // an empty Search sends the reader to the box
-    const hit = [...ids].find(([text]) => text.toLowerCase().includes(needle));
-    if (hit) open(hit[1]);
-    else onNoMatch(needle);
+    const typed = input.value.trim();
+    if (!typed) { input.focus(); return; }   // an empty Search sends the reader to the box
+    const matches = matchesOf(ids, typed);
+    if (matches.length === 1) open(matches[0]);
+    else onShowMatches(typed);   // several, or none: the list of businesses, filtered by it, says which
   });
 }
 
 /** The browser's own suggestion list in `datalist`, built once, shared by every [form, input] pair in `forms`: picking
- *  a suggestion opens its business at once; Enter opens the first whose text holds what was typed, else
- *  onNoMatch(text). */
-export function wireFinder({ datalist, forms }, premises, onOpen, onNoMatch) {
+ *  a suggestion opens its business at once. Enter opens the one business the text means; when it could mean several,
+ *  or none, onShowMatches(text) shows them, as a business picked for someone would be a stranger's shop. */
+export function wireFinder({ datalist, forms }, premises, onOpen, onShowMatches) {
   const ids = finderEntries(premises);
   datalist.replaceChildren(...[...ids.keys()].map((text) => h("option", { value: text })));
-  for (const [form, input] of forms) wireForm(form, input, ids, onOpen, onNoMatch);
+  for (const [form, input] of forms) wireForm(form, input, ids, onOpen, onShowMatches);
 }
 
 // ---------- nothing picked yet ----------

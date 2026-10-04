@@ -135,14 +135,14 @@
 
 /* the area's businesses */
 .directory #directory-filter { max-width: 18rem; }
-.directory-head, .directory button { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 4rem); gap: var(--space-2); align-items: center; }
+.directory-head, #directory button { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 4rem); gap: var(--space-2); align-items: center; }
 .directory-head { padding: 0 var(--space-3) var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); text-align: center; }
 .directory-head span:first-child { text-align: left; }
 #directory { max-height: 28rem; overflow-y: auto; border-top: 1px solid var(--line); }
 #directory li[hidden] { display: none; }
-.directory button { width: 100%; padding: var(--space-2) var(--space-3); border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; transition: background-color var(--duration-fast); }
-.directory button:hover { background: var(--surface-sunk); }
-.directory button[aria-current="true"] { background: var(--brand-wash); box-shadow: inset 3px 0 0 var(--accent); }
+#directory button { width: 100%; padding: var(--space-2) var(--space-3); border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; transition: background-color var(--duration-fast); }
+#directory button:hover { background: var(--surface-sunk); }
+#directory button[aria-current="true"] { background: var(--brand-wash); box-shadow: inset 3px 0 0 var(--accent); }
 .directory .name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: var(--text-sm); }
 .directory .meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-xs); color: var(--ink-3); }
 .depth-chip { padding: 3px 0; border-radius: 6px; text-align: center; font-size: var(--text-xs); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); background: var(--surface-sunk); }
@@ -154,8 +154,8 @@
 .depth-chip.band-5 { background: var(--band-5); color: #fff; }
 @media (max-width: 520px) {   /* phones: name on its own line, the three depths below it, each labelled */
   .directory-head { display: none; }
-  .directory button { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--space-1); }
-  .directory button > span:first-child { grid-column: 1 / -1; }
+  #directory button { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--space-1); }
+  #directory button > span:first-child { grid-column: 1 / -1; }
   .depth-chip::before { content: attr(data-size) ": "; font-weight: 500; }   /* "1 in 10" in the page's language, set by overview.js */
 }
 
@@ -368,4 +368,15 @@ body[data-tab="overview"] .finder { display: none; }
 @media (max-width: 520px) {
   .pick-empty { padding: var(--space-6) var(--space-4); }
   .pick-empty-actions .btn { flex: 1 1 100%; }
+}
+
+/* The business list after a search: how many match, or, with none, the ways on */
+.directory-status { margin: 0 0 var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+.directory-status:empty { margin: 0; }
+.directory-head[hidden] { display: none; }
+.directory-next { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.directory-next[hidden] { display: none; }
+.directory-next .btn { min-height: 44px; }
+@media (max-width: 520px) {
+  .directory-next .btn { flex: 1 1 100%; }
 }

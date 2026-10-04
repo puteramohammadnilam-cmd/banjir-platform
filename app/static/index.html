@@ -65,9 +65,9 @@
     </a>
     <span class="place" id="area-name" hidden></span>
     <form class="finder" id="finder" role="search">
-      <label class="visually-hidden" for="finder-input" data-i18n="header.find">Find your business</label>
+      <label class="visually-hidden" for="finder-input" data-i18n="header.find">Find your shop</label>
       <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
-      <input id="finder-input" type="search" list="business-names" data-i18n-attr="placeholder:header.find" placeholder="Find your business" autocomplete="off" enterkeyhint="go">
+      <input id="finder-input" type="search" list="business-names" data-i18n-attr="placeholder:header.find" placeholder="Find your shop" autocomplete="off" enterkeyhint="go">
       <datalist id="business-names"></datalist>
     </form>
     <span class="badge" data-i18n="header.badge" data-i18n-attr="title:header.badgeTitle" title="Depths come from a global model, not an official flood map">Test build</span>
@@ -91,7 +91,7 @@
 
     <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
       <section class="finder-hero" aria-labelledby="finder-hero-heading">
-        <h1 class="finder-hero-title" id="finder-hero-heading"><label for="finder-hero-input" data-i18n="hero.heading">Find your shop</label></h1>
+        <h1 class="finder-hero-title" id="finder-hero-heading"><label id="finder-hero-label" for="finder-hero-input" data-i18n="hero.heading">Find your shop</label></h1>
         <p class="finder-hero-lead" data-i18n="hero.lead">See how deep a modelled flood gets there, and what it could cost.</p>
         <form class="finder-hero-form" id="finder-hero" role="search" aria-labelledby="finder-hero-heading">
           <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
@@ -136,9 +136,10 @@
           <input id="directory-filter" class="field" type="search" data-i18n-attr="placeholder:overview.filterPlaceholder" placeholder="Filter by name or type" autocomplete="off">
         </div>
         <p class="fineprint area-note" id="directory-note" hidden></p>
+        <p class="directory-status" id="directory-status" role="status"></p>
+        <div class="directory-next" id="directory-next" hidden></div>
         <div class="directory-head" aria-hidden="true"><span data-i18n="overview.colBusiness">Business</span><span data-i18n="overview.col10">1 in 10</span><span data-i18n="overview.col100">1 in 100</span><span data-i18n="overview.col500">1 in 500</span></div>
         <ol id="directory"></ol>
-        <p class="muted small" id="directory-empty" data-i18n="overview.noMatch" hidden>No business matches that filter.</p>
       </section>
     </section>
 

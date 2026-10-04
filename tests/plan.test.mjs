@@ -235,3 +235,23 @@ test("a failed share sheet sends this page to WhatsApp, not into a popup; a canc
     delete globalThis.location;
   }
 });
+
+test("with the AI switched off the write button is off and a line says why", () => {
+  const calls = [];
+  const card = createPlanCard({ onWrite: (language) => calls.push(language), onPrint() {}, onLanguage() {}, isReady: false });
+  card.render(undefined, "ms");
+  const write = card.node.querySelectorAll("button").find((b) => b.textContent === "Write my flood plan");
+  assert.equal(write.disabled, true);
+  write.click();
+  assert.deepEqual(calls, []);
+  assert.match(card.node.textContent, /Needs the AI assistant, which is switched off in this test build\./);
+  card.render({ busy: false, error: "x" }, "en");   // a later render does not switch it back on
+  assert.equal(write.disabled, true);
+});
+
+test("with the AI on there is no such line and the button works", () => {
+  const { card, button } = mount();
+  card.render(undefined, "ms");
+  assert.equal(button("Write my flood plan").disabled, false);
+  assert.doesNotMatch(card.node.textContent, /switched off/);
+});

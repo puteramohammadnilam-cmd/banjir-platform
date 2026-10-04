@@ -89,14 +89,14 @@ test("remembering a pick keeps the other areas' picks", () => {
 
 // ---------- the finder ----------
 
-function mountFinder() {
+function mountFinder(premises = START.premises) {
   const datalist = document.createElement("datalist");
   const pair = () => [document.createElement("form"), document.createElement("input")];
   const [header, hero] = [pair(), pair()];
   const opened = [];
-  const missed = [];
-  wireFinder({ datalist, forms: [header, hero] }, START.premises, (id) => opened.push(id), (text) => missed.push(text));
-  return { datalist, header, hero, opened, missed };
+  const shown = [];
+  wireFinder({ datalist, forms: [header, hero] }, premises, (id) => opened.push(id), (text) => shown.push(text));
+  return { datalist, header, hero, opened, shown };
 }
 
 const type = ([, input], text) => { input.value = text; input.dispatch("input"); };
@@ -118,14 +118,43 @@ test("picking a suggestion in either box opens its business and clears the box",
   assert.equal(header[1].value, "");
 });
 
-test("Enter in either box opens the first match, or hands over what matched nothing", () => {
-  const { header, hero, opened, missed } = mountFinder();
+test("Enter in either box opens the one business that matches, and a suggestion's text opens its own", () => {
+  const { header, hero, opened, shown } = mountFinder();
   submit(hero, "  b sho ");
   submit(header, "a shop");
+  submit(hero, [...finderEntries(START.premises).keys()][1]);
+  assert.deepEqual(opened, [other.id, shop.id, other.id]);
+  assert.deepEqual(shown, []);
+  assert.equal(hero[1].value, "", "an opened business clears the box");
+});
+
+test("Enter on a name several businesses share opens none of them and hands the text over, to show them all", () => {
+  const dobi = (id, name) => ({ ...shop, id, name });
+  const premises = [dobi("d-1", "DOBI DHOLPIN"), dobi("d-2", "Dobi DIY Selesa"), dobi("d-3", "Dobi Queen")];
+  const { header, hero, opened, shown } = mountFinder(premises);
+  submit(hero, " dobi ");
+  submit(header, "DOBI D");
+  assert.deepEqual(opened, []);
+  assert.deepEqual(shown, ["dobi", "DOBI D"], "the text as typed, trimmed");
+  assert.equal(hero[1].value, " dobi ", "the box keeps what was typed");
+  submit(hero, "dobi queen");
+  assert.deepEqual(opened, ["d-3"]);
+});
+
+test("Enter on a whole name opens that business, though a longer name holds it too", () => {
+  const { hero, opened, shown } = mountFinder([shop, { ...shop, id: "node-3", name: "A Shop Two" }]);
+  submit(hero, "a shop");
+  assert.deepEqual(opened, [shop.id]);
+  submit(hero, "a sho");
+  assert.deepEqual(shown, ["a sho"]);
+});
+
+test("Enter on a name that matches nothing hands it over, and an empty box opens nothing", () => {
+  const { header, hero, opened, shown } = mountFinder();
   submit(hero, "nothing like it");
   submit(header, "   ");
-  assert.deepEqual(opened, [other.id, shop.id]);
-  assert.deepEqual(missed, ["nothing like it"]);
+  assert.deepEqual(opened, []);
+  assert.deepEqual(shown, ["nothing like it"]);
 });
 
 // ---------- nothing picked ----------

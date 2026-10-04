@@ -57,9 +57,10 @@ function listingFact(listing) {
     h("p", { class: "fineprint" }, t("business.mapsSource")));
 }
 
-function floorFact(rp, photo, onPhoto) {
-  const input = h("input", { type: "file", accept: "image/jpeg,image/png,image/webp", class: "visually-hidden", disabled: Boolean(photo?.busy), onchange: (event) => onPhoto(event.target.files[0]) });
-  const picker = h("label", { class: "btn btn-secondary photo-button", "aria-disabled": photo?.busy ? "true" : null }, icon("camera"),
+function floorFact(rp, photo, onPhoto, isReady) {
+  const isOff = Boolean(photo?.busy) || !isReady;
+  const input = h("input", { type: "file", accept: "image/jpeg,image/png,image/webp", class: "visually-hidden", disabled: isOff, onchange: (event) => onPhoto(event.target.files[0]) });
+  const picker = h("label", { class: "btn btn-secondary photo-button", "aria-disabled": isOff ? "true" : null }, icon("camera"),
     photo?.busy ? t("common.photoReading") : photo?.estimate ? t("common.photoAgain") : t("business.photoAdd"), input);
   const estimate = photo?.estimate;
   let value = t("business.floorUnknown");
@@ -81,6 +82,7 @@ function floorFact(rp, photo, onPhoto) {
     photo?.error && h("p", { class: "fact-note", role: "alert" }, photo.error),
     photo?.preview && h("img", { class: "photo-thumb", src: photo.preview, alt: t("business.photoAlt"), width: 96, height: 72 }),
     picker,
+    !isReady && h("p", { class: "fact-note ai-off" }, t("common.needsAi")),
     h("p", { class: "fineprint" }, t("common.photoPrivacy")));
 }
 
@@ -94,6 +96,9 @@ function historyFact(area, goto) {
     h("p", { class: "fact-note" }, `${t("business.historyNote", { dated, area: area.name, since })} `,
       h("button", { type: "button", class: "btn btn-link", onclick: () => goto("overview") }, t("business.historySee"))));
 }
+
+/** The Ask AI shortcut's second line: what it reads, or that the assistant is off in this build. */
+const askNote = (isReady, hasMaps) => t(!isReady ? "business.nextAskOff" : hasMaps ? "business.nextAskNote" : "business.nextAskNoMaps");
 
 const nextStep = (title, text, onclick, isPrimary = false) =>
   h("button", { type: "button", class: `next-step${isPrimary ? " is-primary" : ""}`, onclick },
@@ -155,23 +160,24 @@ const header = (place, options) => (place.is_point ? pointHead(place, options) :
 /** The facts beside the drawing. A point has no road or Google Maps listing: it is not a business. Its relief centre
  *  is the server's, for a point in a listed area with one; the flood record is the page's area's, so only a point in
  *  that area shows it (another area's record is on that area's own page). */
-function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto }) {
+function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isReady }) {
   const isPoint = premise.is_point;
   const hasPageRecord = !isPoint || premise.area_id === area.id;
   return h("div", { class: "facts" },
     !isPoint && premise.road && roadFact(premise, rp),
     premise.shelter && shelterFact(premise.shelter),
     !isPoint && listingFact(listing),
-    floorFact(rp, photo, onPhoto),
+    floorFact(rp, photo, onPhoto, isReady),
     hasPageRecord && historyFact(area, goto));
 }
 
 /** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
  *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onMovePin() puts the pin of a point back in
  *  the map's hands. With no place picked the tab shows the empty state (pick.js), with onFind and onCheckPoint behind
- *  its buttons. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
+ *  its buttons. isReady and hasMaps are false when the build has no Gemini key or no Google Maps key: the photo button
+ *  is then off, and the Ask AI shortcut says what it can read. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
  *  not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onFind = () => {}, onCheckPoint = null }) {
+export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": t("business.riskLabel") });
@@ -215,10 +221,10 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
         announcer.textContent = spoken(premise, rp);
       }
       side.replaceChildren(
-        sideFacts(shown, { area, goto, onPhoto }),
+        sideFacts(shown, { area, goto, onPhoto, isReady }),
         h("div", { class: "next" },
           nextStep(t("business.nextCost"), t("business.nextCostNote"), () => goto("cost"), true),
-          nextStep(t("business.nextAsk"), t("business.nextAskNote"), () => goto("ask"))));
+          nextStep(t("business.nextAsk"), askNote(isReady, hasMaps), () => goto("ask"))));
     },
   };
 }

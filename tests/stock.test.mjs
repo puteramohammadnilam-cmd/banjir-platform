@@ -140,3 +140,22 @@ test("the photo picker gets focus back when the photo has been read, if the page
   card.render({ result: RESULT, error: "x" }, "100");
   assert.equal(document.activeElement, elsewhere, "focus the user moved is left alone");
 });
+
+test("with the AI switched off the photo picker is off and a line says why", () => {
+  const card = createStockCard({ onPhoto() {}, onUse() {}, isReady: false });
+  card.render(undefined, "100");
+  const input = card.node.querySelector("input");
+  assert.equal(input.disabled, true);
+  assert.equal(card.node.querySelector(".photo-button").getAttribute("aria-disabled"), "true");
+  assert.match(card.node.textContent, /Needs the AI assistant, which is switched off in this test build\./);
+  card.render({ busy: false }, "500");   // a later render does not switch it back on
+  assert.equal(input.disabled, true);
+});
+
+test("with the AI on the picker is on and there is no such line", () => {
+  const { card, text } = mount();
+  card.render(undefined, "100");
+  assert.equal(card.node.querySelector("input").disabled, false);
+  assert.equal(card.node.querySelector(".photo-button").getAttribute("aria-disabled"), null);
+  assert.doesNotMatch(text(), /switched off/);
+});

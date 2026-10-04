@@ -7,6 +7,8 @@ import { BANDS, DOOR_M } from "../app/static/js/dom.js";
 import { gauge, miniGauge } from "../app/static/js/gauge.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
+// The water is one watery blue (the third band's) whatever the depth: deeper bands are indigo and plum, which do not read as water.
+const WATER = BANDS[2].color;
 const num = (node, name) => Number(node.getAttribute(name));
 /** SVG units per metre, read off the drawing itself: the door is 2.1 m tall. */
 const unitsPerMetre = (svg) => num(svg.querySelector(".door"), "height") / DOOR_M;
@@ -18,7 +20,7 @@ test("the small gauge's water is as tall as the depth, to scale with the door", 
   const water = svg.querySelector(".water");
   assert.ok(Math.abs(num(water, "height") / unitsPerMetre(svg) - 1.2) < 1e-9);
   assert.equal(num(water, "y") + num(water, "height"), GROUND(svg));   // it stands on the street
-  assert.equal(water.getAttribute("fill"), BANDS[1].color);
+  assert.equal(water.getAttribute("fill"), WATER);
 });
 
 test("the small gauge cuts the water off at one storey", () => {
@@ -26,7 +28,7 @@ test("the small gauge cuts the water off at one storey", () => {
   const svg = miniGauge(5.4);
   const height = num(svg.querySelector(".water"), "height");
   assert.ok(Math.abs(height / unitsPerMetre(svg) - 3) < 1e-9);
-  assert.equal(svg.querySelector(".water").getAttribute("fill"), BANDS[4].color);
+  assert.equal(svg.querySelector(".water").getAttribute("fill"), WATER);
 });
 
 test("the small gauge draws no water when the model has none", () => {
@@ -63,4 +65,13 @@ test("water and waterline stop short of the right-hand labels", () => {
   assert.ok(labelX - reach >= 11 * 6.6, `labels ending at ${labelX} must be clear of water ending at ${reach}`);
   assert.equal(num(svg.querySelector(".waterline"), "x2"), reach);
   assert.equal(num(svg.querySelector(".other-level"), "x2"), reach);
+});
+
+test("the water is the same blue at every depth, in the full drawing and the small one", () => {
+  installFakeDom();
+  for (const depth of [0.1, 0.8, 1.4, 1.9, 2.5, 3.5, 7]) {
+    assert.equal(miniGauge(depth).querySelector(".water").getAttribute("fill"), WATER, `mini at ${depth} m`);
+    const full = gauge({ depth_m: { 10: depth, 100: depth, 500: depth } }, "100", 0);
+    assert.equal(full.querySelector(".water").getAttribute("fill"), WATER, `full at ${depth} m`);
+  }
 });

@@ -25,6 +25,14 @@ function table(places, onOpen) {
       h("td", {}, roadWater(place)), h("td", {}, shelterOf(place)))))));
 }
 
+/** The one place saved so far, said, with what to do next. When it is not the place on show it can be taken out here;
+ *  when it is, the main button does that. */
+function saved(place, isCurrent, onRemove) {
+  const name = nameOf(place);
+  return h("p", { class: "hint compare-saved" }, t(isCurrent ? "compare.added" : "compare.addedOther", { name }), " ",
+    !isCurrent && h("button", { type: "button", class: "btn btn-link", onclick: () => onRemove(place.id) }, t("compare.removeOne")));
+}
+
 /** The card. render({current, compared}) with the place on show and the compared places, in order; with no place on
  *  show (nothing picked yet) it is left empty. onAdd(id) and onRemove(id) change the list; onOpen(place) shows a
  *  compared place. */
@@ -46,14 +54,14 @@ export function createCompareCard({ onAdd, onRemove, onOpen }) {
       const toggle = isIn
         ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => onRemove(current.id) }, t("compare.remove"))
         : h("button", { type: "button", class: "btn btn-secondary", onclick: () => onAdd(current.id) }, t("compare.add"));
-      const hint = !isIn && compared.length >= MAX_COMPARED ? t("compare.full", { max: MAX_COMPARED })
-        : compared.length === 1 ? t("compare.another") : null;
+      const hint = !isIn && compared.length >= MAX_COMPARED ? t("compare.full", { max: MAX_COMPARED }) : null;
       const hadFocus = node.contains(document.activeElement);   // the button is made again: give focus to the new one
       node.replaceChildren(...[
         h("h2", { id: "compare-heading", class: "small-heading" }, t("compare.heading")),
         h("p", { class: "hint" }, t("compare.hint")),
         toggle,
         hint && h("p", { class: "hint" }, hint),
+        compared.length === 1 && saved(compared[0], isIn, onRemove),
         compared.length >= 2 && table(compared, onOpen),
       ].filter(Boolean));
       if (hadFocus) toggle.focus();

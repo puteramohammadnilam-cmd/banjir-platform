@@ -8,7 +8,7 @@ export default Object.freeze({
   // ---------- index.html: head, header, tabs ----------
   "meta.title": "Banjir Check · kedalaman banjir dalam model untuk kedai dan perniagaan",
   "meta.description": "Lihat sedalam mana air banjir dalam model di setiap perniagaan di kawasan yang dipetakan, anggaran kosnya, dan tanya pembantu AI dalam Bahasa Melayu atau bahasa Inggeris.",
-  "header.find": "Cari perniagaan anda",
+  "header.find": "Cari kedai anda",
   "header.badge": "Versi ujian",
   "header.badgeTitle": "Kedalaman air diambil daripada model global, bukan peta banjir rasmi",
   "header.language": "Language / Bahasa",
@@ -26,6 +26,7 @@ export default Object.freeze({
   "common.metres": "{m} m",
   "common.photoReading": "Membaca foto…",
   "common.photoAgain": "Cuba foto lain",
+  "common.needsAi": "Perlu pembantu AI, yang dimatikan dalam versi ujian ini.",
   "common.photoPrivacy": "Foto dikecilkan dalam pelayar anda, dihantar kepada Google Gemini, dan tidak disimpan oleh alat ini.",
   "common.photoUnreadable": "Fail itu tidak dapat dibaca sebagai foto.",
   "common.relief": "Pusat pemindahan banjir",
@@ -70,6 +71,11 @@ export default Object.freeze({
   "overview.col100": "1 dalam 100",
   "overview.col500": "1 dalam 500",
   "overview.noMatch": "Tiada perniagaan yang sepadan dengan tapisan itu.",
+  "overview.matches": "{count} perniagaan sepadan dengan “{text}”. Pilih kedai anda.",
+  "overview.matchOne": "1 perniagaan sepadan dengan “{text}”.",
+  "overview.notListed": "Tiada dalam senarai kami untuk {area}. Senarai kami diambil daripada peta awam, jadi ada kedai yang tertinggal.",
+  "overview.checkSpot": "Semak lokasinya pada peta",
+  "overview.otherArea": "Pilih kawasan lain",
   "overview.printHeading": "Ringkasan kawasan untuk persatuan dan majlis",
   "overview.printLead": "Satu halaman: berapa banyak perniagaan yang dimasuki air bagi setiap saiz banjir, jalan yang paling terjejas, banjir lalu dan had data ini.",
   "overview.printButton": "Cetak atau simpan ringkasan kawasan",
@@ -103,6 +109,7 @@ export default Object.freeze({
 
   // ---------- index.html: carian di atas Gambaran kawasan ----------
   "hero.heading": "Cari kedai anda",
+  "hero.headingIn": "Cari kedai anda di {area}",
   "hero.lead": "Lihat sedalam mana banjir dalam model sampai ke situ, dan berapa kosnya.",
   "hero.placeholder": "Nama kedai anda",
   "hero.search": "Cari",
@@ -186,9 +193,11 @@ export default Object.freeze({
   "business.riskLabel": "Kedalaman banjir dalam model",
   "business.sideLabel": "Butiran dan langkah seterusnya",
   "business.nextCost": "Berapakah kos banjir kepada anda?",
-  "business.nextCostNote": "Kerugian bagi setiap banjir, setahun dan dalam 10 tahun",
+  "business.nextCostNote": "Kerugian bagi setiap banjir dan setahun, serta peluang dalam 10 tahun akan datang",
   "business.nextAsk": "Tanya dalam Bahasa Melayu atau bahasa Inggeris",
   "business.nextAskNote": "Gemini, dengan Google Weather dan Google Maps",
+  "business.nextAskNoMaps": "Gemini, dengan data banjir alat ini",
+  "business.nextAskOff": "Pembantu dimatikan dalam versi ujian ini",
 
   // ---------- point.js ----------
   "point.kicker": "Titik yang anda pilih",
@@ -222,7 +231,9 @@ export default Object.freeze({
   "compare.remove": "Keluarkan daripada perbandingan",
   "compare.add": "Tambah tempat ini untuk dibandingkan",
   "compare.full": "Hingga {max} tempat: menambah yang ini akan membuang yang paling lama.",
-  "compare.another": "Tambah satu lagi tempat, perniagaan atau titik, untuk melihatnya sebelah-menyebelah.",
+  "compare.added": "Ditambah: {name}. Buka tempat lain dan tambahkannya untuk melihat kedua-duanya sebelah-menyebelah.",
+  "compare.addedOther": "Ditambah: {name}. Tambah tempat ini untuk melihat kedua-duanya sebelah-menyebelah.",
+  "compare.removeOne": "Keluarkan",
   "compare.heading": "Bandingkan tempat",
   "compare.hint": "Sedang memilih lot kedai? Letakkan hingga tiga tempat sebelah-menyebelah: air yang dimasuki setiap satu dalam model.",
 

@@ -94,6 +94,8 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.6; cursor: wait; }
+.btn.is-off:disabled { cursor: not-allowed; }   /* off for good (no AI in this build), not busy */
+.btn[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; pointer-events: none; }   /* a photo picker is a label, which has no :disabled */
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-deep); }
 .btn-secondary { background: var(--surface); border-color: var(--line-strong); color: var(--ink); }

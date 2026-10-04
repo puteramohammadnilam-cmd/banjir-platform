@@ -102,7 +102,7 @@ test("applyStatic sets <html lang> and fills the marked text and attributes", ()
   inLang("ms", () => applyStatic(page));
   assert.equal(page.documentElement.lang, "ms");
   assert.equal(heading.textContent, "Tentang data ini");
-  assert.equal(input.getAttribute("placeholder"), "Cari perniagaan anda");
+  assert.equal(input.getAttribute("placeholder"), "Cari kedai anda");
   assert.equal(input.getAttribute("aria-label"), "Soalan anda");
   applyStatic(page);
   assert.equal(page.documentElement.lang, "en");

@@ -1,4 +1,4 @@
-import { ADULT_M, COUNTER_M, DOOR_M, SCENARIOS, band, bandColor, depthText, depthWords, s, scenarioLabel } from "./dom.js";
+import { ADULT_M, BANDS, COUNTER_M, DOOR_M, SCENARIOS, band, depthText, depthWords, s, scenarioLabel } from "./dom.js";
 import { t } from "./i18n.js";
 
 // The shop-front drawing, in SVG units: a street, an adult, a door and a counter, to scale.
@@ -13,6 +13,9 @@ const COUNTER = { x: 180, w: 82 };
 const LABEL_X = WIDTH - 4;
 const WATER_W = 280;              // water and the dashed levels stop here: the gutter to LABEL_X fits "1 dalam 500", so no label is under water
 const LABEL_GAP = 14;
+// The water is always the same blue, whatever the depth: the deeper bands' indigo and plum, painted over a street, do not
+// read as water. How deep it is stays in the words and on the map, and the depth is the height of the blue.
+const WATER_FILL = BANDS[2].color;
 let drawnWaterM = 0;   // where the water stood in the last drawing, so the next one rises or falls from there
 let lastWater = null;
 
@@ -61,7 +64,7 @@ function levelLabels(premise, rp) {
 export function gauge(premise, rp, floorM) {
   const depth = premise.depth_m[rp];
   const shownM = band(depth) ? Math.min(depth, TOP_M) : 0;
-  const water = s("rect", { class: "water", x: 0, y: yAt(TOP_M), width: WATER_W, height: TOP_M * PX_PER_M, fill: bandColor(depth) });
+  const water = s("rect", { class: "water", x: 0, y: yAt(TOP_M), width: WATER_W, height: TOP_M * PX_PER_M, fill: WATER_FILL });
   const waterline = s("line", { class: "waterline", x1: 0, x2: WATER_W, y1: GROUND_Y, y2: GROUND_Y });
   const fromM = paintedM();
   water.style.transform = `scaleY(${fromM / TOP_M})`;
@@ -90,7 +93,7 @@ export function miniGauge(depthM) {
   const top = yAt(TOP_M);
   return s("svg", { class: "gauge gauge-mini", viewBox: `0 ${top} ${WATER_W} ${GROUND_Y - top + 3}`, "aria-hidden": "true" },
     objects(0),
-    shownM > 0 && s("rect", { class: "water", x: 0, y: yAt(shownM), width: WATER_W, height: shownM * PX_PER_M, fill: bandColor(depthM) }),
+    shownM > 0 && s("rect", { class: "water", x: 0, y: yAt(shownM), width: WATER_W, height: shownM * PX_PER_M, fill: WATER_FILL }),
     s("line", { class: "street", x1: 0, x2: WATER_W, y1: GROUND_Y, y2: GROUND_Y }));
 }
 

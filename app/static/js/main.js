@@ -325,6 +325,7 @@ function linkFollower(app) {
 function createExtras(app) {
   const { start, store } = app;
   const plan = createPlanCard({
+    isReady: start.status.ai_ready,
     onWrite: (language) => writePlan(app, language), onPrint: () => printSheet($("panel-business").querySelector(".plan-sheet")),
     onLanguage: (planLanguage) => store.update({ planLanguage }),
   });
@@ -341,14 +342,14 @@ function createExtras(app) {
 }
 
 /** The two search boxes, the header's and the Area overview's, and the overview's "Check any point in Malaysia" (shown
- *  only where points can be checked). A name that matches nothing shows the list of businesses, filtered by it. */
-function wireWaysIn(app, checkPoint) {
+ *  only where points can be checked). A name that could mean several businesses, or none, shows the list of businesses,
+ *  filtered by it, saying how many match or what to do next (overview.js). */
+function wireWaysIn(app, checkPoint, overview) {
   wireFinder({
     datalist: $("business-names"),
     forms: [[$("finder"), $("finder-input")], [$("finder-hero"), $("finder-hero-input")]],
-  }, app.start.premises, (id) => open(app, id), (needle) => {
-    $("directory-filter").value = needle;
-    $("directory-filter").dispatchEvent(new Event("input"));
+  }, app.start.premises, (id) => open(app, id), (text) => {
+    overview.showMatches(text);
     goto(app, "overview");
     $("directory-filter").scrollIntoView({ block: "center" });
     $("directory-filter").focus({ preventScroll: true });   // where the typed name now is, and the list it filters
@@ -378,16 +379,17 @@ function createViews(app) {
   const business = createBusiness($("panel-business"), {
     area: start.area, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
-    onMovePin: () => movePin(app, pin), ...empty,
+    onMovePin: () => movePin(app, pin), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
     onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm), ...empty,
+    isReady: start.status.ai_ready,
   });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
-  wireWaysIn(app, checkPoint);
+  wireWaysIn(app, checkPoint, overview);
   const chat = createChat({
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,

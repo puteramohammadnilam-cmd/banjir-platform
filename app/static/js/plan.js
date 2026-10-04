@@ -123,17 +123,18 @@ function languageChoice(onLanguage) {
 
 /** The card. render(state, language) with state {busy, result, error}, `result` the answer of POST /api/plan.
  *  onWrite(language) asks for a plan, onLanguage(language) changes the choice, onPrint() prints the plan. The heading,
- *  the choice, the button and the live region are built once and changed in place, so focus and announcements stay. */
-export function createPlanCard({ onWrite, onPrint, onLanguage }) {
+ *  the choice, the button and the live region are built once and changed in place, so focus and announcements stay.
+ *  isReady is false when the build has no Gemini key: the button is then off, with a line that says why. */
+export function createPlanCard({ onWrite, onPrint, onLanguage, isReady = true }) {
   const choice = languageChoice(onLanguage);
   let language = lang;   // until the first render: the page's own language
-  const write = h("button", { type: "button", class: "btn btn-primary", onclick: () => onWrite(language) });
+  const write = h("button", { type: "button", class: isReady ? "btn btn-primary" : "btn btn-primary is-off", onclick: () => onWrite(language) });
   const alert = h("p", { class: "fact-note", role: "alert" });
   const live = h("div", { "aria-live": "polite" });
   const node = h("section", { class: "surface plan-card", "aria-labelledby": "plan-heading" },
     h("h2", { id: "plan-heading", class: "small-heading" }, t("plan.heading")),
     h("p", { class: "hint" }, t("plan.hint")),
-    choice.node, write, alert, live);
+    choice.node, write, !isReady && h("p", { class: "fact-note ai-off" }, t("common.needsAi")), alert, live);
   let shown = {};
   return {
     node,
@@ -144,7 +145,7 @@ export function createPlanCard({ onWrite, onPrint, onLanguage }) {
       shown = { state, chosen };
       language = chosen;
       choice.show(chosen);
-      write.disabled = Boolean(state?.busy);
+      write.disabled = Boolean(state?.busy) || !isReady;
       // a disabled button loses focus to the page: give it back once the plan is written (or failed)
       if (isDone && [write, document.body].includes(document.activeElement)) write.focus();
       write.textContent = t(state?.busy ? "plan.writing" : state?.result ? "plan.again" : "plan.write");

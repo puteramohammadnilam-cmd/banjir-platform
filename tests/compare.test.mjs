@@ -53,10 +53,29 @@ test("a point is named by its square, and each row opens its place", () => {
   assert.deepEqual(calls.opened, ["pt:3.02998,101.53667"]);
 });
 
-test("with one place it says to add another, and with three the add button says the limit", () => {
-  const { card, button } = mount();
+test("with one place added it says which, and what to do next, whether it is on show or not", () => {
+  const { card, calls, button } = mount();
   card.render({ current: shop, compared: [shop] });
-  assert.match(card.node.textContent, /Add another place/);
+  assert.match(card.node.textContent, /Added: A Shop\. Open another place and add it to see them side by side\./);
+  assert.ok(button("Remove from compare"));
+  assert.equal(button("Remove"), undefined, "the main button already removes the place on show");
+  card.render({ current: other, compared: [shop] });
+  assert.match(card.node.textContent, /Added: A Shop\. Add this place to see them side by side\./);
+  assert.ok(button("Add this place to compare"));
+  button("Remove").click();
+  assert.deepEqual(calls.removed, ["node-1"]);
+  card.render({ current: other, compared: [] });
+  assert.doesNotMatch(card.node.textContent, /Added:/);
+});
+
+test("a point added alone is named by its square", () => {
+  const { card } = mount();
+  card.render({ current: shop, compared: [point()] });
+  assert.match(card.node.textContent, /Added: 90 m square at 3\.02998, 101\.53667\./);
+});
+
+test("with three places the add button says the limit", () => {
+  const { card, button } = mount();
   const third = { ...other, id: "node-3" };
   card.render({ current: { ...other, id: "node-4" }, compared: [shop, other, third] });
   assert.match(card.node.textContent, /Up to 3 places: adding this one drops the oldest/);

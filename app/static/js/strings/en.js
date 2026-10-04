@@ -7,7 +7,7 @@ export default Object.freeze({
   // ---------- index.html: head, header, tabs ----------
   "meta.title": "Banjir Check · modelled flood depth for shops and businesses",
   "meta.description": "See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.",
-  "header.find": "Find your business",
+  "header.find": "Find your shop",
   "header.badge": "Test build",
   "header.badgeTitle": "Depths come from a global model, not an official flood map",
   "header.language": "Language / Bahasa",
@@ -25,6 +25,7 @@ export default Object.freeze({
   "common.metres": "{m} m",
   "common.photoReading": "Reading the photo…",
   "common.photoAgain": "Try another photo",
+  "common.needsAi": "Needs the AI assistant, which is switched off in this test build.",
   "common.photoPrivacy": "The photo is shrunk in your browser, sent to Google Gemini, and not saved by this tool.",
   "common.photoUnreadable": "That file could not be read as a photo.",
   "common.relief": "Flood relief centre",
@@ -69,6 +70,11 @@ export default Object.freeze({
   "overview.col100": "1 in 100",
   "overview.col500": "1 in 500",
   "overview.noMatch": "No business matches that filter.",
+  "overview.matches": "{count} businesses match “{text}”. Pick yours.",
+  "overview.matchOne": "1 business matches “{text}”.",
+  "overview.notListed": "Not on our list for {area}. Our list comes from a public map and misses some shops.",
+  "overview.checkSpot": "Check the spot on the map",
+  "overview.otherArea": "Pick another area",
   "overview.printHeading": "Area summary for associations and councils",
   "overview.printLead": "One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.",
   "overview.printButton": "Print or save the area summary",
@@ -102,6 +108,7 @@ export default Object.freeze({
 
   // ---------- index.html: the search at the top of the Area overview ----------
   "hero.heading": "Find your shop",
+  "hero.headingIn": "Find your shop in {area}",
   "hero.lead": "See how deep a modelled flood gets there, and what it could cost.",
   "hero.placeholder": "Your shop's name",
   "hero.search": "Search",
@@ -185,9 +192,11 @@ export default Object.freeze({
   "business.riskLabel": "Modelled flood depth",
   "business.sideLabel": "Details and next steps",
   "business.nextCost": "What would a flood cost you?",
-  "business.nextCostNote": "Loss per flood, per year and over 10 years",
+  "business.nextCostNote": "Loss per flood and per year, and the chance in the next 10 years",
   "business.nextAsk": "Ask in Bahasa Melayu or English",
   "business.nextAskNote": "Gemini, with Google Weather and Google Maps",
+  "business.nextAskNoMaps": "Gemini, with this tool's flood data",
+  "business.nextAskOff": "The assistant is switched off in this test build",
 
   // ---------- point.js ----------
   "point.kicker": "A point you picked",
@@ -221,7 +230,9 @@ export default Object.freeze({
   "compare.remove": "Remove from compare",
   "compare.add": "Add this place to compare",
   "compare.full": "Up to {max} places: adding this one drops the oldest.",
-  "compare.another": "Add another place, a business or a point, to see them side by side.",
+  "compare.added": "Added: {name}. Open another place and add it to see them side by side.",
+  "compare.addedOther": "Added: {name}. Add this place to see them side by side.",
+  "compare.removeOne": "Remove",
   "compare.heading": "Compare places",
   "compare.hint": "Choosing between shop lots? Put up to three places side by side: the water each one gets in the model.",
 
