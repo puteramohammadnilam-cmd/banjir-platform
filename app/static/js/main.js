@@ -375,7 +375,7 @@ function cityOf(app) {
   return {
     sections: start.sections, word: start.area.section_word, section: start.section, index: start.index,
     wholeCity: !start.area.default_section, onSection: (id) => changeSection(app, id), hrefOf: (id) => sectionLink(app, id),
-    cityHref: sectionLink(app, null), cityName: start.area.name,
+    cityHref: () => sectionLink(app, null), cityName: start.area.name,
   };
 }
 

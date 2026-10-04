@@ -77,13 +77,14 @@ const WORD = { en: "Section", ms: "Seksyen" };
 function mountCity({ sectionId = null, wholeCity = true } = {}) {
   const slot = document.createElement("div");
   const sections = [];
-  createScopeBar(slot, {
+  const link = { href: "?rp=50" };
+  const bar = createScopeBar(slot, {
     areas: AREAS, areaId: "sri-muda", onArea() {}, sections: SECTIONS, sectionId, word: WORD, wholeCity,
-    onSection: (id) => sections.push(id), cityHref: "?", cityName: "The City",
+    onSection: (id) => sections.push(id), cityHref: () => link.href, cityName: "The City",
   });
   const select = slot.querySelector('[id="section-select"]');
   const open = slot.querySelectorAll("button").filter((button) => button.textContent === "Open")[1];
-  return { slot, select, open, sections };
+  return { slot, select, open, sections, bar, link };
 }
 
 test("a city adds a section select, in the area's own word, with the whole city first", () => {
@@ -111,9 +112,17 @@ test("choosing a section only chooses it; Open opens it, and the whole city with
 test("a section's page has a plain link back to the whole city; the whole city's page has none", () => {
   const onSection = mountCity({ sectionId: "seksyen-25" });
   const back = onSection.slot.querySelector("a");
-  assert.equal(back.getAttribute("href"), "?");
+  assert.equal(back.getAttribute("href"), "?rp=50");
   assert.equal(back.textContent, "All of The City");
   assert.equal(mountCity().slot.querySelector("a"), null);
+  assert.doesNotThrow(() => mountCity().bar.refresh(), "a page with no link has nothing to refresh");
+});
+
+test("the link back to the whole city follows the page's flood size when the page is redrawn", () => {
+  const { slot, bar, link } = mountCity({ sectionId: "seksyen-25" });
+  link.href = "?rp=10";
+  bar.refresh();
+  assert.equal(slot.querySelector("a").getAttribute("href"), "?rp=10");
 });
 
 test("a city with a default section has no whole-city view to offer", () => {

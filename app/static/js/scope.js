@@ -33,7 +33,8 @@ function sectionPicker({ sections, sectionId, word, wholeCity, onSection }) {
 
 /** An "Area" select with one option per listed area (its display name) and an "Open" button; another area is another
  *  page. A city split into sections (`sections` not empty) adds the section select, in the area's own `word` for a
- *  section, and on a section's page a plain link back to the whole city (cityHref, named "All of {cityName}"). */
+ *  section, and on a section's page a plain link back to the whole city (cityHref() gives it, named "All of {cityName}").
+ *  Gives back refresh(), which asks cityHref() again, as the link carries the flood size on show. */
 export function createScopeBar(slot, { areas, areaId, onArea, sections = [], sectionId = null, word = null, wholeCity = true, onSection = () => {}, cityHref = null, cityName = "" }) {
   const area = picker({
     id: "area-select", label: t("scope.area"), options: areas.map((entry) => [entry.id, entry.display_name]), current: areaId, onOpen: onArea,
@@ -41,7 +42,8 @@ export function createScopeBar(slot, { areas, areaId, onArea, sections = [], sec
   const section = sections.length ? sectionPicker({ sections, sectionId, word, wholeCity, onSection }) : null;
   // coming back to this page from the browser's back-forward cache must show what it holds, not what was picked on the way out
   window.addEventListener("pageshow", (event) => { if (event.persisted) { area.reset(); section?.reset(); } });
-  const back = section && sectionId && cityHref ? h("a", { class: "scope-back", href: cityHref }, t("scope.allOf", { city: cityName })) : null;
+  const back = section && sectionId && cityHref ? h("a", { class: "scope-back", href: cityHref() }, t("scope.allOf", { city: cityName })) : null;
   const hint = section ? t("scope.hintSections", { word: dataWord(word, { lower: true }) }) : t("scope.hint");
   slot.replaceChildren(...[area.node, section?.node, back].filter(Boolean), h("p", { id: "area-hint", class: "fineprint scope-hint" }, hint));
+  return { refresh: () => back?.setAttribute("href", cityHref()) };
 }

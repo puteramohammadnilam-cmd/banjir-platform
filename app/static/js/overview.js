@@ -207,10 +207,10 @@ function createCityParts(map, city) {
  *  opens the pin and GPS flow (pin.js) from the map's own button and from an empty list, and is null when this build
  *  cannot check points. showMatches(text) is the list, filtered by a search that could mean several businesses or none.
  *  `city` is null for a plain area; for a city split into sections it is {sections, word, section (null on the whole
- *  city), index (the whole city's lean list), wholeCity, onSection(id | null), hrefOf(id), cityHref, cityName}. */
+ *  city), index (the whole city's lean list), wholeCity, onSection(id | null), hrefOf(id), cityHref(), cityName}. */
 export function createOverview({ area, areas, premises, town, onSelect, onOpen, onPick, onArea, onCheckPoint = null, city = null }) {
   const isWholeCity = Boolean(city && !city.section);
-  createScopeBar($("scope"), { areas, areaId: area.id, onArea, ...cityScope(city) });
+  const scope = createScopeBar($("scope"), { areas, areaId: area.id, onArea, ...cityScope(city) });
   renderAreaLabels(area, isWholeCity ? city : null);
   if (city) $("finder-hero-label").textContent = t("hero.headingIn", { area: city.cityName });   // the search covers the whole city
   const riverOnly = riverOnlyNote(area, city?.section ?? null);
@@ -237,6 +237,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
         kpis.setScenario(rp);
         renderPicker(document.querySelector("[data-scenario]"), rp, onPick, area.bigger_flood_example);
         cityParts?.show(rp);
+        scope.refresh();   // "All of {city}" carries the flood size, as the table's links do
       }
       if (rain !== shown.rain) kpis.setRain(rain);
       if (rp !== shown.rp || selectedId !== shown.selectedId) {
