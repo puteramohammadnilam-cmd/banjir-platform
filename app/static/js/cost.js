@@ -1,5 +1,5 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
-import { SCENARIOS, depthText, h, icon, ringgit } from "./dom.js";
+import { CHANCE_YEARS, SCENARIOS, chanceWithin, depthText, h, icon, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
 import { emptyState } from "./pick.js";
 import { createStockCard } from "./stock.js";
@@ -16,15 +16,46 @@ function numberField(name, label, unit, extra = {}) {
 
 const metresAbove = (m) => (m > 0 ? t("common.metres", { m: m.toFixed(2) }) : t("cost.none"));
 
-function lossTable(result) {
+/** The typical shop-size figure is one flat amount per flooded shop (JPS 2003), whatever the depth. */
+const isFlat = (result) => SCENARIOS.every((rp) => result.per_flood[rp].damage_share == null);
+
+function lossTable(result, flat) {
+  const cols = flat ? ["cost.colSize", "cost.colWater", "cost.colTotal"] : ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"];
   return h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
     h("caption", { class: "visually-hidden" }, t("cost.caption")),
-    h("thead", {}, h("tr", {}, ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"].map((key) => h("th", { scope: "col" }, t(key))))),
+    h("thead", {}, h("tr", {}, cols.map((key) => h("th", { scope: "col" }, t(key))))),
     h("tbody", {}, SCENARIOS.map((rp) => {
       const flood = result.per_flood[rp];
       return h("tr", {}, h("th", { scope: "row" }, t("common.rpYears", { rp })), h("td", {}, metresAbove(flood.water_above_floor_m)),
-        h("td", {}, ringgit(flood.direct_damage_rm)), h("td", {}, ringgit(flood.indirect_loss_rm)), h("td", {}, h("strong", {}, ringgit(flood.total_rm))));
+        !flat && h("td", {}, ringgit(flood.direct_damage_rm)), !flat && h("td", {}, ringgit(flood.indirect_loss_rm)),
+        h("td", {}, h("strong", {}, ringgit(flood.total_rm))));
     }))));
+}
+
+/** With the flat figure, one line says what any flood that reaches the floor costs, and how to make depth count. */
+function flatLine(result) {
+  const wettest = result.per_flood[SCENARIOS.at(-1)];
+  if (!wettest.direct_damage_rm) return null;
+  return h("div", { class: "flat-line" },
+    h("p", {}, h("strong", {}, t("cost.flatLine", { total: ringgit(wettest.total_rm) })), " ",
+      t("cost.flatParts", { damage: ringgit(wettest.direct_damage_rm), trade: ringgit(wettest.indirect_loss_rm) })),
+    h("p", { class: "fineprint" }, t("cost.flatNote")));
+}
+
+/** The most frequent flood size that costs the shop anything, as {rp, total}, or null when none does. */
+function firstCostlyFlood(result) {
+  const rp = [...SCENARIOS].sort((a, b) => Number(a) - Number(b)).find((key) => result.per_flood[key].total_rm > 0);
+  return rp ? { rp, total: result.per_flood[rp].total_rm } : null;
+}
+
+/** The second headline: the chance of a costly flood within the next CHANCE_YEARS, not a discounted sum. */
+function chanceBox(result) {
+  const costly = firstCostlyFlood(result);
+  if (!costly) return h("div", { class: "figure-box" }, h("p", { class: "kpi-figure" }, "–"), h("p", { class: "kpi-label" }, t("cost.noCostly")));
+  const pct = Math.round(chanceWithin(Number(costly.rp), CHANCE_YEARS) * 100);
+  return h("div", { class: "figure-box" }, h("p", { class: "kpi-figure" }, t("cost.chanceFigure", { pct })),
+    h("p", { class: "kpi-label" }, t("cost.chanceLabel", { years: CHANCE_YEARS })),
+    h("p", { class: "kpi-note" }, t("cost.chanceNote", { rp: costly.rp, total: ringgit(costly.total) })));
 }
 
 function verdict(measure, years) {
@@ -37,21 +68,24 @@ function verdict(measure, years) {
     h("p", {}, saving));
 }
 
-function results(result) {
+export function results(result) {
   if (!result) {
     return [h("div", { class: "cost-empty" }, icon("cash"), h("strong", {}, t("cost.emptyTitle")), h("p", {}, t("cost.emptyNote")))];
   }
   const { years, discount_rate: rate, present_value_rm: overYears } = result.loss_over_years;
+  const flat = isFlat(result);
   return [
     h("div", { class: "headline-figures" },
-      h("div", { class: "figure-box is-key" }, h("p", { class: "kpi-figure" }, ringgit(result.expected_yearly_loss_rm)),
-        h("p", { class: "kpi-label" }, t("cost.yearly")), h("p", { class: "kpi-note" }, t("cost.yearlyNote"))),
-      h("div", { class: "figure-box" }, h("p", { class: "kpi-figure" }, ringgit(overYears)),
-        h("p", { class: "kpi-label" }, t("cost.overYears", { years })), h("p", { class: "kpi-note" }, t("cost.overYearsNote", { pct: Math.round(rate * 100) })))),
-    lossTable(result),
+      // floods more frequent than 1 in 10 years are not in the model (costs.expected_yearly), so this is a floor
+      h("div", { class: "figure-box is-key" }, h("p", { class: "kpi-figure" }, t("cost.atLeast", { rm: ringgit(result.expected_yearly_loss_rm) })),
+        h("p", { class: "kpi-label" }, t("cost.yearly")), h("p", { class: "kpi-note" }, t("cost.yearlyNote", { rp: SCENARIOS[0] }))),
+      chanceBox(result)),
+    flat && flatLine(result),
+    lossTable(result, flat),
     verdict(result.measure, years),
     h("p", { class: "fineprint" }, t("cost.rough")),
     h("details", {}, h("summary", {}, t("cost.how")),   // the method's own words come from the server, in English
+      h("p", {}, t("cost.overYearsLine", { rm: ringgit(overYears), years, pct: Math.round(rate * 100) })),
       h("p", {}, t("cost.damage", { text: result.basis.direct })), h("p", {}, t("cost.trade", { text: result.basis.indirect })),
       h("p", {}, result.method), h("p", {}, result.limits)),
   ].filter(Boolean);

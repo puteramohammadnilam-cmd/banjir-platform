@@ -259,6 +259,8 @@
 .figure-box.is-key { background: var(--brand-deep); color: #fff; }
 .figure-box .kpi-figure { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.25rem); }
 .figure-box .kpi-note { color: inherit; opacity: 0.75; }
+.flat-line { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-left: 3px solid var(--brand); border-radius: var(--radius-sm); background: var(--brand-wash); }
+.flat-line .fineprint { margin-top: var(--space-1); }
 .table-scroll { overflow-x: auto; }   /* the table scrolls inside its card on narrow screens, not the page */
 .loss-table { width: 100%; min-width: 26rem; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .loss-table th, .loss-table td { padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--line); text-align: right; }
