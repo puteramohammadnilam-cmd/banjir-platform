@@ -124,14 +124,31 @@ def _aliases() -> dict[str, tuple[areas.Area, Mapping]]:
 
 
 def preload() -> None:
-    """Check every area's sections now, so a bad sections.json or an alias that clashes stops the server at start-up."""
+    """Check every area's sections and flood record now, so a bad sections.json or history.json, or an alias that
+    clashes, stops the server at start-up rather than answering a page with a 500."""
     for area in areas.load_all():
         listed(area.id)
+        _check_history(area)
     found = [entry["id"] for area in areas.load_all() for entry in area.aliases]
     clashes = sorted({alias_id for alias_id in found if found.count(alias_id) > 1 or areas.get(alias_id)})
     if clashes:
         raise areas.AreaError(f"An alias repeats or is also an area id: {', '.join(clashes)}.")
     _aliases()
+
+
+def _check_history(area: areas.Area) -> None:
+    """The area's history.json, if it has one, is sound and, for an area split into sections, names exactly its
+    sections (section_names keys == the sections.json ids). Raises areas.AreaError otherwise."""
+    try:
+        doc = flood_record.load(str(areas.AREAS_DIR / area.id / flood_record.FILE_NAME))
+    except flood_record.HistoryError as error:
+        raise areas.AreaError(str(error)) from error   # it names the file
+    if doc is None or not has_sections(area):
+        return
+    named, ids = set(doc["section_names"]), {section["id"] for section in listed(area.id)}
+    if named != ids:
+        odd = ", ".join(sorted(named ^ ids))
+        raise areas.AreaError(f"{area.id}: history.json section_names must be the sections.json ids; differ: {odd}.")
 
 
 def clear_caches() -> None:
@@ -169,7 +186,9 @@ def find_section(area: areas.Area | None, text) -> Mapping | None:
 
 def section_at(area: areas.Area, lat: float, lon: float) -> Mapping | None:
     """The section whose outline holds the point, else the nearest within NEAREST_SECTION_M, else None. The first in the
-    list wins on a shared edge."""
+    list wins on a shared edge. It reads the simplified outlines of sections.json (about 10 m tolerance), while the
+    build assigned businesses and squares to sections on the full outlines, so a point within about 10 m of a boundary
+    may get the neighbouring section here."""
     items = [{"geometry": section["outline"], "bbox": tuple(section["bbox"]), "section": section}
              for section in listed(area.id)]
     found = geo.containing(lon, lat, items)

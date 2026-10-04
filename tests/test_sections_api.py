@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, areas, googlemaps, main, places, sections
+from app import ai, areas, googlemaps, history, main, places, sections
 from sectioned_fixture import CHECKLIST_POINT, CITY, PLAIN, city  # noqa: F401  (city is a fixture)
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -160,6 +160,35 @@ def test_an_alias_may_not_be_an_area_id(city):
     path.write_text(json.dumps({**config, "aliases": [{"id": PLAIN, "section": "zon-1", "names": []}]}))
     sections.clear_caches()
     with pytest.raises(areas.AreaError, match=f"also an area id: {PLAIN}"):
+        sections.preload()
+
+
+def _rewrite_history(change) -> None:
+    path = areas.AREAS_DIR / CITY / "history.json"
+    path.write_text(change(path.read_text(encoding="utf-8")), encoding="utf-8")
+    sections.clear_caches()
+    history.load.cache_clear()
+
+
+def _without_section(doc: dict, section_id: str) -> dict:
+    """The history with no word of one section: its name gone, and the events placed in it."""
+    return {**doc, "section_names": {key: value for key, value in doc["section_names"].items() if key != section_id},
+            "events": [event for event in doc["events"] if section_id not in event["sections"]]}
+
+
+@pytest.mark.parametrize("change, problem", [
+    (lambda text: text[:-2], "history.json: not JSON"),
+    (lambda text: json.dumps({**json.loads(text), "events": "none"}), "events must be a list"),
+    (lambda text: json.dumps(_without_section(json.loads(text), "zon-u3")), "differ: zon-u3"),
+    (lambda text: json.dumps({**json.loads(text), "section_names": {
+        **json.loads(text)["section_names"], "zon-9": {"en": "Zone 9", "ms": "Zon 9"}}}), "differ: zon-9"),
+])
+def test_a_bad_history_file_stops_the_server_at_start_up(city, change, problem):
+    """A history.json that is not sound, or whose section_names are not exactly the sections.json ids, would answer
+    the section pages with a 500: it stops start-up instead."""
+    sections.preload()   # the fixture's own is sound
+    _rewrite_history(change)
+    with pytest.raises(areas.AreaError, match=problem):
         sections.preload()
 
 
