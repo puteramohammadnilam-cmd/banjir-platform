@@ -10,6 +10,8 @@ import { dataWord, t } from "./i18n.js";
 
 const OUTLINE = "#0c447c";   // --brand in tokens.css
 const LIFTED = "#0d1b2a";    // --ink
+const STREET_ZOOM = 15;     // from here in, a point's own squares show: the shading steps back to a wash
+const STREET_WASH = 0.25;
 const NO_SHARE = Object.freeze({ upTo: 0, color: OUTLINE, opacity: 0, words: () => t("choropleth.none") });
 const BOUNDS = [0.05, 0.15, 0.3, 0.5, Infinity];   // each class's top: under 5%, 5-15, 15-30, 30-50 (50 included), over 50
 const WORDS = [
@@ -50,9 +52,9 @@ const tooltipNode = (section, rp) => {
   return h("div", { class: "choro-tip" }, h("strong", {}, name), rest.map((line, i) => h("span", { class: i === rest.length - 1 ? "choro-tip-open" : null }, line)));
 };
 
-const paint = (share) => {
+const paint = (share, wash = 1) => {
   const step = SHARE_CLASSES[shareClass(share)];
-  return { fill: true, fillColor: step.color, fillOpacity: step.opacity };
+  return { fill: true, fillColor: step.color, fillOpacity: step.opacity * wash };
 };
 const outline = (isLifted) => ({ color: isLifted ? LIFTED : OUTLINE, weight: isLifted ? 3 : 1, opacity: isLifted ? 0.9 : 0.55 });
 
@@ -67,10 +69,12 @@ export function choroplethKey(word, extra = null) {
 
 /** Draws `sections` (each with its GeoJSON `outline` and `counts`) on `renderer`, the map's canvas. onOpen(id) opens a
  *  section, from a click, except while isAiming() says a point is being aimed at (a tap there moves the map). show(rp)
- *  shades them for a flood size; highlight(id) lifts one outline (null for none), as hovering one does. */
+ *  shades them for a flood size; highlight(id) lifts one outline (null for none), as hovering one does. Zoomed in to
+ *  street level, where a checked point's own squares are drawn, the shading steps back to a wash. */
 export function createChoropleth(map, renderer, sections, { onOpen, isAiming = () => false }) {
   let rp = null;
   let lifted = null;
+  const wash = () => ((map.getZoom?.() ?? 0) >= STREET_ZOOM ? STREET_WASH : 1);
   const paths = new Map(sections.map((section) => {
     const path = L.geoJSON(section.outline, { renderer, interactive: true, bubblingMouseEvents: false });
     path.setStyle({ ...outline(false), ...paint(0) })
@@ -89,10 +93,13 @@ export function createChoropleth(map, renderer, sections, { onOpen, isAiming = (
     paths.get(lifted)?.path.setStyle(outline(true)).bringToFront();
   }
 
+  const repaint = () => { for (const { section, path } of paths.values()) path.setStyle(paint(shareOf(section, rp), wash())); };
+  map.on?.("zoomend", repaint);
+
   return {
     show(next) {
       rp = next;
-      for (const { section, path } of paths.values()) path.setStyle(paint(shareOf(section, rp)));
+      repaint();
     },
     highlight,
   };

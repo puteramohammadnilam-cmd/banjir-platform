@@ -9,7 +9,8 @@ const SELECTED = "#b94a1b";   // --accent in tokens.css
 const BRAND = "#0c447c";      // --brand: a section's outline
 const HALO = "#fff";   // every shop dot wears a white ring (and a dark hairline from .biz-dot), so it reads on pale and dark squares
 const FOCUS_ZOOM = 17;
-const MIN_ZOOM = 6;   // far enough out to see about all of Malaysia on a wide screen
+const MIN_ZOOM = 6;
+const FIT_SNAP = 0.25;   // a city or a section fills the map more closely than whole zoom steps allow   // far enough out to see about all of Malaysia on a wide screen
 const MALAYSIA_BOUNDS = [[0.5, 98.5], [8.0, 120.0]];   // [[south, west], [north, east]]: the country, with sea around it
 const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTRIBUTION = '&copy; OpenStreetMap contributors · flood depth: JRC v2.1 (CC BY 4.0)';
@@ -25,7 +26,7 @@ const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)
 function openMap(element, { view: [west, south, east, north], zoom, fit = false }) {
   const glide = motionAllowed();   // with reduced motion asked for, zooms and fades are jumps
   const map = L.map(element, {
-    scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM,
+    scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM, zoomSnap: fit ? FIT_SNAP : 1,
     zoomAnimation: glide, fadeAnimation: glide, markerZoomAnimation: glide,
   });
   // a whole city fills the map when the map is on show to measure; a hidden tab's map has no size yet

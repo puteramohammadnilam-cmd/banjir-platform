@@ -175,6 +175,7 @@
 .choro-swatch.sq-3 { background: linear-gradient(var(--square-3), var(--square-3)), var(--map-ground); }
 .choro-swatch.sq-4 { background: linear-gradient(var(--square-4), var(--square-4)), var(--map-ground); }
 .choro-swatch.sq-5 { background: linear-gradient(var(--square-5), var(--square-5)), var(--map-ground); }
+.river-note { margin-top: var(--space-2); font-size: var(--text-sm); }
 .sections-surface { margin-bottom: var(--space-4); }
 .sections-surface > .muted { margin: var(--space-1) 0 var(--space-4); }
 .sections-scroll { max-height: 30rem; overflow-y: auto; border-top: 1px solid var(--line); }
@@ -200,11 +201,15 @@
 .share-figure { flex: none; min-width: 3.5rem; font-weight: 700; color: var(--ink); }
 .wet-cell { color: var(--ink-2); white-space: nowrap; }
 @media (max-width: 520px) {
-  .section-table th, .section-table td { padding: var(--space-2); }
-  .sort-button { padding: 0 var(--space-2); letter-spacing: 0; }
-  .share-track { max-width: 3.5rem; }
+  .section-table th, .section-table td { padding: var(--space-2) var(--space-1); }
+  .section-table .col-share { width: 28%; }
+  .sort-button { padding: 0 var(--space-1); letter-spacing: 0; }
+  .share-cell { flex-direction: column-reverse; align-items: stretch; gap: var(--space-1); }   /* the figure over a full-width bar */
+  .share-track { max-width: none; height: 6px; }
   .share-figure { min-width: 0; }
+  .wet-cell { font-size: var(--text-xs); }
 }
+@media (max-width: 360px) { .section-table tbody th { white-space: normal; } }   /* 320 px: a long name wraps, not the table */
 
 @media (min-width: 1040px) {
   .overview-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }

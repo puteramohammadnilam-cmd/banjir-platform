@@ -159,3 +159,17 @@ test("in Bahasa Melayu the key and tooltip read naturally, with the area's own w
     useLang("en");
   }
 });
+
+test("zoomed in to street level the shading steps back to a wash, so a point's own squares read", () => {
+  let zoomed = null;
+  map = { layers: [], zoom: 12, getZoom() { return this.zoom; }, on(type, listener) { if (type === "zoomend") zoomed = listener; } };
+  const { choropleth } = mount();
+  choropleth.show("50");
+  const full = map.layers[1].style.fillOpacity;
+  map.zoom = 16;
+  zoomed();
+  assert.ok(map.layers[1].style.fillOpacity < full / 2);
+  map.zoom = 12;
+  zoomed();
+  assert.equal(map.layers[1].style.fillOpacity, full);
+});

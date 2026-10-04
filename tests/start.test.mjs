@@ -183,7 +183,7 @@ test("the map of a plain area opens on its view and owns its squares, as before;
   const city = { section: null };
   assert.deepEqual(mapFrame(CITY_AREA, city), { view: CITY_AREA.view, zoom: 12, ownedBox: null, outline: null, fit: true }, "the whole city draws no squares of its own");
   const section = SECTIONS[1];
-  assert.deepEqual(mapFrame(pageArea(CITY_AREA, section), { section }), { view: section.bbox, zoom: 15, ownedBox: section.bbox, outline: section.outline });
+  assert.deepEqual(mapFrame(pageArea(CITY_AREA, section), { section }), { view: section.bbox, zoom: 15, ownedBox: section.bbox, outline: section.outline, fit: true });
 });
 
 test("an old area's link to a business goes to the business's own section, which may not be the alias's", async () => {

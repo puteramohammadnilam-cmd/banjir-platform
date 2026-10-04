@@ -173,7 +173,7 @@ const cityScope = (city) => (city ? {
 /** What the map opens on and which squares are the page's own (pin.js and cells.js draw a point's others): a section's
  *  box, none on the whole city's map (it draws no squares of its own), else the area's view. */
 export function mapFrame(area, city) {
-  if (city?.section) return { view: city.section.bbox, zoom: city.section.zoom, ownedBox: city.section.bbox, outline: city.section.outline };
+  if (city?.section) return { view: city.section.bbox, zoom: city.section.zoom, ownedBox: city.section.bbox, outline: city.section.outline, fit: true };
   return city ? { view: area.view, zoom: area.zoom, ownedBox: null, outline: null, fit: true } : { view: area.view, zoom: area.zoom, ownedBox: area.view, outline: null };
 }
 
@@ -213,7 +213,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   createScopeBar($("scope"), { areas, areaId: area.id, onArea, ...cityScope(city) });
   renderAreaLabels(area, isWholeCity ? city : null);
   const riverOnly = riverOnlyNote(area, city?.section ?? null);
-  if (riverOnly) setNote($("map-note"), [riverOnly, $("map-note").textContent].filter(Boolean).join(" "));
+  if (riverOnly) $("map-lead").after(h("p", { class: "alert alert-inline alert-info river-note" }, riverOnly));   // up top, beside the map it explains
   const map = createMap($("map"), mapFrame(area, city), town, premises, { onSelect, onOpen, onCheckPoint });
   const parts = {
     list: $("directory"), filter: $("directory-filter"), status: $("directory-status"), next: $("directory-next"),
