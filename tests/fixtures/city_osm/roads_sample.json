@@ -1,0 +1,78 @@
+{
+ "osm3s": {
+  "timestamp_osm_base": "2026-10-04T09:22:21Z",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+ },
+ "elements": [
+  {
+   "type": "way",
+   "id": 4931450,
+   "tags": {
+    "highway": "residential",
+    "name": "Jalan Pinggiran USJ 1/17"
+   },
+   "geometry": [
+    {
+     "lat": 3.0499156,
+     "lon": 101.5569492
+    },
+    {
+     "lat": 3.0499039,
+     "lon": 101.5570153
+    },
+    {
+     "lat": 3.0498287,
+     "lon": 101.5574414
+    },
+    {
+     "lat": 3.0498185,
+     "lon": 101.5574991
+    },
+    {
+     "lat": 3.049679,
+     "lon": 101.5582893
+    },
+    {
+     "lat": 3.049596,
+     "lon": 101.5587598
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 4931468,
+   "tags": {
+    "highway": "tertiary",
+    "name": "Jalan Pinggiran USJ 1"
+   },
+   "geometry": [
+    {
+     "lat": 3.0500569,
+     "lon": 101.5548825
+    },
+    {
+     "lat": 3.0500209,
+     "lon": 101.5550899
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 4931834,
+   "tags": {
+    "highway": "service",
+    "name": "Persiaran Perusahaan U/1"
+   },
+   "geometry": [
+    {
+     "lat": 3.09148,
+     "lon": 101.5546892
+    },
+    {
+     "lat": 3.0906127,
+     "lon": 101.5546524
+    }
+   ]
+  }
+ ]
+}

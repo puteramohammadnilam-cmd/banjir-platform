@@ -1,0 +1,40 @@
+{
+  "id": "shah-alam",
+  "default": true,
+  "name": "Shah Alam",
+  "display_name": "Shah Alam, Selangor",
+  "view": [
+    101.4277,
+    2.9496,
+    101.5914,
+    3.2298
+  ],
+  "zoom": 12,
+  "ai_name": "Shah Alam, Selangor, Malaysia: the city's 56 sections (Seksyen 1 to 36 and U1 to U20), Taman Sri Muda in Seksyen 25 among them",
+  "news_place": "Shah Alam, Selangor",
+  "news_region": "Shah Alam and the Klang Valley, Selangor, Malaysia",
+  "council": "Majlis Bandaraya Shah Alam (MBSA)",
+  "bigger_flood_example": "2021-12",
+  "aliases": [
+    {
+      "id": "sri-muda",
+      "section": "seksyen-25",
+      "names": [
+        "Taman Sri Muda",
+        "Taman Seri Muda"
+      ]
+    }
+  ],
+  "section_word": {
+    "en": "Section",
+    "ms": "Seksyen"
+  },
+  "default_section": null,
+  "notes": {
+    "businesses": "Shops, eateries and pharmacies as mapped on OpenStreetMap inside the city boundary (fetched 4 Oct 2026; (c) OpenStreetMap contributors, ODbL). The list is what volunteers have mapped, not checked on the ground, so many real businesses are missing and some listed ones may have closed.",
+    "sections": "Sections are MBSA's Seksyen 1 to 36 and U1 to U20 as drawn on OpenStreetMap (fetched 4 Oct 2026; ODbL), not the council's own survey lines. Outlines are simplified to within 10 m for the map. A business belongs to the section that holds it, or to the nearest one within 300 m.",
+    "shelters": "Relief centres (PPS) used in past floods, not an official list: 6 centres named in news reports of the floods of December 2021, April 2025 and November 2025, placed with OpenStreetMap (2 of them by a nearly matching name). A centre open in one flood may not open in the next, so check with the council or the state disaster office before going. Also named in the news but not shown, because they could not be placed on the map: Masjid Muhsini, Kampung Sungai Kandis (Seksyen 36); Balai MPKK Bukit Naga, Seksyen 32, only the village is on the map; Dewan Azalea, Taman Seri Muda (Seksyen 25); Dewan Bunga Bakawali, Seksyen 35.",
+    "depths": "Flood depths are the European Commission JRC global river flood model v2.1 (CC BY 4.0), in 90 m squares, for floods of 1 in 10, 20 and 50 years. It models rivers overflowing, not drains or flash floods, so read its depths as the model's, not as what to expect."
+  },
+  "history": null
+}
