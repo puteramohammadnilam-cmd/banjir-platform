@@ -34,7 +34,7 @@ from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
 RP_KEYS = tuple(str(rp) for rp in raster.RETURN_PERIODS)
-PUBLIC_KEYS = ("id", "name", "bbox", "zoom", "outline", "area_km2", "counts")
+SECTION_KEYS = ("id", "name", "bbox", "zoom", "outline", "area_km2", "counts")   # each needs these; others pass on
 INDEX_KEYS = ("id", "name", "kind", "sector", "section")
 MAX_CACHED = 128
 WORD = re.compile(r"\w+")
@@ -66,8 +66,8 @@ def listed(area_id: str) -> tuple[Mapping, ...]:
 
 
 def _problems(item) -> list[str]:
-    if not isinstance(item, Mapping) or set(PUBLIC_KEYS) - item.keys():
-        return [f"needs {', '.join(PUBLIC_KEYS)}"]
+    if not isinstance(item, Mapping) or set(SECTION_KEYS) - item.keys():
+        return [f"needs {', '.join(SECTION_KEYS)}"]
     counts = item["counts"]
     checks = {
         "id must be lower-case letters, digits and hyphens": isinstance(item["id"], str) and areas._is_id(item["id"]),
@@ -239,7 +239,8 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
 
 
 def public(section: Mapping) -> dict:
-    return {key: areas._thaw(section[key]) for key in PUBLIC_KEYS}
+    """A section as the page is sent it: its sections.json entry as built."""
+    return areas._thaw(section)
 
 
 @lru_cache(maxsize=areas.MAX_CACHED_AREAS)

@@ -66,7 +66,7 @@ the page and to the AI. Only Kota Tinggi has relief centres.
 
 The page opens on the default area; `?area=kuantan` (or another id) opens another. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
 
-Place names live only in `area.json`. The backend and the page scripts carry none, and a test guards that.
+Place names live only in the data (`area.json`, and a city's `sections.json` and `history.json`). The backend and the page scripts carry none, and a test guards that. A city split into sections (`app/sections.py`) names its section word, its aliases and its default section in `area.json`; each business names its section.
 
 ## Check any point
 
@@ -109,20 +109,21 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 
 | Method and path | Returns |
 |---|---|
-| GET `/api/data` | The default area's `{area, premises, town, limits}` |
-| GET `/api/areas` | `{default, areas:[{id, name, display_name, view, zoom, counts, has_history, has_shelters}]}` |
-| GET `/api/areas/{id}/data` | `{area, premises, town, limits}` for one area. 404 for an unknown id. |
+| GET `/api/data` | The default area's data, as `/api/areas/{id}/data` gives it |
+| GET `/api/areas` | `{default, areas:[{id, name, display_name, view, zoom, counts, has_history, has_shelters, has_sections, aliases}]}` |
+| GET `/api/areas/{id}/data` | `{area, premises, town, limits}` for one area. An area split into sections (a city) gives its city view instead: `{area, sections, index, town, premises: [], limits}`, with every section's outline and counts, a lean `index` row per business and no squares (`town.cells` is `[]`). An alias id (an old area id that now means one section) gives that section's data. 404 for an unknown id. |
+| GET `/api/areas/{id}/sections/{sid}/data` | One section of a city: `{area, section, sections, town, premises, limits}`: the section's flood record in `area.history`, its full entry, every section's `{id, name}`, `town.view` = the section's box with the squares that overlap it and every relief centre of the city, and the section's businesses in full. 404 `Unknown section.` for a section the area does not have. |
 | GET `/api/status` | `{ai_ready, model, maps_ready, points_ready}` |
 | GET `/api/coverage` | `{data_version, return_periods, block_cells, grids, regions}`: what the page needs to snap a point, and coarse boxes for Langkawi, the Peninsula and Borneo |
-| POST `/api/point` | Body `{lat, lon, source: "pin" or "gps"}`. Returns `{coverage, region, place, blocks, cells}`. `coverage` is `covered`, `not_loaded` or `outside`. Only a covered point has a place (its depths, its square, its area if it lies in one), and the wet squares around it in `blocks` and `cells`. If a neighbouring flood tile cannot be read, `blocks` and `cells` are null but the place is still returned. |
-| POST `/api/ask` | `{question, place, area_id, history}`. The chat answer. `place` is a business or point id (`business_id` is accepted as an older name). |
+| POST `/api/point` | Body `{lat, lon, source: "pin" or "gps"}`. Returns `{coverage, region, place, blocks, cells}`. `coverage` is `covered`, `not_loaded` or `outside`. Only a covered point has a place (its depths, its square, its area and section if it lies in one; a point in a city's box but in none of its sections is in no area), and the wet squares around it in `blocks` and `cells`. If a neighbouring flood tile cannot be read, `blocks` and `cells` are null but the place is still returned. |
+| POST `/api/ask` | `{question, place, area_id, section_id, history}`. The chat answer. `place` is a business or point id (`business_id` is accepted as an older name). |
 | POST `/api/photo` | `{place, image}`. Gemini reads floor height from a shop-front photo (JPEG, PNG or WebP, 4 MB at most). |
 | POST `/api/stock` | `{place, image, floor_height_cm}`. Gemini lists the stock and equipment in a photo of the shop's inside, with rough value ranges; the server works out which of it sits under the modelled water in each flood size (`app/stock.py`) and suggests a value for the cost form. |
 | POST `/api/plan` | `{place, language: "ms" or "en", …the owner's figures if any}`. A one-page flood plan: our facts (`app/plan.py`), Gemini's steps written from them (links and phone numbers it adds are dropped), and our contacts. |
-| POST `/api/voice` | `{audio, place, area_id, history}`. A spoken question as 16 kHz mono WAV (30 s, 1 MB at most). Gemini writes down the words, which are then asked like a typed question. Returns `{question, language, answer}`. |
+| POST `/api/voice` | `{audio, place, area_id, section_id, history}`. A spoken question as 16 kHz mono WAV (30 s, 1 MB at most). Gemini writes down the words, which are then asked like a typed question. Returns `{question, language, answer}`. |
 | POST `/api/estimate` | `{place, …the owner's figures}`. The ringgit estimate, no AI. |
-| POST `/api/news` | `{area_id}`. Gemini grounded on Google Search: the latest flood news for the area, with sources. The question is fixed in code. |
-| GET `/api/rain?area=` | Rain expected in the next 12 hours, from Google Weather, at the area's centre |
+| POST `/api/news` | `{area_id, section_id}`. Gemini grounded on Google Search: the latest flood news for the area, with sources. The question is fixed in code. |
+| GET `/api/rain?area=&section=` | Rain expected in the next 12 hours, from Google Weather, at the centre of the area or of one of its sections |
 | GET `/api/place/{id}` | How Google Maps lists a mapped business. 404 for a point id. |
 
 `/api/point`, `/api/ask`, `/api/photo`, `/api/stock`, `/api/plan`, `/api/voice`, `/api/estimate` and `/api/news` take only POST. A GET to them is a 405. Input that does not fit is a 422 with a plain message that does not repeat what was sent.

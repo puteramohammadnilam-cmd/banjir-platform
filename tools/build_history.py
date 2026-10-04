@@ -50,8 +50,9 @@ def raw_dir() -> Path:
 
 
 def section_names(sections: list[dict]) -> dict:
-    """{id: {"en": "Section 25", "ms": "Seksyen 25"}} in the sections' order."""
-    return {s["id"]: {"en": f"Section {s['number_label']}", "ms": s["name"]} for s in sections}
+    """{id: {"en": "Seksyen 25", "ms": "Seksyen 25"}} in the sections' order: the section's name on the map, a proper
+    noun, in both languages (as the page and sections.json name it)."""
+    return {s["id"]: {"en": s["name"], "ms": s["name"]} for s in sections}
 
 
 def _clean(text) -> str:

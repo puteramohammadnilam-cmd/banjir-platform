@@ -59,8 +59,8 @@ def build(events=(), points=()):
 # ---------- where a point goes
 
 def test_section_ids_and_names_come_from_the_label():
-    assert bh.section_names(SECTIONS) == {"seksyen-1": {"en": "Section 1", "ms": "Seksyen 1"},
-                                          "seksyen-u2": {"en": "Section U2", "ms": "Seksyen U2"}}
+    assert bh.section_names(SECTIONS) == {"seksyen-1": {"en": "Seksyen 1", "ms": "Seksyen 1"},
+                                          "seksyen-u2": {"en": "Seksyen U2", "ms": "Seksyen U2"}}
 
 
 @pytest.mark.parametrize("lon, lat, expected", [
