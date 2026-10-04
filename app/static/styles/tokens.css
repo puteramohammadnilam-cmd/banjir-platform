@@ -30,6 +30,15 @@
   --band-5: #5a1170;
   --dry-dot: #fbf8f1;   /* a shop with no water: DRY_COLOR in js/dom.js */
 
+  /* the model's squares: one blue that darkens with depth, each at its opacity. Same values as SQUARE_RAMP in js/cells.js.
+     --map-ground is what they lie on: the map's own colour, so a legend swatch looks as the square does on the map */
+  --square-1: rgb(171 207 240 / 0.3);
+  --square-2: rgb(104 152 192 / 0.4);
+  --square-3: rgb(59 113 156 / 0.48);
+  --square-4: rgb(28 84 126 / 0.55);
+  --square-5: rgb(0 48 83 / 0.58);
+  --map-ground: #f2efe9;
+
   --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;

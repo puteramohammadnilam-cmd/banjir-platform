@@ -124,9 +124,18 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .tag { padding: 2px var(--space-2); border-radius: 999px; background: var(--surface-sunk); border: 1px solid var(--line); font-size: var(--text-xs); color: var(--ink-2); }
 
 /* ---------- legend and depth swatches ---------- */
-.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: var(--space-2) var(--space-4); margin-top: var(--space-4); font-size: var(--text-xs); }
-.legend li { display: flex; align-items: center; gap: var(--space-2); }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4) var(--space-6); margin-top: var(--space-4); font-size: var(--text-xs); }
+.legend-heading { margin-bottom: var(--space-2); font-weight: 700; color: var(--ink); }
+.legend-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: var(--space-2) var(--space-4); }
+.legend-items li { display: flex; align-items: center; gap: var(--space-2); }
 .legend .muted::before { content: "· "; }
+/* the squares' ramp: laid on the map's own ground, so it looks as the squares do there; the ends are the depths */
+.square-key { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.square-key .muted::before { content: none; }
+.square-strip { display: flex; width: 9rem; height: 16px; background: var(--map-ground); border: 1px solid var(--line-strong); border-radius: 3px; overflow: hidden; }
+.square-strip span { flex: 1; }
+.sq-1 { background: var(--square-1); } .sq-2 { background: var(--square-2); } .sq-3 { background: var(--square-3); }
+.sq-4 { background: var(--square-4); } .sq-5 { background: var(--square-5); }
 /* the same dots as on the map: a white ring with a dark hairline (.biz-dot), and a small pale dot for no water */
 .swatch { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0.8px 0.5px rgba(13, 27, 42, 0.9); }
 .band-1 { background: var(--band-1); } .band-2 { background: var(--band-2); } .band-3 { background: var(--band-3); }

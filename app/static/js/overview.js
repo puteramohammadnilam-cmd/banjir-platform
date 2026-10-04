@@ -1,4 +1,5 @@
 // The "Area overview" tab: the area chooser, headline figures, the map, past floods and the area's businesses in one list.
+import { SQUARE_RAMP } from "./cells.js";
 import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
 import { renderHistory } from "./history.js";
 import { t } from "./i18n.js";
@@ -8,13 +9,23 @@ import { createScopeBar } from "./scope.js";
 
 const $ = (id) => document.getElementById(id);
 
-function renderLegend(element, hasShelters) {
-  const items = [
-    ...BANDS.map((b, i) => h("li", {}, h("span", { class: `swatch band-${i + 1}` }), b.words, h("span", { class: "muted" }, b.range))),
-    h("li", {}, h("span", { class: "swatch swatch-dry" }), t("overview.legendDry")),
-    hasShelters && h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")),
-  ];
-  element.replaceChildren(...items.filter(Boolean));
+/** One group of the key: a heading over what it explains. */
+const legendGroup = (heading, content) => h("li", { class: "legend-group" }, h("p", { class: "legend-heading" }, heading), content);
+
+/** The dots: the five depth classes, a pale dot for no water, and the relief centre's pin when the area has one. */
+const dotKey = (hasShelters) => h("ul", { class: "legend-items" },
+  BANDS.map((b, i) => h("li", {}, h("span", { class: `swatch band-${i + 1}` }), b.words, h("span", { class: "muted" }, b.range))),
+  h("li", {}, h("span", { class: "swatch swatch-dry" }), t("overview.legendDry")),
+  hasShelters && h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")));
+
+/** The squares: a strip of the ramp's five steps, shallowest to deepest, with the depths at its two ends. */
+const squareKey = () => h("div", { class: "square-key" },
+  h("span", { class: "muted" }, BANDS[0].range),
+  h("span", { class: "square-strip", "aria-hidden": "true" }, SQUARE_RAMP.map((_, i) => h("span", { class: `sq-${i + 1}` }))),
+  h("span", { class: "muted" }, BANDS[BANDS.length - 1].range));
+
+export function renderLegend(element, hasShelters) {
+  element.replaceChildren(legendGroup(t("legend.dots"), dotKey(hasShelters)), legendGroup(t("legend.squares"), squareKey()));
 }
 
 const depthChip = (depth, rp) => {

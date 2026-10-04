@@ -31,7 +31,7 @@ function openMap(element, { view: [west, south, east, north], zoom }) {
   return map;
 }
 
-/** The flood model's squares, each kept with its depths for the three flood sizes. */
+/** The flood model's squares, each kept with its depths for the flood sizes; paintSquares colours them (cells.js ramp). */
 function addSquares(map, town) {
   const size = town.cell_deg;
   return town.cells.map(([cellSouth, cellWest, ...depths]) => ({

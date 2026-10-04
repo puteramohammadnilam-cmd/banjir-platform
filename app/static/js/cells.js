@@ -4,17 +4,24 @@
 // blocks' wet squares). One "neighbourhood" is the blocks that one point came with. The layer keeps the last few, draws a
 // square once however many neighbourhoods hold it, and takes a square off the map when none holds it any more. It asks
 // the server for nothing: a block asked for by its address would put the area in the URL, and so in every log.
-import { band, bandColor } from "./dom.js";
+import { BANDS, DRY_COLOR, band } from "./dom.js";
 
 export const MAX_NEIGHBOURHOODS = 4;
-const CELL_OPACITY = 0.28;   // the squares are background: the shop dots carry the depth
-const CELL_FIELDS = 5;       // [south, west, depth at 1 in 10, 1 in 100, 1 in 500], as in town.json `cells`
+const CELL_FIELDS = 5;       // [south, west, then one depth for each flood size], as in town.json `cells`
 
-/** The paint of one square: the colour of its depth for the flood size at `index` of its depths, or none when dry. */
-export const squareStyle = (depths, index) => ({
-  fillColor: bandColor(depths[index]),
-  fillOpacity: band(depths[index]) ? CELL_OPACITY : 0,
-});
+// The squares are background: the shop dots carry the depth. So they get a ramp of their own, one hue (OKLCH hue about
+// 245, low chroma) that darkens and thickens with depth, where the dots run through five colours. They share the dots'
+// depth thresholds (BANDS), so a square and a dot of the same depth are the same step. Same values as --square-1..5 in
+// tokens.css, which are the colour at its opacity. tests/palette.test.mjs holds the ramp to hue, lightness and spacing:
+// each step, laid over the map's ground (#f2efe9), stays at least 8 apart from the next.
+const SQUARE_STEPS = [["#abcff0", 0.30], ["#6898c0", 0.40], ["#3b719c", 0.48], ["#1c547e", 0.55], ["#003053", 0.58]];
+export const SQUARE_RAMP = Object.freeze(BANDS.map(({ below }, i) => Object.freeze({ below, color: SQUARE_STEPS[i][0], opacity: SQUARE_STEPS[i][1] })));
+
+/** The paint of one square: its step of the ramp for the depth at `index` of its depths, or none when dry. */
+export function squareStyle(depths, index) {
+  const step = SQUARE_RAMP[band(depths[index]) - 1];
+  return step ? { fillColor: step.color, fillOpacity: step.opacity } : { fillColor: DRY_COLOR, fillOpacity: 0 };
+}
 
 /** A name for the blocks one point came with, the same whatever order they are given in. */
 export const neighbourhoodId = (grid, blocks) => `${grid.name}:${blocks.map(({ bi, bj }) => `${bi}.${bj}`).sort().join(",")}`;

@@ -5,8 +5,9 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { h } from "../app/static/js/dom.js";
-import { createDirectory, renderAreaLabels } from "../app/static/js/overview.js";
+import { SQUARE_RAMP } from "../app/static/js/cells.js";
+import { BANDS, h } from "../app/static/js/dom.js";
+import { createDirectory, renderAreaLabels, renderLegend } from "../app/static/js/overview.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { HOME, shop } from "./point_fixtures.mjs";
 
@@ -95,4 +96,28 @@ test("the search's heading names the area it covers, by its short name", () => {
   };
   renderAreaLabels(HOME);
   assert.equal(elements.get("finder-hero-label").textContent, `Find your shop in ${HOME.name}`);
+});
+
+// ---------- the map's key ----------
+
+test("the key has two groups: the dots' five classes with no water and the relief centre, and the squares' ramp", () => {
+  const legend = h("ul");
+  renderLegend(legend, true);
+  const [dots, squares] = legend.querySelectorAll(".legend-group");
+  assert.deepEqual(legend.children.map((group) => group.querySelector(".legend-heading").textContent),
+    ["Dots: water at each business", "Squares: the model's 90 m squares, darker = deeper"]);
+  assert.deepEqual(dots.querySelectorAll(".swatch").map((swatch) => swatch.getAttribute("class")),
+    [...BANDS.map((_, i) => `swatch band-${i + 1}`), "swatch swatch-dry"]);
+  assert.ok(dots.querySelector(".shelter-pin"), "the relief centre is a dot's kind of mark");
+  assert.deepEqual(squares.querySelector(".square-strip").children.map((step) => step.getAttribute("class")),
+    SQUARE_RAMP.map((_, i) => `sq-${i + 1}`), "one step for each step of the ramp, shallowest first");
+  assert.deepEqual(squares.querySelectorAll(".muted").map((end) => end.textContent), ["under 0.9 m", "3 m or more"]);
+  assert.equal(squares.querySelector(".square-strip").getAttribute("aria-hidden"), "true", "the heading and the two ends say it all");
+});
+
+test("the key leaves out the relief centre when the area has none", () => {
+  const legend = h("ul");
+  renderLegend(legend, false);
+  assert.equal(legend.querySelector(".shelter-pin"), null);
+  assert.equal(legend.querySelectorAll(".swatch").length, BANDS.length + 1);
 });
