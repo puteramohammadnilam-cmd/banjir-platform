@@ -1,4 +1,4 @@
-"""tools/build_history.py: curated events plus the public ArcGIS flood points -> app/data/areas/_shah-alam/history.json.
+"""tools/build_history.py: curated events plus the public ArcGIS flood points -> app/data/areas/shah-alam/history.json.
 
 Run from 11_Platform_Draft:  .venv/bin/python -m pytest -q tests/test_build_history.py
 The rebuild test reads the raw files from ../05_Raw_Data_Sources, or BANJIR_RAW_DIR when that is set (a worktree), and
@@ -19,7 +19,7 @@ import build_history as bh  # noqa: E402
 from app import history  # noqa: E402
 
 RAW = Path(os.environ.get("BANJIR_RAW_DIR") or ROOT.parent / "05_Raw_Data_Sources") / "shah_alam"
-BUILT = ROOT / "app" / "data" / "areas" / "_shah-alam" / "history.json"
+BUILT = ROOT / "app" / "data" / "areas" / "shah-alam" / "history.json"
 TODAY = date(2026, 10, 4)
 
 

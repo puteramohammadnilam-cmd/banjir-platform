@@ -19,7 +19,7 @@ from app import ai, areas, costs, floodtools, googlemaps, main, places
 WET, WET_ID = (6.4321, 101.1987), "pt:6.37500,101.12500"
 OTHER = (5.6, 101.9)                     # another covered fixture point
 KOTA_ID = areas.premises("kota-tinggi")[0]["id"]
-SRI_MUDA = areas.premises("sri-muda")[0]
+SRI_MUDA = areas.business("node-13414432501")[0]   # the checklist business, now in the city
 NO_FIGURES = {"shop_size": "", "floor_height_cm": 0, "daily_takings_rm": 0, "closed_days": 0, "raise_cm": 0,
               "measure_cost_rm": 0}
 TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" * 64).decode()
@@ -114,7 +114,7 @@ def test_flood_check_takes_any_business_and_selected_but_no_point_id(selected):
     for ref in (WET_ID, places.point(*OTHER)["id"], "pt:6.375,101.125", "pt:"):   # the selected point's own id too
         assert floodtools.flood_check(ref) == {"error": floodtools.POINT_ID_REFUSED}
     assert floodtools.flood_check(KOTA_ID)["id"] == KOTA_ID       # a business from any area
-    assert floodtools.flood_check(SRI_MUDA["id"])["area_id"] == "sri-muda"
+    assert floodtools.flood_check(SRI_MUDA["id"])["area_id"] == "shah-alam"
 
 
 def test_outside_a_question_selected_stands_for_nothing(rasters):

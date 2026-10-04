@@ -20,7 +20,7 @@ INNER = (6.4321, 103.6)                  # fixture row 14, col 14: all four bloc
 DRY = (4.9, 101.1)
 POINT_WORDS = "Please check the location and try again."
 TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" * 64).decode()
-SRI_MUDA_ID = areas.premises("sri-muda")[0]["id"]
+SRI_MUDA_ID = "node-13414432501"   # the checklist business, now in the city
 
 
 @pytest.fixture
@@ -266,7 +266,7 @@ def test_ask_takes_a_point_and_its_area(client, monkeypatch):
     assert client.post("/api/ask", json={"question": "Banjir tak?", "place": WET_ID}).status_code == 200
     assert client.post("/api/ask", json={"question": "hi", "place": WET_ID, "area_id": "kota-tinggi"}).status_code == 200
     assert client.post("/api/ask", json={"question": "hi", "business_id": SRI_MUDA_ID}).status_code == 200
-    assert seen == [(WET_ID, None), (WET_ID, None), (SRI_MUDA_ID, areas.get("sri-muda"))]
+    assert seen == [(WET_ID, None), (WET_ID, None), (SRI_MUDA_ID, areas.get("shah-alam"))]
 
 
 @pytest.mark.parametrize("body, status, error", [
@@ -317,7 +317,7 @@ def test_estimate_for_a_point_is_the_cost_engine_on_its_depths(client):
 
 def test_estimate_still_takes_business_id(client):
     res = client.post("/api/estimate", json={"business_id": SRI_MUDA_ID, "value_at_risk_rm": 10_000})
-    assert res.status_code == 200 and res.json()["data"]["business"] == areas.premises("sri-muda")[0]["name"]
+    assert res.status_code == 200 and res.json()["data"]["business"] == areas.business(SRI_MUDA_ID)[0]["name"]
     missing = client.post("/api/estimate", json={"value_at_risk_rm": 10_000})
     assert missing.status_code == 422 and "figures" in missing.json()["error"]
 
@@ -370,7 +370,7 @@ def test_parity_each_premise_point_returns_its_depth(monkeypatch):
             inside = west <= lon <= east and south <= lat <= north
             assert data["place"]["area_id"] == (area.id if inside else None), premise["id"]
             checked += 1
-    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 204 + 27 + 300 + 491 + 158
+    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 2445 + 27 + 300 + 491 + 158
     example = post_point(client, 3.0297599, 101.5364982).json()["data"]["place"]   # the plan's checklist point
     assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["50"] == 1.76
 

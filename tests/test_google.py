@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app import ai, areas, floodtools, googlemaps, main
 
-KNOWN = floodtools.premises()[0]
+KNOWN = areas.business("node-13414432501")[0]   # the checklist business, in the default city
 
 
 def hour(start, mm, chance, text="Light rain", unit="MILLIMETERS"):

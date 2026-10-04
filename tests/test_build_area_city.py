@@ -165,7 +165,7 @@ def test_installed_ids_leave_out_the_area_itself_and_the_replaced_ones():
 
 # ---------- the hidden city area rebuilds byte for byte from its saved inputs
 
-CITY = ROOT / "app" / "data" / "areas" / "_shah-alam"
+CITY = ROOT / "app" / "data" / "areas" / "shah-alam"
 CITY_RAW = Path(os.environ.get("BANJIR_RAW_DIR") or ROOT.parent / "05_Raw_Data_Sources") / "shah_alam"
 CITY_INPUTS = [CITY_RAW / "city_osm" / name for name in ("pois.json", "roads.json", "shelters.json")] + \
     [CITY_RAW / "mbsa_sections" / "sections.geojson"]

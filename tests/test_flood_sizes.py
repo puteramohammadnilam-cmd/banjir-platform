@@ -113,11 +113,11 @@ def test_the_limits_the_model_reads_say_bigger_floods_are_not_shown():
 
 # ---------- the example of a bigger flood an area may give
 
-def test_only_sri_muda_names_a_bigger_flood_and_the_data_route_sends_it():
+def test_only_the_city_names_a_bigger_flood_and_the_data_route_sends_it():
     examples = {area.id: area.bigger_flood_example for area in areas.load_all()}
-    assert examples.pop("sri-muda") == "2021-12"
+    assert examples.pop("shah-alam") == "2021-12"
     assert set(examples.values()) == {None}
-    assert areas.details(areas.get("sri-muda"))["bigger_flood_example"] == "2021-12"
+    assert areas.details(areas.get("shah-alam"))["bigger_flood_example"] == "2021-12"
     assert areas.details(areas.get("kuantan"))["bigger_flood_example"] is None
 
 

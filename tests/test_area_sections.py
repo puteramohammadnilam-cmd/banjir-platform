@@ -18,7 +18,7 @@ import area_sections as asec  # noqa: E402
 import build_area as ba  # noqa: E402
 
 FIXTURE_VIEW = (100.0, 8.0, 101.0, 10.0)
-CITY = ROOT / "app" / "data" / "areas" / "_shah-alam"
+CITY = ROOT / "app" / "data" / "areas" / "shah-alam"
 CITY_BUILT = pytest.mark.skipif(not (CITY / "sections.json").is_file(), reason="the city area is not built here")
 RPS = ("10", "20", "50")
 

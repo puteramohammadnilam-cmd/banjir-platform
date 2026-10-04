@@ -1,6 +1,6 @@
 """Per-section figures for an area built with sections: sections.json beside its premises.json and town.json.
 
-    .venv/bin/python tools/area_sections.py --area-dir app/data/areas/_shah-alam \\
+    .venv/bin/python tools/area_sections.py --area-dir app/data/areas/shah-alam \\
         [--sections ../05_Raw_Data_Sources/shah_alam/mbsa_sections/sections.geojson] [--rasters DIR]
 
 Run from 11_Platform_Draft after tools/build_area.py --sections. For each section, in natural order (1 to 36, then U1

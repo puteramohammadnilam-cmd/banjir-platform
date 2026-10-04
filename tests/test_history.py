@@ -13,7 +13,7 @@ import pytest
 from app import history
 
 ROOT = Path(__file__).resolve().parent.parent
-BUILT = ROOT / "app" / "data" / "areas" / "_shah-alam" / "history.json"
+BUILT = ROOT / "app" / "data" / "areas" / "shah-alam" / "history.json"
 
 NAMES = {"sec-1": {"en": "Part 1", "ms": "Bahagian 1"}, "sec-2": {"en": "Part 2", "ms": "Bahagian 2"},
          "sec-3": {"en": "Part 3", "ms": "Bahagian 3"}}
@@ -169,9 +169,9 @@ def test_the_built_file_passes_and_every_section_scope_works():
     doc = json.loads(BUILT.read_text(encoding="utf-8"))
     assert history.problems(doc) == []
     assert len(doc["section_names"]) == 56
-    city = history.for_scope("_shah-alam", None)
+    city = history.for_scope("shah-alam", None)
     assert len(city["floods"]) == len(doc["events"]) and city["floods"]
     for section_id in doc["section_names"]:
-        assert history.for_scope("_shah-alam", section_id)["scope"] == section_id
-    assert history.for_scope("_shah-alam", "seksyen-25")["floods"]
+        assert history.for_scope("shah-alam", section_id)["scope"] == section_id
+    assert history.for_scope("shah-alam", "seksyen-25")["floods"]
     assert all(flood["url"].startswith("https://") for flood in city["floods"])

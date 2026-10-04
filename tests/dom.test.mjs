@@ -9,7 +9,7 @@ import { useLang } from "../app/static/js/i18n.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
 // The floods are an area's data, not the page's: area.json is what GET /api/areas/{id}/data sends as `area`.
-const SRI_MUDA = JSON.parse(readFileSync(new URL("../app/data/areas/sri-muda/area.json", import.meta.url), "utf8"));
+const SRI_MUDA = JSON.parse(readFileSync(new URL("./fixtures/sri_muda_built/area.json", import.meta.url), "utf8"));
 const HISTORY = SRI_MUDA.history;
 
 test("bands break at the counter, an adult's head, the door and a storey", () => {

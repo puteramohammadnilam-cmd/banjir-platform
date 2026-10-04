@@ -328,11 +328,11 @@ def test_a_business_resolves_from_any_area_with_the_place_keys(rasters):
 
 
 def test_a_resolved_business_is_a_copy(rasters):
-    first = areas.premises("sri-muda")[0]
+    first = areas.premises("shah-alam")[0]
     place = places.resolve(first["id"])
     place["depth_m"]["20"] = 99.0
     place["road"]["name"] = "changed"
-    assert areas.premises("sri-muda")[0]["depth_m"]["20"] != 99.0 and first["road"]["name"] != "changed"
+    assert areas.premises("shah-alam")[0]["depth_m"]["20"] != 99.0 and first["road"]["name"] != "changed"
 
 
 @pytest.mark.parametrize("ref", ["nope", "node-", "node-12a", "NODE-1", "node-99999999999999999999", ["node-1"], None, 7])
@@ -343,7 +343,7 @@ def test_an_unknown_business_is_reported(rasters, ref):
 
 
 def test_area_of_gives_the_listed_area_or_none(area_rasters):
-    assert places.area_of(places.point(*IN_SRI_MUDA)) == areas.get("sri-muda")
+    assert places.area_of(places.point(*IN_SRI_MUDA)) == areas.get("shah-alam")
     assert places.area_of(places.resolve(areas.premises("kota-tinggi")[0]["id"])) == areas.get("kota-tinggi")
     assert places.area_of({"area_id": None}) is None
 
@@ -352,8 +352,9 @@ def test_area_of_gives_the_listed_area_or_none(area_rasters):
 
 def test_a_point_inside_an_area_carries_the_area(area_rasters):
     place = places.point(*IN_SRI_MUDA)
-    assert place["area_id"] == "sri-muda" and place["depth_m"] == {"10": 23.3, "20": 23.8, "50": 24.3}
-    assert place["shelter"] is None   # the area has no relief centre list
+    assert place["area_id"] == "shah-alam" and place["depth_m"] == {"10": 23.3, "20": 23.8, "50": 24.3}
+    assert place["section"]["id"] == "seksyen-24"   # just west of the old view's Seksyen 25 part
+    assert place["shelter"] == {"name": "SK Shah Alam, Seksyen 16", "distance_m": 2745}   # the city's nearest centre
 
 
 def test_a_point_gets_the_nearest_relief_centre_of_its_area(area_rasters):

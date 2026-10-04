@@ -10,7 +10,9 @@ import { floodCounts, renderHistory } from "../app/static/js/history.js";
 import { useLang } from "../app/static/js/i18n.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
-const areaJson = (id) => JSON.parse(readFileSync(new URL(`../app/data/areas/${id}/area.json`, import.meta.url), "utf8"));
+// the old Taman Sri Muda area is now part of the city: its area.json is kept frozen beside its build
+const AREA_FILES = { "sri-muda": "../tests/fixtures/sri_muda_built/area.json" };
+const areaJson = (id) => JSON.parse(readFileSync(new URL(AREA_FILES[id] ?? `../app/data/areas/${id}/area.json`, import.meta.url), "utf8"));
 const NAMES = { "sec-1": { en: "Part 1", ms: "Bahagian 1" }, "sec-2": { en: "Part 2", ms: "Bahagian 2" },
   "sec-3": { en: "Part 3", ms: "Bahagian 3" } };
 

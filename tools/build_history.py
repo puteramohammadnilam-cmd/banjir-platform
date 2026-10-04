@@ -8,7 +8,7 @@ Run from 11_Platform_Draft. Inputs (read only; BANJIR_RAW_DIR, else ../05_Raw_Da
   shah_alam/arcgis_flood_points/shah_alam.geojson   the 2021 and 2022 points of ArcGIS Online user d1anameera (reuse with
                                                 credit approved by the user; the raw rows stay out of the repo)
   shah_alam/mbsa_sections/sections.geojson      the 56 sections (OSM, ODbL), read with tools/sections_io.py
-Output: app/data/areas/_shah-alam/history.json, in the form app/history.py checks (the build stops on any problem).
+Output: app/data/areas/shah-alam/history.json, in the form app/history.py checks (the build stops on any problem).
 
 A point goes to a section in this order: a section the report's own text names ("Seksyen 22", "Sek. 26"); a place name
 events.json maps to a section ("Sri Muda"); the section that holds the point, or the nearest within 300 m. Points given
@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from app import geo, history  # noqa: E402
 import sections_io  # noqa: E402
 
-DEFAULT_OUT = ROOT / "app" / "data" / "areas" / "_shah-alam" / "history.json"
+DEFAULT_OUT = ROOT / "app" / "data" / "areas" / "shah-alam" / "history.json"
 CITY_DISTRICTS = frozenset({"", "?", "KLANG", "PETALING"})   # Shah Alam lies in these two districts
 NEAR_M = 300               # a point this close to a section counts as in it
 COARSE_HALF_DEG = 0.005    # half the square a 2-decimal coordinate stands for

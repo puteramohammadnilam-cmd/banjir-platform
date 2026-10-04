@@ -7,10 +7,10 @@ import logging
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, floodtools, main
+from app import ai, areas, floodtools, main
 from test_place_ai import gemini_says, scripted_gemini
 
-KNOWN = floodtools.premises()[0]
+KNOWN = areas.business("node-13414432501")[0]   # the checklist business, in the default city
 WAV = "data:audio/wav;base64," + base64.b64encode(b"RIFF" + b"\x00" * 4 + b"WAVE" + b"\x00" * 52).decode()
 HEARD = {"is_speech": True, "text": "Kedai ni kena air tak kalau banjir besar?", "language": "ms"}
 

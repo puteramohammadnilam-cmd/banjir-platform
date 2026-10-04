@@ -37,7 +37,7 @@ curl -s -X POST localhost:8081/api/point -H 'content-type: application/json' \
   -d '{"lat":3.0297599,"lon":101.5364982,"source":"pin"}'
 ```
 
-That is a spot in Taman Sri Muda. The answer names its square `pt:3.02998,101.53667` and gives 1.35, 1.54 and 1.76 m for the 1 in 10, 20 and 50 years floods.
+That is a spot in Taman Sri Muda, in Seksyen 25 of Shah Alam. The answer names its square `pt:3.02998,101.53667` and gives 1.35, 1.54 and 1.76 m for the 1 in 10, 20 and 50 years floods.
 
 ## Areas
 
@@ -53,7 +53,7 @@ Five areas are built in:
 
 | Area | Businesses | Wet at 1 in 50 (model) | Flood squares | Past floods in the sources checked |
 |---|---|---|---|---|
-| Taman Sri Muda, Shah Alam, Selangor (the default) | 204 | 183 | 1,514 | 10 |
+| Shah Alam, Selangor (the default): 56 sections, Taman Sri Muda in Seksyen 25 | 2,445 | 571 | 12,477 | 69 (1992 to 2026); 6 relief centres |
 | Kuantan town centre, Pahang | 300 | 191 | 1,085 | 5 (2012 to 2021) |
 | Kota Bharu town centre, Kelantan | 491 | 100 | 618 | 3 (2014 to 2025) |
 | Kuala Terengganu town centre, Terengganu | 158 | 85 | 588 | 5 (1999 to 2025) |
@@ -64,7 +64,7 @@ business count and the share wet in the model) and built with `tools/build_area.
 5 to 10 m at some businesses, where news reports of real floods give about 0.1 to 2 m; each area's notes say so on
 the page and to the AI. Only Kota Tinggi has relief centres.
 
-The page opens on the default area; `?area=kuantan` (or another id) opens another. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
+The page opens on the default area (for Shah Alam, the city view); `?area=kuantan` (or another id) opens another, `?section=seksyen-25` one section of the city, and the old `?area=sri-muda` is an alias of Seksyen 25. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
 
 Place names live only in the data (`area.json`, and a city's `sections.json` and `history.json`). The backend and the page scripts carry none, and a test guards that. A city split into sections (`app/sections.py`) names its section word, its aliases and its default section in `area.json`; each business names its section.
 
@@ -163,10 +163,10 @@ These are the claims this app makes about your location, and what backs each one
 
 - Depths are river floods on land, from a global model at 90 m. The model does not show flash floods, blocked drains or the sea. "No water in the model" is not a promise that a place stays dry. It can be a hill, the sea, or a place the model does not flood.
 - Points anywhere in Malaysia have depths. Langkawi has no flood water in the model. See "Flood depth rasters".
-- Only the two built areas have mapped businesses. The counts are "businesses mapped on OpenStreetMap", not all businesses. Nobody has checked them on the ground. Banks, clinics and fuel stations are left out.
-- Relief centres: Kota Tinggi's two were named in news reports and located on OpenStreetMap. They are not an official list. Taman Sri Muda has none.
+- Only the built areas have mapped businesses. The counts are "businesses mapped on OpenStreetMap", not all businesses. Nobody has checked them on the ground. Banks, clinics and fuel stations are left out.
+- Relief centres: Kota Tinggi's two and Shah Alam's six were named in news reports and located on OpenStreetMap. They are not an official list.
 - Floods more frequent than 1 in 10 years, and bigger than 1 in 50 years, are not in the data. The JRC set has bigger ones (1 in 75 years and up); the app shows 1 in 10, 20 and 50 only, and says bigger floods are not shown.
-- Past floods are collected only for Taman Sri Muda.
+- Past floods: Shah Alam's record (`app/data/areas/shah-alam/history.json`, built by `tools/build_history.py`) covers the city and each section; Kuantan, Kota Bharu and Kuala Terengganu keep a short record in their `area.json`. No record is not proof of no flood.
 
 ## Google services used
 
@@ -197,7 +197,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/static/` | The page, in three tabs (area overview, my business, flood cost) with the Ask AI chat as a floating button and dialog on every tab (`chat-widget.js`; `?tab=ask` links open it). Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
 | `app/data/areas/` | Built data for each area. |
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
-| `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds Taman Sri Muda, Kuantan, Kota Bharu and Kuala Terengganu byte for byte. The built data is committed, so you do not need to run it. |
+| `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds the old Taman Sri Muda build (kept in `tests/fixtures/sri_muda_built`), Kuantan, Kota Bharu and Kuala Terengganu byte for byte; with `--sections` it builds a city split into sections. The built data is committed, so you do not need to run it. |
 | `tools/resample_area.py` | Re-samples an area built on the old flood sizes (1 in 10, 100, 500) at 1 in 10, 20 and 50 when its OpenStreetMap inputs were not kept (Kota Tinggi): depths read again at each business and square; each road's square found from its stored old depths and distance, and refused if that is ambiguous. Needs the old JRC files. |
 | `deploy.sh` | Cloud Run deploy with a post-deploy smoke test. |
 
@@ -283,7 +283,7 @@ Only sources with clear terms, so the repo can be public.
 - Flood depth: European Commission JRC global river flood hazard maps v2.1 (Baugh and others, 2024), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1. The nine files in `app/data/rasters/` are used unchanged. Our changes in `app/data/areas/`: depths read at each business and its nearest road (`premises.json`) and for the 90 m squares of each area (`town.json`), rounded to the centimetre.
 - Businesses, roads, base map: OpenStreetMap contributors, ODbL (https://opendatacommons.org/licenses/odbl/1-0/). Every `app/data/areas/*/premises.json` is built from OpenStreetMap data, so those files are under the Open Database License 1.0. © OpenStreetMap contributors.
 - Kota Tinggi's relief centres were named in news reports and located on OpenStreetMap. They are not an official list.
-- Past floods at Taman Sri Muda: ten reports from the news, DOSM and one journal paper (Rosmadi and others 2025, quoting MBSA's flood report for 2022), paraphrased with their sources in `app/data/areas/sri-muda/area.json` and on the page.
+- Past floods in Shah Alam: news, official and research reports and the public 2021 and 2022 ArcGIS flood points (credited on the page), paraphrased with their sources in `app/data/areas/shah-alam/history.json` and on the page.
 - Damage share by water depth: Huizinga, de Moel and Szewczyk (2017), Global flood depth-damage functions, European Commission JRC, Table 3-6. Nine published numbers, typed into `app/costs.py`.
 - Consumer price index for Malaysia: World Bank, CC BY 4.0. It gives one factor, 1.65, in `app/costs.py`.
 - `app/static/vendor/leaflet.js` and `leaflet.css`: Leaflet 1.9.4, BSD 2-Clause, see `app/static/vendor/LICENSE-leaflet.txt`.

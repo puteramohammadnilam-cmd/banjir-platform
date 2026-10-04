@@ -11,10 +11,11 @@ import pytest
 from fastapi.testclient import TestClient
 from google import genai
 
-from app import ai, areas, floodtools, googlemaps, main
+from app import ai, areas, floodtools, googlemaps, main, sections
 
 ROOT = Path(__file__).resolve().parent.parent
-SRI_MUDA, KOTA_TINGGI = "sri-muda", "kota-tinggi"
+CITY, KOTA_TINGGI = "shah-alam", "kota-tinggi"
+ANETAS = "node-13414432501"   # the first business of the old Taman Sri Muda build, now in seksyen-25
 PLACE_WORDS = ("Sri Muda", "Shah Alam", "Seksyen", "MBSA")   # must stay out of app/*.py
 UNKNOWN_AREA = {"success": False, "data": None, "error": "Unknown area."}
 
@@ -35,10 +36,11 @@ def ids_in(area_id: str) -> set[str]:
 
 # ---------- the areas and their data
 
-def test_every_area_loads_and_sri_muda_is_the_default():
-    ids = [SRI_MUDA, "kota-bharu", KOTA_TINGGI, "kuala-terengganu", "kuantan"]
+def test_every_area_loads_and_the_city_is_the_default():
+    ids = [CITY, "kota-bharu", KOTA_TINGGI, "kuala-terengganu", "kuantan"]
     assert [a.id for a in areas.load_all()] == ids   # the default first, then by id
-    assert areas.default().id == SRI_MUDA and areas.default() == areas.get(SRI_MUDA)
+    assert areas.default().id == CITY and areas.default() == areas.get(CITY)
+    assert areas.get("sri-muda") is None and sections.alias("sri-muda")[1]["id"] == "seksyen-25"
     assert areas.get("nope") is None
     areas.preload()   # both areas' built data fit their config
 
@@ -55,14 +57,16 @@ def test_every_premise_lies_inside_its_own_area():
         for p in areas.premises(area.id):
             assert west <= p["lon"] <= east and south <= p["lat"] <= north, p["id"]
             assert areas.area_at(p["lat"], p["lon"]) == area
+            assert sections.listed_area_at(p["lat"], p["lon"])[0] == area, p["id"]
     assert areas.area_at(35.68, 139.69) is None   # Tokyo
 
 
-def test_sri_muda_holds_the_204_businesses_of_today():
-    shown = areas.premises(SRI_MUDA)
+def test_the_city_holds_the_2445_businesses_of_its_build():
+    shown = areas.premises(CITY)
     wet = {rp: sum(1 for p in shown if p["depth_m"][rp]) for rp in ("10", "20", "50")}
-    assert len(shown) == 204 and wet == {"10": 174, "20": 179, "50": 183}
-    assert (areas.default().zoom, areas.default().council) == (15, "MBSA")
+    assert len(shown) == 2445 and wet == {"10": 522, "20": 551, "50": 571}
+    assert (areas.default().zoom, areas.default().council) == (12, "Majlis Bandaraya Shah Alam (MBSA)")
+    assert areas.business(ANETAS)[0]["section"] == "seksyen-25"
 
 
 def test_kota_tinggi_is_the_earlier_hand_picked_build():
@@ -75,15 +79,16 @@ def test_kota_tinggi_is_the_earlier_hand_picked_build():
     assert set(area.notes) == {"businesses", "shelters"} and "Not an official list" in area.notes["shelters"]
 
 
-def test_sri_muda_history_is_the_record_the_page_shows_today():
-    history = areas.default().history
+def test_the_city_history_comes_from_its_history_file_for_the_city_and_each_section():
+    city = areas.default()
+    assert city.history is None   # not in area.json: in history.json (app/history.py)
+    history = sections.history_for(city)
     floods = history["floods"]
-    dated = [f for f in floods if not f.get("account")]
-    assert (history["first_year"], history["recent_from"], history["last_year"]) == (1995, 2019, 2026)
-    assert len(floods) == 10 and len(dated) == 9                                  # "9 dated floods ... since 1995"
-    assert sum(1 for f in dated if f["year"] >= history["recent_from"]) == 7     # "7 of them since 2019"
-    assert [f["year"] for f in floods] == sorted(f["year"] for f in floods)
-    assert all(f["when"] and f["what"] and f["source"] for f in floods)
+    assert (history["first_year"], history["recent_from"], history["last_year"]) == (1992, 2019, 2026)
+    assert len(floods) == 69 and [f["year"] for f in floods] == sorted(f["year"] for f in floods)
+    assert all(f["when"] and f["what"] and f["source"] and f["url"].startswith("https://") for f in floods)
+    section = sections.history_for(city, "seksyen-25")
+    assert section["floods"] and all("seksyen-25" in f["sections"] for f in section["floods"])
 
 
 def test_a_business_is_found_in_whichever_area_holds_it():
@@ -96,7 +101,7 @@ def test_a_business_is_found_in_whichever_area_holds_it():
 
 
 def test_a_business_id_in_two_areas_is_refused(monkeypatch):
-    twin = areas.premises(SRI_MUDA)[0]
+    twin = areas.premises(CITY)[0]
     monkeypatch.setattr(areas, "premises", lambda area_id: (twin,))   # every area now lists the same business
     areas._businesses.cache_clear()
     try:
@@ -109,9 +114,9 @@ def test_a_business_id_in_two_areas_is_refused(monkeypatch):
 def test_area_config_is_read_only_and_a_response_gets_its_own_copy():
     with pytest.raises(TypeError):
         areas.get(KOTA_TINGGI).notes["shelters"] = "An official list."
-    sent = areas.details(areas.default())
+    sent = sections.details(areas.get("kuantan"))
     sent["history"]["floods"].clear()
-    assert len(areas.default().history["floods"]) == 10
+    assert len(areas.get("kuantan").history["floods"]) == 5
 
 
 # ---------- area.json is checked when it loads
@@ -232,14 +237,15 @@ def test_a_folder_without_area_json_or_a_second_default_is_rejected(tmp_path):
 
 def test_the_area_list_gives_each_area_with_its_counts(client):
     body = client.get("/api/areas").json()
-    assert body["success"] is True and body["data"]["default"] == SRI_MUDA
+    assert body["success"] is True and body["data"]["default"] == CITY
     listed = {area["id"]: area for area in body["data"]["areas"]}
     first = body["data"]["areas"][0]
     assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters",
                           "has_sections", "aliases"}
-    assert all((area["has_sections"], area["aliases"]) == (False, []) for area in body["data"]["areas"])
+    assert all((area["has_sections"], area["aliases"]) == (False, []) for area in body["data"]["areas"][1:])
+    assert (first["has_sections"], [alias["id"] for alias in first["aliases"]]) == (True, ["sri-muda"])
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
-        SRI_MUDA, {"businesses": 204, "squares": 1514, "shelters": 0}, True, False)
+        CITY, {"businesses": 2445, "squares": 12477, "shelters": 6}, True, True)
     kota = listed[KOTA_TINGGI]
     assert (kota["counts"], kota["has_history"], kota["has_shelters"]) == (
         {"businesses": 27, "squares": 382, "shelters": 2}, False, True)
@@ -257,10 +263,10 @@ def test_area_data_carries_the_area_and_its_data(client):
 def test_api_data_is_the_default_area_in_full_so_the_page_need_not_wait_for_the_list(client):
     # with no area in the link the page asks for /api/data at once, beside /api/areas: it must carry the area too
     old = client.get("/api/data").json()["data"]
-    new = client.get(f"/api/areas/{SRI_MUDA}/data").json()["data"]
-    assert old == new and set(old) == {"area", "premises", "town", "limits"}
-    assert new["area"]["view"] == [101.515, 3.008, 101.55, 3.042] and new["area"]["zoom"] == 15
-    assert len(new["area"]["history"]["floods"]) == 10
+    new = client.get(f"/api/areas/{CITY}/data").json()["data"]
+    assert old == new and set(old) == {"area", "sections", "index", "premises", "town", "limits"}
+    assert new["area"]["view"] == [101.4277, 2.9496, 101.5914, 3.2298] and new["area"]["zoom"] == 12
+    assert len(new["area"]["history"]["floods"]) == 69 and len(new["sections"]) == 56 and len(new["index"]) == 2445
 
 
 @pytest.mark.parametrize("method, path, body", [
@@ -284,7 +290,7 @@ def test_rain_is_asked_for_the_middle_of_the_chosen_area(client, monkeypatch):
     monkeypatch.setattr(googlemaps, "rain_outlook", lambda lat, lon, hours: seen.append((lat, lon)) or {"total_mm": 0})
     assert client.get(f"/api/rain?area={KOTA_TINGGI}").status_code == 200
     assert client.get("/api/rain").status_code == 200
-    assert seen == [areas.get(KOTA_TINGGI).centre(), (3.025, 101.5325)]   # no area: the same point as before
+    assert seen == [areas.get(KOTA_TINGGI).centre(), areas.default().centre()]   # no area: the default's middle
 
 
 def test_news_is_asked_about_the_chosen_area(client, monkeypatch):
@@ -293,7 +299,7 @@ def test_news_is_asked_about_the_chosen_area(client, monkeypatch):
     monkeypatch.setattr(ai, "flood_news", lambda area, section=None: seen.append(area.id) or answer)
     for body in ({"area_id": KOTA_TINGGI}, {}, None, {"question": "write me a poem"}):
         assert client.post("/api/news", json=body).status_code == 200
-    assert seen == [KOTA_TINGGI, SRI_MUDA, SRI_MUDA, SRI_MUDA]
+    assert seen == [KOTA_TINGGI, CITY, CITY, CITY]
 
 
 def test_a_question_is_about_the_area_asked_for_or_the_selected_business(client, monkeypatch):
@@ -302,8 +308,8 @@ def test_a_question_is_about_the_area_asked_for_or_the_selected_business(client,
     kota_id = areas.premises(KOTA_TINGGI)[0]["id"]
     bodies = ({"area_id": KOTA_TINGGI}, {"business_id": kota_id}, {}, {"area_id": KOTA_TINGGI, "business_id": kota_id})
     assert [client.post("/api/ask", json={"question": "hi", **b}).status_code for b in bodies] == [200] * 4
-    assert seen == [KOTA_TINGGI, KOTA_TINGGI, SRI_MUDA, KOTA_TINGGI]
-    elsewhere = client.post("/api/ask", json={"question": "hi", "area_id": SRI_MUDA, "business_id": kota_id})
+    assert seen == [KOTA_TINGGI, KOTA_TINGGI, CITY, KOTA_TINGGI]
+    elsewhere = client.post("/api/ask", json={"question": "hi", "area_id": CITY, "business_id": kota_id})
     assert elsewhere.status_code == 404 and elsewhere.json()["error"] == "Unknown business."
 
 
@@ -325,15 +331,15 @@ def recording_client(calls: list):
     return SimpleNamespace(models=SimpleNamespace(generate_content=generate_content))
 
 
-def test_the_kota_tinggi_prompt_names_its_area_and_no_sri_muda_text(monkeypatch):
+def test_the_kota_tinggi_prompt_names_its_area_and_no_city_text(monkeypatch):
     calls = []
     monkeypatch.setattr(ai, "_client", lambda: recording_client(calls))
     ai.ask("Banjir tak?", None, [], areas.get(KOTA_TINGGI))
     ai.ask("Banjir tak?", None, [])
     kota, default = (call["config"].system_instruction for call in calls)
     assert areas.get(KOTA_TINGGI).ai_name in kota and not place_words_in(kota)
-    assert ("small businesses around Taman Sri Muda (Seksyen 25) and the neighbouring sections of Shah Alam, "
-            "Selangor, Malaysia. Shop owners ask you what a flood could mean for their premises.") in default
+    assert (f"small businesses around {areas.get(CITY).ai_name}. Shop owners ask you what a flood could mean for "
+            "their premises.") in default
 
 
 def gemini_says(*parts: dict):
@@ -360,7 +366,7 @@ def test_a_kota_tinggi_question_gets_kota_tinggi_tool_results(monkeypatch):
     assert summary["shelters"] == [s["name"] for s in areas.town(KOTA_TINGGI)["shelters"]]
     assert answers["find_business"] and {b["id"] for b in answers["find_business"]} <= ids_in(KOTA_TINGGI)
     assert not place_words_in(json.dumps(sent))   # the prompt, the tool declarations and the tool results
-    assert len(floodtools.premises()) == 204      # the question's scope ended with the question
+    assert len(floodtools.premises()) == 2445     # the question's scope ended with the question
 
 
 def test_the_news_question_uses_the_area_news_place(monkeypatch):
@@ -377,8 +383,8 @@ def test_the_news_question_uses_the_area_news_place(monkeypatch):
     (kota_question, kota_system), (default_question, default_system) = seen
     assert areas.get(KOTA_TINGGI).news_place in kota_question and not place_words_in(kota_question + kota_system)
     assert default_question == ("What is the latest news on floods, river levels, rain warnings or flood works "
-                                "around Taman Sri Muda, Shah Alam?")
-    assert "works around Taman Sri Muda and Shah Alam, Selangor, Malaysia, using Google Search" in default_system
+                                "around Shah Alam, Selangor?")
+    assert "works around Shah Alam and the Klang Valley, Selangor, Malaysia, using Google Search" in default_system
 
 
 def test_a_question_scope_holds_its_area_and_one_lookup_allowance_for_all_tools(monkeypatch):
@@ -417,7 +423,8 @@ def test_the_lookup_cap_holds_across_tool_calls_in_one_model_turn(monkeypatch):
 
 
 def test_the_no_shelter_message_takes_the_council_from_the_area():
-    assert floodtools.no_shelters(areas.default()).endswith("JPS Public Infobanjir, the local council (MBSA) or 999.")
+    council = areas.default().council
+    assert floodtools.no_shelters(areas.default()).endswith(f"JPS Public Infobanjir, the local council ({council}) or 999.")
     without_council = replace(areas.get(KOTA_TINGGI), council=None)
     assert floodtools.no_shelters(without_council).endswith("JPS Public Infobanjir, the local council or 999.")
 

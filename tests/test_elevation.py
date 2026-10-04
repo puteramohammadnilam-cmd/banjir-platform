@@ -175,7 +175,7 @@ def test_the_shah_alam_crop_covers_its_box_and_stops_there(real_dem):
 
 
 def test_premises_carry_elevation_where_it_is_loaded_and_null_elsewhere(real_dem):
-    sri_muda = areas.premises("sri-muda")
+    sri_muda = [areas.business("node-13414432501")[0], *areas.premises("shah-alam")]   # the checklist business first
     assert all(set(p["elevation"]) == {"ground_m", "above_river_m"} for p in sri_muda)
     assert sri_muda[0]["elevation"] == {"ground_m": 5.3, "above_river_m": 0.9}
     assert all(p["elevation"] is None for p in areas.premises("kuantan"))

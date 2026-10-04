@@ -10,7 +10,7 @@ from app import ai, areas, floodtools, main, places, plan
 from test_place_ai import gemini_says, scripted_gemini
 
 SRI_MUDA = areas.default()
-KNOWN = floodtools.premises()[0]   # Anetas: 1.35, 1.54 and 1.76 m
+KNOWN = areas.business("node-13414432501")[0]   # Anetas: 1.35, 1.54 and 1.76 m
 WRITTEN = {
     "title": "Pelan banjir kedai anda",
     "summary": "Dalam model, air boleh sampai 1.76 m di jalan dalam banjir sekali dalam 50 tahun.",
@@ -30,7 +30,7 @@ def test_the_facts_of_a_business_hold_its_depths_chances_and_area():
     assert [f["street_depth_m"] for f in facts["floods"]] == [1.35, 1.54, 1.76]
     assert [f["chance_in_10_years_pct"] for f in facts["floods"]] == [65, 40, 18]
     assert facts["floor_height_cm"] == 0 and [f["water_above_floor_m"] for f in facts["floods"]] == [1.35, 1.54, 1.76]
-    assert facts["estimate"] is None and facts["relief_centre"] is None
+    assert facts["estimate"] is None and facts["relief_centre"] == {"name": "Dewan Kenanga, Seksyen 28", "distance_m": 3773}
 
 
 def test_a_floor_and_an_estimate_go_into_the_facts():

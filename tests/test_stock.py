@@ -5,10 +5,10 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, floodtools, main, stock
+from app import ai, areas, floodtools, main, stock
 from test_place_ai import gemini_says, scripted_gemini
 
-KNOWN = floodtools.premises()[0]
+KNOWN = areas.business("node-13414432501")[0]   # the checklist business, in the default city
 TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" * 64).decode()
 ITEMS = [
     {"item": "Rice sacks", "kind": "stock", "lowest_cm": 0, "value_rm_low": 800, "value_rm_high": 1200},

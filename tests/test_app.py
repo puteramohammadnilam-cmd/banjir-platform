@@ -9,9 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 from google import genai
 
-from app import ai, floodtools, googlemaps, main
+from app import ai, areas, floodtools, googlemaps, main
 
-KNOWN_ID = floodtools.premises()[0]["id"]
+KNOWN_ID = "node-13414432501"   # a business with water in every flood size, in the default area
 TINY_JPEG = "data:image/jpeg;base64," + base64.b64encode(b"\xff\xd8\xff" + b"0" * 64).decode()
 
 
@@ -25,29 +25,35 @@ def client(monkeypatch):
     return TestClient(main.app)
 
 
-TOTAL = 204   # shops and eateries on OpenStreetMap around Taman Sri Muda, fetched 2 October 2026
+TOTAL = 2445   # shops, eateries and pharmacies on OpenStreetMap in the city's sections, fetched 4 October 2026
 
 
 def test_data_is_the_shah_alam_build():
     wet = {rp: sum(1 for p in floodtools.premises() if p["depth_m"][rp]) for rp in ("10", "20", "50")}
     west, south, east, north = floodtools.town()["view"]
     assert len(floodtools.premises()) == TOTAL
-    assert wet == {"10": 174, "20": 179, "50": 183}
+    assert wet == {"10": 522, "20": 551, "50": 571}
     assert all(west <= p["lon"] <= east and south <= p["lat"] <= north for p in floodtools.premises())
 
 
 def test_find_business_matches_name_and_ignores_blank():
     matches = floodtools.find_business("kfc")
-    assert [b["name"] for b in matches] == ["KFC", "KFC"]
-    assert all(b["near"] for b in matches)   # two outlets share a name; the road tells them apart
+    assert [b["name"] for b in matches] == ["KFC"] * floodtools.MAX_MATCHES   # 23 outlets: the first 8
+    assert all(b["near"] and b["section"] for b in matches)   # outlets share a name; road and section tell them apart
     assert floodtools.find_business("  ") == []
     assert floodtools.find_business(5) == []   # Gemini sent something other than text
 
 
 def test_no_shelter_is_claimed_without_a_cited_list():
-    assert floodtools.town()["shelters"] == []
-    assert floodtools.flood_check(KNOWN_ID)["shelter"] is None
-    assert "no relief centre list" in floodtools.area_summary()["shelters"]
+    assert len(floodtools.town()["shelters"]) == 6   # the city's list, from news reports of past floods
+    assert floodtools.area_summary()["shelters"] == [s["name"] for s in floodtools.town()["shelters"]]
+    token = floodtools.start_question(areas.get("kuantan"))   # an area with no list
+    try:
+        kuantan_id = areas.premises("kuantan")[0]["id"]
+        assert floodtools.town()["shelters"] == [] and floodtools.flood_check(kuantan_id)["shelter"] is None
+        assert "no relief centre list" in floodtools.area_summary()["shelters"]
+    finally:
+        floodtools.end_question(token)
 
 
 def test_flood_check_returns_limits_and_reports_unknown_id():
@@ -65,7 +71,7 @@ def test_area_summary_counts_add_up():
 
 def test_data_endpoint_sends_security_headers(client):
     res = client.get("/api/data")
-    assert res.status_code == 200 and len(res.json()["data"]["premises"]) == TOTAL
+    assert res.status_code == 200 and len(res.json()["data"]["index"]) == TOTAL
     assert "frame-ancestors 'none'" in res.headers["content-security-policy"]
 
 
@@ -252,9 +258,9 @@ def test_photo_rejects_bad_uploads(client, image, status):
 
 
 def test_area_data_is_gzipped_for_a_browser_that_takes_it(client):
-    res = client.get("/api/areas/sri-muda/data", headers={"Accept-Encoding": "gzip"})
+    res = client.get("/api/areas/shah-alam/sections/seksyen-25/data", headers={"Accept-Encoding": "gzip"})
     assert res.headers["content-encoding"] == "gzip" and res.json()["success"] is True
-    assert int(res.headers["content-length"]) < 24_000   # about 16 KB in the plan's checklist 6A
+    assert int(res.headers["content-length"]) < 40_000   # the phase 2 budget for this section
 
 
 # from "./x.js", a bare import "./x.js" and a dynamic import("./x.js")
