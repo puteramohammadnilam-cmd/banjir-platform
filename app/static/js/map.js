@@ -6,9 +6,11 @@ import { overlapsView } from "./place.js";
 
 const INK = "#0d1b2a";
 const SELECTED = "#b94a1b";   // --accent in tokens.css
+const BRAND = "#0c447c";      // --brand: a section's outline
 const HALO = "#fff";   // every shop dot wears a white ring (and a dark hairline from .biz-dot), so it reads on pale and dark squares
 const FOCUS_ZOOM = 17;
-const MIN_ZOOM = 6;   // far enough out to see about all of Malaysia on a wide screen
+const MIN_ZOOM = 6;
+const FIT_SNAP = 0.25;   // a city or a section fills the map more closely than whole zoom steps allow   // far enough out to see about all of Malaysia on a wide screen
 const MALAYSIA_BOUNDS = [[0.5, 98.5], [8.0, 120.0]];   // [[south, west], [north, east]]: the country, with sea around it
 const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTRIBUTION = '&copy; OpenStreetMap contributors · flood depth: JRC v2.1 (CC BY 4.0)';
@@ -19,25 +21,35 @@ const label = (text) => document.createTextNode(text);
 /** Whether the person asks the page not to move things about: then the map jumps instead of gliding. */
 const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** The Leaflet map on the area's own view and zoom (its config), with the base tiles. It can be moved over all of Malaysia. */
-function openMap(element, { view: [west, south, east, north], zoom }) {
+/** The Leaflet map on the page's own view and zoom (the area's config, or a section's box), with the base tiles. It can be
+ *  moved over all of Malaysia. */
+function openMap(element, { view: [west, south, east, north], zoom, fit = false }) {
   const glide = motionAllowed();   // with reduced motion asked for, zooms and fades are jumps
   const map = L.map(element, {
-    scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM,
+    scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM, zoomSnap: fit ? FIT_SNAP : 1,
     zoomAnimation: glide, fadeAnimation: glide, markerZoomAnimation: glide,
   });
-  map.setView([(south + north) / 2, (west + east) / 2], zoom);
+  // a whole city fills the map when the map is on show to measure; a hidden tab's map has no size yet
+  if (fit && element.clientHeight > 0) map.fitBounds([[south, west], [north, east]], { animate: false });
+  else map.setView([(south + north) / 2, (west + east) / 2], zoom);
   L.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
   return map;
 }
 
-/** The flood model's squares, each kept with its depths for the flood sizes; paintSquares colours them (cells.js ramp). */
-function addSquares(map, town) {
+/** The flood model's squares, each kept with its depths for the flood sizes; paintSquares colours them (cells.js ramp).
+ *  On the map's one canvas (`renderer`): a section can have thousands, and an element each would slow a phone. */
+function addSquares(map, town, renderer) {
   const size = town.cell_deg;
   return town.cells.map(([cellSouth, cellWest, ...depths]) => ({
     depths,
-    layer: L.rectangle([[cellSouth, cellWest], [cellSouth + size, cellWest + size]], { stroke: false, interactive: false }).addTo(map),
+    layer: L.rectangle([[cellSouth, cellWest], [cellSouth + size, cellWest + size]], { stroke: false, interactive: false, renderer }).addTo(map),
   }));
+}
+
+/** A section's outline (GeoJSON), over its squares; it takes no clicks. */
+function addOutline(map, outline, renderer) {
+  if (!outline) return;
+  L.geoJSON(outline, { renderer, interactive: false, style: { color: BRAND, weight: 2.5, opacity: 0.85, fill: false, dashArray: "7 5" } }).addTo(map);
 }
 
 function addShelters(map, shelters) {
@@ -103,8 +115,9 @@ const pinIcon = () => L.divIcon({
 });
 
 /** One pin at a time, with the outline of its flood square (the Place's `cell.bounds`: [west, south, east, north]). It
- *  only marks the place: it takes no clicks and no focus. */
-function createPointLayer(map) {
+ *  only marks the place: it takes no clicks and no focus. The outline goes on the map's canvas, so that no layer of
+ *  another kind lies over the canvas and takes the pointer from the whole city's sections. */
+function createPointLayer(map, renderer) {
   let shown = null;   // {id, marker, outline}
   return {
     show(place) {
@@ -114,7 +127,7 @@ function createPointLayer(map) {
       shown = {
         id: place.id,
         marker: L.marker([place.lat, place.lon], { icon: pinIcon(), interactive: false, keyboard: false }).addTo(map),
-        outline: L.rectangle([[south, west], [north, east]], { color: SELECTED, weight: 3, fill: false, interactive: false }).addTo(map),
+        outline: L.rectangle([[south, west], [north, east]], { color: SELECTED, weight: 3, fill: false, interactive: false, renderer }).addTo(map),
       };
     },
     /** Moves the map to the pin when `id` is the point on show; false when it is not. */
@@ -136,17 +149,21 @@ function crossIcon() {
     arms.map(line("halo")), arms.map(line("core")), s("circle", { class: "dot", cx: 26, cy: 26, r: 3.5 }));
 }
 
-/** Puts the cross over the middle of the map, and the panel's words as the map's description; gives the cross back. */
+/** Puts the cross over the middle of the map, and the panel's words as the map's description; gives back the cross
+ *  and the description the map had before (the whole city's map is described by its table), to put back after. */
 function showCross(map, describedBy) {
   const cross = h("div", { class: "aim-cross", "aria-hidden": "true" }, crossIcon());
-  map.getContainer().append(cross);
-  map.getContainer().setAttribute("aria-describedby", describedBy);
-  return cross;
+  const container = map.getContainer();
+  const before = container.getAttribute("aria-describedby");
+  container.append(cross);
+  container.setAttribute("aria-describedby", describedBy);
+  return { cross, before };
 }
 
-function hideCross(map, cross) {
+function hideCross(map, { cross, before }) {
   cross.remove();
-  map.getContainer().removeAttribute("aria-describedby");
+  if (before) map.getContainer().setAttribute("aria-describedby", before);
+  else map.getContainer().removeAttribute("aria-describedby");
 }
 
 /** In Chrome a shape in an SVG that has a focus listener can be tabbed to, and every shop's dot has one (its tooltip
@@ -173,7 +190,7 @@ function addAimButton(map, onCheckPoint) {
 
 /** Aim mode takes a tap to move the map's middle to where it fell. The page moves the map with moveTo, which does not
  *  count as the person moving it: enter()'s onMove is only for them (a drag, the arrow keys, a tap, the zoom buttons). */
-function createAim(map, setButtonHidden) {
+function createAim(map, setButtonHidden, renderer) {
   let active = null;   // {cross, onMoved, ring} while aiming
   let isQuiet = false;
   const recentre = (event) => map.panTo(event.latlng, { animate: motionAllowed() });
@@ -214,23 +231,31 @@ function createAim(map, setButtonHidden) {
     showAccuracy(circle) {
       if (!active) return;
       active.ring?.remove();
-      const ring = circle && L.circle([circle.lat, circle.lon], { radius: circle.metres, color: SELECTED, weight: 2, fillOpacity: 0.08, interactive: false }).addTo(map);
+      const ring = circle && L.circle([circle.lat, circle.lon], { radius: circle.metres, color: SELECTED, weight: 2, fillOpacity: 0.08, interactive: false, renderer }).addTo(map);
       active = { ...active, ring: ring || null };
     },
     focus: () => map.getContainer().focus({ preventScroll: true }),
+    isActive: () => active !== null,
   };
 }
 
-/** `onCheckPoint(button)` is for the pin and GPS flow (pin.js); with none, the page offers no way to check a point. */
-export function createMap(element, area, town, premises, { onSelect, onOpen, onCheckPoint = null }) {
-  const map = openMap(element, area);
-  const squares = addSquares(map, town);
+/** `frame` is what the map opens on ({view, zoom}; fit: fill the map with the view, as for a whole city), `ownedBox` the box whose squares are the page's own (town.json has
+ *  every wet square that overlaps it; null when the page draws none of its own, as on a whole city's map) and `outline`
+ *  a section's outline to draw, or null. Squares, outlines and the whole city's sections share one canvas; the shop dots
+ *  stay SVG, over it. `onCheckPoint(button)` is for the pin and GPS flow (pin.js); with none, the page offers no way to
+ *  check a point. */
+export function createMap(element, { view, zoom, ownedBox = view, outline = null, fit = false }, town, premises, { onSelect, onOpen, onCheckPoint = null }) {
+  const map = openMap(element, { view, zoom, fit });
+  const renderer = L.canvas({ padding: 0.5 });
+  const squares = addSquares(map, town, renderer);
+  addOutline(map, outline, renderer);
   addShelters(map, town.shelters);
   let shownRp = null;
   const markers = addMarkers(map, premises, () => shownRp, { onSelect, onOpen });
-  const cells = createCellLayer(map, () => SCENARIOS.indexOf(shownRp), (grid, south, west) => overlapsView(area.view, south, west, grid));
-  const point = createPointLayer(map);
-  const aim = createAim(map, onCheckPoint ? addAimButton(map, onCheckPoint) : () => {});
+  const isOwned = ownedBox ? (grid, south, west) => overlapsView(ownedBox, south, west, grid) : () => false;
+  const cells = createCellLayer(map, () => SCENARIOS.indexOf(shownRp), isOwned, renderer);
+  const point = createPointLayer(map, renderer);
+  const aim = createAim(map, onCheckPoint ? addAimButton(map, onCheckPoint) : () => {}, renderer);
 
   return {
     /** Colour the squares and the shop dots for one flood size, and ring the selected shop. */
@@ -260,5 +285,8 @@ export function createMap(element, area, town, premises, { onSelect, onOpen, onC
     aimAt: aim.moveTo,
     showAccuracy: aim.showAccuracy,
     focusMap: aim.focus,
+    /** Puts more on the map: build({map, renderer, isAiming}) gets the Leaflet map, its canvas and whether a point is
+     *  being aimed at (a tap then moves the map, so it must open nothing), and gives back what it made. */
+    addOverlay: (build) => build({ map, renderer, isAiming: aim.isActive }),
   };
 }

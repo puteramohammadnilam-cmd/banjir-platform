@@ -17,6 +17,7 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 0));   // let 
 const DRY = { 10: null, 20: null, 50: null };
 
 // ---------- My business ----------
+// (a point in a city's section: see the end of this file)
 
 /** The tab built the way main.js builds it. */
 function mountCard(options = {}) {
@@ -372,4 +373,37 @@ test("the Ask AI shortcut opens the floating chat, with the shortcut itself as t
   assert.deepEqual(went, []);
   panel.querySelectorAll(".next-step")[0].dispatch("click");
   assert.deepEqual(went, ["cost"]);
+});
+
+// ---------- a point in a city split into sections ----------
+
+test("a point's card in the whole city offers its section as a button, which calls onOpenSection and nothing else", () => {
+  const opened = [];
+  const city = { id: "shah-alam", name: "Shah Alam", display_name: "Shah Alam, Selangor", history: null };
+  const { panel, card } = mountCard({ area: city, areas: [city], onOpenSection: (id) => opened.push(["section", id]), onOpenArea: (id) => opened.push(["area", id]) });
+  show(card, point({ area_id: "shah-alam", section: { id: "seksyen-25", name: "Seksyen 25" } }));
+  assert.equal(head(panel).querySelector("h1").textContent, "Point in Seksyen 25, Shah Alam");
+  buttonNamed(panel, "Open Seksyen 25").click();
+  assert.deepEqual(opened, [["section", "seksyen-25"]]);
+});
+
+test("on a section's page every question and the news name the section; a plain area's name none, as before", async () => {
+  const asked = stubServer();
+  const { chat, news, form, input } = mountChat({ areaId: "shah-alam", sectionId: "seksyen-25", areas: [{ id: "shah-alam", name: "Seksyen 25" }] });
+  input.value = "Will it flood?";
+  form.dispatch("submit");
+  await settle();
+  news.click();
+  await settle();
+  chat.render(point({ area_id: "shah-alam" }));
+  assert.deepEqual(asked.map(([path, body]) => [path, body.area_id, body.section_id]),
+    [["/api/ask", "shah-alam", "seksyen-25"], ["/api/news", "shah-alam", "seksyen-25"]]);
+  const plain = stubServer();
+  const other = mountChat();
+  other.input.value = "Will it flood?";
+  other.form.dispatch("submit");
+  await settle();
+  other.news.click();
+  await settle();
+  assert.ok(plain.every(([, body]) => !("section_id" in body)), JSON.stringify(plain));
 });

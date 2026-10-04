@@ -1,18 +1,18 @@
 import * as api from "./api.js";
 import { createBusiness } from "./card.js";
-import { squaresOf } from "./cells.js";
 import { createChat } from "./chat.js";
 import { createChatWidget } from "./chat-widget.js";
 import { createCost } from "./cost.js";
 import { h } from "./dom.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
-import { createOverview } from "./overview.js";
+import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard } from "./plan.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
-import { initialState, rememberPlace, wireFinder } from "./pick.js";
-import { businessPlace, isPoint, parseRef, readUrl, snapToGrid, writeUrl } from "./place.js";
+import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
+import { isPoint, readUrl, writeUrl } from "./place.js";
+import { isCityView, linkedPlace, loadCityIndex, loadStart, missedWords, openLink, sectionOf } from "./start.js";
 import * as realVoice from "./voice.js";
 
 const PHOTO_MAX_EDGE = 1280;
@@ -57,57 +57,6 @@ function wireTabs(onPick) {
   };
 }
 
-// ---------- start-up: what the link asks for, and the data to show it ----------
-
-/** The listed areas, the status and the data of the area the link names, else the default area's. With no area in
- *  the link the default's data is asked for at once, beside the list; a named area waits for the list, to check it is
- *  one. The flood model's coverage (its grids, for points) is asked for now but never waited on before the first view. */
-async function loadStart(url) {
-  const coverage = api.getCoverage().catch(() => null);   // null: points cannot be checked; businesses still work
-  const listing = api.getAreas();
-  const chosen = url.area === null ? api.getDefaultData()
-    : listing.then((list) => api.getAreaData(list.areas.some((area) => area.id === url.area) ? url.area : list.default));
-  const [list, status, data] = await Promise.all([listing, api.getStatus(), chosen]);
-  return {
-    list, status, coverage, area: data.area, town: data.town,
-    premises: data.premises.map((premise) => businessPlace(premise, data.area.id)),
-    isAreaMissing: url.area !== null && url.area !== data.area.id,
-  };
-}
-
-const foundPlace = (place, squares = null) => (place ? { place, squares } : null);
-
-/** What a link names, as {place, squares}: a business of the loaded area, or a point the server checks again (POST
- *  /api/point), snapped here first so that only a square's centre is sent, with the flood squares around it that come
- *  in the same answer (cells.js squaresOf; null for a business). null when this build holds no such place; throws when
- *  the server could not be asked. */
-async function linkedPlace(ref, start) {
-  const parsed = parseRef(ref);
-  if (parsed?.kind === "business") return foundPlace(start.premises.find((premise) => premise.id === parsed.id));
-  if (parsed?.kind !== "point" || !start.status.points_ready) return null;
-  const coverage = await start.coverage;
-  const centre = coverage ? snapToGrid(parsed.lat, parsed.lon, coverage.grids) : parsed;
-  if (!centre) return null;
-  const answer = await api.checkPoint({ lat: centre.lat, lon: centre.lon, source: "pin" });
-  return answer.coverage === "covered" ? foundPlace(answer.place, squaresOf(answer)) : null;
-}
-
-const missedWords = (area) => t("main.missed", { area: area.name });
-
-/** The place the link names ({place, squares}, as linkedPlace gives it), when this build holds it, and a note for a link
- *  to an area or place it does not hold (a point in the query counts: points are read only from the fragment).
- *  isFailed: the server could not be asked. */
-async function openLink(url, start) {
-  const missed = missedWords(start.area);
-  if (!url.place) return { linked: null, note: start.isAreaMissing || url.pointInQuery ? missed : null };
-  try {
-    const linked = await linkedPlace(url.place, start);
-    return { linked, note: linked && !start.isAreaMissing ? null : missed };
-  } catch (error) {
-    return { linked: null, note: `${error.message} ${t("main.showing", { area: start.area.name })}`, isFailed: true };
-  }
-}
-
 // ---------- the running page ----------
 
 /** The page's state. A change makes a new state object and redraws, passing the old one so views can compare. */
@@ -128,11 +77,13 @@ function createStore(initial) {
 /** The selected place: a business of the area, or a point checked on this visit. */
 const placeOf = (app, state) => app.byId.get(state.placeKey) ?? state.points[state.placeKey];
 
-/** The page's own link (place.js writeUrl): the area only when it is not the default, a point only in the fragment, the
- *  language only when it is not English. A link without one opens in the reader's own remembered choice. */
-const linkFor = (app, state) => writeUrl({
-  area: state.areaId === app.start.list.default ? null : state.areaId, place: state.placeKey, tab: state.tab, rp: state.rp,
-  lang: lang === DEFAULT_LANG ? null : lang,
+/** The page's own link (place.js writeUrl): the area only when it is not the default, the page's section (sectionId:
+ *  another section's, null for the whole city), a point only in the fragment, the language only when it is not
+ *  English. A link without one opens in the reader's own remembered choice. Another area's link names no section. */
+const linkFor = (app, state, { sectionId = app.start.section?.id ?? null } = {}) => writeUrl({
+  area: state.areaId === app.start.list.default ? null : state.areaId,
+  section: state.areaId === app.start.area.id ? sectionId : null,
+  place: state.placeKey, tab: state.tab, rp: state.rp, lang: lang === DEFAULT_LANG ? null : lang,
 });
 
 /** Switch tab from a button inside the page, and take keyboard focus to the new tab's heading. */
@@ -152,7 +103,17 @@ function select(app, id) {
   loadListing(app, id);
 }
 
+/** A business of the city that is not on this page (the whole city's list and search, or a section's search once the
+ *  city's index is in) is on its section's page: that page, on My business. False when no index names its section. */
+function openElsewhere(app, id) {
+  const section = sectionOf(app.cityIndex ?? app.start.index, id);
+  if (!section) return false;
+  location.assign(linkFor(app, { ...app.store.state, tab: "business", placeKey: id }, { sectionId: section }));
+  return true;
+}
+
 function open(app, id, { isPicked = true } = {}) {
+  if (!app.byId.has(id) && openElsewhere(app, id)) return;
   if (isPicked) rememberPlace(app.start.area.id, id);
   goto(app, "business", { placeKey: id });
   loadListing(app, id);
@@ -177,6 +138,14 @@ function openPoint(app, place, squares) {
 /** Another area is another page (location.assign), so nothing of this one carries over but the flood size. */
 function changeArea(app, areaId) {
   location.assign(linkFor(app, { ...app.store.state, areaId, tab: "overview", placeKey: null }));
+}
+
+/** The link to a section's Area overview (null: the whole city's), with the flood size on show. */
+const sectionLink = (app, sectionId) => linkFor(app, { ...app.store.state, tab: "overview", placeKey: null }, { sectionId });
+
+/** Another section, or the whole city, is another page too, opened the same way. */
+function changeSection(app, sectionId) {
+  location.assign(sectionLink(app, sectionId));
 }
 
 /** The flood model's coverage, for checking points: the one asked for at start-up, else asked for again, as that first
@@ -293,7 +262,7 @@ async function loadListing(app, id) {
 
 function loadRain(app) {
   if (!app.start.status.maps_ready) return;
-  api.getRain(app.start.area.id).then(
+  api.getRain(app.start.area.id, app.start.section?.id).then(
     ({ configured, rain }) => app.store.update({ rain: { configured, data: rain } }),
     () => app.store.update({ rain: { configured: true, error: true } }));
 }
@@ -312,7 +281,7 @@ function linkFollower(app) {
     try {
       const linked = await linkedPlace(ref, start);
       if (!isCurrent()) return;
-      showNote(linked ? null : missedWords(start.area));
+      showNote(linked ? null : missedWords(start.page));
       if (!linked) history.replaceState(null, "", linkFor(app, store.state));
       else if (linked.place.is_point) openPoint(app, linked.place, linked.squares);
       else open(app, linked.place.id, { isPicked: false });
@@ -331,8 +300,10 @@ function createExtras(app) {
     onWrite: (language) => writePlan(app, language), onPrint: () => printSheet($("panel-business").querySelector(".plan-sheet")),
     onLanguage: (planLanguage) => store.update({ planLanguage }),
   });
+  const isCity = isCityView(start);   // the whole city's summary: from the index, with its sections ranked
   $("print-area").addEventListener("click", () => printSheet(buildAreaReport({
-    area: start.area, premises: start.premises, date: new Date().toLocaleDateString(dateLocale(), { day: "numeric", month: "short", year: "numeric" }),
+    area: start.page, premises: isCity ? start.index : start.premises, sections: isCity ? start.sections : null, word: start.area.section_word,
+    date: new Date().toLocaleDateString(dateLocale(), { day: "numeric", month: "short", year: "numeric" }),
   })));
   const compare = createCompareCard({
     onAdd: (id) => store.update({ compare: addCompared(store.state.compare, id) }),
@@ -343,22 +314,60 @@ function createExtras(app) {
   return { plan, compare };
 }
 
+/** The businesses on this page, then the rest of the city's (from its index) for a section's search. */
+const withCity = (premises, index) => {
+  const here = new Set(premises.map((premise) => premise.id));
+  return [...premises, ...index.filter((row) => !here.has(row.id))];
+};
+
+/** On a section's page the search reaches the whole city once the city's index is in: asked for the first time a search
+ *  box is used, and waited for by Enter. Gives back the function that starts it (null on other pages). A failed load is
+ *  asked for again on the next search; until then the search covers this section, its city's sections and their names. */
+function cityIndexLoader(app, finder) {
+  if (!app.start.section) return null;
+  let loading = null;
+  return () => {
+    if (app.cityIndex) return null;
+    loading ??= loadCityIndex(app.start).then((index) => {
+      app.cityIndex = index;
+      finder.current.setPlaces(withCity(app.start.premises, index));
+    }, () => { loading = null; });
+    return loading;
+  };
+}
+
 /** The two search boxes, the header's and the Area overview's, and the overview's "Check any point in Malaysia" (shown
  *  only where points can be checked). A name that could mean several businesses, or none, shows the list of businesses,
- *  filtered by it, saying how many match or what to do next (overview.js). */
+ *  filtered by it, saying how many match or what to do next (overview.js). In a city they find its sections and its
+ *  old areas' names too, and a business of another section opens on that section's page. */
 function wireWaysIn(app, checkPoint, overview) {
-  wireFinder({
-    datalist: $("business-names"),
-    forms: [[$("finder"), $("finder-input")], [$("finder-hero"), $("finder-hero-input")]],
-  }, app.start.premises, (id) => open(app, id), (text) => {
-    overview.showMatches(text);
-    goto(app, "overview");
-    $("directory-filter").scrollIntoView({ block: "center" });
-    $("directory-filter").focus({ preventScroll: true });   // where the typed name now is, and the list it filters
-  });
+  const { start } = app;
+  const forms = [[$("finder"), $("finder-input")], [$("finder-hero"), $("finder-hero-input")]];
+  const named = start.area.has_sections ? sectionFinder(start.sections, start.area.aliases, start.area.section_word) : { entries: [], synonyms: new Map() };
+  const finder = { current: null };
+  const ready = cityIndexLoader(app, finder);
+  finder.current = wireFinder({ datalist: $("business-names"), forms }, isCityView(start) ? start.index : start.premises,
+    (target) => (typeof target === "string" ? open(app, target) : changeSection(app, target.section)), (text) => {
+      overview.showMatches(text);
+      goto(app, "overview");
+      $("directory-filter").scrollIntoView({ block: "center" });
+      $("directory-filter").focus({ preventScroll: true });   // where the typed name now is, and the list it filters
+    }, { extra: named.entries, synonyms: named.synonyms, ready });
+  if (ready) for (const [, input] of forms) input.addEventListener("focus", ready);
   if (!checkPoint) return;
   $("hero-check").addEventListener("click", (event) => checkPoint(event.currentTarget));
   $("hero-point").hidden = false;
+}
+
+/** What the Area overview needs of a city split into sections (null for a plain area): see overview.js createOverview. */
+function cityOf(app) {
+  const { start } = app;
+  if (!start.area.has_sections) return null;
+  return {
+    sections: start.sections, word: start.area.section_word, section: start.section, index: start.index,
+    wholeCity: !start.area.default_section, onSection: (id) => changeSection(app, id), hrefOf: (id) => sectionLink(app, id),
+    cityHref: sectionLink(app, null), cityName: start.area.name,
+  };
 }
 
 function createViews(app) {
@@ -369,22 +378,25 @@ function createViews(app) {
   const checkPoint = start.status.points_ready ? (opener) => pin.start({ opener }) : null;
   // the same from an empty My business or Flood cost, where the map is first brought on show
   const empty = { onFind: () => findShop(app), onCheckPoint: checkPoint && (() => { goto(app, "overview"); checkPoint($("hero-check")); }) };
+  const city = cityOf(app);
   const overview = createOverview({
-    area: start.area, areas: start.list.areas, premises: start.premises, town: start.town, onPick: pickRp,
+    area: start.page, areas: start.list.areas, premises: start.premises, town: start.town, onPick: pickRp,
     onSelect: (id) => select(app, id), onOpen: (id) => open(app, id),
-    onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint,
+    onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint, city,
   });
-  const pin = createPin({
-    map: overview.map, anchor: $("map"), area: start.area, tabBar: document.querySelector(".tabs"),
+  const pin = createPin({   // a point's squares are drawn unless the page's own squares cover it (none on a whole city's map)
+    map: overview.map, anchor: $("map"), area: { ...start.page, view: mapFrame(start.page, city).ownedBox }, tabBar: document.querySelector(".tabs"),
     getCoverage: () => coverageOf(app),
     onChecked: (place, squares) => openPoint(app, place, squares),
   });
   const business = createBusiness($("panel-business"), {
-    area: start.area, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
+    area: start.page, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
     onMovePin: () => movePin(app, pin), onAsk: (opener) => widget.open(opener), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
+    // a point in another section of this city, or in the whole city's view: that section's page, the point still in the fragment
+    onOpenSection: (sectionId) => location.assign(linkFor(app, store.state, { sectionId })),
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
@@ -395,7 +407,7 @@ function createViews(app) {
   wireWaysIn(app, checkPoint, overview);
   const chat = createChat({
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
-    getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
+    getPlaceRef: () => store.state.placeKey, areaId: start.area.id, sectionId: start.section?.id ?? null, areaName: start.page.name, areas: start.list.areas,
     isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     voice: { ...realVoice, speak: (text, language) => widget.isOpen && realVoice.speak(text, language) },   // a late answer is not read to a closed chat
   });
@@ -403,7 +415,7 @@ function createViews(app) {
 }
 
 /** What the chat's "About" line names: the place, or the area while none is picked. */
-const askingAbout = (app, place) => (!place ? app.start.area.name : place.is_point ? t("ask.thisPoint") : place.name);
+const askingAbout = (app, place) => (!place ? app.start.page.name : place.is_point ? t("ask.thisPoint") : place.name);
 
 /** The flood plan and the compare card are about a place: with none picked they are off. */
 function renderExtras(app, views, state, place) {
@@ -442,8 +454,8 @@ function showAreaName(area) {
 }
 
 function startApp(start, initial, url) {
-  const app = { start, byId: new Map(start.premises.map((premise) => [premise.id, premise])), store: createStore(initial) };
-  showAreaName(start.area);
+  const app = { start, byId: new Map(start.premises.map((premise) => [premise.id, premise])), store: createStore(initial), cityIndex: null };
+  showAreaName(start.page);
   const views = createViews(app);
   app.store.listen((state, previous) => render(app, views, state, previous));
   if (!start.status.ai_ready) {

@@ -66,9 +66,8 @@ function drawSquare(map, renderer, grid, [south, west, ...depths], index) {
 /** The squares of this map's neighbourhoods. getIndex() gives the position in a square's depths of the flood size the
  *  map shows now, so a square is painted for it as it is drawn; restyle() repaints them all when that changes.
  *  isOwned(grid, south, west) says that something else draws that square already (an area's own squares do), so it is
- *  counted but not drawn. */
-export function createCellLayer(map, getIndex, isOwned = () => false) {
-  const renderer = L.canvas({ padding: 0.5 });   // thousands of squares: one canvas, not an element each
+ *  counted but not drawn. `renderer` is the canvas to draw on: the map's own, when it has one. */
+export function createCellLayer(map, getIndex, isOwned = () => false, renderer = L.canvas({ padding: 0.5 })) {   // thousands of squares: one canvas, not an element each
   const drawn = new Map();                       // key -> {layer, depths}
   let ledger = [];
 

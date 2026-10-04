@@ -73,8 +73,8 @@ export function createKpis(container, { history, areaName, premises }) {
     setScenario(rp) {
       const wet = premises.filter((p) => band(p.depth_m[rp]));
       const typical = wet.length ? median(wet.map((p) => p.depth_m[rp])) : null;
-      tiles.wet.set(t("overview.wetFigure", { wet: wet.length, total: premises.length }), t("overview.wetLabel", { area: areaName }),
-        t("overview.wetNote", { rp }), premises.length ? wet.length / premises.length : 0);
+      if (!premises.length) tiles.wet.set("–", t("overview.wetLabel", { area: areaName }), t("city.noneMappedTile"), 0);   // a section with none mapped
+      else tiles.wet.set(t("overview.wetFigure", { wet: wet.length, total: premises.length }), t("overview.wetLabel", { area: areaName }), t("overview.wetNote", { rp }), wet.length / premises.length);
       tiles.depth.set(typical === null ? "–" : t("common.metres", { m: typical.toFixed(1) }), t("overview.typical"), t("overview.typicalNote"), 0);
       tiles.depth.setArt(typical === null ? null : miniGauge(typical));
     },

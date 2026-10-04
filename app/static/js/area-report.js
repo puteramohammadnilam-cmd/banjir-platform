@@ -1,10 +1,12 @@
 // A one-page flood summary of the area on show, to print or save as a PDF, for trade associations and councils. Every
 // figure is worked out here from the area's own data (its businesses' modelled depths); nothing is asked of the AI.
 import { CHANCE_YEARS, SCENARIOS, UNNAMED_ROAD, chanceWithin, h } from "./dom.js";
-import { t } from "./i18n.js";
+import { shareOf, shareText } from "./choropleth.js";
+import { dataWord, t } from "./i18n.js";
 import { DEFAULT_RP } from "./pick.js";
 
 const TOP_STREETS = 5;
+const TOP_SECTIONS = 10;
 
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -47,8 +49,29 @@ function record(area) {
     `${f.when}: ${f.what} (${f.source})`, f.account ? t("report.account") : "")))];
 }
 
-/** The sheet. `date` is the day it is printed, as text. */
-export function buildAreaReport({ area, premises, date }) {
+/** A city's sections with the most businesses with water at the default size (1 in 50), biggest first, ties in the
+ *  data's order; at most TOP_SECTIONS, and none with none: [{id, name, wet, total, share}]. */
+export function topSections(sections) {
+  return sections.map((section) => ({
+    id: section.id, name: section.name, wet: section.counts?.wet_businesses?.[DEFAULT_RP] ?? 0,
+    total: section.counts?.businesses ?? 0, share: shareOf(section, DEFAULT_RP),
+  })).filter((row) => row.wet > 0).sort((a, b) => b.wet - a.wet).slice(0, TOP_SECTIONS);
+}
+
+/** The whole city's sheet adds its sections with the most businesses with water, in the area's own `word` for one. */
+function sectionsPart(sections, word) {
+  const rows = topSections(sections);
+  return [h("h4", {}, t("report.sectionsHeading", { word: dataWord(word, { lower: true }), rp: DEFAULT_RP })),
+    rows.length ? h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
+      h("thead", {}, h("tr", {}, [dataWord(word), t("sections.colBusinesses"), t("sections.colSquares")].map((text) => h("th", { scope: "col" }, text)))),
+      h("tbody", {}, rows.map((row) => h("tr", {}, h("th", { scope: "row" }, row.name),
+        h("td", {}, t("overview.wetFigure", { wet: row.wet, total: row.total })), h("td", {}, shareText(row.share)))))))
+      : h("p", {}, t("report.noStreets"))];
+}
+
+/** The sheet. `date` is the day it is printed, as text. For a whole city `premises` is its lean index and `sections`
+ *  its sections (with `word`, the area's word for one); otherwise sections is null. */
+export function buildAreaReport({ area, premises, date, sections = null, word = null }) {
   const summary = areaSummary(premises);
   const notes = Object.values(area.notes ?? {}).filter(Boolean);
   return h("article", { class: "plan-sheet area-report" },
@@ -59,6 +82,7 @@ export function buildAreaReport({ area, premises, date }) {
     summary.streets.length
       ? h("ul", {}, summary.streets.map((s) => h("li", {}, `${s.name}: ${s.wet}`)))
       : h("p", {}, t("report.noStreets")),
+    ...(sections ? sectionsPart(sections, word) : []),
     h("h4", {}, t("report.floods")), ...record(area),
     ...(notes.length ? [h("h4", {}, t("report.notes")), h("ul", {}, notes.map((n) => h("li", {}, n)))] : []),
     area.council ? h("p", {}, t("report.council", { council: area.council })) : null,

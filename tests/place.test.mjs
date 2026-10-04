@@ -115,7 +115,7 @@ test("the first grid in coverage order that holds the point wins", () => {
   assert.equal(snapToGrid(3.0297599, 101.5364982, [E100, overlap]).grid, "N10_E100");
 });
 
-const NOTHING = { area: null, place: null, tab: null, rp: null, lang: null, chat: false, pointInQuery: false };
+const NOTHING = { area: null, section: null, place: null, tab: null, rp: null, lang: null, chat: false, pointInQuery: false };
 
 test("an old ?shop= link names the place; tab and rp keep their old rules", () => {
   assert.deepEqual(readUrl({ search: "?tab=business&shop=node-13414432501&rp=20", hash: "" }),
@@ -193,9 +193,9 @@ test("a link round-trips through the browser's URL", () => {
     { area: "kota-tinggi", tab: "cost", place: "pt:1.72665,103.90000", rp: "20" },
     { area: "kota-tinggi", tab: "cost", place: null, rp: "10" },
   ];
-  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { lang: null, chat: false, ...view, pointInQuery: false }, JSON.stringify(view));
+  for (const view of views) assert.deepEqual(readUrl(asLocation(writeUrl(view))), { section: null, lang: null, chat: false, ...view, pointInQuery: false }, JSON.stringify(view));
   const inMalay = { area: "kota-tinggi", tab: "business", place: ANETAS, rp: "50", lang: "ms" };
-  assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, chat: false, pointInQuery: false });
+  assert.deepEqual(readUrl(asLocation(writeUrl(inMalay))), { ...inMalay, section: null, chat: false, pointInQuery: false });
 });
 
 test("the language is kept in a link when set, after the flood size and before a point's fragment", () => {
@@ -216,4 +216,26 @@ test("writing a link again drops a point from the query, so the page can clean i
   assert.equal(writeUrl(read), "?area=kota-tinggi&tab=business&rp=50");
   const both = readUrl({ search: "?shop=pt:3.0297599,101.5364982", hash: "#place=pt:1.72665,103.90000" });
   assert.equal(writeUrl(both), "?#place=pt:1.72665,103.90000");
+});
+
+// ---------- sections of a city (plan Phase 2) ----------
+
+test("a section goes in the query after the area, and comes back as given", () => {
+  assert.equal(writeUrl({ section: "seksyen-25", tab: "business", place: "node-1", rp: "50" }), "?section=seksyen-25&tab=business&place=node-1&rp=50");
+  assert.equal(writeUrl({ area: "city-b", section: "presint-9", tab: "overview" }), "?area=city-b&section=presint-9&tab=overview");
+  assert.equal(readUrl({ search: "?section=seksyen-25&tab=cost" }).section, "seksyen-25");
+  const view = { area: null, section: "seksyen-u12", tab: "business", place: "node-7", rp: "20" };
+  assert.deepEqual(readUrl(asLocation(writeUrl(view))), { ...view, lang: null, chat: false, pointInQuery: false });
+});
+
+test("a section that is not a plain id is no section, so nothing odd reaches an API path", () => {
+  for (const odd of ["", "../x", "Seksyen 25", "a/b", "x".repeat(61), "-x", "seksyen-25?x=1"]) {
+    assert.equal(readUrl({ search: `?section=${encodeURIComponent(odd)}` }).section, null, odd);
+  }
+  assert.equal(writeUrl({ section: "../x", tab: "overview" }), "?tab=overview");
+});
+
+test("a point in a section keeps its square in the fragment: the query names only the page's own section", () => {
+  assert.equal(writeUrl({ section: "seksyen-25", tab: "business", place: ANETAS, rp: "50" }), `?section=seksyen-25&tab=business&rp=50#place=${ANETAS}`);
+  assert.equal(writeUrl({ section: null, tab: "business", place: ANETAS }), `?tab=business#place=${ANETAS}`, "the city view: no section at all");
 });

@@ -65,6 +65,13 @@ export function translate(tables, code, key, vars = {}) {
 /** The text for `key` in the page's language (see translate). */
 export const t = (key, vars = {}) => translate(TABLES, lang, key, vars);
 
+/** A word an area's data gives in each language ({en, ms}, such as its word for a section), in the page's language,
+ *  else English; lower-cased for the middle of a sentence. "" when the data gives none. */
+export function dataWord(words, { lower = false } = {}) {
+  const word = words?.[lang] ?? words?.[DEFAULT_LANG] ?? "";
+  return lower ? word.toLocaleLowerCase(lang) : word;
+}
+
 /** A number with the page's grouping, as Intl gives it for Malaysia. */
 export const formatNumber = (value, options = {}) => Number(value).toLocaleString(NUMBER_LOCALE[lang], options);
 

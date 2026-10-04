@@ -2,7 +2,8 @@
 // point someone picked, addressed by one id string, as in app/places.py:
 //   business  "node-11075038761"       (node|way|relation)-digits: an OpenStreetMap business in a listed area
 //   point     "pt:3.02998,101.53667"   the centre of the 90 m flood model square that holds the point, 5 decimals
-// A link carries the area, tab, flood size, a business's id and the language (when not English) in its query. A point's id goes in the fragment
+// A link carries the area, the section of a city split into sections, tab, flood size, a business's id and the language
+// (when not English) in its query. A point's id goes in the fragment
 // (#place=…) and never in the query: the browser sends the query to the server, where it reaches the logs, but it
 // never sends the fragment.
 import { SCENARIOS } from "./dom.js";
@@ -12,6 +13,7 @@ export const TABS = ["overview", "business", "cost"];
 const BUSINESS_ID = /^(?:node|way|relation)-[0-9]{1,19}$/;
 const POINT_ID = /^pt:(-?[0-9]{1,2}\.[0-9]{5}),(-?[0-9]{1,3}\.[0-9]{5})$/;
 const POINT_PREFIX = "pt:";
+const SECTION_ID = /^[a-z0-9][a-z0-9-]{0,59}$/;   // a section's id as its city's data writes it, such as "presint-9"
 const ID_DECIMALS = 5;
 const MAX_LAT = 90;
 const MAX_LON = 180;
@@ -93,10 +95,11 @@ export function overlapsView(view, south, west, { px, py }) {
 }
 
 const given = (value) => value || null;   // an empty parameter counts as none
+/** A section id in the form the data writes them, else null: the page puts it in an API path. */
+const sectionId = (value) => (typeof value === "string" && SECTION_ID.test(value) ? value : null);
 const claimsPoint = (value) => typeof value === "string" && value.startsWith(POINT_PREFIX);   // as places.is_point_id
 
-/** What a link asks for: {area, place, tab, rp, lang, chat, pointInQuery}; area, place, tab, rp and lang are null when not
- *  there. tab, rp and lang are null unless valid. chat is true for ?tab=ask, the old Ask AI tab, which is now the floating
+/** What a link asks for: {area, section, place, tab, rp, lang, chat, pointInQuery}; each is null when not there. tab, rp and lang are null unless valid. chat is true for ?tab=ask, the old Ask AI tab, which is now the floating
  *  chat: it opens over the page's own tab. area and place are passed on as given, for the page to check against what this
  *  build holds. The place is the fragment's (where points go), else ?place=, else ?shop= from links made before
  *  there were points. A point is read only from the fragment: pointInQuery says the query named one (or anything
@@ -110,6 +113,7 @@ export function readUrl({ search = "", hash = "" } = {}) {
   const lang = query.get("lang");
   return {
     area: given(query.get("area")),
+    section: sectionId(query.get("section")),
     place: given(fragment.get("place")) ?? given(named.find((value) => value && !claimsPoint(value))),
     tab: TABS.includes(tab) ? tab : null,
     chat: tab === "ask",
@@ -119,12 +123,12 @@ export function readUrl({ search = "", hash = "" } = {}) {
   };
 }
 
-/** The link for a view, to pass to history.replaceState or location.assign. Area, tab, a business's id, rp and lang go
- *  in the query, in that order; a point's id goes in the fragment. Null values, and a place that is not a valid id, are
- *  left out; give area null for the default area. */
-export function writeUrl({ area = null, place = null, tab = null, rp = null, lang = null } = {}) {
+/** The link for a view, to pass to history.replaceState or location.assign. Area, section, tab, a business's id, rp and
+ *  lang go in the query, in that order; a point's id goes in the fragment. Null values, and a place or section that is
+ *  not a valid id, are left out; give area null for the default area, and section null for a whole area. */
+export function writeUrl({ area = null, section = null, place = null, tab = null, rp = null, lang = null } = {}) {
   const ref = parseRef(place);
-  const query = [["area", area], ["tab", tab], ["place", ref?.kind === "business" ? ref.id : null], ["rp", rp],
+  const query = [["area", area], ["section", sectionId(section)], ["tab", tab], ["place", ref?.kind === "business" ? ref.id : null], ["rp", rp],
     ["lang", LANGS.includes(lang) ? lang : null]]
     .filter(([, value]) => value != null && value !== "")
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);

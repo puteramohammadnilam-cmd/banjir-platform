@@ -23,18 +23,32 @@ export function areaOf(place, page, areas) {
 
 const degrees = (value) => (Number.isFinite(value) ? value.toFixed(COORD_DECIMALS) : null);
 
+/** Where a point is, for its title: its section and city (a city split into sections; the server gives the point's
+ *  `section`, {id, name}), else its area. A section's page is dressed as an area (start.js pageArea): its city's own
+ *  name is `city_name`. */
+const placeName = (area, section) => (section ? `${section.name}, ${area.city_name ?? area.name}` : area.display_name ?? area.name);
+
+/** The offer to open where a point lies, {kind, id, text, action}: another listed area ("area"), or in the page's own
+ *  city a section other than the page's ("section"; on the whole city's page, any section). Never taken on its own:
+ *  the point's section goes into a link only when the button is pressed. null when there is nothing to offer. */
+function elsewhereOf(area, section, page) {
+  const offer = (kind, id, name) => ({ kind, id, text: t("point.elsewhere", { area: name }), action: t("point.openArea", { area: name }) });
+  if (!area) return null;
+  if (area.id !== page?.id) return offer("area", area.id, area.city_name ?? area.name);
+  return section && section.id !== (page.section_id ?? null) ? offer("section", section.id, section.name) : null;
+}
+
 /** The words above a point's depth. `subline` is null if the square's centre did not come as numbers. `elsewhere` is
- *  the offer for a point that lies in a listed area other than the page's: where it is, and how to open that area; null
- *  when there is nothing to offer. */
+ *  the offer for a point that lies in a listed area, or a section, other than the page's (elsewhereOf). */
 export function pointHeader(place, page, areas) {
   const area = areaOf(place, page, areas);
+  const section = place.section?.id ? place.section : null;
   const [lat, lon] = [degrees(place.lat), degrees(place.lon)];
-  const isElsewhere = area !== null && area.id !== page?.id;
   return {
     kicker: POINT_KICKER,
-    title: area ? t("point.in", { area: area.display_name ?? area.name }) : UNNAMED_TITLE,
+    title: area ? t("point.in", { area: placeName(area, section) }) : UNNAMED_TITLE,
     subline: lat !== null && lon !== null ? t("point.subline", { lat, lon }) : null,
     tags: POINT_TAGS,
-    elsewhere: isElsewhere ? { id: area.id, text: t("point.elsewhere", { area: area.name }), action: t("point.openArea", { area: area.name }) } : null,
+    elsewhere: elsewhereOf(area, section, page),
   };
 }

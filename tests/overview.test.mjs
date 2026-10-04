@@ -7,7 +7,9 @@ import { beforeEach, test } from "node:test";
 
 import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, h } from "../app/static/js/dom.js";
-import { createDirectory, renderAreaLabels, renderLegend } from "../app/static/js/overview.js";
+import { createCityDirectory, createDirectory, renderAreaLabels, renderLegend } from "../app/static/js/overview.js";
+import { pageArea } from "../app/static/js/start.js";
+import { CITY_AREA, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs";
 import { installFakeDom } from "./fake_dom.mjs";
 import { HOME, shop } from "./point_fixtures.mjs";
 
@@ -120,4 +122,113 @@ test("the key leaves out the relief centre when the area has none", () => {
   renderLegend(legend, false);
   assert.equal(legend.querySelector(".shelter-pin"), null);
   assert.equal(legend.querySelectorAll(".swatch").length, BANDS.length + 1);
+});
+
+test("a section's page names the section, with its city, in the search's heading and the list's", () => {
+  const elements = new Map();
+  globalThis.document.getElementById = (id) => {
+    if (!elements.has(id)) elements.set(id, h("p"));
+    return elements.get(id);
+  };
+  renderAreaLabels(pageArea(CITY_AREA, SECTIONS[1]));
+  assert.equal(elements.get("finder-hero-label").textContent, "Find your shop in Seksyen 25");
+  assert.equal(elements.get("directory-heading").textContent, "Businesses in Seksyen 25");
+  assert.equal(elements.get("map").getAttribute("aria-label"), "Map of Seksyen 25, Shah Alam, with modelled flood depth at each business");
+});
+
+// ---------- the whole city ----------
+
+function mountCity(index = INDEX) {
+  const parts = { list: h("ol"), filter: h("input"), status: h("p"), next: h("div"), head: h("div") };
+  const opened = [];
+  const directory = createCityDirectory(parts, index, {
+    area: CITY_AREA, sections: SECTIONS, onOpen: (id) => opened.push(id), onCheckPoint: () => {}, onOtherArea: () => {},
+  });
+  return { ...parts, directory, opened };
+}
+const typeIn = (filter, text) => { filter.value = text; filter.dispatch("input"); };
+
+test("the whole city's list shows nothing until a name is typed, and says how many it can search", () => {
+  const { list, status, head, next } = mountCity();
+  assert.equal(list.children.length, 0, "no rows are built for a city's thousands of businesses up front");
+  assert.equal(status.textContent, `Type a name to search the ${INDEX.length} businesses in Shah Alam.`);
+  assert.equal(head.hidden, true);
+  assert.equal(next.hidden, true);
+});
+
+test("a filter shows the city's matching businesses, each with its section, and a row opens its business", () => {
+  const { list, filter, status, opened } = mountCity();
+  typeIn(filter, "dobi");
+  assert.deepEqual(shownNames(list), ["Dobi Kering", "Dobi Queen"]);
+  assert.match(list.children[0].querySelector(".meta").textContent, /· Seksyen 25$/);
+  assert.match(list.children[0].querySelector("button").getAttribute("aria-label"), /In Seksyen 25\.$/);
+  assert.equal(status.textContent, "");
+  list.children[1].querySelector("button").click();
+  assert.deepEqual(opened, ["node-2"]);
+  typeIn(filter, "seksyen u1");
+  assert.deepEqual(shownNames(list), ["Kedai U Satu"], "a section's name finds its businesses");
+  typeIn(filter, "");
+  assert.equal(list.children.length, 0, "an emptied filter empties the list again");
+});
+
+test("a search with more than 100 matches shows the first 100 and says to type more", () => {
+  const many = Array.from({ length: 140 }, (_, i) => ({ ...INDEX[1], id: `node-${1000 + i}`, name: `Kedai ${String(i).padStart(3, "0")}` }));
+  const { list, directory, status } = mountCity(many);
+  directory.showMatches("kedai");
+  assert.equal(list.children.length, 100);
+  assert.equal(status.textContent, "Showing the first 100 of 140 matches. Type more of the name to narrow them.");
+  assert.equal(shownNames(list)[0], "Kedai 000");
+});
+
+test("a search that matches nothing in the city says so, with the ways on", () => {
+  const { directory, status, next } = mountCity();
+  directory.showMatches("Kedai Runcit Pak Ali");
+  assert.equal(status.textContent, "Not on our list for Shah Alam. Our list comes from a public map and misses some shops.");
+  assert.equal(next.hidden, false);
+});
+
+test("the city's key: the sections' shading in the area's word, the squares' ramp, the relief centre", () => {
+  const legend = h("ul");
+  renderLegend(legend, true, { word: SECTION_WORD });
+  assert.deepEqual(legend.children.map((group) => group.querySelector(".legend-heading").textContent),
+    ["Shading: share of each section's 90 m squares with water", "Squares: the model's 90 m squares, darker = deeper"]);
+  assert.equal(legend.querySelectorAll(".choro-swatch").length, 6);
+  assert.ok(legend.querySelector(".shelter-pin"));
+  assert.equal(legend.querySelectorAll(".swatch").length, 0, "no business dots on the whole city's map");
+});
+
+test("the city's map is labelled for its shading and described by the table that holds its figures", () => {
+  const elements = new Map();
+  globalThis.document.getElementById = (id) => {
+    if (!elements.has(id)) elements.set(id, h("p"));
+    return elements.get(id);
+  };
+  renderAreaLabels(CITY_AREA, { word: SECTION_WORD });
+  const map = elements.get("map");
+  assert.match(map.getAttribute("aria-label"), /^Map of Shah Alam, Selangor: each section shaded/);
+  assert.equal(map.getAttribute("aria-describedby"), "sections-caption");
+  assert.equal(elements.get("map-lead").textContent,
+    "Each section is shaded by the share of its 90 m squares with water in the model. Tap one to open it.");
+  assert.equal(elements.get("sections-heading").textContent, "Compare the sections");
+});
+
+// ---------- a section with no businesses, and one the river model leaves dry ----------
+
+test("a section with no businesses mapped says so, with the way to check a spot, not that a filter matched nothing", () => {
+  const parts = { list: h("ol"), filter: h("input"), status: h("p"), next: h("div"), head: h("div") };
+  const area = pageArea(CITY_AREA, SECTIONS[2]);
+  createDirectory(parts, [], { area, onOpen() {}, onCheckPoint: () => {} });
+  assert.equal(parts.status.textContent, "No businesses are mapped in Seksyen U1 yet. Our list comes from a public map.");
+  assert.equal(parts.head.hidden, true);
+  assert.equal(parts.next.hidden, false);
+});
+
+test("where floods are on record but the river model shows no water, the map says it shows river floods only", async () => {
+  const { riverOnlyNote } = await import("../app/static/js/overview.js");
+  const dry = { ...SECTIONS[2], counts: { ...SECTIONS[2].counts, businesses: 4 } };
+  const page = pageArea({ ...CITY_AREA }, dry);
+  assert.equal(riverOnlyNote(page, dry), "Floods are on record for Seksyen U1, but the model shows little or no river water at its businesses: it maps river floods only, not flash floods or blocked drains.");
+  assert.equal(riverOnlyNote(pageArea(CITY_AREA, SECTIONS[1]), SECTIONS[1]), null, "wet in the model: nothing to explain");
+  assert.equal(riverOnlyNote({ ...page, history: { ...CITY_AREA.history, floods: [] } }, dry), null, "no record: nothing disagrees");
+  assert.equal(riverOnlyNote(CITY_AREA, null), null, "the whole city has its own map");
 });
