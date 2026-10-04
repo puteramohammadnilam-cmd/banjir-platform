@@ -25,7 +25,7 @@ test("the words give the band, then the surface and the river in whole metres", 
   useLang("en");
   assert.deepEqual(elevationWords({ ground_m: 6.5, above_river_m: 4.0 }), {
     value: en["business.elevationHigh"],
-    note: "The surface is about 7 m above sea level. That is about 4 m above the nearest mapped river's level.",
+    note: "The lowest ground within about 45 m is about 7 m above sea level. The lowest point there is about 4 m above the nearest mapped river's level.",
   });
   assert.equal(elevationWords({ ground_m: 3.2, above_river_m: 1.6 }).value, en["business.elevationMid"]);
   const near = elevationWords({ ground_m: 2.1, above_river_m: -1.6 });
@@ -37,7 +37,7 @@ test("the words give the band, then the surface and the river in whole metres", 
 test("no river within reach, a surface at sea level, and nothing loaded each say so", () => {
   useLang("en");
   assert.deepEqual(elevationWords({ ground_m: 40.2, above_river_m: null }),
-    { value: "No mapped river within 3 km", note: "The surface is about 40 m above sea level." });
+    { value: "No mapped river within 3 km", note: "The lowest ground within about 45 m is about 40 m above sea level." });
   assert.equal(elevationWords({ ground_m: -17.3, above_river_m: -19.9 }).note.split(". ")[0],
     en["business.elevationGroundLow"].replace(/\.$/, ""));
   for (const missing of [null, undefined]) {
@@ -52,7 +52,8 @@ test("the fact carries the limits wherever it shows a height, and only there", (
   const shown = elevationFact({ elevation: { ground_m: 6.5, above_river_m: 4.0 } });
   assert.equal(textOf(shown.querySelector(".fact-label")), "Height of the ground");
   assert.equal(textOf(shown.querySelector(".fineprint")), en["business.elevationLimits"]);
-  assert.match(en["business.elevationLimits"], /roofs and trees/);
+  assert.match(en["business.elevationLimits"], /^Lowest satellite surface height within about 45 m/);
+  assert.match(en["business.elevationLimits"], /Roofs and trees can still lift it/);
   assert.match(en["business.elevationLimits"], /may not be the one that floods here/);
   assert.match(en["business.elevationLimits"], /Not a survey/);
   assert.equal(elevationFact({ elevation: null }).querySelector(".fineprint"), null);

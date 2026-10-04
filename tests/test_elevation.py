@@ -20,15 +20,17 @@ DEM = ROOT / "app" / "data" / "dem"
 ORIGIN, PIXEL, TILE = (100.0, 10.0), 0.25, 16   # the depth fixture's grid, so a point has both a depth and a height
 ROWS, COLS = 20, 24
 SPECIAL = {(0, 0): -9999.0, (0, 1): 0.0, (0, 2): -2.345, (0, 3): math.nan, (0, 4): -0.04, (0, 5): 12.36}
-NO_RIVER = (1, 1)     # a surface but no river within reach
+NO_SURFACE = {(r, c) for r in range(9, 12) for c in range(9, 12)}     # a whole 3 x 3 window of no data
+NO_RIVER = {(r, c) for r in range(14, 17) for c in range(18, 21)}     # a surface, but no river within reach
 
 
 def surface(r: int, c: int) -> float:
-    return SPECIAL.get((r, c), 5 + r + c / 10)
+    """5 m rising by 1 a row south and 0.1 a column east, so a window's lowest square is its north-west one."""
+    return -9999.0 if (r, c) in NO_SURFACE else SPECIAL.get((r, c), 5 + r + c / 10)
 
 
 def above(r: int, c: int) -> float:
-    return -9999.0 if (r, c) == NO_RIVER else surface(r, c) - 7
+    return -9999.0 if (r, c) in NO_RIVER or (r, c) in NO_SURFACE else surface(r, c) - 7
 
 
 def write_crop(folder: Path, name: str = "test-area", origin=ORIGIN, layers=("surface", "above_river"), **options) -> Path:
@@ -59,17 +61,25 @@ def test_height_value_keeps_zero_and_negatives_and_drops_no_data():
     assert math.copysign(1, elevation.height_value(-0.04)) == 1   # never "-0.0" in an answer
 
 
-def test_a_spot_gives_ground_and_height_above_the_river(dem):
-    assert elevation.at(*centre(5, 7)) == {"ground_m": 10.7, "above_river_m": 3.7}
-    assert elevation.at(*centre(0, 1)) == {"ground_m": 0.0, "above_river_m": -7.0}
-    assert elevation.at(*centre(0, 2)) == {"ground_m": -2.3, "above_river_m": -9.3}   # negatives are kept
-    assert elevation.at(*centre(0, 5)) == {"ground_m": 12.4, "above_river_m": 5.4}
+def test_a_spot_gives_the_lowest_of_the_3_by_3_squares_around_it(dem):
+    assert elevation.at(*centre(5, 7)) == {"ground_m": surface(4, 6), "above_river_m": round(surface(4, 6) - 7, 1)}
+    assert elevation.at(*centre(5, 7)) == {"ground_m": 9.6, "above_river_m": 2.6}
+    assert elevation.at(*centre(15, 16)) == {"ground_m": 20.5, "above_river_m": 13.5}   # across four tiles
+    assert elevation.at(*centre(1, 2)) == {"ground_m": -2.3, "above_river_m": -9.3}     # negatives are kept
 
 
-def test_no_river_within_reach_is_null_and_no_surface_is_no_answer(dem):
-    assert elevation.at(*centre(*NO_RIVER)) == {"ground_m": 6.1, "above_river_m": None}
-    assert elevation.at(*centre(0, 0)) is None    # no data
-    assert elevation.at(*centre(0, 3)) is None    # NaN
+def test_the_window_stops_at_the_crops_edge_and_skips_no_data(dem):
+    assert elevation.at(*centre(ROWS - 1, COLS - 1)) == {"ground_m": 25.2, "above_river_m": 18.2}   # 4 squares
+    # the spot's own square is no data and (0, 3) is NaN: both left out, the other squares still count
+    assert elevation.at(*centre(0, 0)) == {"ground_m": 0.0, "above_river_m": -7.0}
+    assert elevation.at(*centre(1, 4)) == {"ground_m": 0.0, "above_river_m": -7.0}
+
+
+def test_no_river_in_the_window_is_null_and_no_surface_in_it_is_no_answer(dem):
+    assert elevation.at(*centre(15, 19)) == {"ground_m": 20.8, "above_river_m": None}
+    assert elevation.at(*centre(15, 17)) == {"ground_m": 20.6, "above_river_m": 13.6}   # the river side counts
+    assert elevation.at(*centre(10, 10)) is None
+    assert elevation.at(*centre(10, 11)) == {"ground_m": 15.2, "above_river_m": 8.2}    # one column clear of it
 
 
 def test_outside_every_crop_is_none(dem, monkeypatch):
@@ -84,7 +94,7 @@ def test_a_second_crop_is_read_where_the_first_does_not_reach(dem):
     write_crop(dem, "east-area", origin=(ORIGIN[0] + COLS * PIXEL, ORIGIN[1]))
     elevation.crops.cache_clear()
     lat, lon = centre(5, 7)
-    assert elevation.at(lat, lon + COLS * PIXEL) == elevation.at(lat, lon) == {"ground_m": 10.7, "above_river_m": 3.7}
+    assert elevation.at(lat, lon + COLS * PIXEL) == elevation.at(lat, lon) == {"ground_m": 9.6, "above_river_m": 2.6}
 
 
 def test_one_file_of_two_or_two_grids_are_refused(tmp_path):
@@ -112,8 +122,8 @@ def test_a_damaged_file_logs_its_name_and_tile_but_never_the_point(tmp_path, mon
 def test_a_point_carries_the_height_at_its_squares_centre(dem, tmp_path, monkeypatch):
     monkeypatch.setenv("BANJIR_RASTER_DIR", str(fx.write_depth_set(tmp_path / "rasters")))
     place = places.point(*centre(14, 4))   # inside the Peninsula box, wet in the depth fixture
-    assert place["elevation"] == elevation.at(*places.parse_point_id(place["id"])) == {"ground_m": 19.4,
-                                                                                      "above_river_m": 12.4}
+    assert place["elevation"] == elevation.at(*places.parse_point_id(place["id"])) == {"ground_m": 18.3,
+                                                                                      "above_river_m": 11.3}
 
 
 # --- the committed crops ---
@@ -143,13 +153,17 @@ def real_dem(monkeypatch):
     areas._businesses.cache_clear()
 
 
-@pytest.mark.parametrize(("spot", "lat", "lon", "ground", "river"), [
-    ("Taman Sri Muda", 3.0249, 101.5325, 6.5, 3.5),
-    ("Bukit Sapu Tangan, 204 m on OpenStreetMap", 3.1145919, 101.4983917, 216.8, 178.7),
-    ("Bukit Nibung Gila, 120 m on OpenStreetMap", 3.1451708, 101.5584969, 118.6, 105.2),
-    ("Bukit Lipat Kajang, 64 m on OpenStreetMap", 3.0247514, 101.4458931, 65.2, 57.9),
+@pytest.mark.parametrize(("spot", "lat", "lon", "top", "ground", "river"), [
+    ("Taman Sri Muda", 3.0249, 101.5325, 6.5, 6.5, 3.5),
+    ("Bukit Sapu Tangan, 204 m on OpenStreetMap", 3.1145919, 101.4983917, 216.8, 198.9, 160.8),
+    ("Bukit Nibung Gila, 120 m on OpenStreetMap", 3.1451708, 101.5584969, 118.6, 103.8, 90.4),
+    ("Bukit Lipat Kajang, 64 m on OpenStreetMap", 3.0247514, 101.4458931, 65.2, 53.4, 46.1),
 ])
-def test_known_spots_in_shah_alam(real_dem, spot, lat, lon, ground, river):
+def test_known_spots_in_shah_alam(real_dem, spot, lat, lon, top, ground, river):
+    """`top` is the surface in the spot's own square (the decoding check: hills against their mapped height, trees
+    adding a few metres); the answer is the lowest of the 3 x 3 squares, well below a hill's top."""
+    crop = elevation.crops()[0]
+    assert crop.surface.value_at(*crop.surface.grid.cell(lon, lat), elevation.height_value) == top, spot
     assert elevation.at(lat, lon) == {"ground_m": ground, "above_river_m": river}, spot
 
 
@@ -163,7 +177,7 @@ def test_the_shah_alam_crop_covers_its_box_and_stops_there(real_dem):
 def test_premises_carry_elevation_where_it_is_loaded_and_null_elsewhere(real_dem):
     sri_muda = areas.premises("sri-muda")
     assert all(set(p["elevation"]) == {"ground_m", "above_river_m"} for p in sri_muda)
-    assert sri_muda[0]["elevation"] == {"ground_m": 12.6, "above_river_m": 8.0}
+    assert sri_muda[0]["elevation"] == {"ground_m": 5.3, "above_river_m": 0.9}
     assert all(p["elevation"] is None for p in areas.premises("kuantan"))
     found = places.resolve(sri_muda[0]["id"])
     assert found["elevation"] == sri_muda[0]["elevation"]

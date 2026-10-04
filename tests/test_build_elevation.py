@@ -187,9 +187,12 @@ def test_a_build_writes_two_crops_that_the_app_reads(tmp_path, monkeypatch):
     found = be.build(be.parse_args(["build", "--name", "test", "--bbox", "101.3", "2.8", "101.6", "3.2",
                                     "--raw", str(raw), "--out", str(out), "--margin-km", "0"]))
     assert sorted(found["files"]) == ["test_above_river.tif", "test_surface.tif"]
-    monkeypatch.setenv("BANJIR_DEM_DIR", str(out))
-    on_river = elevation.at(3.0, 101.5)                    # square gx 1624: its neighbours on the river are 0.01 apart
-    assert on_river == {"ground_m": round(height(48, 1624), 1), "above_river_m": 0.0}
-    one_up = elevation.at(3.0 + PX, 101.5)
-    assert one_up == {"ground_m": round(height(49, 1624), 1), "above_river_m": 1.0}
-    assert elevation.at(3.0 + 3 * PX, 101.5)["above_river_m"] is None   # about 21 km away: past the cap
+    crop = elevation.load(out)[0]                          # one square at a time, not app/elevation's 3 x 3 lowest
+
+    def square(lat: float, lon: float) -> tuple:
+        cell = crop.surface.grid.cell(lon, lat)
+        return tuple(f.value_at(*cell, elevation.height_value) for f in (crop.surface, crop.above_river))
+
+    assert square(3.0, 101.5) == (round(height(48, 1624), 1), 0.0)   # on the river; its river neighbours 0.01 apart
+    assert square(3.0 + PX, 101.5) == (round(height(49, 1624), 1), 1.0)
+    assert square(3.0 + 3 * PX, 101.5)[1] is None                    # about 21 km away: past the cap

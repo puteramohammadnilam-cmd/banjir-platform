@@ -7,9 +7,14 @@ Each area with elevation has two files, made by tools/build_elevation.py on the 
                            beyond; negative where the surface is below that level
 Both are read with app/raster.py (DepthFile.value_at), in the layout it reads, with no data -9999.
 
-at(lat, lon) gives {"ground_m", "above_river_m"} in metres to 1 decimal (above_river_m null with no mapped river within
-3 km), or None where no crop covers the spot: the page says "not loaded for this spot yet". A business is looked up at
-its own point, a picked square at its centre (places.py), so the same spot always gives the same answer.
+at(lat, lon) gives {"ground_m", "above_river_m"} in metres to 1 decimal, or None where no crop covers the spot: the page
+says "not loaded for this spot yet". Each is the LOWEST value of its file in the 3 x 3 squares around the spot (the
+square holding it and the 8 around that, about 90 m across: every square centre within about 45 m of the spot's
+square's centre), because a satellite surface at a shop's own point is mostly its roof. The two minimums are taken
+separately, so they may come from different squares. Squares past the crop's edge and no-data squares are left out;
+above_river_m is null when no square of the window has a river within 3 km, and the whole answer None when none has a
+surface. A business is looked up at its own point, a picked square at its centre (places.py), so the same spot always
+gives the same answer.
 
 The files are part of the repo (app/data/dem/SOURCES.txt), loaded on first use and kept. A file that cannot be read
 is logged with its name and tile, never a point, and gives None, so a damaged crop costs the heights, not the page.
@@ -32,6 +37,7 @@ DEM_DIR = Path(__file__).resolve().parent / "data" / "dem"
 FILE_NAME = re.compile(r"^(?P<name>[a-z0-9]+(?:-[a-z0-9]+)*)_(?P<layer>surface|above_river)\.tif$")
 LAYERS = ("surface", "above_river")
 DECIMALS = 1
+WINDOW = 1                    # squares each side of the spot's square: the 3 x 3 window
 CACHE_TILES = 32              # decoded 256 px tiles kept: 32 x 256 KB, about 8 MB; one area's two files hold 30
 
 
@@ -51,13 +57,22 @@ class Crop:
     above_river: raster.DepthFile
 
     def at(self, lat: float, lon: float) -> dict | None:
+        """The lowest ground and height above the river in the window around the spot (the module docstring)."""
         cell = self.surface.grid.cell(lon, lat)
         if cell is None:
             return None
-        ground = self.surface.value_at(*cell, height_value)
+        row, col = cell
+        window = [(row + dr, col + dc) for dr in range(-WINDOW, WINDOW + 1) for dc in range(-WINDOW, WINDOW + 1)]
+        ground = lowest(self.surface, window)
         if ground is None:
             return None
-        return {"ground_m": ground, "above_river_m": self.above_river.value_at(*cell, height_value)}
+        return {"ground_m": ground, "above_river_m": lowest(self.above_river, window)}
+
+
+def lowest(file: raster.DepthFile, cells: list[tuple[int, int]]) -> float | None:
+    """The smallest height_value of the file at the cells, leaving out no data and cells outside its grid; None if
+    none is left."""
+    return min((v for row, col in cells if (v := file.value_at(row, col, height_value)) is not None), default=None)
 
 
 def load(folder: str | Path) -> tuple[Crop, ...]:

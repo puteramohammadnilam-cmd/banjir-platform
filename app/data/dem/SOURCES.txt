@@ -42,6 +42,9 @@ Values:    float32 metres rounded to 0.1 m, 256 px deflate tiles, no data -9999.
            surface      the GLO-30 height above the EGM2008 geoid (about mean sea level): roofs and trees are in it
            above_river  surface minus the level of the nearest mapped river within 3 km (no data beyond: 79,301
                         squares); negative where the surface is below that river level
+Lookup:    app/elevation.py answers with the lowest value of each file in the 3 x 3 squares around a spot (about
+           90 m across; square centres within about 45 m), since a shop's own square is mostly its roof. The files
+           themselves hold every square as built.
 Checked:   every value read back through app/raster.py byte for byte as written; the surface crop byte for byte equal
            to the source tiles' heights rounded to 0.1 m (decoded a second way with numpy, 4 Oct 2026); hills against
            OpenStreetMap peak heights (Bukit Sapu Tangan 204 m: 216.8; Bukit Nibung Gila 120 m: 118.6; Bukit Lipat
