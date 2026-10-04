@@ -26,7 +26,9 @@ flash and the score are null for a section with no land square, the score alone 
 and `score`, the method (`flash`, whose classes and breaks must be those of the flash flood potential files, and `score`
 with its weights, deviations and citations) and `validation`, how the figures compare with the flood record. A section
 is sent `indexes` {flash, score} (no ratings), the area's details `index_method` {flash, score, validation} and `layers`
-{flash_flood} (app/indexes.py layer): null, or left out of a section, where there are no files.
+{flash_flood} (app/indexes.py layer): null, or left out of a section, where there are no files. While the area holds the
+score back (area.json show_index_score false), nothing of it is sent: no `indexes.score`, no `index_method.score`, and
+no score correlations or hotspot score ranks in the validation.
 
 Flood record: an area's own area.json record, as before, else its built history.json (app/history.py for_scope), cut to
 the city or to one section.
@@ -239,9 +241,23 @@ def index_method(area_id: str) -> dict | None:
     doc = index_doc(area_id)
     if doc is None:
         return None
+    shown = areas.get(area_id).show_index_score   # the page shows the score only when this is true
+    validation = areas._thaw(doc["validation"])
+    if not shown:
+        return {"flash": indexes.flash_method(area_id), "validation": _without_score(validation), "show_score": False}
     score = {key: areas._thaw(value) for key, value in doc["method"]["score"].items() if key in SCORE_METHOD_KEYS}
-    return {"flash": indexes.flash_method(area_id), "score": score, "validation": areas._thaw(doc["validation"]),
-            "show_score": areas.get(area_id).show_index_score}   # the page shows the score only when this is true
+    return {"flash": indexes.flash_method(area_id), "score": score, "validation": validation, "show_score": True}
+
+
+def _without_score(validation: dict) -> dict:
+    """The validation less the score's own figures: its correlations (score_*) and the hotspots' score ranks."""
+    found = dict(validation)
+    if isinstance(found.get("spearman"), dict):
+        found["spearman"] = {k: v for k, v in found["spearman"].items() if not k.startswith("score_")}
+    if isinstance(found.get("hotspots"), list):
+        found["hotspots"] = [{k: v for k, v in spot.items() if k != "score_rank"} if isinstance(spot, dict) else spot
+                             for spot in found["hotspots"]]
+    return found
 
 
 def city_figures(area_id: str) -> Mapping | None:
@@ -360,14 +376,16 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
 
 def public(section: Mapping, area_id: str | None = None) -> dict:
     """A section as the page is sent it: its sections.json entry as built and, when its area (area_id) has an
-    indexes.json, its `indexes` {flash: {mean, share}, score: {value, class} | null}."""
+    indexes.json, its `indexes` {flash: {mean, share}, score: {value, class} | null}; no `score` at all while the area
+    holds the score back (area.json show_index_score false)."""
     sent = areas._thaw(section)
     doc = index_doc(area_id) if area_id else None
     if doc is not None:
         figures = doc["sections"][section["id"]]
         score = figures.get("score")
-        sent["indexes"] = {"flash": areas._thaw(figures["flash"]) if figures.get("flash") else None,
-                           "score": {"value": score["value"], "class": score["class"]} if score else None}
+        sent["indexes"] = {"flash": areas._thaw(figures["flash"]) if figures.get("flash") else None}
+        if areas.get(area_id).show_index_score:   # held back until its comparison with past floods is reviewed
+            sent["indexes"]["score"] = {"value": score["value"], "class": score["class"]} if score else None
     return sent
 
 

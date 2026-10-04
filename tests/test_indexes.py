@@ -169,7 +169,12 @@ def test_a_point_carries_the_figure_at_its_squares_centre(folder, tmp_path, monk
 
 # --- indexes.json for the sections ---
 
-def write_doc(root, **changes):
+def write_doc(root, *, shown: bool = True, **changes):
+    """The fixture indexes.json, with the area's show_index_score set (the score is sent only when it is true)."""
+    config_path = root / CITY / "area.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config_path.write_text(json.dumps({**config, "show_index_score": shown}), encoding="utf-8")
+    sections.clear_caches()
     return ix.write_indexes(root / CITY, [s["id"] for s in sections.listed(CITY)], **changes)
 
 
@@ -193,7 +198,27 @@ def test_a_section_carries_its_flash_and_score_figures(city):
     assert "indexes" not in sections.public(sections.listed(CITY)[0])
 
 
+def test_the_held_back_score_is_never_sent(city, city_indexes):
+    write_doc(city, shown=False)
+    sections.clear_caches()
+    area = areas.get(CITY)
+    assert area.show_index_score is False
+    first = sections.public(sections.listed(CITY)[0], CITY)
+    assert first["indexes"] == {"flash": {"mean": 6.0, "share": ix.SHARE}}
+    method = sections.details(area)["index_method"]
+    assert set(method) == {"flash", "validation", "show_score"} and method["show_score"] is False
+    assert method["validation"]["spearman"] == {"flash_vs_history": None}
+    assert method["validation"]["hotspots"] == [{"id": "zon-1", "history_events": 9, "flash_rank": 5}]
+    sent = json.dumps([sections.city_data(area), sections.section_data(area, sections.get(area, "zon-2"))])
+    assert "score_" not in sent and '"score": {"value"' not in sent and "Leeonis" not in sent
+    write_doc(city, shown=True)
+    assert "score" in sections.public(sections.listed(CITY)[0], CITY)["indexes"]
+    shown = sections.index_method(CITY)
+    assert "score" in shown and "score_rank" in shown["validation"]["hotspots"][0]
+
+
 def test_a_section_with_no_land_square_has_null_figures(city):
+    write_doc(city)
     doc = ix.indexes_doc([s["id"] for s in sections.listed(CITY)])
     doc["sections"]["zon-1"].update(flash=None, score=None)
     (city / CITY / "indexes.json").write_text(json.dumps(doc), encoding="utf-8")
@@ -203,6 +228,7 @@ def test_a_section_with_no_land_square_has_null_figures(city):
 
 
 def test_a_section_with_no_score_has_flash_figures_and_a_null_score(city):
+    write_doc(city)
     doc = ix.indexes_doc([s["id"] for s in sections.listed(CITY)])
     for found in doc["sections"].values():
         del found["score"]
