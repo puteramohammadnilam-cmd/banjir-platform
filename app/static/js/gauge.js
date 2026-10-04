@@ -2,7 +2,7 @@ import { ADULT_M, COUNTER_M, DOOR_M, SCENARIOS, band, bandColor, depthText, dept
 import { t } from "./i18n.js";
 
 // The shop-front drawing, in SVG units: a street, an adult, a door and a counter, to scale.
-const WIDTH = 330;
+const WIDTH = 360;
 const GROUND_Y = 208;
 const PX_PER_M = 62;
 const TOP_M = 3;                  // one storey: deeper water is cut off at the top, and the drawing says so
@@ -11,6 +11,7 @@ const PERSON_X = 58;
 const DOOR = { x: 104, w: 54 };
 const COUNTER = { x: 180, w: 82 };
 const LABEL_X = WIDTH - 4;
+const WATER_W = 280;              // water and the dashed levels stop here: the gutter to LABEL_X fits "1 dalam 500", so no label is under water
 const LABEL_GAP = 14;
 let drawnWaterM = 0;   // where the water stood in the last drawing, so the next one rises or falls from there
 let lastWater = null;
@@ -60,8 +61,8 @@ function levelLabels(premise, rp) {
 export function gauge(premise, rp, floorM) {
   const depth = premise.depth_m[rp];
   const shownM = band(depth) ? Math.min(depth, TOP_M) : 0;
-  const water = s("rect", { class: "water", x: 0, y: yAt(TOP_M), width: WIDTH, height: TOP_M * PX_PER_M, fill: bandColor(depth) });
-  const waterline = s("line", { class: "waterline", x1: 0, x2: WIDTH, y1: GROUND_Y, y2: GROUND_Y });
+  const water = s("rect", { class: "water", x: 0, y: yAt(TOP_M), width: WATER_W, height: TOP_M * PX_PER_M, fill: bandColor(depth) });
+  const waterline = s("line", { class: "waterline", x1: 0, x2: WATER_W, y1: GROUND_Y, y2: GROUND_Y });
   const fromM = paintedM();
   water.style.transform = `scaleY(${fromM / TOP_M})`;
   waterline.style.transform = `translateY(${-fromM * PX_PER_M}px)`;
@@ -73,13 +74,24 @@ export function gauge(premise, rp, floorM) {
     waterline.style.transform = `translateY(${-shownM * PX_PER_M}px)`;
   });
   const others = SCENARIOS.filter((key) => key !== rp && band(premise.depth_m[key]))
-    .map((key) => s("line", { class: "other-level", x1: 0, x2: LABEL_X - 46, y1: yAt(Math.min(premise.depth_m[key], TOP_M)), y2: yAt(Math.min(premise.depth_m[key], TOP_M)) }));
+    .map((key) => s("line", { class: "other-level", x1: 0, x2: WATER_W, y1: yAt(Math.min(premise.depth_m[key], TOP_M)), y2: yAt(Math.min(premise.depth_m[key], TOP_M)) }));
   return s("svg", { class: "gauge", viewBox: `0 0 ${WIDTH} ${GROUND_Y + 24}`, role: "img", "aria-label": gaugeSummary(premise, rp) },
     objects(floorM), water, waterline, others, objectLabels(floorM), levelLabels(premise, rp),
-    s("line", { class: "storey", x1: 0, x2: LABEL_X - 46, y1: yAt(TOP_M), y2: yAt(TOP_M) }),
+    s("line", { class: "storey", x1: 0, x2: WATER_W, y1: yAt(TOP_M), y2: yAt(TOP_M) }),
     depth > TOP_M && s("text", { class: "object-label", x: 6, y: yAt(TOP_M) + 28 }, t("gauge.deeper", { m: depth.toFixed(2) })),
     s("line", { class: "street", x1: 0, x2: WIDTH, y1: GROUND_Y, y2: GROUND_Y }),
     s("text", { x: 6, y: GROUND_Y + 17 }, t("gauge.street")));
+}
+
+/** A small, still picture of the same scene at one depth: no labels, no animation, no shared state. The text beside it
+ *  says the figure, so it is hidden from screen readers. Water is cut off at one storey, as in the full drawing. */
+export function miniGauge(depthM) {
+  const shownM = band(depthM) ? Math.min(depthM, TOP_M) : 0;
+  const top = yAt(TOP_M);
+  return s("svg", { class: "gauge gauge-mini", viewBox: `0 ${top} ${WATER_W} ${GROUND_Y - top + 3}`, "aria-hidden": "true" },
+    objects(0),
+    shownM > 0 && s("rect", { class: "water", x: 0, y: yAt(shownM), width: WATER_W, height: shownM * PX_PER_M, fill: bandColor(depthM) }),
+    s("line", { class: "street", x1: 0, x2: WATER_W, y1: GROUND_Y, y2: GROUND_Y }));
 }
 
 function gaugeSummary(premise, rp) {

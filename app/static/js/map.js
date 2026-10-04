@@ -1,11 +1,12 @@
 /* global L */
 import { createCellLayer, squareStyle } from "./cells.js";
-import { SCENARIOS, band, bandColor, depthText, depthWords, h, icon, s, scenarioLabel } from "./dom.js";
+import { DRY_COLOR, SCENARIOS, band, bandColor, depthText, depthWords, h, icon, s, scenarioLabel } from "./dom.js";
 import { t } from "./i18n.js";
 import { overlapsView } from "./place.js";
 
 const INK = "#0d1b2a";
 const SELECTED = "#b94a1b";   // --accent in tokens.css
+const HALO = "#fff";   // every shop dot wears a white ring (and a dark hairline from .biz-dot), so it reads on pale and dark squares
 const FOCUS_ZOOM = 17;
 const MIN_ZOOM = 6;   // far enough out to see about all of Malaysia on a wide screen
 const MALAYSIA_BOUNDS = [[0.5, 98.5], [8.0, 120.0]];   // [[south, west], [north, east]]: the country, with sea around it
@@ -61,7 +62,7 @@ function popupBody(map, p, rp, onOpen) {
 function addMarkers(map, premises, getRp, { onSelect, onOpen }) {
   return new Map(premises.map((p) => [p.id, {
     p,
-    marker: L.circleMarker([p.lat, p.lon], { fillOpacity: 1 })
+    marker: L.circleMarker([p.lat, p.lon], { fillOpacity: 1, className: "biz-dot" })
       .bindTooltip(label(p.name))
       .bindPopup(() => popupBody(map, p, getRp(), onOpen))
       .on("click", () => onSelect(p.id))
@@ -71,11 +72,18 @@ function addMarkers(map, premises, getRp, { onSelect, onOpen }) {
 
 const paintSquares = (squares, index) => { for (const { depths, layer } of squares) layer.setStyle(squareStyle(depths, index)); };
 
+/** How one shop dot looks: ringed in the accent when selected, small and pale when the model has no water there. */
+function dotStyle(depth, selected) {
+  if (selected) return { radius: 10, color: SELECTED, weight: 4, fillColor: bandColor(depth) };
+  if (!band(depth)) return { radius: 4, color: INK, weight: 1.5, fillColor: DRY_COLOR };   // "no water" differs in size, not just in tint
+  return { radius: 7, color: HALO, weight: 2, fillColor: bandColor(depth) };
+}
+
 /** The shop dots for one flood size, the selected one ringed. */
 function paintMarkers(markers, rp, selectedId) {
   for (const { p, marker } of markers.values()) {
     const selected = p.id === selectedId;
-    marker.setStyle({ radius: selected ? 10 : 6, color: selected ? SELECTED : INK, weight: selected ? 4 : 1.5, fillColor: bandColor(p.depth_m[rp]) });
+    marker.setStyle(dotStyle(p.depth_m[rp], selected));
     if (selected) marker.bringToFront();
   }
 }

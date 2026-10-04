@@ -111,6 +111,8 @@ export class FakeElement {
 
   focus() {}
 
+  blur() {}
+
   /** Every element below this one, in document order. */
   get descendants() {
     return this.children.filter((child) => child instanceof FakeElement).flatMap((child) => [child, ...child.descendants]);

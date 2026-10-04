@@ -1,6 +1,7 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
 import { SCENARIOS, depthText, h, icon, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
+import { emptyState } from "./pick.js";
 import { createStockCard } from "./stock.js";
 
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
@@ -178,8 +179,9 @@ function useStockValue(form, fields, value) {
 }
 
 /** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up.
- *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form. */
-export function createCost(panel, { onEstimate, onStockPhoto = () => {} }) {
+ *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form. With no place picked the
+ *  tab shows the empty state (pick.js), with onFind and onCheckPoint behind its buttons. */
+export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null }) {
   const title = h("h1", { class: "view-title" });
   const depths = h("p", { class: "muted" });
   const fields = buildFields();
@@ -187,18 +189,26 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {} }) {
   const form = buildForm(fields, onEstimate);
   const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value) });
   const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": t("cost.output") });
-  panel.replaceChildren(
-    h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths),
-    stock.node,
-    h("div", { class: "cost-grid" }, form, output));
+  const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
+  const parts = [h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths),
+    stock.node, h("div", { class: "cost-grid" }, form, output)];
+  panel.replaceChildren(empty, ...parts);
   const drafts = createDrafts(form, fields);
   let shownId = null;
   let shownEstimate;
+  /** The empty state while nothing is picked; the form and its figures, kept as they were, once a place is. */
+  const showEmpty = (isEmpty) => {
+    if (!isEmpty) empty.replaceChildren();
+    else if (!empty.children.length) empty.append(emptyState({ kicker: t("cost.kicker"), onFind, onCheckPoint }));
+    for (const part of parts) part.hidden = isEmpty;
+  };
 
   return {
     /** photoFloorCm fills the floor field unless the owner has typed their own for this place. stockState is the
      *  place's stock photo ({busy, result, error}) and rp the flood size on show. */
     render(place, photoFloorCm, estimate, stockState, rp = "100") {
+      showEmpty(!place);
+      if (!place) return;
       stock.render(stockState, rp);
       const isNewPlace = place.id !== shownId;
       if (isNewPlace) {

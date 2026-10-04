@@ -77,8 +77,6 @@ export default Object.freeze({
   // ---------- Area overview: overview.js ----------
   "overview.rainDue": "Hujan dijangka dalam {hours} jam akan datang",
   "overview.rainChecking": "Menyemak Google Weather",
-  "overview.rainForecast": "Ramalan hujan",
-  "overview.rainNotSet": "Google Weather belum disediakan dalam versi ini",
   "overview.rainNoAnswer": "Google Weather tidak menjawab buat masa ini",
   "overview.rainMm": "{mm} mm",
   "overview.rainNote": "Peluang hingga {pct}%. Google Weather, bukan amaran banjir",
@@ -101,8 +99,21 @@ export default Object.freeze({
   // ---------- scope.js ----------
   "scope.area": "Kawasan",
   "scope.open": "Buka",
-  "scope.check": "Semak mana-mana titik di Malaysia",
-  "scope.hint": "Pilih kawasan, kemudian tekan Buka untuk memuatkan halamannya.",
+  "scope.hint": "Pilih kawasan, kemudian tekan Buka.",
+
+  // ---------- index.html: carian di atas Gambaran kawasan ----------
+  "hero.heading": "Cari kedai anda",
+  "hero.lead": "Lihat sedalam mana banjir dalam model sampai ke situ, dan berapa kosnya.",
+  "hero.placeholder": "Nama kedai anda",
+  "hero.search": "Cari",
+  "hero.notListed": "Tiada dalam senarai?",
+  "hero.check": "Semak mana-mana titik di Malaysia",
+
+  // ---------- pick.js: Perniagaan saya dan Kos banjir sebelum tempat dipilih ----------
+  "empty.title": "Pilih kedai anda dahulu",
+  "empty.line": "Cari dengan nama, atau ketik titik pada peta.",
+  "empty.find": "Cari kedai anda",
+  "empty.check": "Semak satu titik",
 
   // ---------- map.js ----------
   "map.inFlood": " dalam banjir yang dijangka {label}",
@@ -329,6 +340,7 @@ export default Object.freeze({
   "ask.lead": "Gemini membaca data banjir alat ini, Google Weather dan Google Maps. Ia menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
   "ask.conversation": "Perbualan",
   "ask.question": "Soalan anda",
+  "ask.placeholderArea": "Tanya apa-apa tentang banjir di kawasan ini",
   "ask.placeholderShop": "Tanya apa-apa tentang banjir di kedai ini",
   "ask.send": "Tanya",
   "ask.try": "Cuba tanya",
@@ -402,9 +414,10 @@ export default Object.freeze({
   "footer.testBuild": "Ini versi ujian.",
   "footer.model": "Kedalaman air diambil daripada model komputer global dalam petak 90 m. Ia bukan peta banjir rasmi, bukan ramalan, dan bukan rekod banjir sebenar. Perniagaan ialah titik pada peta awam dan belum disemak di lapangan.",
   "footer.credits": "Kedalaman banjir: peta bahaya banjir sungai global JRC Suruhanjaya Eropah v2.1, CC BY 4.0. Perniagaan, jalan dan peta asas: © penyumbang OpenStreetMap, ODbL. Indeks harga: Bank Dunia, CC BY 4.0. Ramalan hujan: Google Weather. Buka atau tutup: Google Maps. Berita: Gemini dengan Google Search.",
-  "footer.privacy": "Jubin peta datang daripada pelayan OpenStreetMap, yang melihat bahagian peta yang anda lihat; pada skala jalan, iaitu tempat peta beralih apabila anda berkongsi lokasi, itu dalam lingkungan kira-kira 300 m. Jika anda bertanya kepada pembantu AI tentang hujan, Google Weather mendapat titik tengah kawasan itu, atau bagi titik yang anda pilih di luar kawasan yang disenaraikan, petak 90 m titik itu yang dibundarkan kepada kira-kira 1 km. Bagi titik yang anda pilih, Gemini mendapat nama kawasan, kedalaman air banjir dan pusat pemindahan banjir terdekat berserta jaraknya, tetapi tidak pernah mendapat koordinatnya. Foto dan rakaman suara dihantar kepada Gemini untuk dibaca dan tidak disimpan oleh alat ini.",
+  "footer.privacy": "Jubin peta datang daripada pelayan OpenStreetMap, yang melihat bahagian peta yang anda lihat; pada skala jalan, iaitu tempat peta beralih apabila anda berkongsi lokasi, itu dalam lingkungan kira-kira 300 m. Jika anda bertanya kepada pembantu AI tentang hujan, Google Weather mendapat titik tengah kawasan itu, atau bagi titik yang anda pilih di luar kawasan yang disenaraikan, petak 90 m titik itu yang dibundarkan kepada kira-kira 1 km. Bagi titik yang anda pilih, Gemini mendapat nama kawasan, kedalaman air banjir dan pusat pemindahan banjir terdekat berserta jaraknya, tetapi tidak pernah mendapat koordinatnya. Foto dan rakaman suara dihantar kepada Gemini untuk dibaca dan tidak disimpan oleh alat ini. Bahasa dan kedai yang anda pilih hanya disimpan dalam pelayar ini.",
   "footer.forecasts": "Ramalan banjir sungai:",
   "footer.levels": ". Paras sungai semasa dan amaran:",
   "footer.emergency": ". Dalam kecemasan, hubungi 999.",
+  "footer.more": "Lagi tentang data, privasi dan kos",
   "footer.money": "Angka ringgit ialah anggaran kasar, bukan penilaian atau angka insurans: daripada nilai yang anda berikan, lengkung kerosakan seluruh Asia (JRC 2017) dan garis panduan kerosakan banjir JPS 2003.",
 });

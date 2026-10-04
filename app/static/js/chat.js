@@ -11,8 +11,9 @@ const CHIP_KEYS = Object.freeze({
   business: ["ask.chipShopWater", "ask.chipShopLoss", "ask.chipAreaDry", "ask.chipRain", "ask.chipOpen"],
   point: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipRain"],
   pointArea: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipPointAreaDry", "ask.chipRain"],
+  area: ["ask.chipAreaDry", "ask.chipRain"],   // nothing picked yet: only what the area as a whole can answer
 });
-const chipSets = new Map();   // language -> {business, point, pointArea}
+const chipSets = new Map();   // language -> {business, point, pointArea, area}
 
 function chipsIn(language) {
   if (!chipSets.has(language)) {
@@ -27,7 +28,8 @@ const MAX_TURN_CHARS = 2000;   // the server rejects longer history turns
  *  ones, to tell whether a point lies in one. */
 export function chipsFor(place, page, areas) {
   const chips = chipsIn(lang);
-  if (!place?.is_point) return chips.business;
+  if (!place) return chips.area;
+  if (!place.is_point) return chips.business;
   return areaOf(place, page, areas) ? chips.pointArea : chips.point;
 }
 
@@ -257,7 +259,7 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     render(place) {
       if (place?.id !== shownPlaceId) voice.stopSpeaking?.();   // an answer about another place is not read on
       shownPlaceId = place?.id;
-      input.placeholder = t(place?.is_point ? "ask.placeholderPoint" : "ask.placeholderShop");
+      input.placeholder = t(!place ? "ask.placeholderArea" : place.is_point ? "ask.placeholderPoint" : "ask.placeholderShop");
       const next = { chips: chipsFor(place, page, areas), news: newsFor(place, page, areas) };
       if (next.chips !== shown.chips) showChips(chips, next.chips, send);
       if (next.news?.areaId !== shown.news?.areaId) showNews(next.news);

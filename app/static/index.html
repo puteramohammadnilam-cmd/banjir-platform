@@ -19,10 +19,12 @@
   <link rel="modulepreload" href="js/strings/ms.js">
   <link rel="modulepreload" href="js/dom.js">
   <link rel="modulepreload" href="js/place.js">
+  <link rel="modulepreload" href="js/pick.js">
   <link rel="modulepreload" href="js/cells.js">
   <link rel="modulepreload" href="js/map.js">
   <link rel="modulepreload" href="js/scope.js">
   <link rel="modulepreload" href="js/history.js">
+  <link rel="modulepreload" href="js/kpis.js">
   <link rel="modulepreload" href="js/overview.js">
   <link rel="modulepreload" href="js/gauge.js">
   <link rel="modulepreload" href="js/point.js">
@@ -38,7 +40,7 @@
   <link rel="modulepreload" href="js/area-report.js">
   <link rel="modulepreload" href="js/compare.js">
 </head>
-<body>
+<body data-tab="overview">
   <svg class="sprite" aria-hidden="true" focusable="false">
     <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 13c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 18c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></symbol>
@@ -88,6 +90,19 @@
     <p class="alert" id="link-note" role="alert" hidden></p>
 
     <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
+      <section class="finder-hero" aria-labelledby="finder-hero-heading">
+        <h1 class="finder-hero-title" id="finder-hero-heading"><label for="finder-hero-input" data-i18n="hero.heading">Find your shop</label></h1>
+        <p class="finder-hero-lead" data-i18n="hero.lead">See how deep a modelled flood gets there, and what it could cost.</p>
+        <form class="finder-hero-form" id="finder-hero" role="search" aria-labelledby="finder-hero-heading">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input id="finder-hero-input" class="field" type="search" list="business-names" data-i18n-attr="placeholder:hero.placeholder" placeholder="Your shop's name" autocomplete="off" enterkeyhint="search">
+          <button type="submit" class="btn btn-primary" data-i18n="hero.search">Search</button>
+        </form>
+        <p class="finder-hero-point" id="hero-point" hidden>
+          <span data-i18n="hero.notListed">Not on the list?</span>
+          <button type="button" class="btn btn-secondary" id="hero-check"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="hero.check">Check any point in Malaysia</span></button>
+        </p>
+      </section>
       <div class="scope-bar" id="scope"></div>
       <div class="kpis" id="kpis" aria-live="polite"></div>
       <div class="overview-grid">
@@ -105,7 +120,14 @@
             <p class="fineprint area-note" id="map-note" hidden></p>
           </div>
         </section>
-        <section class="surface" id="history" aria-labelledby="history-heading"></section>
+        <div class="overview-side">
+          <section class="surface" id="history" aria-labelledby="history-heading"></section>
+          <section class="surface area-print" aria-labelledby="area-print-heading">
+            <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
+            <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
+            <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
+          </section>
+        </div>
       </div>
       <section class="surface directory" aria-labelledby="directory-heading">
         <div class="surface-head">
@@ -117,11 +139,6 @@
         <div class="directory-head" aria-hidden="true"><span data-i18n="overview.colBusiness">Business</span><span data-i18n="overview.col10">1 in 10</span><span data-i18n="overview.col100">1 in 100</span><span data-i18n="overview.col500">1 in 500</span></div>
         <ol id="directory"></ol>
         <p class="muted small" id="directory-empty" data-i18n="overview.noMatch" hidden>No business matches that filter.</p>
-      </section>
-      <section class="surface area-print" aria-labelledby="area-print-heading">
-        <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
-        <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
-        <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
       </section>
     </section>
 
@@ -164,10 +181,13 @@
   <footer class="about" id="about">
     <h2 data-i18n="footer.heading">About this data</h2>
     <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
-    <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
-    <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool.</p>
     <p><span data-i18n="footer.forecasts">River flood forecasts:</span> <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer" translate="no">Google Flood Hub</a><span data-i18n="footer.levels">. Live river levels and warnings:</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a><span data-i18n="footer.emergency">. In an emergency call 999.</span></p>
-    <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
+    <details class="about-more">
+      <summary data-i18n="footer.more">More about the data, privacy and costs</summary>
+      <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
+      <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.</p>
+      <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
+    </details>
   </footer>
 
   <script src="vendor/leaflet.js"></script>

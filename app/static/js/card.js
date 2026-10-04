@@ -3,6 +3,7 @@ import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName,
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
 import { formatNumber, t } from "./i18n.js";
+import { emptyState } from "./pick.js";
 import { NO_WATER_NOTE, pointHeader } from "./point.js";
 
 // Past this, the global model is often far deeper than reports of real floods (5 to 10 m against 0.1 to 2 m in the
@@ -167,19 +168,31 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto }) {
 
 /** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
  *  lies in; onOpenArea(areaId) opens that area when it is not the page's; onMovePin() puts the pin of a point back in
- *  the map's hands. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
+ *  the map's hands. With no place picked the tab shows the empty state (pick.js), with onFind and onCheckPoint behind
+ *  its buttons. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
  *  not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea }) {
+export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onFind = () => {}, onCheckPoint = null }) {
+  const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": t("business.riskLabel") });
   const picker = h("div");
   const drawing = h("div");
   const side = h("aside", { class: "biz-side", "aria-label": t("business.sideLabel") });
   const announcer = h("p", { class: "visually-hidden", "aria-live": "polite" });
+  const grid = h("div", { class: "biz-grid" }, risk, side);
   risk.append(picker, drawing);
-  panel.replaceChildren(head, h("div", { class: "biz-grid" }, risk, side), announcer);
+  panel.replaceChildren(empty, head, grid, announcer);
   let drawnKey = null;
   let shown = {};
+
+  /** Nothing picked: the empty state alone, and nothing of the last place left behind to be focused or read. */
+  function showEmpty() {
+    if (!empty.children.length) empty.append(emptyState({ kicker: t("tab.business"), onFind, onCheckPoint }));
+    head.replaceChildren();
+    head.hidden = true;
+    grid.hidden = true;
+    drawnKey = null;
+  }
 
   return {
     render({ premise, rp, photo, listing }) {
@@ -187,6 +200,10 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
       if (premise === shown.premise && rp === shown.rp && photo === shown.photo && listing === shown.listing) return;
       const isNewBusiness = premise !== shown.premise;
       shown = { premise, rp, photo, listing };
+      if (!premise) return showEmpty();
+      empty.replaceChildren();
+      head.hidden = false;
+      grid.hidden = false;
       const photoFloorM = photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm / 100 : 0;
       const floorM = Math.min(photoFloorM, MAX_DRAWN_FLOOR_M);
       if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea }));

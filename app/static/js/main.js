@@ -3,18 +3,18 @@ import { createBusiness } from "./card.js";
 import { squaresOf } from "./cells.js";
 import { createChat } from "./chat.js";
 import { createCost } from "./cost.js";
-import { h, roadName } from "./dom.js";
+import { h } from "./dom.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createOverview } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard } from "./plan.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
+import { initialState, rememberPlace, wireFinder } from "./pick.js";
 import { businessPlace, isPoint, parseRef, readUrl, snapToGrid, writeUrl } from "./place.js";
 
 const PHOTO_MAX_EDGE = 1280;
 const PHOTO_QUALITY = 0.85;
-const DEFAULT_RP = "100";
 const SLOW_START_MS = 400;   // only a start slower than this says it is loading, so a quick one looks as it did
 const $ = (id) => document.getElementById(id);
 
@@ -53,28 +53,6 @@ function wireTabs(onPick) {
       $(tab.getAttribute("aria-controls")).hidden = !selected;
     }
   };
-}
-
-/** The header search: the browser's own suggestion list, one entry per business, made unique with its road. */
-function wireFinder(premises, onOpen, onNoMatch) {
-  const ids = new Map();
-  for (const p of [...premises].sort((a, b) => a.name.localeCompare(b.name))) {
-    let text = `${p.name} · ${roadName(p.road.name)}`;
-    for (let n = 2; ids.has(text); n += 1) text = `${p.name} · ${roadName(p.road.name)} (${n})`;
-    ids.set(text, p.id);
-  }
-  $("business-names").replaceChildren(...[...ids.keys()].map((text) => h("option", { value: text })));
-  const input = $("finder-input");
-  const open = (id) => { input.value = ""; input.blur(); onOpen(id); };
-  input.addEventListener("input", () => { if (ids.has(input.value)) open(ids.get(input.value)); });
-  $("finder").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const needle = input.value.trim().toLowerCase();
-    if (!needle) return;
-    const hit = [...ids].find(([text]) => text.toLowerCase().includes(needle));
-    if (hit) open(hit[1]);
-    else onNoMatch(needle);
-  });
 }
 
 // ---------- start-up: what the link asks for, and the data to show it ----------
@@ -128,26 +106,6 @@ async function openLink(url, start) {
   }
 }
 
-function initialState(url, start, linked) {
-  const place = linked?.place ?? start.premises[0];
-  return {
-    tab: url.tab ?? (linked ? "business" : "overview"),
-    rp: url.rp ?? DEFAULT_RP,
-    areaId: start.area.id,
-    placeKey: place.id,
-    points: place.is_point ? { [place.id]: place } : {},   // points checked on this visit, by id
-    squares: linked?.squares ? { [place.id]: linked.squares } : {},   // {blocks, cells} that came with the latest point, by its id
-    photos: {},    // by place id: { busy, preview, estimate, water_above_floor_m, error }
-    stocks: {},    // by place id: { busy, result, error }: the photo of the stock (POST /api/stock)
-    plans: {},     // by place id: { busy, result, error }: the flood plan (POST /api/plan)
-    planLanguage: lang,   // the plan is written in the page's language unless the owner picks the other
-    compare: [],   // ids of the places side by side on My business, oldest first (compare.js)
-    listings: {},  // by business id: { busy } | { configured, place } | { error }
-    estimates: {}, // by place id: { busy, result } | { result } | { error, result }
-    rain: start.status.maps_ready ? { busy: true, configured: true } : { configured: false },
-  };   // aim mode, the mode in which a point is picked, is the Area overview's own and lives in pin.js
-}
-
 // ---------- the running page ----------
 
 /** The page's state. A change makes a new state object and redraws, passing the old one so views can compare. */
@@ -184,15 +142,24 @@ function goto(app, tab, change = {}) {
   heading.focus({ preventScroll: true });
 }
 
-// picking a business is what loads its Google Maps listing, so picking it again after an error retries
+// picking a business is what loads its Google Maps listing, so picking it again after an error retries. A business
+// someone picked is remembered for their next visit (pick.js); one a link opened is not, as someone else chose it.
 function select(app, id) {
+  rememberPlace(app.start.area.id, id);
   app.store.update({ placeKey: id });
   loadListing(app, id);
 }
 
-function open(app, id) {
+function open(app, id, { isPicked = true } = {}) {
+  if (isPicked) rememberPlace(app.start.area.id, id);
   goto(app, "business", { placeKey: id });
   loadListing(app, id);
+}
+
+/** "Find your shop": the Area overview, with focus in its search. */
+function findShop(app) {
+  goto(app, "overview");
+  $("finder-hero-input").focus();
 }
 
 /** Show a point the server has checked on My business: from a link here, or from a pin or a GPS fix (pin.js), with the
@@ -312,7 +279,7 @@ async function sendEstimate(app, figures) {
 async function loadListing(app, id) {
   const { store, start } = app;
   const listing = store.state.listings[id];
-  if (!start.status.maps_ready || isPoint(id) || (listing && !listing.error)) return;   // retry after an error
+  if (!id || !start.status.maps_ready || isPoint(id) || (listing && !listing.error)) return;   // retry after an error
   const setListing = (value) => store.update({ listings: { ...store.state.listings, [id]: value } });
   setListing({ busy: true });
   try {
@@ -346,7 +313,7 @@ function linkFollower(app) {
       showNote(linked ? null : missedWords(start.area));
       if (!linked) history.replaceState(null, "", linkFor(app, store.state));
       else if (linked.place.is_point) openPoint(app, linked.place, linked.squares);
-      else open(app, linked.place.id);
+      else open(app, linked.place.id, { isPicked: false });
     } catch (error) {
       if (isCurrent()) showNote(error.message, () => follow(ref));
     }
@@ -373,15 +340,35 @@ function createExtras(app) {
   return { plan, compare };
 }
 
+/** The two search boxes, the header's and the Area overview's, and the overview's "Check any point in Malaysia" (shown
+ *  only where points can be checked). A name that matches nothing shows the list of businesses, filtered by it. */
+function wireWaysIn(app, checkPoint) {
+  wireFinder({
+    datalist: $("business-names"),
+    forms: [[$("finder"), $("finder-input")], [$("finder-hero"), $("finder-hero-input")]],
+  }, app.start.premises, (id) => open(app, id), (needle) => {
+    $("directory-filter").value = needle;
+    $("directory-filter").dispatchEvent(new Event("input"));
+    goto(app, "overview");
+    $("directory-filter").scrollIntoView({ block: "center" });
+    $("directory-filter").focus({ preventScroll: true });   // where the typed name now is, and the list it filters
+  });
+  if (!checkPoint) return;
+  $("hero-check").addEventListener("click", (event) => checkPoint(event.currentTarget));
+  $("hero-point").hidden = false;
+}
+
 function createViews(app) {
   const { start, store } = app;
   const pickRp = (rp) => store.update({ rp });
+  // the overview's "Check any point in Malaysia" and the map's own button: aim mode and the location go in pin.js
+  const checkPoint = start.status.points_ready ? (opener) => pin.start({ opener }) : null;
+  // the same from an empty My business or Flood cost, where the map is first brought on show
+  const empty = { onFind: () => findShop(app), onCheckPoint: checkPoint && (() => { goto(app, "overview"); checkPoint($("hero-check")); }) };
   const overview = createOverview({
     area: start.area, areas: start.list.areas, premises: start.premises, town: start.town, onPick: pickRp,
     onSelect: (id) => select(app, id), onOpen: (id) => open(app, id),
-    onArea: (areaId) => changeArea(app, areaId),
-    // "Check any point in Malaysia", and the map's own button: aim mode and the location go in pin.js
-    onCheckPoint: start.status.points_ready ? (opener) => pin.start({ opener }) : null,
+    onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint,
   });
   const pin = createPin({
     map: overview.map, anchor: $("map"), area: start.area, tabBar: document.querySelector(".tabs"),
@@ -391,21 +378,16 @@ function createViews(app) {
   const business = createBusiness($("panel-business"), {
     area: start.area, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
-    onMovePin: () => movePin(app, pin),
+    onMovePin: () => movePin(app, pin), ...empty,
     // a point in another listed area: that area's own page, with the point kept (it travels in the fragment)
     onOpenArea: (areaId) => location.assign(linkFor(app, { ...store.state, areaId })),
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
-    onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm),
+    onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm), ...empty,
   });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
-  wireFinder(start.premises, (id) => open(app, id), (needle) => {   // nothing matched: show the filtered list instead
-    $("directory-filter").value = needle;
-    $("directory-filter").dispatchEvent(new Event("input"));
-    goto(app, "overview");
-    $("directory-filter").scrollIntoView({ block: "center" });
-  });
+  wireWaysIn(app, checkPoint);
   const chat = createChat({
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),
     getPlaceRef: () => store.state.placeKey, areaId: start.area.id, areaName: start.area.name, areas: start.list.areas,
@@ -413,18 +395,31 @@ function createViews(app) {
   return { overview, business, cost, chat, showTab, pin, plan, compare };
 }
 
+/** What the Ask AI heading asks about: the place, or the area while none is picked. */
+const askingAbout = (app, place) => (!place ? app.start.area.name : place.is_point ? t("ask.thisPoint") : place.name);
+
+/** The flood plan and the compare card are about a place: with none picked they are off. */
+function renderExtras(app, views, state, place) {
+  views.plan.node.hidden = !place;
+  views.compare.node.hidden = !place;
+  views.plan.render(state.plans[state.placeKey], state.planLanguage);
+  views.compare.render({ current: place, compared: state.compare.map((id) => placeOf(app, { ...state, placeKey: id })).filter(Boolean) });
+}
+
+/** Draws every view for `state`. No place may be picked yet (placeKey null): My business and Flood cost then show how
+ *  to pick one, and the rest leave it out. */
 function render(app, views, state, previous) {
   const place = placeOf(app, state);
   const photo = state.photos[state.placeKey];
   views.showTab(state.tab);
+  document.body.dataset.tab = state.tab;   // views.css: the header's search steps aside on the Area overview, which has its own
   views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey] });
   views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
     state.stocks[state.placeKey], state.rp);
-  views.plan.render(state.plans[state.placeKey], state.planLanguage);
-  views.compare.render({ current: place, compared: state.compare.map((id) => placeOf(app, { ...state, placeKey: id })).filter(Boolean) });
+  renderExtras(app, views, state, place);
   views.chat.render(place);   // the chips, the question box and the flood news that fit the place
-  $("ask-business").textContent = place.is_point ? t("ask.thisPoint") : place.name;
+  $("ask-business").textContent = askingAbout(app, place);
   views.pin.render({ tab: state.tab, place, squares: state.squares[state.placeKey] });   // ends aim mode off the Area overview; puts a point's pin and its squares on the map
   if (previous && previous.tab !== state.tab) {
     if (state.tab === "overview") views.overview.map.refresh();   // the map was measured while its tab was hidden
@@ -475,6 +470,7 @@ async function main() {
   const slow = setTimeout(() => { loading.textContent = t("main.loading"); }, SLOW_START_MS);
   try {
     const url = readUrl(location);
+    document.body.dataset.tab = url.tab ?? "overview";   // before the first await, so a deep link's header does not shift
     if (url.pointInQuery) history.replaceState(null, "", writeUrl(url));   // before any request can send it as Referer
     const start = await loadStart(url);
     const { linked, note, isFailed } = await openLink(url, start);

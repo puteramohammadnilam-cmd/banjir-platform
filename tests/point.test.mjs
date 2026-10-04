@@ -85,6 +85,10 @@ test("the cost tab's title says 'this point' for a point and names a business", 
   assert.equal(costTitle(shop), "What a flood could cost A Shop");
 });
 
+test("with nothing picked, the chips ask only about the area", () => {
+  assert.deepEqual(chipsFor(undefined, HOME, AREAS), ["Which businesses stay dry in a 100 year flood?", "Is heavy rain due today?"]);
+});
+
 test("a business keeps its five chips; a point gets its own, with no question a point cannot answer", () => {
   const business = chipsFor(shop, HOME, AREAS);
   assert.deepEqual(business, [

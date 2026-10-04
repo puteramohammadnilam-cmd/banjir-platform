@@ -25,14 +25,20 @@ function table(places, onOpen) {
       h("td", {}, roadWater(place)), h("td", {}, shelterOf(place)))))));
 }
 
-/** The card. render({current, compared}) with the place on show and the compared places, in order. onAdd(id) and
- *  onRemove(id) change the list; onOpen(place) shows a compared place. */
+/** The card. render({current, compared}) with the place on show and the compared places, in order; with no place on
+ *  show (nothing picked yet) it is left empty. onAdd(id) and onRemove(id) change the list; onOpen(place) shows a
+ *  compared place. */
 export function createCompareCard({ onAdd, onRemove, onOpen }) {
   const node = h("section", { class: "surface compare-card", "aria-labelledby": "compare-heading" });
   let shownKey = null;
   return {
     node,
     render({ current, compared }) {
+      if (!current) {
+        node.replaceChildren();
+        shownKey = null;
+        return;
+      }
       const key = [current.id, ...compared.map((place) => place.id)].join("|");
       if (key === shownKey) return;   // nothing it shows changed (rain or a listing arriving): keep focus where it is
       shownKey = key;

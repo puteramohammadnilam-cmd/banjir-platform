@@ -9,11 +9,12 @@
 .scope-pick { display: flex; gap: var(--space-2); }
 .scope-pick .field { flex: 1 1 auto; min-width: 0; }
 .scope-pick .btn { flex: none; }
-.scope-check { flex: none; }
 .scope-hint { flex: 1 1 100%; margin: calc(-1 * var(--space-2)) 0 0; }
-@media (max-width: 520px) { .scope-area, .scope-check { flex: 1 1 100%; max-width: none; } }
+@media (max-width: 520px) { .scope-area { flex: 1 1 100%; max-width: none; } }
 
-.kpis { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+/* data-tiles is set by kpis.js: 4 with the rain forecast, 3 without it; the headline and the depth drawing get the room */
+.kpis { display: grid; grid-template-columns: 1.4fr 1.4fr repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.kpis[data-tiles="3"] { grid-template-columns: 1.4fr 1.4fr minmax(0, 1fr); }
 .kpi { display: grid; align-content: start; gap: 2px; padding: var(--space-4) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
 .kpi-figure { font-size: var(--text-figure); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .kpi-label { font-size: var(--text-sm); font-weight: 600; }
@@ -22,14 +23,24 @@
 .kpi-hero { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; box-shadow: var(--shadow-md); }
 .kpi-hero .kpi-note, .kpi-hero .icon { color: var(--band-1); }
 .kpi-bar { height: 6px; margin-top: var(--space-2); border-radius: 999px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
+/* the typical-depth tile: its picture sits right of the icon and figure, so the tile is no taller than the others */
+.kpi-has-art { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); }
+.kpi-has-art > .icon { grid-area: 1 / 1; }
+.kpi-has-art > .kpi-figure { grid-area: 2 / 1; align-self: end; }
+.kpi-has-art > .kpi-label, .kpi-has-art > .kpi-note { grid-column: 1 / -1; }
+.kpi-art { grid-area: 1 / 2 / 3 / 3; align-self: end; width: 6.5rem; }
+.kpi-art .gauge.gauge-mini { margin: 0; max-width: none; }
 .kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-2); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
 
+.overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
 .overview-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
 .map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
 #map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
 .leaflet-container { font-family: var(--font); }
 .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }   /* zoom buttons: 44 px touch targets */
 .leaflet-tile-pane { filter: grayscale(1) sepia(0.06) contrast(0.85) brightness(1.06); }   /* quiet base, so the water reads */
+/* a thin dark hairline outside the white ring, so a shop dot shows on both pale and dark squares */
+.biz-dot { filter: drop-shadow(0 0 0.8px rgba(13, 27, 42, 0.9)); }
 .leaflet-popup-content-wrapper { border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 .leaflet-popup-content { margin: var(--space-3) var(--space-4); min-width: 12rem; }
 .pop-name { font-weight: 700; font-size: var(--text-sm); line-height: 1.3; }
@@ -152,8 +163,14 @@
   .overview-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
 }
 @media (max-width: 900px) {
-  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi-hero, .kpi:last-child { grid-column: 1 / -1; }
+  .kpis, .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-hero, .kpis[data-tiles="4"] .kpi:last-child { grid-column: 1 / -1; }   /* the rain tile is last only when it shows */
+}
+@media (max-width: 720px) {   /* phones: one column, the tiles tighter, and no "Floods recorded" (the timeline under the map says it), so the map comes sooner */
+  .kpis, .kpis[data-tiles="3"] { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin-bottom: var(--space-3); }
+  .kpi { padding: var(--space-3) var(--space-4); }
+  .kpi-flood { display: none; }
+  .kpi-art { width: 5.5rem; }
 }
 
 /* ---------- my business ---------- */
@@ -170,16 +187,17 @@
 .subhead { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 
 .gauge { display: block; width: 100%; max-width: 34rem; height: auto; margin: var(--space-5) 0 var(--space-2); }
-.gauge text { font: 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }   /* a light outline keeps labels readable over water */
+.gauge text { font: 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }   /* a light outline keeps labels readable over water */
 .gauge .figure, .gauge .knob { fill: var(--ink-3); }
 .gauge .door { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .gauge .counter { fill: var(--surface-sunk); stroke: var(--ink); stroke-width: 1.5; }
 .gauge .floor { fill: var(--line); }
 .gauge .water { fill-opacity: 0.6; transform-box: fill-box; transform-origin: bottom; transition: transform 700ms var(--ease-out-expo); }
-.gauge .waterline { stroke: var(--band-4); stroke-width: 2; transition: transform 700ms var(--ease-out-expo); }
+.gauge .waterline { stroke: var(--brand); stroke-width: 2; transition: transform 700ms var(--ease-out-expo); }
 .gauge .other-level { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.55; }
 .gauge .level.is-active, .gauge .object-label { font-weight: 700; fill: var(--ink); }
 .gauge .street { stroke: var(--ink); stroke-width: 2; }
+.gauge.gauge-mini { max-width: 12rem; margin: var(--space-2) 0 0; }   /* the first-screen picture: no text in it, so it can be small */
 .gauge .storey { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 1 3; }
 
 .biz-side { display: grid; gap: var(--space-3); }
@@ -204,7 +222,7 @@
 .next-step.is-primary .icon { color: var(--accent); }
 
 @media (max-width: 900px) { .biz-grid { grid-template-columns: minmax(0, 1fr); } }
-@media (min-width: 901px) { .gauge text { font-size: 9.5px; } }   /* the drawing scales up on wide screens; its labels should not */
+@media (min-width: 901px) { .gauge text { font-size: 10.5px; } }   /* the drawing scales up on wide screens; its labels should not */
 
 /* ---------- flood cost ---------- */
 /* the stock photo: rows under the modelled water carry the water's colour and a mark, so colour is not the only cue */
@@ -281,7 +299,7 @@
 @media (max-width: 900px) { .ask-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- the flood plan ---------- */
-.area-print { display: grid; gap: var(--space-2); justify-items: start; margin-top: var(--space-4); }
+.area-print { display: grid; gap: var(--space-2); justify-items: start; }
 .area-report ul { list-style: disc; }
 .compare-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
 .compare-card > * { max-width: 100%; }
@@ -307,4 +325,40 @@
   #print-root { display: block; }
   #print-root .plan-sheet { border: 0; padding: 0; max-width: none; }
   #print-root .plan-actions { display: none; }
+}
+
+/* ---- ux-fixes: hero, empty state ---- */
+/* the Area overview has its own search at the top, so the header's steps aside there: one search box per screen */
+body[data-tab="overview"] .finder { display: none; }
+
+/* the way in: a big search box, the primary action, with the way to any point beside it as the second */
+.finder-hero { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); padding: var(--space-6) var(--space-6) var(--space-5); background: var(--brand-wash); border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--brand-wash)); border-radius: var(--radius-lg); }
+.finder-hero-title { font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--brand-deep); }
+.finder-hero-title label { cursor: pointer; }
+.finder-hero-lead { color: var(--ink-2); max-width: 40rem; }
+.finder-hero-form { position: relative; display: flex; gap: var(--space-2); max-width: 42rem; margin-top: var(--space-2); }
+.finder-hero-form .icon { position: absolute; left: 16px; top: 50%; width: 22px; height: 22px; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+/* 18 px text: big enough to read at arm's length, and iOS does not zoom into a field of 16 px or more */
+.finder-hero-form .field { flex: 1 1 auto; min-width: 0; min-height: 56px; padding-left: 48px; font-size: var(--text-lg); border-color: var(--line-strong); box-shadow: var(--shadow-sm); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
+.finder-hero-form .field:focus-visible { box-shadow: 0 0 0 4px var(--accent-wash); }
+.finder-hero-form .btn { flex: none; min-height: 56px; padding: 0 var(--space-6); font-size: var(--text-md); box-shadow: var(--shadow-sm); }
+.finder-hero-point { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
+.finder-hero-point .btn { min-height: 44px; }
+.finder-hero-point .icon { color: var(--accent); }
+@media (max-width: 520px) {
+  .finder-hero { padding: var(--space-5) var(--space-4) var(--space-4); }
+  .finder-hero-form { flex-wrap: wrap; }   /* the button under the box, so the placeholder is not cut off */
+  .finder-hero-form .btn { flex: 1 1 100%; min-height: 48px; }
+  .finder-hero-form .icon { top: 28px; }   /* the middle of the 56px box, not of box and button */
+  .finder-hero-point .btn { flex: 1 1 100%; }
+}
+
+/* My business and Flood cost before a place is picked: what to do, and the two ways to do it */
+.pick-empty { display: grid; justify-items: start; gap: var(--space-2); max-width: 38rem; padding: var(--space-8) var(--space-6); border-style: dashed; border-color: var(--line-strong); }
+.pick-empty .view-title { margin: 0; }
+.pick-empty-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.pick-empty-actions .btn { min-height: 44px; }
+@media (max-width: 520px) {
+  .pick-empty { padding: var(--space-6) var(--space-4); }
+  .pick-empty-actions .btn { flex: 1 1 100%; }
 }

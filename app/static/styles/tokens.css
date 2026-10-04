@@ -21,12 +21,14 @@
   --dry: #2f7a3d;
   --danger-wash: #fbe9e7;
 
-  /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js */
-  --band-1: #c6e4ef;
-  --band-2: #86c0db;
+  /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js.
+     Water-blue for the first three, then indigo and deep plum, so the two deepest do not blur into one navy. */
+  --band-1: #c2e6f5;
+  --band-2: #6fb3dc;
   --band-3: #2b77a7;
-  --band-4: #1a5482;
-  --band-5: #0b2f4c;
+  --band-4: #3b3fbd;
+  --band-5: #5a1170;
+  --dry-dot: #fbf8f1;   /* a shop with no water: DRY_COLOR in js/dom.js */
 
   --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --text-xs: 0.75rem;

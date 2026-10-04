@@ -154,6 +154,7 @@ function mountChat(change = {}) {
   const section = h("section", {}, h("p", {}, "Gemini searches Google."), news);
   const selected = { ref: "node-1" };
   const chat = createChat({ messages, chips, form, input, news, getPlaceRef: () => selected.ref, areaId: "home", areaName: "Home Town", areas: AREAS, ...change });
+  chat.render(shop);   // the page renders the chat with its place straight away
   return { chat, chips, input, news, section, selected };
 }
 const chipTexts = (chips) => chips.children.map((chip) => chip.textContent);
@@ -175,6 +176,14 @@ test("a business chat starts with its five chips and the news button for the pag
   assert.equal(news.textContent, "Latest flood news for Home Town");
   assert.equal(news.hidden, false);
   assert.equal(section.children.length, 2, "the note is made only when a place needs it");
+});
+
+test("with nothing picked yet, the chat asks about the area, not a shop", () => {
+  const { chat, chips, input, news } = mountChat();
+  chat.render(undefined);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 100 year flood?", "Is heavy rain due today?"]);
+  assert.equal(input.placeholder, "Ask anything about flooding in this area");
+  assert.equal(news.textContent, "Latest flood news for Home Town");
 });
 
 test("a point in a listed area gets point chips, and its news is that area's", async () => {

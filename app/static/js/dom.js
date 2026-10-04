@@ -21,18 +21,19 @@ export const SCENARIOS = ["10", "100", "500"];
 /** "once in 100 years": a flood size in words, for "in a flood expected …". */
 export const scenarioLabel = (rp) => t("scenario.label", { rp });
 
-// Things a shop owner can picture, at typical heights: a counter, an adult, a door, a storey. Same colours as tokens.css.
+// Things a shop owner can picture, at typical heights: a counter, an adult, a door, a storey. Same colours as tokens.css
+// (water-blue, then indigo and plum for the two deepest, so each class reads apart from its neighbours).
 export const ADULT_M = 1.65;
 export const COUNTER_M = 0.9;
 export const DOOR_M = 2.1;
 /** A depth band: water shallower than `below` metres, its colour and its words in the page's language. */
 const bandEntry = (n, below, color) => ({ below, color, words: t(`band.${n}.words`), range: t(`band.${n}.range`) });
 export const BANDS = [
-  bandEntry(1, COUNTER_M, "#c6e4ef"),
-  bandEntry(2, ADULT_M, "#86c0db"),
+  bandEntry(1, COUNTER_M, "#c2e6f5"),
+  bandEntry(2, ADULT_M, "#6fb3dc"),
   bandEntry(3, DOOR_M, "#2b77a7"),
-  bandEntry(4, 3, "#1a5482"),
-  bandEntry(5, Infinity, "#0b2f4c"),
+  bandEntry(4, 3, "#3b3fbd"),
+  bandEntry(5, Infinity, "#5a1170"),
 ];
 export const DRY_COLOR = "#fbf8f1";
 

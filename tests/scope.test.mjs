@@ -64,12 +64,7 @@ test("coming back from the back-forward cache shows the page's own area again, w
   assert.equal(open.disabled, true);
 });
 
-test("the way in to any point is there only when points can be checked", () => {
-  const without = mount();
-  assert.equal(without.slot.querySelectorAll("button").length, 1);
-  const openers = [];
-  const withPoints = mount({ onCheckPoint: (button) => openers.push(button) });
-  const check = withPoints.slot.querySelectorAll("button").find((button) => button.textContent.includes("Check any point"));
-  check.dispatch("click", { currentTarget: check });
-  assert.deepEqual(openers, [check]);
+test("the bar holds the area choice alone: the way in to any point is the search's neighbour, not here", () => {
+  const { slot } = mount({ onCheckPoint: () => assert.fail("the scope bar has no check-point button") });
+  assert.deepEqual(slot.querySelectorAll("button").map((button) => button.textContent), ["Open"]);
 });

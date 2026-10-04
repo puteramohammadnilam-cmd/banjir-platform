@@ -76,8 +76,6 @@ export default Object.freeze({
   // ---------- Area overview: overview.js ----------
   "overview.rainDue": "Rain due in the next {hours} hours",
   "overview.rainChecking": "Checking Google Weather",
-  "overview.rainForecast": "Rain forecast",
-  "overview.rainNotSet": "Google Weather is not set up in this build",
   "overview.rainNoAnswer": "Google Weather did not answer just now",
   "overview.rainMm": "{mm} mm",
   "overview.rainNote": "Chance up to {pct}%. Google Weather, not a flood warning",
@@ -100,8 +98,21 @@ export default Object.freeze({
   // ---------- scope.js ----------
   "scope.area": "Area",
   "scope.open": "Open",
-  "scope.check": "Check any point in Malaysia",
-  "scope.hint": "Choose an area, then Open to load its page.",
+  "scope.hint": "Pick an area, then Open.",
+
+  // ---------- index.html: the search at the top of the Area overview ----------
+  "hero.heading": "Find your shop",
+  "hero.lead": "See how deep a modelled flood gets there, and what it could cost.",
+  "hero.placeholder": "Your shop's name",
+  "hero.search": "Search",
+  "hero.notListed": "Not on the list?",
+  "hero.check": "Check any point in Malaysia",
+
+  // ---------- pick.js: My business and Flood cost with no place picked ----------
+  "empty.title": "Pick your shop first",
+  "empty.line": "Search by name, or tap a dot on the map.",
+  "empty.find": "Find your shop",
+  "empty.check": "Check a point",
 
   // ---------- map.js ----------
   "map.inFlood": " in a flood expected {label}",
@@ -328,6 +339,7 @@ export default Object.freeze({
   "ask.lead": "Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.",
   "ask.conversation": "Conversation",
   "ask.question": "Your question",
+  "ask.placeholderArea": "Ask anything about flooding in this area",
   "ask.placeholderShop": "Ask anything about flooding at this shop",
   "ask.send": "Ask",
   "ask.try": "Try asking",
@@ -401,9 +413,10 @@ export default Object.freeze({
   "footer.testBuild": "This is a test build.",
   "footer.model": "Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.",
   "footer.credits": "Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Businesses, roads and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.",
-  "footer.privacy": "Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool.",
+  "footer.privacy": "Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.",
   "footer.forecasts": "River flood forecasts:",
   "footer.levels": ". Live river levels and warnings:",
   "footer.emergency": ". In an emergency call 999.",
+  "footer.more": "More about the data, privacy and costs",
   "footer.money": "Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.",
 });

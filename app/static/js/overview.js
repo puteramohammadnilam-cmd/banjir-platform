@@ -1,47 +1,12 @@
 // The "Area overview" tab: the area chooser, headline figures, the map, past floods and the area's businesses in one list.
-import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
-import { floodCounts, renderHistory } from "./history.js";
+import { BANDS, SCENARIOS, band, depthText, h, kindText, renderPicker, roadName } from "./dom.js";
+import { renderHistory } from "./history.js";
 import { t } from "./i18n.js";
+import { createKpis } from "./kpis.js";
 import { createMap } from "./map.js";
 import { createScopeBar } from "./scope.js";
 
 const $ = (id) => document.getElementById(id);
-const RAIN_HOURS = 12;   // what GET /api/rain sums, said while it is asked
-
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-}
-
-/** One figure tile, built once and updated in place, so its bar can animate and the live region only speaks on change. */
-function kpiTile(iconName, { hero = false, bar = false } = {}) {
-  const figure = h("p", { class: "kpi-figure" });
-  const label = h("p", { class: "kpi-label" });
-  const note = h("p", { class: "kpi-note" });
-  const fill = bar ? h("span") : null;
-  if (fill) fill.style.transform = "scaleX(0)";
-  const node = h("div", { class: `kpi${hero ? " kpi-hero" : ""}` }, icon(iconName), figure, label, note,
-    fill && h("div", { class: "kpi-bar", "aria-hidden": "true" }, fill));
-  return {
-    node,
-    set(figureText, labelText, noteText, share) {
-      figure.textContent = figureText;
-      label.textContent = labelText;
-      note.textContent = noteText;
-      if (fill) fill.style.transform = `scaleX(${share})`;
-    },
-  };
-}
-
-function rainText(rain) {
-  const due = (hours) => t("overview.rainDue", { hours });
-  if (!rain || rain.busy) return ["…", due(RAIN_HOURS), t("overview.rainChecking")];
-  if (!rain.configured) return ["–", t("overview.rainForecast"), t("overview.rainNotSet")];
-  if (rain.error || !rain.data) return ["–", due(RAIN_HOURS), t("overview.rainNoAnswer")];
-  const { total_mm: total, max_chance_pct: chance, hours } = rain.data;
-  return [t("overview.rainMm", { mm: total }), due(hours), t("overview.rainNote", { pct: chance })];
-}
 
 function renderLegend(element, hasShelters) {
   const items = [
@@ -81,20 +46,6 @@ function createDirectory(premises, onOpen) {
   return (selectedId) => { for (const row of rows) row.button.setAttribute("aria-current", String(row.id === selectedId)); };
 }
 
-/** The "Floods recorded" tile: the area's own counts, or a dash when no flood record has been collected for it. */
-function floodTileText(history) {
-  const counts = floodCounts(history);
-  if (!counts) return ["–", t("overview.floodsTile"), t("overview.floodsNone")];
-  return [String(counts.recent), t("overview.floodsSince", { year: counts.recentFrom }), t("overview.floodsNote", { dated: counts.dated, since: counts.since })];
-}
-
-function createKpis(history) {
-  const tiles = { wet: kpiTile("wave", { hero: true, bar: true }), depth: kpiTile("store"), flood: kpiTile("clock"), rain: kpiTile("rain") };
-  tiles.flood.set(...floodTileText(history));
-  $("kpis").replaceChildren(tiles.wet.node, tiles.depth.node, tiles.flood.node, tiles.rain.node);
-  return tiles;
-}
-
 const setNote = (element, text) => { element.textContent = text ?? ""; element.hidden = !text; };
 
 /** The page's words that name the area come from its config: the map's and the list's labels, and what the area's
@@ -107,16 +58,16 @@ function renderAreaLabels(area) {
 }
 
 /** `area` is the page's area config (GET /api/areas/{id}/data) and `areas` the listed areas for the chooser.
- *  onArea(areaId) is for another area's page; onCheckPoint(button) opens the pin and GPS flow (pin.js), from the scope
- *  bar's button and from the map's own, and is null when this build cannot check points. */
+ *  onArea(areaId) is for another area's page; onCheckPoint(button) opens the pin and GPS flow (pin.js) from the map's
+ *  own button, and is null when this build cannot check points. */
 export function createOverview({ area, areas, premises, town, onSelect, onOpen, onPick, onArea, onCheckPoint = null }) {
-  createScopeBar($("scope"), { areas, areaId: area.id, onArea, onCheckPoint });
+  createScopeBar($("scope"), { areas, areaId: area.id, onArea });
   renderAreaLabels(area);
   const map = createMap($("map"), area, town, premises, { onSelect, onOpen, onCheckPoint });
   const markSelected = createDirectory(premises, onOpen);
   renderLegend($("legend"), town.shelters.length > 0);
   renderHistory($("history"), area);
-  const tiles = createKpis(area.history);
+  const kpis = createKpis($("kpis"), { history: area.history, areaName: area.name, premises });
   let shown = {};
 
   return {
@@ -124,15 +75,10 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
     /** Each part changes only when its own inputs do, so focus and the live figures stay put. */
     render({ rp, selectedId, rain }) {
       if (rp !== shown.rp) {
-        const wet = premises.filter((p) => band(p.depth_m[rp]));
-        const share = premises.length ? wet.length / premises.length : 0;
-        tiles.wet.set(t("overview.wetFigure", { wet: wet.length, total: premises.length }), t("overview.wetLabel", { area: area.name }),
-          t("overview.wetNote", { rp }), share);
-        tiles.depth.set(wet.length ? t("common.metres", { m: median(wet.map((p) => p.depth_m[rp])).toFixed(1) }) : "–",
-          t("overview.typical"), t("overview.typicalNote"));
+        kpis.setScenario(rp);
         renderPicker(document.querySelector("[data-scenario]"), rp, onPick);
       }
-      if (rain !== shown.rain) tiles.rain.set(...rainText(rain));
+      if (rain !== shown.rain) kpis.setRain(rain);
       if (rp !== shown.rp || selectedId !== shown.selectedId) {
         map.show(rp, selectedId);
         markSelected(selectedId);

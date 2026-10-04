@@ -108,7 +108,7 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .scenario button { padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-sm); background: none; text-align: left; font-weight: 700; font-size: var(--text-sm); line-height: 1.25; cursor: pointer; color: var(--ink); transition: background-color var(--duration-fast); }
 .scenario button:hover { background: var(--surface); }
 .scenario button[aria-pressed="true"] { background: var(--brand); color: #fff; box-shadow: var(--shadow-sm); }
-.scenario .chance { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--ink-3); }
+.scenario .chance { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); }
 .scenario button[aria-pressed="true"] .chance { color: var(--band-1); }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
@@ -122,10 +122,11 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: var(--space-2) var(--space-4); margin-top: var(--space-4); font-size: var(--text-xs); }
 .legend li { display: flex; align-items: center; gap: var(--space-2); }
 .legend .muted::before { content: "· "; }
-.swatch { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--ink); }
+/* the same dots as on the map: a white ring with a dark hairline (.biz-dot), and a small pale dot for no water */
+.swatch { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0.8px 0.5px rgba(13, 27, 42, 0.9); }
 .band-1 { background: var(--band-1); } .band-2 { background: var(--band-2); } .band-3 { background: var(--band-3); }
 .band-4 { background: var(--band-4); } .band-5 { background: var(--band-5); }
-.swatch-dry { background: var(--surface); }
+.swatch-dry { width: 9px; height: 9px; margin: 0 3.5px; border: 1.5px solid var(--ink); box-shadow: none; background: var(--dry-dot); }
 
 /* ---------- dialogs: the native <dialog>, opened with showModal ---------- */
 .dialog { width: min(28rem, calc(100% - 2 * var(--gutter))); max-height: calc(100% - 2 * var(--gutter)); padding: var(--space-5); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-md); }
@@ -138,6 +139,16 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 /* ---------- footer ---------- */
 .about { max-width: var(--content-max); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-10); display: grid; gap: var(--space-2); font-size: var(--text-xs); color: var(--ink-2); border-top: 1px solid var(--line); }
 .about h2 { font-size: var(--text-sm); color: var(--ink); }
+/* the rest of the footer folds away: a full-width row that reads as a control, with a plus that turns when open */
+.about-more { margin-top: var(--space-2); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); }
+.about-more summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 44px; padding: var(--space-2) var(--space-4); border-radius: inherit; font-size: var(--text-sm); font-weight: 700; color: var(--brand); cursor: pointer; list-style: none; }
+.about-more summary::-webkit-details-marker { display: none; }
+.about-more summary::after { content: "+" / ""; flex: none; width: 1.5rem; text-align: center; font-size: var(--text-xl); line-height: 1; transition: transform var(--duration-normal) var(--ease-out); }
+.about-more[open] summary::after { transform: rotate(45deg); }
+.about-more summary:hover { background: var(--brand-wash); }
+.about-more[open] summary { border-bottom: 1px solid var(--line); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.about-more > p { padding: var(--space-3) var(--space-4) 0; }
+.about-more > p:last-child { padding-bottom: var(--space-4); }
 
 /* ---------- phones: compact header, tabs become a bottom bar ---------- */
 @media (max-width: 720px) {
