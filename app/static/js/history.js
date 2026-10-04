@@ -125,9 +125,13 @@ function gapsLine(history) {
     t("history.gaps", { ranges: runs.map(([from, to]) => `${from}–${to}`).join(", ") }));
 }
 
+/** Whether the record was searched for this scope (a city's, or a section's with nothing found in it): it then has a
+ *  list of floods, maybe empty, and the years searched. An area never searched has no record at all. */
+export const isSearched = (history) => Array.isArray(history?.floods) && Number.isInteger(history.first_year);
+
 /** The words for "nothing here": a scope searched with nothing found, or an area never searched. */
 function noneText(area, history, place) {
-  if (Array.isArray(history?.floods) && Number.isInteger(history.first_year)) {
+  if (isSearched(history)) {
     return t("history.noneFound", { area: place, from: history.first_year, to: history.last_year });
   }
   return t("history.none", { area: area.display_name });

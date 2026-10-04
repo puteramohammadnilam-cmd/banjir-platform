@@ -1,7 +1,7 @@
 // The four figure tiles at the top of the Area overview: how many businesses get water, how deep it typically gets,
 // how often this area has flooded, and the rain forecast (only when Google Weather is set up).
 import { band, icon, h } from "./dom.js";
-import { floodCounts } from "./history.js";
+import { floodCounts, isSearched } from "./history.js";
 import { miniGauge } from "./gauge.js";
 import { t } from "./i18n.js";
 
@@ -51,9 +51,13 @@ function rainText(rain) {
   return [t("overview.rainMm", { mm: total }), due(hours), t("overview.rainNote", { pct: chance })];
 }
 
-/** The "Floods recorded" tile: the area's own counts, or a dash when no flood record has been collected for it. */
+/** The "Floods recorded" tile: the area's own counts, or a dash when none was found in the years searched, or when no
+ *  flood record has been collected for it. */
 function floodTileText(history) {
   const counts = floodCounts(history);
+  if (!counts && isSearched(history)) {
+    return ["–", t("overview.floodsTile"), t("overview.floodsNoneFound", { from: history.first_year, to: history.last_year })];
+  }
   if (!counts) return ["–", t("overview.floodsTile"), t("overview.floodsNone")];
   return [String(counts.recent), t("overview.floodsSince", { year: counts.recentFrom }), t("overview.floodsNote", { dated: counts.dated, since: counts.since })];
 }

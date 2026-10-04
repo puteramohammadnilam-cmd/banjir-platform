@@ -95,6 +95,7 @@ export default Object.freeze({
   "overview.rowLabel": "{name}, {kind}, berhampiran {road}. {depths}.",
   "overview.floodsTile": "Banjir yang direkodkan",
   "overview.floodsNone": "Belum ada rekod banjir yang dikumpulkan",
+  "overview.floodsNoneFound": "Tiada ditemui dalam sumber yang kami semak ({from}–{to})",
   "overview.floodsSince": "Banjir direkodkan sejak {year}",
   "overview.floodsNote": "{dated} sejak {since}, dalam sumber yang kami semak",
   "overview.mapLabel": "Peta {area}, dengan kedalaman banjir dalam model di setiap perniagaan",

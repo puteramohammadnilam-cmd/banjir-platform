@@ -12,9 +12,9 @@ const premise = (id, d10, d20, d50) => ({ id, depth_m: { 10: d10, 20: d20, 50: d
 const PREMISES = [premise("a", null, 0.4, 1.0), premise("b", 0.2, 1.0, 2.0), premise("c", null, 2.2, 3.5), premise("d", null, null, null)];
 const RAIN = { configured: true, data: { total_mm: 24, max_chance_pct: 60, hours: 12 } };
 
-function mount(overrides = {}) {
+function mount(overrides = {}, language = "en") {
   installFakeDom();
-  useLang("en");
+  useLang(language);
   const container = document.createElement("div");
   const kpis = createKpis(container, { history: null, areaName: "Test Area", premises: PREMISES, ...overrides });
   const [wet, depth, flood, rain] = container.children;
@@ -120,4 +120,18 @@ test("a section with no businesses mapped shows a dash, not 0 of 0", () => {
   assert.equal(figure(wet), "–");
   assert.match(wet.textContent, /No businesses mapped here yet/);
   assert.equal(figure(depth), "–");
+});
+
+test("a section searched with no flood found says none was found in the sources checked, not that none was collected", () => {
+  const searched = { first_year: 1992, recent_from: 2019, last_year: 2026, floods: [] };
+  const { flood } = mount({ history: searched, areaName: "Seksyen U1" });
+  assert.equal(figure(flood), "–");
+  assert.match(flood.textContent, /None found in the sources we checked \(1992–2026\)/);
+  assert.doesNotMatch(flood.textContent, /collected/);
+  assert.match(mount({ history: null }).flood.textContent, /No flood record collected yet/, "an area never searched, as before");
+  try {
+    assert.match(mount({ history: searched }, "ms").flood.textContent, /Tiada ditemui dalam sumber yang kami semak \(1992–2026\)/);
+  } finally {
+    useLang("en");
+  }
 });

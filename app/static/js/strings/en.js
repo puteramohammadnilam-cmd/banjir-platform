@@ -94,6 +94,7 @@ export default Object.freeze({
   "overview.rowLabel": "{name}, {kind}, near {road}. {depths}.",
   "overview.floodsTile": "Floods recorded",
   "overview.floodsNone": "No flood record collected yet",
+  "overview.floodsNoneFound": "None found in the sources we checked ({from}–{to})",
   "overview.floodsSince": "Floods recorded since {year}",
   "overview.floodsNote": "{dated} since {since}, in the sources we checked",
   "overview.mapLabel": "Map of {area}, with modelled flood depth at each business",

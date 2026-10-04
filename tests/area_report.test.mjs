@@ -112,3 +112,17 @@ test("in Bahasa Melayu the table of sections uses the area's own word", () => {
     useLang("en");
   }
 });
+
+test("a section searched with no flood found says so, with the years checked, in both languages", () => {
+  const area = { ...AREA, name: "Seksyen U1", history: { first_year: 1992, recent_from: 2019, last_year: 2026, floods: [] } };
+  const text = buildAreaReport({ area, premises: PREMISES, date: "5 Oct 2026" }).textContent;
+  assert.match(text, /No flood record found for Seksyen U1 in the sources we checked \(1992–2026\)\. That does not mean it has never flooded\./);
+  assert.doesNotMatch(text, /collected/);
+  useLang("ms");
+  try {
+    const malay = buildAreaReport({ area, premises: PREMISES, date: "5 Okt 2026" }).textContent;
+    assert.match(malay, /Tiada rekod banjir ditemui untuk Seksyen U1 dalam sumber yang kami semak \(1992–2026\)/);
+  } finally {
+    useLang("en");
+  }
+});

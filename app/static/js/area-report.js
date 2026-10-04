@@ -2,6 +2,7 @@
 // figure is worked out here from the area's own data (its businesses' modelled depths); nothing is asked of the AI.
 import { CHANCE_YEARS, SCENARIOS, UNNAMED_ROAD, chanceWithin, h } from "./dom.js";
 import { shareOf, shareText } from "./choropleth.js";
+import { isSearched } from "./history.js";
 import { dataWord, t } from "./i18n.js";
 import { DEFAULT_RP } from "./pick.js";
 
@@ -43,7 +44,11 @@ function floodTable({ total, floods }) {
 }
 
 function record(area) {
-  const floods = area.history?.floods ?? [];
+  const { history } = area;
+  const floods = history?.floods ?? [];
+  if (!floods.length && isSearched(history)) {   // searched, with none found: as the page's own record says it
+    return [h("p", {}, t("history.noneFound", { area: area.name, from: history.first_year, to: history.last_year }))];
+  }
   if (!floods.length) return [h("p", {}, t("report.noRecord", { area: area.name }))];
   return [h("ul", {}, floods.map((f) => h("li", {},
     `${f.when}: ${f.what} (${f.source})`, f.account ? t("report.account") : "")))];
