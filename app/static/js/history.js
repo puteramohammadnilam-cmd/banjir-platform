@@ -7,8 +7,9 @@
 import { h, s } from "./dom.js";
 import { lang, t } from "./i18n.js";
 
-const DOT_Y = 22;
-const AXIS_Y = 30;
+const DOT_Y = 34;    // room above the dots for two rows of counts
+const AXIS_Y = 42;
+const COUNT_GAP_YEARS = 2;   // counts this close in years would overlap on a phone-wide strip
 const TICK_EVERY_YEARS = 5;
 const LONG_RECORD_YEARS = 40;   // past this the labels come every 10 years, so they never touch
 const MIN_GAP_YEARS = 3;        // shorter runs with no record are not worth a mention
@@ -57,10 +58,20 @@ function floodsByYear(floods) {
 /** Positions are percentages and the svg has no viewBox, so text keeps its real size on a phone. */
 function strip({ floods, first_year: first, last_year: last }) {
   const xOf = (year) => `${2 + ((year + 0.5 - first) / Math.max(1, last - first)) * 96}%`;
-  // one dot a year, with a count, so a narrow screen never piles dots on top of each other
-  const dots = [...floodsByYear(floods)].map(([year, { days, hollow }]) => s("g", {},
-    s("circle", { class: hollow ? "flood-dot is-account" : "flood-dot", cx: xOf(year), cy: DOT_Y, r: 5 }),
-    days.size > 1 && s("text", { class: "flood-count", x: xOf(year), y: DOT_Y - 9, "text-anchor": "middle" }, `×${days.size}`)));
+  // one dot a year, with a count, so a narrow screen never piles dots on top of each other; counts of neighbouring
+  // years take turns between two rows, so "×3" and "×4" a year apart do not run into each other
+  let lastCounted = -Infinity;
+  let isHigh = false;
+  const dots = [...floodsByYear(floods)].sort(([a], [b]) => a - b).map(([year, { days, hollow }]) => {
+    const isCounted = days.size > 1;
+    if (isCounted) {
+      isHigh = year - lastCounted <= COUNT_GAP_YEARS ? !isHigh : false;
+      lastCounted = year;
+    }
+    return s("g", {},
+      s("circle", { class: hollow ? "flood-dot is-account" : "flood-dot", cx: xOf(year), cy: DOT_Y, r: 5 }),
+      isCounted && s("text", { class: "flood-count", x: xOf(year), y: DOT_Y - (isHigh ? 21 : 9), "text-anchor": "middle" }, `×${days.size}`));
+  });
   const ticks = tickYears(first, last).map((year) =>
     s("text", { x: xOf(year), y: AXIS_Y + 16, "text-anchor": "middle" }, String(year)));
   return s("svg", { class: "flood-strip", height: AXIS_Y + 22, "aria-hidden": "true" },

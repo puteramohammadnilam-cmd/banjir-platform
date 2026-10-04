@@ -212,6 +212,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   const isWholeCity = Boolean(city && !city.section);
   createScopeBar($("scope"), { areas, areaId: area.id, onArea, ...cityScope(city) });
   renderAreaLabels(area, isWholeCity ? city : null);
+  if (city) $("finder-hero-label").textContent = t("hero.headingIn", { area: city.cityName });   // the search covers the whole city
   const riverOnly = riverOnlyNote(area, city?.section ?? null);
   if (riverOnly) $("map-lead").after(h("p", { class: "alert alert-inline alert-info river-note" }, riverOnly));   // up top, beside the map it explains
   const map = createMap($("map"), mapFrame(area, city), town, premises, { onSelect, onOpen, onCheckPoint });
