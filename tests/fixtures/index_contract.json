@@ -1,0 +1,163 @@
+{
+  "about": "Phase 3 data contract between I1 (data: tools/build_ffpi.py, tools/build_section_scores.py), I2 (runtime: app/indexes.py, app/sections.py, app/floodtools.py) and I3 (page). Frozen 5 Oct 2026. Every key below is present in the real files; example values are illustrative except where a rule says they are fixed. Numbers are JSON numbers, never strings. Class ids are fixed lower-case ASCII words; the page translates them.",
+
+  "ffpi_json": {
+    "path": "app/data/indexes/{area}_ffpi.json",
+    "rules": [
+      "classes: exactly [\"low\", \"medium\", \"high\", \"extreme\"], in this order (rising potential).",
+      "breaks: 3 ascending numbers on the 1-10 scale. A score at or above breaks[i] belongs to classes[i + 1]; below breaks[0] is classes[0]. The real values are equal intervals of 1-10: [3.25, 5.5, 7.75].",
+      "Class is always worked out from the stored score (rounded to scale.decimals), so the tif, the JSON and the runtime agree.",
+      "legend: one entry per class in classes order; colour is #rrggbb lower case (sRGB of the oklch triple [L, C, h]); same colours as the PNG palette.",
+      "grid: the tif's grid; pixel is area; west/north are the outer edges; px/py degrees per square (1 arc second); row 0 north, col 0 west.",
+      "bounds: [west, south, east, north] of the tif and the PNG (same grid, same size): give Leaflet [[south, west], [north, east]].",
+      "png.index_of_class maps class id -> palette index in the PNG; png.transparent_index is fully transparent.",
+      "credit: one plain-text line to show under the map when the layer is on (data credits, no HTML).",
+      "method: plain-text strings for the 'How these are worked out' panel; method.not says what the index is not."
+    ],
+    "example": {
+      "version": 1,
+      "area": "shah-alam",
+      "index": "ffpi",
+      "scale": {"min": 1, "max": 10, "decimals": 1},
+      "classes": ["low", "medium", "high", "extreme"],
+      "breaks": [3.25, 5.5, 7.75],
+      "break_rule": "A score at or above a break belongs to the class above it.",
+      "legend": [
+        {"class": "low", "colour": "#fbd9c7", "oklch": [0.91, 0.045, 50]},
+        {"class": "medium", "colour": "#f2ab83", "oklch": [0.8, 0.1, 50]},
+        {"class": "high", "colour": "#da7738", "oklch": [0.67, 0.145, 50]},
+        {"class": "extreme", "colour": "#a44c06", "oklch": [0.52, 0.135, 50]}
+      ],
+      "files": {"tif": "shah-alam_ffpi.tif", "png": "shah-alam_ffpi.png"},
+      "grid": {"west": 101.41208333333333, "north": 3.2481944444444446, "px": 0.0002777777777777778,
+               "py": 0.0002777777777777778, "rows": 1139, "cols": 705},
+      "bounds": [101.41208333333333, 2.9318055555555556, 101.60791666666667, 3.2481944444444446],
+      "nodata": -9999,
+      "png": {"width": 705, "height": 1139, "transparent_index": 0,
+              "index_of_class": {"low": 1, "medium": 2, "high": 3, "extreme": 4},
+              "masked": "Transparent outside the city outline and over permanent water."},
+      "credit": "Flash flood potential: ESA WorldCover 2021 and its Sentinel-2 NDVI composite (CC BY 4.0), SoilGrids 2.0 (ISRIC, CC BY 4.0), Copernicus DEM GLO-30; method after Smith (2003) as used by Yassin et al. (2023).",
+      "method": {
+        "name": "Flash Flood Potential Index (FFPI)",
+        "formula": "(1.5 M + L + S + 0.5 V) / 4",
+        "summary": "Each 30 m square rated 1 to 10 for slope (M), land cover (L), soil (S) and bare ground (V), then weighted.",
+        "factors": {"M": "...", "L": "...", "S": "...", "V": "..."},
+        "classes": "Four equal steps of the 1-10 scale.",
+        "citations": ["Smith, G. (2003) ...", "Yassin, N. A. M. et al. (2023) Planning Malaysia 21(2) ..."],
+        "deviations": ["..."],
+        "not": "A susceptibility to flash floods, not a water depth and not a chance of flooding."
+      }
+    }
+  },
+
+  "ffpi_tif": {
+    "path": "app/data/indexes/{area}_ffpi.tif",
+    "rules": [
+      "The layout app/raster.py reads (tools/geotiff_write.py): float32, deflate, no predictor, 256 px tiles, pixel is area, WGS 84, GDAL_NODATA -9999.",
+      "Values are scores 1.0 to 10.0 rounded to 0.1; -9999 (any value <= -9998) is no data: permanent water, or no input there.",
+      "Grid equals ffpi_json.grid (the GLO-30 crop of app/data/dem). Read with app.raster.DepthFile.open(path).value_at(row, col, convert)."
+    ]
+  },
+
+  "ffpi_png": {
+    "path": "app/data/indexes/{area}_ffpi.png",
+    "rules": [
+      "Indexed PNG (colour type 3, bit depth 4), width = grid.cols, height = grid.rows, north up, same squares as the tif.",
+      "PLTE entry i is legend colour of the class with index_of_class == i; tRNS makes transparent_index fully transparent and the class colours opaque (the page sets layer opacity).",
+      "Transparent outside the city outline, over permanent water and where the tif has no data."
+    ]
+  },
+
+  "spot": {
+    "rules": [
+      "flash_at(lat, lon) on the runtime side returns {\"score\": number (0.1 steps), \"class\": one of ffpi_json.classes} for the square holding the point, or null outside the grid or on no data.",
+      "class comes from ffpi_json.breaks with break_rule."
+    ],
+    "example": {"score": 7.2, "class": "high"},
+    "null_example": null
+  },
+
+  "indexes_json": {
+    "path": "app/data/areas/{area}/indexes.json",
+    "rules": [
+      "sections: one entry per id in sections.json, same ids, every id present.",
+      "flash.mean: area-weighted mean FFPI over the section's land squares (centre in the section, permanent water and no data left out), 1 decimal.",
+      "flash.share: fraction (0 to 1, 3 decimals) of those squares in each class; keys exactly low, medium, high, extreme; they add up to 1 within rounding.",
+      "flash is null only for a section with no land square; then score is null too.",
+      "score.value: area-weighted mean of the per-square weighted rating, 1 to 5, 2 decimals. score.class from method.score.breaks with method.score.break_rule over method.score.classes.",
+      "score.ratings: the section's mean rating (1 to 5, 2 decimals) for each criterion id in method.score.criteria order.",
+      "method.score.weights_used: criterion id -> weight / weights_total (4 decimals); weights_total is 74 (rainfall 23 and economic loss 3 dropped from Leeonis et al. 2024's 100).",
+      "method.score.criteria[i].breaks are ascending, in the criterion's unit; ratings has len(breaks) + 1 entries: ratings[0] applies below breaks[0], ratings[k] at or above breaks[k - 1] and below breaks[k].",
+      "city: the same flash and score shapes over all the sections' squares together.",
+      "validation: plain numbers; wording says 'compared with', never 'validated'. Ranks: 1 = highest of n; ties share the best rank. spearman uses average ranks for ties; null when a side has no spread.",
+      "deviations and the other method strings are plain text for the 'How these are worked out' panel."
+    ],
+    "example": {
+      "version": 1,
+      "area": "shah-alam",
+      "method": {
+        "flash": {
+          "source": "shah-alam_ffpi.json",
+          "classes": ["low", "medium", "high", "extreme"],
+          "breaks": [3.25, 5.5, 7.75],
+          "per_section": "Mean score and share of the section's land squares in each class; permanent water left out."
+        },
+        "score": {
+          "name": "Flood risk score (multi-criteria)",
+          "summary": "...",
+          "criteria": [
+            {"id": "river_distance", "weight": 18, "unit": "m", "breaks": [100, 250, 500, 1000], "ratings": [5, 4, 3, 2, 1], "source": "..."},
+            {"id": "drainage_density", "weight": 16, "unit": "km/km2", "breaks": [2, 4, 6, 8], "ratings": [1, 2, 3, 4, 5], "source": "..."},
+            {"id": "elevation", "weight": 10, "unit": "m", "breaks": [21, 42, 70, 113], "ratings": [5, 4, 3, 2, 1], "source": "..."},
+            {"id": "land_cover", "weight": 9, "unit": "class", "breaks": [], "ratings": [], "table": {"built-up": 5}, "source": "..."},
+            {"id": "slope", "weight": 8, "unit": "%", "breaks": [3.53, 7.05, 11.8, 18.1], "ratings": [5, 4, 3, 2, 1], "source": "..."},
+            {"id": "road_distance", "weight": 7, "unit": "m", "breaks": [50, 100, 200, 500], "ratings": [5, 4, 3, 2, 1], "source": "..."},
+            {"id": "population_density", "weight": 6, "unit": "people/km2", "breaks": [1000, 7441, 18188, 43792], "ratings": [1, 2, 3, 4, 5], "source": "..."}
+          ],
+          "weights_total": 74,
+          "weights_used": {"river_distance": 0.2432, "drainage_density": 0.2162, "elevation": 0.1351, "land_cover": 0.1216,
+                           "slope": 0.1081, "road_distance": 0.0946, "population_density": 0.0811},
+          "classes": ["very_low", "low", "moderate", "high", "very_high"],
+          "breaks": [1.5, 2.5, 3.5, 4.5],
+          "break_rule": "A value at or above a break belongs to the class above it.",
+          "citations": ["Leeonis, A. N. et al. (2024) Discover Sustainability 5:352 (criteria weights)"],
+          "deviations": ["..."]
+        }
+      },
+      "sections": {
+        "seksyen-13": {
+          "flash": {"mean": 6.1, "share": {"low": 0.0, "medium": 0.31, "high": 0.66, "extreme": 0.03}},
+          "score": {"value": 3.12, "class": "moderate",
+                    "ratings": {"river_distance": 1.4, "drainage_density": 3.2, "elevation": 4.0, "land_cover": 4.8,
+                                "slope": 4.6, "road_distance": 4.9, "population_density": 2.7}}
+        }
+      },
+      "city": {
+        "flash": {"mean": 5.8, "share": {"low": 0.01, "medium": 0.42, "high": 0.55, "extreme": 0.02}},
+        "score": {"value": 3.0, "class": "moderate", "ratings": {"river_distance": 2.0, "drainage_density": 3.0, "elevation": 4.0,
+                  "land_cover": 4.0, "slope": 4.5, "road_distance": 4.5, "population_density": 2.5}}
+      },
+      "validation": {
+        "wording": "Compared with past flood records and the river model; this does not validate either index.",
+        "n": 56,
+        "history_counts": "Events in history.json naming the section (an event naming several sections counts for each).",
+        "wet_share": "Share of the section's 90 m squares wet at 1 in 50 years in the river model (sections.json).",
+        "flash_metric": "Share of the section's land squares in the high or extreme class.",
+        "spearman": {"score_vs_history": 0.12, "score_vs_wet_share_50": 0.3,
+                     "flash_vs_history": -0.05, "flash_vs_wet_share_50": -0.2},
+        "hotspots": [
+          {"id": "seksyen-16", "history_events": 9, "score_rank": 20, "flash_rank": 5}
+        ],
+        "rank_rule": "1 = highest of the n sections; ties share the best rank."
+      }
+    }
+  },
+
+  "area_json": {
+    "path": "app/data/areas/{area}/area.json",
+    "rules": [
+      "flash_flood_example: a section id from sections.json (string) for a section with flash-flood records in history.json but (almost) no water in the river model, or absent/null when the area has none. Shah Alam: \"seksyen-13\"."
+    ],
+    "example": {"flash_flood_example": "seksyen-13"}
+  }
+}
