@@ -17,7 +17,7 @@ import contextvars
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
-from . import areas, costs, googlemaps, places, sections
+from . import areas, costs, googlemaps, places, sections, wider_costs
 
 SCENARIOS = {"10": "a flood expected once in 10 years", "20": "a flood expected once in 20 years",
              "50": "a flood expected once in 50 years"}
@@ -70,7 +70,9 @@ MAPS_DOWN = "Google Maps did not answer just now. Try again later."
 MAX_MAPS_LOOKUPS = 3   # per chat question, so a model told to check every shop cannot run up the bill
 MAPS_SPENT = "Enough Google lookups for one question. Answer with what you have."
 ESTIMATE_MAX = {"value_at_risk_rm": 50_000_000, "floor_height_cm": 300, "daily_takings_rm": 1_000_000,
-                "closed_days": 365, "raise_cm": 300, "measure_cost_rm": 50_000_000}
+                "closed_days": 365, "raise_cm": 300, "measure_cost_rm": 50_000_000,
+                "built_in_rm": 50_000_000, "vehicles_rm": 20_000_000, "unpaid_workers": 1_000}
+WIDER = ("built_in_rm", "vehicles_rm", "unpaid_workers")
 
 
 @dataclass(frozen=True)
@@ -437,21 +439,34 @@ def damage_estimate(place_id: str, value_at_risk_rm: float, shop_size: str, floo
 
 def estimate_for(place: dict, value_at_risk_rm: float, shop_size: str = "", floor_height_cm: float = 0,
                  daily_takings_rm: float = 0, closed_days: float = 0, raise_cm: float = 0,
-                 measure_cost_rm: float = 0) -> dict:
+                 measure_cost_rm: float = 0, built_in_rm: float = 0, vehicles_rm: float = 0,
+                 unpaid_workers: float = 0) -> dict:
     """damage_estimate for a Place already found (the form's endpoint finds its own): the owner's figures are
-    checked, then costs.estimate does the sums. An error, worded for the model, when a figure cannot be used."""
+    checked, then costs.estimate does the sums, with the wider losses (wider_costs) the owner gave added to each
+    flood. An error, worded for the model, when a figure cannot be used."""
     given = {"value_at_risk_rm": value_at_risk_rm, "floor_height_cm": floor_height_cm,
              "daily_takings_rm": daily_takings_rm, "closed_days": closed_days,
              "raise_cm": raise_cm, "measure_cost_rm": measure_cost_rm}
+    wider = {"built_in_rm": built_in_rm, "vehicles_rm": vehicles_rm, "unpaid_workers": unpaid_workers}
     size = shop_size.strip().lower() if isinstance(shop_size, str) else None
-    error = _figures_error(given, size)
+    error = _figures_error({**given, **wider}, size)
     if error:
         return {"error": error}
     if value_at_risk_rm:
         size = ""   # the owner's own value wins, so do not echo a size that was not used
-    return {"place": place["id"], "business": _clean(place["name"]), "inputs": {**given, "shop_size": size},
-            **costs.estimate(place["depth_m"], shop_size=size, **given),
-            "method": costs.METHOD, "limits": f"{costs.LIMITS} {LIMITS}"}
+    found = costs.estimate(place["depth_m"], shop_size=size, **given, extra_rm=_wider_by_flood(place["depth_m"], given, wider))
+    found["basis"] = {**found["basis"], **wider_costs.basis(**wider)}
+    return {"place": place["id"], "business": _clean(place["name"]), "inputs": {**given, **wider, "shop_size": size},
+            **found, "method": costs.METHOD, "limits": f"{costs.LIMITS} {LIMITS}"}
+
+
+def _wider_by_flood(depth_m: dict, given: dict, wider: dict) -> dict | None:
+    """The wider losses in each flood, or None when the owner gave none (so the answer keeps its old shape)."""
+    if not any(wider.values()):
+        return None
+    floor_m = given["floor_height_cm"] / 100
+    return {rp: wider_costs.per_flood(depth, max(0.0, (depth or 0.0) - floor_m), closed_days=given["closed_days"], **wider)
+            for rp, depth in depth_m.items()}
 
 
 def _figures_error(given: dict, size: str | None) -> str | None:
@@ -472,6 +487,11 @@ def _figures_error(given: dict, size: str | None) -> str | None:
     if raise_cm > 0 and not value:
         return ("A measure can only be priced from the owner's own value of stock and equipment. "
                 "The shop-size figure does not change with depth. Ask for that value.")
+    if given.get("built_in_rm") and not value:
+        return ("Built-in works can only be added to the owner's own value of stock and equipment: the shop-size "
+                "figure already counts the building.")
+    if 0 < given.get("built_in_rm", 0) < 1 or 0 < given.get("vehicles_rm", 0) < 1:
+        return "Ringgit amounts must be 0 or at least 1."
     if not (value or size or given["daily_takings_rm"] * given["closed_days"]):
         return "Nothing to estimate from. Ask for the value of stock and equipment, or the shop size."
     return None

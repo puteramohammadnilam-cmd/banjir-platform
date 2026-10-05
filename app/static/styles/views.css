@@ -434,6 +434,12 @@
 .split-key::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--key); }
 .split-key.is-damage { --key: #f2ab83; }
 .split-key.is-trade { --key: var(--band-1); }
+.split-built-in { background: #f8d3b8; }
+.split-key.is-built-in { --key: #f8d3b8; }
+.split-vehicles { background: #b9a6e8; }
+.split-key.is-vehicles { --key: #b9a6e8; }
+.split-wages { background: #9fd9c2; }
+.split-key.is-wages { --key: #9fd9c2; }
 .figure-facts { display: grid; gap: var(--space-1); margin: var(--space-3) 0 0; padding: 0; list-style: none; font-size: var(--text-xs); }
 .figure-facts li { display: flex; align-items: flex-start; gap: var(--space-2); }
 .figure-facts .icon { flex: none; width: 14px; height: 14px; margin-top: 2px; color: var(--band-1); }

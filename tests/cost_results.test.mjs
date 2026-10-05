@@ -105,3 +105,19 @@ test("an answer the owner pressed for names the shop size, and says nothing for 
   const own = results({ ...OWN, inputs: { shop_size: "", value_at_risk_rm: 25000 } });
   assert.equal(own[0].querySelector(".cost-basis"), null);
 });
+
+test("what the owner added shows in the bar and in an Other column; nothing added, neither", () => {
+  const wider = (above, direct, indirect, extra) => ({ ...flood(above, direct, indirect, 0.3), ...extra,
+    total_rm: direct + indirect + Object.values(extra).reduce((a, b) => a + b, 0) });
+  const WIDE = result({ 10: wider(0, 0, 0, { built_in_rm: 0, vehicles_rm: 0, wages_rm: 0 }),
+    20: wider(0.5, 19000, 5700, { built_in_rm: 7600, vehicles_rm: 27720, wages_rm: 915 }),
+    50: wider(1, 27000, 8100, { built_in_rm: 10800, vehicles_rm: 45600, wages_rm: 915 }) });
+  const [figures] = results(WIDE, { rp: "20" });
+  assert.equal(figures.children[0].querySelector(".split-legend").textContent.replace(/\s/g, " "),
+    "Damage RM 19,000Renovation RM 7,600Lost sales RM 5,700Vehicles RM 27,720Workers' pay RM 915");
+  const table = results(WIDE).find((node) => node.getAttribute("class") === "table-scroll");
+  assert.deepEqual(table.querySelector("thead").querySelectorAll("th").map((th) => th.textContent), ["Flood size", "Water above floor", "Damage", "Lost sales", "Other", "Total"]);
+  const plain = results(OWN).find((node) => node.getAttribute("class") === "table-scroll");
+  assert.ok(!plain.querySelector("thead").querySelectorAll("th").some((th) => th.textContent === "Other"));
+  assert.equal(results(OWN, { rp: "20" })[0].children[0].querySelector(".split-legend").querySelectorAll("span").length, 2);
+});

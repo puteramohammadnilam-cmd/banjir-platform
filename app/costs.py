@@ -128,19 +128,34 @@ def _direct(depth_m: dict[str, float | None], value_rm: float, shop_size: str, f
     return floods
 
 
+def _basis(value_rm: float, shop_size: str, closure_rm: float) -> dict:
+    """How the direct damage and the indirect loss were worked out, in words."""
+    if value_rm > 0:
+        direct = DIRECT_FROM_OWNER
+    elif shop_size in JPS_POTENTIAL_DAMAGE_RM_2001:
+        direct = DIRECT_FROM_SIZE.format(label=SIZE_LABEL[shop_size], unit=JPS_POTENTIAL_DAMAGE_RM_2001[shop_size])
+    else:
+        direct = DIRECT_NONE
+    return {"direct": direct, "indirect": INDIRECT_FROM_OWNER if closure_rm > 0 else INDIRECT_DEFAULT}
+
+
 def _yearly(floods: dict) -> float:
     return expected_yearly({rp: flood["total_rm"] for rp, flood in floods.items()})
 
 
 def estimate(depth_m: dict[str, float | None], value_at_risk_rm: float, floor_height_cm: float = 0,
              daily_takings_rm: float = 0, closed_days: float = 0,
-             raise_cm: float = 0, measure_cost_rm: float = 0, shop_size: str = "") -> dict:
+             raise_cm: float = 0, measure_cost_rm: float = 0, shop_size: str = "",
+             extra_rm: dict[str, dict[str, int]] | None = None) -> dict:
     """Loss per flood, per year and over YEARS, and whether raising the stock by raise_cm pays for itself.
 
     The owner's own value_at_risk_rm is used when given; shop_size ("small", "medium", "complex") is the
     fallback. A measure is priced only from the owner's own value: the flat shop-size figure cannot do it.
+    extra_rm adds other named losses per flood (wider_costs.per_flood: built-in works, vehicles, workers' pay) to
+    each total; a measure that raises stock leaves them as they are.
     """
     closure_rm = daily_takings_rm * closed_days
+    extra_rm = extra_rm or {}
 
     def priced(floor_cm: float, indirect_from: dict | None = None) -> dict:
         floods = {}
@@ -152,8 +167,9 @@ def estimate(depth_m: dict[str, float | None], value_at_risk_rm: float, floor_he
                 indirect = round(closure_rm) if flood["depth_m"] else 0
             else:
                 indirect = round(direct * JPS_INDIRECT_SHARE)
-            floods[rp] = {**flood, "direct_damage_rm": round(direct), "indirect_loss_rm": indirect,
-                          "total_rm": round(direct) + indirect}
+            extra = extra_rm.get(rp, {})
+            floods[rp] = {**flood, "direct_damage_rm": round(direct), "indirect_loss_rm": indirect, **extra,
+                          "total_rm": round(direct) + indirect + sum(extra.values())}
         return floods
 
     floods = priced(floor_height_cm)
@@ -168,14 +184,7 @@ def estimate(depth_m: dict[str, float | None], value_at_risk_rm: float, floor_he
                    "benefit_present_value_rm": round(benefit),
                    "benefit_cost_ratio": None if ratio is None else round(ratio, 2),
                    "worth_it": None if ratio is None else ratio > WORTH_IT_ABOVE}
-    if value_at_risk_rm > 0:
-        direct_basis = DIRECT_FROM_OWNER
-    elif shop_size in JPS_POTENTIAL_DAMAGE_RM_2001:
-        direct_basis = DIRECT_FROM_SIZE.format(label=SIZE_LABEL[shop_size], unit=JPS_POTENTIAL_DAMAGE_RM_2001[shop_size])
-    else:
-        direct_basis = DIRECT_NONE
-    basis = {"direct": direct_basis, "indirect": INDIRECT_FROM_OWNER if closure_rm > 0 else INDIRECT_DEFAULT}
-    return {"per_flood": floods, "basis": basis, "expected_yearly_loss_rm": round(yearly),
+    return {"per_flood": floods, "basis": _basis(value_at_risk_rm, shop_size, closure_rm), "expected_yearly_loss_rm": round(yearly),
             "loss_over_years": {"years": YEARS, "discount_rate": DISCOUNT_RATE,
                                 "present_value_rm": round(present_value(yearly))},
             "measure": measure}

@@ -168,6 +168,9 @@ class EstimateIn(BaseModel):
     closed_days: float = 0
     raise_cm: float = 0
     measure_cost_rm: float = 0
+    built_in_rm: float = 0
+    vehicles_rm: float = 0
+    unpaid_workers: float = 0
 
 
 class PointIn(BaseModel):

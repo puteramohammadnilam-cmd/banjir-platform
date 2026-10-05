@@ -14,9 +14,19 @@ const isFlat = (result) => SCENARIOS.every((rp) => result.per_flood[rp].damage_s
  *  beside it, and none for a flood that costs nothing. */
 const lossBar = (share) => h("span", { class: "loss-bar", style: `--share: ${Math.round(share * 100)}%`, "aria-hidden": "true" });
 
+// The parts of one flood's loss, in the order the bar and its key show them: [field, key, CSS name]. The last three are
+// there only when the owner added them (wider_costs).
+const PARTS = [["direct_damage_rm", "cost.splitDamage", "damage"], ["built_in_rm", "cost.splitBuiltIn", "built-in"],
+  ["indirect_loss_rm", "cost.splitTrade", "trade"], ["vehicles_rm", "cost.splitVehicles", "vehicles"], ["wages_rm", "cost.splitWages", "wages"]];
+const WIDER = ["built_in_rm", "vehicles_rm", "wages_rm"];
+/** What the owner added beyond stock and lost sales in this flood. */
+const otherOf = (flood) => WIDER.reduce((sum, field) => sum + (flood[field] ?? 0), 0);
+const hasOther = (result) => SCENARIOS.some((rp) => otherOf(result.per_flood[rp]) > 0);
+
 /** Every flood size's loss, the one on show (rp) marked, each total with a bar against the largest. */
 function lossTable(result, flat, rp) {
-  const cols = flat ? ["cost.colSize", "cost.colWater", "cost.colTotal"] : ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"];
+  const other = hasOther(result);
+  const cols = ["cost.colSize", "cost.colWater", ...(flat ? [] : ["cost.colDamage", "cost.colTrade"]), ...(other ? ["cost.colOther"] : []), "cost.colTotal"];
   const largest = Math.max(...SCENARIOS.map((key) => result.per_flood[key].total_rm));
   return h("div", { class: "table-scroll" }, h("table", { class: `loss-table${flat ? " is-flat" : ""}` },
     h("caption", { class: "visually-hidden" }, t("cost.caption")),
@@ -27,20 +37,21 @@ function lossTable(result, flat, rp) {
       return h("tr", { class: isChosen ? "is-chosen" : null, "aria-current": isChosen ? "true" : null },
         h("th", { scope: "row" }, t("common.rpYears", { rp: key })), h("td", {}, metresAbove(flood.water_above_floor_m)),
         !flat && h("td", {}, ringgit(flood.direct_damage_rm)), !flat && h("td", {}, ringgit(flood.indirect_loss_rm)),
+        other && h("td", {}, ringgit(otherOf(flood))),
         h("td", { class: "loss-total" }, h("strong", {}, ringgit(flood.total_rm)), flood.total_rm > 0 && lossBar(flood.total_rm / largest)));
     }))));
 }
 
-/** The key figure split in two: damage and lost sales, as one bar and its two figures. None for a flood that costs nothing. */
+/** The key figure split into its parts (damage and lost sales, and what the owner added), as one bar and its figures.
+ *  None for a flood that costs nothing; a part worth nothing is left out, damage and lost sales apart. */
 function splitBar(flood) {
   if (!(flood.total_rm > 0)) return null;
+  const parts = PARTS.filter(([field]) => (WIDER.includes(field) ? (flood[field] ?? 0) > 0 : true));
   return h("div", { class: "split" },
     h("div", { class: "split-bar", "aria-hidden": "true" },
-      h("span", { class: "split-damage", style: `flex-grow: ${flood.direct_damage_rm}` }),
-      h("span", { class: "split-trade", style: `flex-grow: ${flood.indirect_loss_rm}` })),
+      parts.map(([field, , name]) => h("span", { class: `split-${name}`, style: `flex-grow: ${flood[field] ?? 0}` }))),
     h("p", { class: "split-legend" },
-      h("span", { class: "split-key is-damage" }, t("cost.splitDamage", { rm: ringgit(flood.direct_damage_rm) })),
-      h("span", { class: "split-key is-trade" }, t("cost.splitTrade", { rm: ringgit(flood.indirect_loss_rm) }))));
+      parts.map(([field, key, name]) => h("span", { class: `split-key is-${name}` }, t(key, { rm: ringgit(flood[field] ?? 0) })))));
 }
 
 /** The key figure: what the flood size on show (the page's "Size of flood", rp) costs, what it is made of, with its

@@ -45,19 +45,25 @@ test("the form starts ready: not sure of the value (a medium shop's typical figu
   assert.match(panel.textContent, /Not sure is fine: we add 30% of the damage/);
 });
 
-test("the four questions come in order, each with its answers to tap", () => {
+test("the six questions come in order, each with its answers to tap", () => {
   const { panel } = mount();
   assert.deepEqual(panel.querySelectorAll(".question-title").map((legend) => legend.textContent), [
     "Things in your shop that water can spoil", "How high is your shop floor above the road?",
-    "On a normal day, how many customers?", "What if you put things higher?"]);
+    "On a normal day, how many customers?", "How many people work here, besides you?", "Cars and motorcycles parked here",
+    "What if you put things higher?"]);
   assert.match(panel.textContent, /kedai runcit has shelves of goods/, "an example that is not only a kedai runcit's");
 });
 
 test("each follow-on question is its own fieldset with a legend, so its answers are named", () => {
   const { panel } = mount();
   assert.deepEqual(panel.querySelectorAll(".sub-question").map((set) => [set.tagName.toLowerCase(), set.querySelector("legend").textContent]), [
+    ["fieldset", "Renovation and built-ins"],
     ["fieldset", "Each spends about"],
     ["fieldset", "If water comes in, how long would you close? Cleaning, drying, fixing and restocking."],
+    ["fieldset", "Are they paid while the shop is shut?"],
+    ["fieldset", "Each car is worth about"],
+    ["fieldset", "Motorcycles"],
+    ["fieldset", "Each motorcycle is worth about"],
     ["fieldset", "What would that cost?"]]);
 });
 
@@ -128,7 +134,7 @@ test("every ready answer stays inside what the server takes (floodtools.ESTIMATE
 test("pressing Estimate with nothing tapped sends a medium shop's typical figure", () => {
   const { form, sent } = mount();
   form.dispatch("submit");
-  assert.deepEqual(sent, [{ value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 }]);
+  assert.deepEqual(sent, [{ value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 7, raise_cm: 0, measure_cost_rm: 0, built_in_rm: 0, vehicles_rm: 0, unpaid_workers: 0 }]);
 });
 
 test("a range counts as about its middle and says so; a step counts as its height", () => {
@@ -137,13 +143,14 @@ test("a range counts as about its middle and says so; a step counts as its heigh
   tap(panel, "floor", "15");
   assert.match(panel.textContent, /We count RM\s?30,000, about the middle of what you picked\./);
   assert.ok(!shown(panel.querySelector("select")), "the shop size goes away once a value is picked");
-  assert.deepEqual(cost.figures(), { value_at_risk_rm: 30000, shop_size: "", floor_height_cm: 15, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 });
+  assert.deepEqual(cost.figures(), { value_at_risk_rm: 30000, shop_size: "", floor_height_cm: 15, daily_takings_rm: 0, closed_days: 7, raise_cm: 0, measure_cost_rm: 0, built_in_rm: 0, vehicles_rm: 0, unpaid_workers: 0 });
 });
 
 test("customers times what each spends gives the day's sales, times the days closed the lost sales", () => {
   const { panel, cost } = mount();
-  const [spend, days] = panel.querySelectorAll(".sub-question");
-  assert.ok(!shown(spend) && !shown(days), "no spend or days closed until the customers are answered");
+  const [, spend, days] = panel.querySelectorAll(".sub-question");
+  assert.ok(!shown(spend), "no spend until the customers are answered");
+  assert.ok(shown(days), "days closed always: they count for workers' pay too");
   tap(panel, "customers", "35");
   assert.ok(shown(spend) && shown(days));
   tap(panel, "spend", "15");
@@ -154,7 +161,7 @@ test("customers times what each spends gives the day's sales, times the days clo
   box(panel, "daily_takings_rm").value = "800";
   assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [800, 14]);
   tap(panel, "customers", "unsure");
-  assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [0, 0], "not sure: the guideline's 30% on the server");
+  assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [0, 14], "not sure: the guideline's 30% on the server");
 });
 
 test("putting things higher needs a value, not Not sure, and counts the picked cost", () => {
@@ -207,7 +214,7 @@ test("each place keeps its own answers, and a new place starts ready", () => {
 
 // ---------- the tab opens with an answer ----------
 
-const DEFAULT_FIGURES = { value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 };
+const DEFAULT_FIGURES = { value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 7, raise_cm: 0, measure_cost_rm: 0, built_in_rm: 0, vehicles_rm: 0, unpaid_workers: 0 };
 
 test("figures() gives what Estimate would send, so the tab can work out a first look when it opens", () => {
   const { cost, sent } = mount();
@@ -356,4 +363,42 @@ test("another size of flood keeps the form's own message, and neither scrolls no
 test("the note under the picker names the area's own bigger flood, as on My business", () => {
   const { panel } = mount({ floodExample: (place) => (place.id === shop.id ? "2021-12" : null) });
   assert.match(panel.querySelector(".cost-picker").textContent, /Floods bigger than 1 in 50 years, such as December 2021, are not shown\./);
+});
+
+// ---------- renovation, workers and vehicles ----------
+
+test("renovation is asked only beside a value of one's own: the typical figure already counts the building", () => {
+  const { panel, cost } = mount();
+  const builtIn = panel.querySelectorAll(".sub-question")[0];
+  assert.ok(!shown(builtIn), "Not sure: no renovation question");
+  tap(panel, "worth", "30000");
+  assert.ok(shown(builtIn));
+  tap(panel, "builtIn", "20000");
+  assert.equal(cost.figures().built_in_rm, 20000);
+  tap(panel, "worth", "size");
+  assert.equal(cost.figures().built_in_rm, 0, "back to Not sure: not sent, though still picked");
+});
+
+test("workers not paid while shut lose the minimum wage for the days closed, said in ringgit", () => {
+  const { panel, cost } = mount();
+  tap(panel, "workers", "2");
+  tap(panel, "days", "14");
+  assert.match(panel.textContent, /They lose about RM\s?1,831 in pay: the minimum wage, RM 65\.38 a day, for 14 days\./);
+  assert.equal(cost.figures().unpaid_workers, 2);
+  tap(panel, "paid", "yes");
+  assert.equal(cost.figures().unpaid_workers, 0);
+  assert.match(panel.textContent, /Their pay is part of the sales you lose, so it is not counted again\./);
+});
+
+test("cars and motorcycles count as their number times what each is worth", () => {
+  const { panel, cost } = mount();
+  const carValue = panel.querySelectorAll(".sub-question")[4];
+  assert.ok(!shown(carValue), "no value question until a car is picked");
+  tap(panel, "cars", "2");
+  tap(panel, "carValue", "30000");
+  tap(panel, "motos", "1");
+  tap(panel, "motoValue", "3000");
+  assert.ok(shown(carValue));
+  assert.equal(cost.figures().vehicles_rm, 63000);
+  assert.match(panel.textContent, /Vehicles worth RM\s?63,000 in all\. .*motorcycles use the car curve, our assumption\./);
 });
