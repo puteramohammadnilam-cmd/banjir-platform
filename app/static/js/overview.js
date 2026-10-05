@@ -5,9 +5,9 @@
 // whole city's map what the sections are shaded by (susceptibility.js), and the low ground layer's (lowground.js).
 import { SQUARE_RAMP } from "./cells.js";
 import { DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, choroplethKey, createChoropleth } from "./choropleth.js";
-import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
+import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, ringgit, roadName } from "./dom.js";
 import { renderHistory } from "./history.js";
-import { dataWord, t } from "./i18n.js";
+import { dataWord, numberLocale, t } from "./i18n.js";
 import { createKpis } from "./kpis.js";
 import { createLowGround } from "./lowground.js";
 import { createMap, createPictureLayer } from "./map.js";
@@ -200,6 +200,28 @@ function listNotes(element, card, notes) {
   card.hidden = !shown.length;
 }
 
+// From RM 10 million a loss is said in millions, one decimal; below that in full, so RM 1,049,000 keeps its 49,000.
+const MILLIONS_FROM_RM_THOUSAND = 10_000;
+/** A loss in RM thousand, as people read it: "RM 396.4 million", "RM 1,049,000", or none recorded. */
+export const lossWords = (thousand) => (thousand === 0 ? t("losses.none")
+  : thousand >= MILLIONS_FROM_RM_THOUSAND
+    ? t("losses.million", { n: (thousand / 1000).toLocaleString(numberLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })
+    : ringgit(thousand * 1000));
+
+/** The Reference tab's card of past flood losses to business premises, from the area's config (`losses`), with its note
+ *  and source; hidden for an area that has none. Place names come from the config, never from the page's strings. */
+function renderLosses(losses) {
+  $("losses-card").hidden = !losses;
+  if (!losses) return;
+  const head = h("tr", {}, h("th", { scope: "col" }, t("losses.year")), losses.places.map((place) => h("th", { scope: "col" }, place)));
+  const rows = losses.years.map((row) => h("tr", { class: row.rm_thousand.every((v) => v === 0) ? "is-none" : null },
+    h("th", { scope: "row" }, String(row.year)), row.rm_thousand.map((value) => h("td", {}, lossWords(value)))));
+  $("losses-body").replaceChildren(
+    h("div", { class: "table-scroll" }, h("table", { class: "loss-table losses-table" },
+      h("caption", { class: "visually-hidden" }, t("losses.caption")), h("thead", {}, head), h("tbody", {}, rows))),
+    h("p", {}, losses.note), h("p", { class: "fineprint" }, losses.source));
+}
+
 /** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
  *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
 function foldNotes(element, notes) {
@@ -218,6 +240,7 @@ export function renderAreaLabels(area, city = null) {
   foldNotes($("directory-note"), [["overview.noteBusinesses", area.notes?.businesses]]);
   listNotes($("map-note"), $("map-notes-card"), [["overview.noteDepths", area.notes?.depths], ["overview.noteShelters", area.notes?.shelters],
     ["overview.noteSections", area.notes?.sections], ["overview.noteBusinesses", area.notes?.businesses]]);
+  renderLosses(area.losses);
   if (!city) {
     $("map").setAttribute("aria-label", t("overview.mapLabel", { area: area.display_name }));
     return;

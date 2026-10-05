@@ -455,6 +455,12 @@
 .table-scroll { position: relative; overflow-x: auto; }   /* the table scrolls inside its card on narrow screens, not the page; relative,
    so a visually hidden line in it stays inside its box and adds no blank scroll under the page */
 .loss-table.is-flat { min-width: 0; }   /* three columns fit a phone; the five of an own value scroll */
+/* past losses on the Reference tab: years down the side; a year with none recorded is quieter */
+.loss-table.losses-table { min-width: 0; }   /* four short columns fit a phone */
+#losses-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+#losses-body .fineprint { overflow-wrap: anywhere; }   /* the source's long links wrap instead of widening the card */
+.losses-table tr.is-none td { color: var(--ink-3); }
+.loss-table.losses-table th, .loss-table.losses-table td { padding-inline: var(--space-1); }
 .loss-table { width: 100%; min-width: 26rem; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .loss-table th, .loss-table td { padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
 .loss-table th:first-child, .loss-table td:first-child { text-align: left; }
@@ -675,7 +681,7 @@ body[data-tab="overview"] .finder { display: none; }
 
 /* ---------- Reference: the data, its working and its limits, to read at leisure ---------- */
 .reference-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: var(--space-4); align-items: start; margin-top: var(--space-4); }
-.reference-card { display: grid; gap: var(--space-3); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.6; }
+.reference-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.6; }
 .reference-card h2 { font-size: var(--text-lg); color: var(--ink); }
 .reference-notes { display: grid; gap: var(--space-1); }
 .reference-notes h3 { margin-top: var(--space-2); color: var(--ink); }

@@ -369,6 +369,7 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
     found = {**summary(area), "council": area.council, "notes": areas._thaw(area.notes),
              "history": history_for(area, section_id), "bigger_flood_example": area.bigger_flood_example,
              "flash_flood_example": area.flash_flood_example, "index_method": index_method(area.id),
+             "losses": areas._thaw(area.losses),
              "layers": {"flash_flood": indexes.layer(area.id), "low_ground": lowground.layer(area.id)}}
     if has_sections(area):
         found.update(section_word=areas._thaw(area.section_word), default_section=area.default_section)

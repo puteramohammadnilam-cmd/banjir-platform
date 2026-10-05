@@ -38,5 +38,56 @@
     "shelters": "Relief centres (PPS) used in past floods, not an official list: 6 centres named in news reports of the floods of December 2021, April 2025 and November 2025, placed with OpenStreetMap (2 of them by a nearly matching name). A centre open in one flood may not open in the next, so check with the council or the state disaster office before going. Also named in the news but not shown, because they could not be placed on the map: Masjid Muhsini, Kampung Sungai Kandis (Seksyen 36); Balai MPKK Bukit Naga, Seksyen 32, only the village is on the map; Dewan Azalea, Taman Seri Muda (Seksyen 25); Dewan Bunga Bakawali, Seksyen 35.",
     "depths": "Flood depths are the European Commission JRC global river flood model v2.1 (CC BY 4.0), in 90 m squares, for floods of 1 in 10, 20 and 50 years. It models rivers overflowing, not drains or flash floods, so read its depths as the model's, not as what to expect."
   },
-  "history": null
+  "history": null,
+  "losses": {
+    "places": [
+      "Selangor",
+      "Petaling",
+      "Klang"
+    ],
+    "years": [
+      {
+        "year": 2021,
+        "rm_thousand": [
+          396400,
+          193600,
+          82400
+        ]
+      },
+      {
+        "year": 2022,
+        "rm_thousand": [
+          519,
+          85,
+          191
+        ]
+      },
+      {
+        "year": 2023,
+        "rm_thousand": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "year": 2024,
+        "rm_thousand": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "year": 2025,
+        "rm_thousand": [
+          1049,
+          113.9,
+          237.5
+        ]
+      }
+    ],
+    "note": "Petaling and Klang are districts, and Shah Alam lies in both. Taman Sri Muda (Seksyen 25) is in Klang district; DOSM does not say which district its table counts it under. The December 2021 flood is far bigger than any year since. DOSM gives ringgit only, not how many premises, and does not say whether the figure is the building, its contents or lost sales.",
+    "source": "Data source: Department of Statistics Malaysia (DOSM). 2021: media statement on the Special Report on Impact of Floods in Malaysia 2021, 28 Jan 2022 (https://www.dosm.gov.my/uploads/content-downloads/file_20221105192714.pdf). 2022 and 2023: Special Report on Impact of Floods in Malaysia 2023, part 5, Table 2, p.802 (https://www.dosm.gov.my/uploads/release-content/file_20240311124014.pdf). 2024 and 2025: Special Report on Impact of Floods in Malaysia 2025, Table 2 (https://www.dosm.gov.my/portal-main/release-content/special-report-on-impact-of-floods-in-malaysia2025)."
+  }
 }

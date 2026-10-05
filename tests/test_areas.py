@@ -463,3 +463,44 @@ def test_the_depth_check_note_counts_what_the_data_holds(area_id, over_5_m):
     deep = sum(1 for p in areas.premises(area_id) if (p["depth_m"]["50"] or 0) > 5)
     note = areas.get(area_id).notes["depths"]
     assert deep == over_5_m and f"more than 5 m of water at {over_5_m} of these businesses in a 1 in 50 years flood" in note
+
+
+# ---------- past losses to business premises (Reference tab)
+
+LOSSES = {"places": ["State", "District"], "years": [{"year": 2021, "rm_thousand": [396400, 193600]},
+                                                     {"year": 2023, "rm_thousand": [0, 0]}],
+          "note": "A note.", "source": "Data source: a statistics office."}
+
+
+def test_losses_load_and_reach_the_page(tmp_path):
+    write_area(tmp_path, "test-town", {**GOOD, "losses": LOSSES})
+    (area,) = areas.load_all(tmp_path)
+    assert areas._thaw(area.losses) == LOSSES
+    assert areas._thaw(areas.get(CITY).losses)["years"][0] == {"year": 2021, "rm_thousand": [396400, 193600, 82400]}
+
+
+def test_the_city_sends_its_losses_with_the_area_data(client):
+    losses = client.get(f"/api/areas/{CITY}/data").json()["data"]["area"]["losses"]
+    assert losses["places"][0] == "Selangor" and [row["year"] for row in losses["years"]] == [2021, 2022, 2023, 2024, 2025]
+    assert all(len(row["rm_thousand"]) == len(losses["places"]) for row in losses["years"])
+    assert losses["source"].startswith("Data source: Department of Statistics Malaysia")
+    section = client.get(f"/api/areas/{CITY}/sections/seksyen-25/data").json()["data"]["area"]
+    assert section["losses"] == losses   # a section's page keeps its city's losses
+
+
+@pytest.mark.parametrize("bad", [
+    {**LOSSES, "years": [{"year": 2021, "rm_thousand": [1]}]},             # one number for two places
+    {**LOSSES, "years": [{"year": 2021, "rm_thousand": [1, -1]}]},         # a negative loss
+    {**LOSSES, "places": []},
+    {**LOSSES, "note": ""},
+    {key: value for key, value in LOSSES.items() if key != "source"},
+    [],
+    {**LOSSES, "years": []},                                              # a table with no rows
+    {**LOSSES, "years": [LOSSES["years"][1], LOSSES["years"][0]]},          # newest first
+    {**LOSSES, "years": [LOSSES["years"][0], LOSSES["years"][0]]},          # a year twice
+    {**LOSSES, "places": ["State", "State"]},
+])
+def test_malformed_losses_are_rejected(tmp_path, bad):
+    write_area(tmp_path, "test-town", {**GOOD, "losses": bad})
+    with pytest.raises(areas.AreaError, match="losses must be"):
+        areas.load_all(tmp_path)

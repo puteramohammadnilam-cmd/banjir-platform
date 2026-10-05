@@ -9,7 +9,7 @@ import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, h } from "../app/static/js/dom.js";
 import { DEPTH_METRIC, FLASH_METRIC } from "../app/static/js/choropleth.js";
 import {
-  createCityDirectory, createDirectory, createIndexControls, indexMetrics, renderAreaLabels, renderLegend, renderMethod,
+  createCityDirectory, createDirectory, createIndexControls, indexMetrics, lossWords, renderAreaLabels, renderLegend, renderMethod,
 } from "../app/static/js/overview.js";
 import { FLASH_RAMP, swatchStyle } from "../app/static/js/susceptibility.js";
 import { pageArea } from "../app/static/js/start.js";
@@ -407,4 +407,40 @@ test("'How these are worked out' shows with the index, hides without it, and lea
   assert.equal(details.hidden, true, "an older server: no method to explain");
   renderMethod(details, body, { ...CITY_AREA, layers: { flash_flood: null }, index_method: null }, { word: SECTION_WORD });
   assert.equal(details.hidden, true, "another area: the fields are there, and null");
+});
+
+// ---------- past losses to business premises (Reference tab) ----------
+
+const LOSSES = { places: ["State", "District"], years: [{ year: 2021, rm_thousand: [396400, 193600] }, { year: 2023, rm_thousand: [0, 0] },
+  { year: 2025, rm_thousand: [1049, 113.9] }], note: "A note.", source: "Data source: a statistics office." };
+
+function mountLabels(area) {
+  const elements = new Map();
+  globalThis.document.getElementById = (id) => {
+    if (!elements.has(id)) elements.set(id, h(id === "finder-hero-label" ? "label" : "div"));
+    return elements.get(id);
+  };
+  renderAreaLabels(area);
+  return elements;
+}
+
+test("an area with losses shows them by year, and one without hides the card", () => {
+  const elements = mountLabels({ ...HOME, losses: LOSSES });
+  assert.equal(elements.get("losses-card").hidden, false);
+  const rows = elements.get("losses-body").querySelectorAll("tr").map((row) => row.textContent.replace(/\s+/g, " "));
+  assert.match(rows[0], /Year.*State.*District/);
+  assert.match(rows[1], /2021.*RM 396\.4 million.*RM 193\.6 million/);
+  assert.match(rows[2], /2023.*None recorded.*None recorded/);
+  assert.match(rows[3], /2025.*RM\s?1,049,000.*RM\s?113,900/, "under RM 10 million in full, so the 49,000 is kept");
+  assert.match(elements.get("losses-body").querySelector("caption").textContent, /Flood losses to business premises by year/);
+  assert.match(elements.get("losses-body").textContent, /Data source: a statistics office\./);
+  renderAreaLabels(HOME);   // another area, with none
+  assert.equal(elements.get("losses-card").hidden, true);
+});
+
+test("losses are said in millions from RM 10 million, with separators", () => {
+  assert.equal(lossWords(0), "None recorded");
+  assert.match(lossWords(9999), /^RM\s?9,999,000$/);
+  assert.equal(lossWords(10000), "RM 10.0 million");
+  assert.equal(lossWords(1234567), "RM 1,234.6 million");
 });

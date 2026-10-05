@@ -27,6 +27,9 @@ area.json fields:
                 named (optional, null)
   show_index_score  whether the page and the assistant may show the multi-criteria score of indexes.json, which is
                 held back until someone has looked at how it compares with the recorded floods (optional, false)
+  losses        flood losses to business premises as an official source counted them, for the Reference tab:
+                {"places": [names], "years": [{"year": YYYY, "rm_thousand": [one number per place, 0 for none]}],
+                "note": text, "source": text}, or null (optional, null)
 
 An area split into sections also has a built sections.json beside its data (app/sections.py reads it), and each of its
 businesses names its section in premises.json. An area with flash flood potential also has an indexes.json beside them
@@ -57,7 +60,7 @@ TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
 OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
             "aliases": [], "section_word": None, "default_section": None, "flash_flood_example": None,
-            "show_index_score": False}
+            "show_index_score": False, "losses": None}
 ALIAS_FIELDS = frozenset({"id", "section", "names"})
 LANGUAGES = frozenset({"en", "ms"})
 SECTIONS_FILE = "sections.json"
@@ -94,6 +97,7 @@ class Area:
     default_section: str | None = None
     flash_flood_example: str | None = None
     show_index_score: bool = False
+    losses: Mapping | None = field(default=None, hash=False, repr=False)   # read-only, as _freeze leaves it
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
@@ -149,7 +153,8 @@ def _load(folder: Path) -> Area:
                 is_default=config["default"], notes=_freeze(config["notes"]), history=_freeze(config["history"]),
                 bigger_flood_example=config["bigger_flood_example"], aliases=_freeze(config["aliases"]),
                 section_word=_freeze(config["section_word"]), default_section=config["default_section"],
-                flash_flood_example=config["flash_flood_example"], show_index_score=config["show_index_score"])
+                flash_flood_example=config["flash_flood_example"], show_index_score=config["show_index_score"],
+                losses=_freeze(config["losses"]))
 
 
 def _freeze(value):
@@ -205,6 +210,9 @@ def _problems(raw: dict, folder: str) -> list[str]:
         "show_index_score must be true or false": isinstance(config["show_index_score"], bool),
         "flash_flood_example must be null or a section id": config["flash_flood_example"] is None
             or (isinstance(config["flash_flood_example"], str) and _is_id(config["flash_flood_example"])),
+        'losses must be null or {"places", "years", "note", "source"}: different names, and years oldest first, each with a '
+        'number per place':
+            config["losses"] is None or _is_losses(config["losses"]),
     }
     return [problem for problem, passed in checks.items() if not passed]
 
@@ -251,6 +259,24 @@ def _is_history(history) -> bool:
     floods = history.get("floods")
     return (first <= recent <= last and isinstance(floods, list)
             and all(_is_flood(flood) and first <= flood["year"] < last + 1 for flood in floods))
+
+
+LOSS_FIELDS = frozenset({"places", "years", "note", "source"})
+
+
+def _is_losses(losses) -> bool:
+    if not (isinstance(losses, dict) and losses.keys() == LOSS_FIELDS and _is_text(losses["note"])
+            and _is_text(losses["source"]) and isinstance(losses["places"], list) and losses["places"]
+            and all(_is_text(place) for place in losses["places"]) and isinstance(losses["years"], list)):
+        return False
+    rows = losses["years"]
+    if not (rows and len(set(losses["places"])) == len(losses["places"])):
+        return False
+    if not all(isinstance(row, dict) and row.keys() == {"year", "rm_thousand"} and _is_whole(row["year"])
+               and isinstance(row["rm_thousand"], list) and len(row["rm_thousand"]) == len(losses["places"])
+               and all(_is_number(value) and value >= 0 for value in row["rm_thousand"]) for row in rows):
+        return False
+    return all(earlier["year"] < later["year"] for earlier, later in zip(rows, rows[1:]))   # oldest first, once each
 
 
 def _is_flood(flood) -> bool:
@@ -426,4 +452,4 @@ def details(area: Area) -> dict:
     """The area as GET /api/areas/{id}/data sends it: its summary plus its council, notes, flood history and the
     example of a flood bigger than those shown."""
     return {**summary(area), "council": area.council, "notes": _thaw(area.notes), "history": _thaw(area.history),
-            "bigger_flood_example": area.bigger_flood_example}
+            "bigger_flood_example": area.bigger_flood_example, "losses": _thaw(area.losses)}
