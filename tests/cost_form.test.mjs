@@ -83,11 +83,23 @@ test("figures() gives none while the form holds a problem", () => {
   assert.equal(cost.figures(), null);
 });
 
-test("the heading shows the water at the street in each flood size, in the map's depth colours", () => {
-  const { panel } = mount();
-  const chips = panel.querySelector(".cost-depths").querySelectorAll(".depth-chip");
-  assert.deepEqual(chips.map((chip) => chip.textContent), ["1 in 10 years: 0.20 m", "1 in 20 years: 0.50 m", "1 in 50 years: 1.00 m"]);
-  assert.ok(chips.every((chip) => /\bband-\d\b/.test(chip.getAttribute("class"))));
+test("the heading has the size of flood on show, and picking another one tells the page", () => {
+  const picked = [];
+  const { panel } = mount({ onPick: (rp) => picked.push(rp) });
+  const buttons = panel.querySelector(".cost-picker").querySelectorAll("button");
+  assert.deepEqual(buttons.map((button) => button.getAttribute("aria-pressed")), ["false", "true", "false"]);
+  buttons[2].dispatch("click");
+  assert.deepEqual(picked, ["50"]);
+});
+
+test("another size of flood redraws the answer for it, with no new estimate", () => {
+  const { panel, cost, sent } = mount();
+  cost.render(shop, null, { result: ANSWER }, undefined, "20");
+  assert.match(panel.querySelector(".cost-results").textContent, /if a 1 in 20 years flood comes/);
+  cost.render(shop, null, { result: ANSWER }, undefined, "10");
+  assert.match(panel.querySelector(".cost-results").textContent, /if a 1 in 10 years flood comes/);
+  assert.equal(panel.querySelector(".cost-picker").querySelectorAll("button")[0].getAttribute("aria-pressed"), "true");
+  assert.equal(sent.length, 0);
 });
 
 test("the answer comes before the form, and the photo of the stock after it", () => {
@@ -151,7 +163,7 @@ test("screen readers hear a short line when the owner's estimate is in, and noth
   assert.equal(status.textContent, "");
   cost.render(shop, null, { busy: true, result: ANSWER, assumed: true }, undefined, "20");
   cost.render(shop, null, { result: { ...ANSWER }, assumed: false }, undefined, "20");
-  assert.match(status.textContent, /^Your estimate: at least RM\s?100 average loss a year$/);
+  assert.match(status.textContent, /^Your estimate: RM\s?1 if a 1 in 20 years flood comes$/);
   assert.equal(panel.querySelector(".cost-results").getAttribute("aria-live"), null, "the whole answer is not read out");
 });
 
@@ -186,4 +198,24 @@ test("a first look is worked out once: on Flood cost, for a place with no estima
   assert.ok(!needsFirstLook(state("cost", { a: { assumed: true } }), shop), "not again after one failed");
   assert.ok(!needsFirstLook(state("business"), shop));
   assert.ok(!needsFirstLook(state("cost"), undefined));
+});
+
+test("another size of flood keeps the form's own message, and neither scrolls nor speaks", () => {
+  const { panel, cost, form } = mount();
+  const done = { result: ANSWER };   // the store keeps the same estimate when only the size changes
+  cost.render(shop, null, done, undefined, "20");
+  field(panel, "raise_cm").value = "30";   // a measure without its cost
+  form.dispatch("submit");
+  const message = panel.querySelector(".form-error").textContent;
+  assert.match(message, /give both how far to raise the stock and what it costs/);
+  const scrolls = placedOutput(panel, -600);
+  cost.render(shop, null, done, undefined, "50");
+  assert.equal(panel.querySelector(".form-error").textContent, message);
+  assert.equal(scrolls.length, 0);
+  assert.equal(panel.querySelector('[role="status"]').textContent, "");
+});
+
+test("the note under the picker names the area's own bigger flood, as on My business", () => {
+  const { panel } = mount({ floodExample: (place) => (place.id === shop.id ? "2021-12" : null) });
+  assert.match(panel.querySelector(".cost-picker").textContent, /Floods bigger than 1 in 50 years, such as December 2021, are not shown\./);
 });

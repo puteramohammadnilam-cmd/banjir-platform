@@ -411,7 +411,9 @@ function createViews(app) {
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
-    onEstimate: (figures) => sendEstimate(app, figures), onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm), ...empty,
+    onEstimate: (figures) => sendEstimate(app, figures), onPick: pickRp, onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm), ...empty,
+    // as My business: the page's own area's example, for a business or a point in that area
+    floodExample: (place) => (!place.is_point || place.area_id === start.page.id ? start.page.bigger_flood_example : null),
     isReady: start.status.ai_ready,
   });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
