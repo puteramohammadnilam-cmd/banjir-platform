@@ -85,7 +85,7 @@ def test_the_city_history_comes_from_its_history_file_for_the_city_and_each_sect
     history = sections.history_for(city)
     floods = history["floods"]
     assert (history["first_year"], history["recent_from"], history["last_year"]) == (1992, 2019, 2026)
-    assert len(floods) == 69 and [f["year"] for f in floods] == sorted(f["year"] for f in floods)
+    assert len(floods) == 54 and [f["year"] for f in floods] == sorted(f["year"] for f in floods)
     assert all(f["when"] and f["what"] and f["source"] and f["url"].startswith("https://") for f in floods)
     section = sections.history_for(city, "seksyen-25")
     assert section["floods"] and all("seksyen-25" in f["sections"] for f in section["floods"])
@@ -266,7 +266,7 @@ def test_api_data_is_the_default_area_in_full_so_the_page_need_not_wait_for_the_
     new = client.get(f"/api/areas/{CITY}/data").json()["data"]
     assert old == new and set(old) == {"area", "sections", "index", "premises", "town", "limits"}
     assert new["area"]["view"] == [101.4277, 2.9496, 101.5914, 3.2298] and new["area"]["zoom"] == 12
-    assert len(new["area"]["history"]["floods"]) == 69 and len(new["sections"]) == 56 and len(new["index"]) == 2445
+    assert len(new["area"]["history"]["floods"]) == 54 and len(new["sections"]) == 56 and len(new["index"]) == 2445
 
 
 @pytest.mark.parametrize("method, path, body", [

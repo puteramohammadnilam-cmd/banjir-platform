@@ -201,8 +201,8 @@ def raw_inputs():
 
 
 def test_a_fresh_build_from_the_raw_files_matches_the_shipped_file():
-    events, points, sections = raw_inputs()
-    doc = bh.build_from_files(events, points, sections, today=TODAY)
+    events, _, sections = raw_inputs()   # the ArcGIS points are left out by default since 5 Oct 2026
+    doc = bh.build_from_files(events, None, sections, today=TODAY)
     assert bh.dumps(doc) == BUILT.read_text(encoding="utf-8")
 
 
@@ -213,5 +213,8 @@ def test_the_shipped_file_has_every_section_known_sources_and_the_named_floods()
     assert by_id["sa-2006-02-26"]["date_note"] and "seksyen-25" in by_id["sa-2021-12-18"]["sections"]
     assert not any(e["id"].startswith(("sa-2007", "sa-2008")) for e in doc["events"])
     assert all(source["url"].startswith("https://") for e in doc["events"] for source in e["sources"])
-    dataset = [e for e in doc["events"] if e["id"].startswith("ds-")]
-    assert dataset and all("d1anameera" in e["sources"][0]["title"] for e in dataset)
+    assert not any(e["id"].startswith("ds-") for e in doc["events"]), "no events from the ArcGIS layer"
+    assert not any("d1anameera" in source["title"] for e in doc["events"] for source in e["sources"])
+    jps = [e for e in doc["events"] if any("Laporan Banjir Tahunan" in source["title"] for source in e["sources"])]
+    assert len(jps) == 22 and all(" p. " in source["title"] for e in jps for source in e["sources"] if "Laporan" in source["title"])
+    assert by_id["jps-2022-12-02"]["date"] == "2022-12-02" and by_id["jps-2022-03-07"]["date"] == "2022-03-07", "the swapped dates, put right"

@@ -1,12 +1,15 @@
-"""Build the Shah Alam flood history (plan workstream F) from the curated events and the public ArcGIS flood points.
+"""Build the Shah Alam flood history (plan workstream F) from the curated events, and optionally the public ArcGIS flood points.
 
     .venv/bin/python tools/build_history.py [--events PATH] [--points PATH] [--sections PATH] [--out PATH]
 
 Run from 11_Platform_Draft. Inputs (read only; BANJIR_RAW_DIR, else ../05_Raw_Data_Sources):
   shah_alam/flood_history/events.json           the curated events (every one with an opened https source), the place
                                                 names that map to a section, and the two dataset credits
-  shah_alam/arcgis_flood_points/shah_alam.geojson   the 2021 and 2022 points of ArcGIS Online user d1anameera (reuse with
-                                                credit approved by the user; the raw rows stay out of the repo)
+  --points shah_alam/arcgis_flood_points/shah_alam.geojson   optional, not used since 5 Oct 2026: the 2021 and 2022 points
+                                                of ArcGIS Online user d1anameera appear copied from the JPS annual flood
+                                                reports ("Hakcipta terpelihara"), and some have day and month swapped.
+                                                Their floods are now curated events citing the JPS reports page by page
+                                                (05_Raw_Data_Sources/shah_alam/jps_laporan_banjir/FINDINGS.md).
   shah_alam/mbsa_sections/sections.geojson      the 56 sections (OSM, ODbL), read with tools/sections_io.py
 Output: app/data/areas/shah-alam/history.json, in the form app/history.py checks (the build stops on any problem).
 
@@ -202,16 +205,20 @@ def build(curated_doc: dict, points_doc: dict, sections: list[dict], today: date
     doc = {"first_year": curated_doc["first_year"], "recent_from": curated_doc["recent_from"],
            "last_year": history.day_range(curated_doc["checked"])[0].year, "checked": curated_doc["checked"],
            "section_names": section_names(sections),
-           "events": merge(curated_doc["events"], groups, curated_doc["datasets"])}
+           "events": merge(curated_doc["events"], groups, curated_doc.get("datasets", {}))}
     found = history.problems(doc, today=today)
     if found:
         raise history.HistoryError("; ".join(found))
     return doc
 
 
-def build_from_files(events: Path, points: Path, sections: Path, today: date | None = None) -> dict:
-    return build(json.loads(Path(events).read_text(encoding="utf-8")), json.loads(Path(points).read_text(encoding="utf-8")),
-                 sections_io.load_sections(sections), today)
+def _points(points: Path | None) -> dict:
+    """The ArcGIS points document, or none when the build leaves them out (the default)."""
+    return json.loads(Path(points).read_text(encoding="utf-8")) if points else {"features": []}
+
+
+def build_from_files(events: Path, points: Path | None, sections: Path, today: date | None = None) -> dict:
+    return build(json.loads(Path(events).read_text(encoding="utf-8")), _points(points), sections_io.load_sections(sections), today)
 
 
 def dumps(doc: dict) -> str:
@@ -237,12 +244,12 @@ def main(argv: list[str] | None = None) -> int:
     raw = raw_dir()
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--events", type=Path, default=raw / "shah_alam" / "flood_history" / "events.json")
-    parser.add_argument("--points", type=Path, default=raw / "shah_alam" / "arcgis_flood_points" / "shah_alam.geojson")
+    parser.add_argument("--points", type=Path, default=None, help="the ArcGIS points (left out by default)")
     parser.add_argument("--sections", type=Path, default=sections_io.default_path())
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args(argv)
     doc = build_from_files(args.events, args.points, args.sections)
-    points = json.loads(args.points.read_text(encoding="utf-8"))["features"]
+    points = _points(args.points)["features"]
     _, drops = group_points(points, sections_io.load_sections(args.sections),
                             json.loads(args.events.read_text(encoding="utf-8")).get("place_sections", {}))
     args.out.parent.mkdir(parents=True, exist_ok=True)
