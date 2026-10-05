@@ -1,14 +1,15 @@
 // The "Area overview" tab: the area chooser, headline figures, the map, past floods and the area's businesses in one list.
 // A city split into sections has two kinds of page: a section's, which is an area's page for the section, and the whole
 // city's, where the map shades each section (choropleth.js), a table ranks them (section-table.js) and the list of
-// businesses waits for a name, as the city has thousands. Under the map: flash flood potential's checkbox, and on the
-// whole city's map what the sections are shaded by (susceptibility.js).
+// businesses waits for a name, as the city has thousands. Under the map: flash flood potential's checkbox, on the
+// whole city's map what the sections are shaded by (susceptibility.js), and the low ground layer's (lowground.js).
 import { SQUARE_RAMP } from "./cells.js";
 import { DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, choroplethKey, createChoropleth } from "./choropleth.js";
 import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
 import { renderHistory } from "./history.js";
 import { dataWord, t } from "./i18n.js";
 import { createKpis } from "./kpis.js";
+import { createLowGround } from "./lowground.js";
 import { createMap, createPictureLayer } from "./map.js";
 import { createScopeBar } from "./scope.js";
 import { createSectionTable } from "./section-table.js";
@@ -40,12 +41,12 @@ const flashKey = (credit) => legendGroup(t("flash.legend"), [h("ul", { class: "l
 
 /** The map's key. On the whole city's map (`city` given, with the area's `word` for a section) the sections' shading
  *  by `metric` takes the dots' place, as no business is drawn there. With the flash flood layer on, its classes and the
- *  layer's data `credit` too. */
-export function renderLegend(element, hasShelters, city = null, { metric = DEPTH_METRIC, isFlashOn = false, credit = null } = {}) {
+ *  layer's data `credit` too; `lowKey` is the low ground layer's group (lowground.js), while that is on. */
+export function renderLegend(element, hasShelters, city = null, { metric = DEPTH_METRIC, isFlashOn = false, credit = null, lowKey = null } = {}) {
   const first = city
     ? choroplethKey(city.word, hasShelters ? h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")) : null, metric)
     : legendGroup(t("legend.dots"), dotKey(hasShelters));
-  element.replaceChildren(...[first, legendGroup(t("legend.squares"), squareKey()), isFlashOn && flashKey(credit)].filter(Boolean));
+  element.replaceChildren(...[first, legendGroup(t("legend.squares"), squareKey()), isFlashOn && flashKey(credit), lowKey].filter(Boolean));
 }
 
 const METRICS = { depth: DEPTH_METRIC, flash: FLASH_METRIC, score: SCORE_METRIC };
@@ -58,8 +59,9 @@ export const indexMetrics = (sections, method) => ["depth",
   ...(showsScore(method) && sections.some((section) => scoreOf(section) !== null) ? ["score"] : [])];
 
 /** The controls under the map in `slot` (susceptibility.js mapControls) for a `layer` ({url, bounds, credit}, fetched
- *  once ticked) and `metrics`; onChange({isFlashOn, metric}) hears each change. A layer that fails unticks and says so. */
-export function createIndexControls(slot, { map, layer, metrics, word = null, validation = null, onChange }) {
+ *  once ticked) and `metrics`; onChange({isFlashOn, metric}) hears each change. A layer that fails unticks and says so.
+ *  `extra` are more controls to show after these (the low ground layer's). */
+export function createIndexControls(slot, { map, layer, metrics, word = null, validation = null, onChange, extra = [] }) {
   let state = { isFlashOn: false, metric: metrics[0] ?? "depth" };
   const alert = h("p", { class: "alert alert-inline layer-error", role: "alert", hidden: true });
   const set = (change) => { state = { ...state, ...change }; onChange(state); };
@@ -75,8 +77,8 @@ export function createIndexControls(slot, { map, layer, metrics, word = null, va
     hasLayer: Boolean(picture), metrics, word, validation, onMetric: (metric) => set({ metric }),
     onLayer: (isOn) => { alert.hidden = true; picture.show(isOn); set({ isFlashOn: isOn }); },
   });
-  slot.replaceChildren(...(nodes.length ? [...nodes, alert] : []));
-  slot.hidden = nodes.length === 0;
+  slot.replaceChildren(...(nodes.length ? [...nodes, alert] : []), ...extra);
+  slot.hidden = nodes.length + extra.length === 0;
 }
 
 /** "How these are worked out" (`details`, its words in `body`), where the area has the index's method or layer. */
@@ -278,16 +280,23 @@ function createCityParts(map, city, showScore) {
   };
 }
 
-/** The controls under the map, which repaint the key (and the city's shading), and "How these are worked out". */
+/** The controls under the map (flash flood potential's, the low ground layer's), which repaint the key (and the city's
+ *  shading), and "How these are worked out". */
 function createIndexParts(map, area, { city, cityParts, hasShelters }) {
   const keyCity = cityParts ? city : null;
   const layer = area.layers?.flash_flood ?? null;
+  let shown = { isFlashOn: false, metric: "depth", lowKey: null };
+  const paint = (change) => {
+    shown = { ...shown, ...change };
+    renderLegend($("legend"), hasShelters, keyCity, { metric: METRICS[shown.metric], isFlashOn: shown.isFlashOn, credit: layer?.credit, lowKey: shown.lowKey });
+  };
+  const low = createLowGround(map, area.layers?.low_ground ?? null, { onChange: (lowKey) => paint({ lowKey }) });
   createIndexControls($("map-controls"), {
-    map, layer, word: city?.word ?? null, validation: area.index_method?.validation ?? null,
+    map, layer, word: city?.word ?? null, validation: area.index_method?.validation ?? null, extra: low.nodes,
     metrics: cityParts ? indexMetrics(city.sections, area.index_method) : [],
     onChange: (state) => {
       cityParts?.setMetric(state.metric);
-      renderLegend($("legend"), hasShelters, keyCity, { metric: METRICS[state.metric], isFlashOn: state.isFlashOn, credit: layer?.credit });
+      paint(state);
     },
   });
   renderMethod($("index-method"), $("index-method-body"), area, { word: area.section_word ?? null });

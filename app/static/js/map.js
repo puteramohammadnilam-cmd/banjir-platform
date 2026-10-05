@@ -126,19 +126,22 @@ function focusMarker(map, entry) {
   entry.marker.openPopup();
 }
 
-// ---------- a picture on the map (flash flood potential), over the tiles, under the squares and dots ----------
+// ---------- a picture on the map (flash flood potential, low ground), over the tiles, under the squares and dots ----------
 
+// Leaflet's panes: tiles at 200, the overlay pane (squares, outlines, dots) at 400. Each picture goes between them in a
+// pane of its own; a pane with a smaller zIndex lies under one with a larger.
 const PICTURE_PANE = "picture";
+const PICTURE_Z = 350;
 /** [[south, west], [north, east]] for [west, south, east, north], or corners as given. */
 const corners = (bounds) => (Array.isArray(bounds[0]) ? bounds : [[bounds[1], bounds[0]], [bounds[3], bounds[2]]]);
 
-/** `layer` {url, bounds} as an image overlay, made (so fetched) on the first show(true). A load error takes it
- *  off and calls onError(); the next show(true) tries again. */
-export function createPictureLayer(map, { url, bounds }, { opacity, className, onError = () => {} }) {
+/** `layer` {url, bounds} as an image overlay in `pane` (made at `zIndex` when new), made (so fetched) on the first
+ *  show(true). A load error takes it off and calls onError(); the next show(true) tries again. */
+export function createPictureLayer(map, { url, bounds }, { opacity, className, pane = PICTURE_PANE, zIndex = PICTURE_Z, onError = () => {} }) {
   let picture = null;
   const make = () => {
-    if (!map.getPane(PICTURE_PANE)) Object.assign(map.createPane(PICTURE_PANE).style, { zIndex: "350", pointerEvents: "none" });
-    const made = L.imageOverlay(url, corners(bounds), { pane: PICTURE_PANE, opacity, className, interactive: false });
+    if (!map.getPane(pane)) Object.assign(map.createPane(pane).style, { zIndex: String(zIndex), pointerEvents: "none" });
+    const made = L.imageOverlay(url, corners(bounds), { pane, opacity, className, interactive: false });
     return made.on("error", () => {
       made.remove();
       if (picture === made) picture = null;

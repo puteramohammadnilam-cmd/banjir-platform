@@ -9,6 +9,7 @@ import { test } from "node:test";
 import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, DRY_COLOR } from "../app/static/js/dom.js";
 import { FLASH_RAMP, LAYER_OPACITY, SCORE_RAMP } from "../app/static/js/susceptibility.js";
+import { LOW_OPACITY, LOW_RAMP } from "../app/static/js/lowground.js";
 
 const css = (file) => readFileSync(new URL(`../app/static/styles/${file}`, import.meta.url), "utf8");
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -141,4 +142,40 @@ test("the warm ramp is apart from the five dot colours, so a dot (ringed in whit
   for (const step of FLASH_RAMP) {
     for (const dot of colours) assert.ok(deltaE(laid(step), dot) >= 7.5, `${step.color} against dot ${dot}`);   // a dot also wears a white ring and a dark hairline
   }
+});
+
+// ---------- low ground: a teal-grey of its own, darker where the ground sits lower ----------
+
+/** The ramp palest first, as the other ramps are tested: the highest ground's tone first. */
+const LOW_PALEST_FIRST = [...LOW_RAMP].reverse();
+
+test("the low ground ramp is one teal-grey hue, at one opacity, darker for lower ground", () => {
+  const hues = LOW_RAMP.map(({ color }) => hueDegrees(color));
+  assert.ok(Math.max(...hues) - Math.min(...hues) <= 10, `hues run ${hues.map((x) => x.toFixed(0)).join(", ")}`);
+  hues.forEach((hue) => assert.ok(hue >= 150 && hue <= 185, `hue ${hue.toFixed(0)} is teal-grey`));
+  LOW_RAMP.forEach(({ opacity }) => assert.equal(opacity, LOW_OPACITY));
+  LOW_RAMP.slice(1).forEach(({ color }, i) => assert.ok(oklab(color)[0] > oklab(LOW_RAMP[i].color)[0], `the tone up to ${LOW_RAMP[i + 1].upTo} m is paler`));
+});
+
+test("the low ground ramp sits at least 60 degrees of hue from the squares, flash potential and the score", () => {
+  const others = { squares: SQUARE_RAMP, flash: FLASH_RAMP, score: SCORE_RAMP };
+  for (const { color } of LOW_RAMP) {
+    for (const [name, ramp] of Object.entries(others)) {
+      for (const step of ramp) assert.ok(hueGap(hueDegrees(color), hueDegrees(step.color)) >= 60, `${color} is too near ${name} ${step.color}`);
+    }
+  }
+});
+
+test("each low ground step, laid on the map, is at least 8 apart from the next, and the palest shows", () => {
+  LOW_PALEST_FIRST.slice(1).forEach((step, i) => {
+    const gap = deltaE(laid(LOW_PALEST_FIRST[i]), laid(step));
+    assert.ok(gap >= 8, `low ground steps ${i + 1} and ${i + 2} are only ${gap.toFixed(1)} apart`);
+  });
+  assert.ok(deltaE(laid(LOW_PALEST_FIRST[0]), MAP_GROUND) >= 3.5, "the palest step can be seen on the map");
+});
+
+test("the low ground PNGs' palette is the page's ramp, lowest ground first", () => {
+  const doc = JSON.parse(readFileSync(new URL("../app/data/dem/shah-alam_lowground.json", import.meta.url), "utf8"));
+  assert.deepEqual(doc.tones.map((tone) => tone.colour), LOW_RAMP.map(({ color }) => color));
+  assert.deepEqual(doc.tones.map((tone) => tone.up_to_m), LOW_RAMP.map(({ upTo }) => upTo));
 });

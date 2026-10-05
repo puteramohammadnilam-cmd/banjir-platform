@@ -60,3 +60,31 @@ SHA-256:  f2b81aa8a2cdaa0299e9f923c4902cd4c32723292490969795528f11542e0075
 File:     shah-alam_above_river.tif
 Bytes:    1109220
 SHA-256:  d735c54dc628119455c73c1ab02c761f9f4208428ba2e9e7fb5427de89465919
+
+Low ground map layer
+====================
+
+tools/build_lowground.py reads the above_river crop above and writes one indexed PNG per level (1, 2, 3
+and 5 m) on its squares, with a JSON of the levels, tones, bounds and these hashes. Each square takes the
+lowest height above the river of the 3 x 3 squares around it (about 90 m, as app/elevation.py does); a
+square at or below the level is shaded in four tones (up to 1 m darkest, then 1-2, 2-3 and 3-5 m), the
+rest and no data (beyond 3 km of a mapped river) are transparent. app/lowground.py serves them for the
+map. Not a flood forecast or extent: banks, bunds, drains and pumps are left out.
+Source:    shah-alam_above_river.tif, SHA-256 d735c54dc628119455c73c1ab02c761f9f4208428ba2e9e7fb5427de89465919
+Credit:    Ground height: Copernicus GLO-30; rivers © OpenStreetMap contributors
+
+File:     shah-alam_lowground_1m.png
+Bytes:    29017
+SHA-256:  637d317fcb069d5947f1438ff8cb11ed537b428c1f4bf30ee25743701941640d
+
+File:     shah-alam_lowground_2m.png
+Bytes:    45204
+SHA-256:  ff1a85c1a1dba022a2bc840cd3a4c0bdc163ff5ec2508f158c303e831acef764
+
+File:     shah-alam_lowground_3m.png
+Bytes:    60393
+SHA-256:  8b816d1f6083b5b14a5da9026a06537987ac5d73a2c0bec8c948f3aa2e80a67e
+
+File:     shah-alam_lowground_5m.png
+Bytes:    75369
+SHA-256:  3e1357e9cf3aae034b03a45ef492dd30c98104049cd39547d98235c6e6b0c9ed
