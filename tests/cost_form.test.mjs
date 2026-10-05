@@ -185,11 +185,28 @@ test("Use these figures from the photo inside the shop picks Type my own with Ge
   const flood = { water_above_floor_m: 0.3, under_water: [0], value_rm_low: 2000, value_rm_high: 3000 };
   const result = { estimate: { is_shop_inside: true, items, confidence: "medium", reasoning: "" }, floor_height_cm: 0,
     total: { value_rm_low: 2000, value_rm_high: 3000 }, suggested_value_rm: 2500, per_flood: { 10: flood, 20: flood, 50: flood } };
-  cost.render(shop, null, undefined, { result }, "20");
+  cost.render(shop, null, undefined, { photos: [result], off: [] }, "20");
   panel.querySelectorAll("button").find((button) => button.textContent === "Use these figures").click();
   assert.equal(picked(panel, "worth"), "own");
   assert.equal(cost.figures().value_at_risk_rm, 2500);
   assert.match(panel.textContent, /Filled in from your photo inside the shop: Gemini's rough guess/);
+  // 0.30 m above the floor and rice on the floor: 30 cm up, so racks (50 cm) are the nearest answer
+  panel.querySelectorAll("button").find((button) => button.textContent === "Check 50 cm higher in the form").click();
+  assert.equal(picked(panel, "raise"), "50");
+  assert.equal(cost.figures().raise_cm, 50);
+});
+
+test("the photo's raise advice with question 1 on Not sure takes the photo's value too, so the check can run", () => {
+  const { panel, cost } = mount();
+  const items = [{ item: "Rice", kind: "stock", lowest_cm: 0, value_rm_low: 2000, value_rm_high: 3000 }];
+  const flood = { water_above_floor_m: 0.3, under_water: [0], value_rm_low: 2000, value_rm_high: 3000 };
+  const result = { estimate: { is_shop_inside: true, items, confidence: "medium", reasoning: "" }, floor_height_cm: 0,
+    per_flood: { 10: flood, 20: flood, 50: flood } };
+  cost.render(shop, null, undefined, { photos: [result], off: [] }, "20");
+  assert.equal(picked(panel, "worth"), "size");
+  panel.querySelectorAll("button").find((button) => button.textContent === "Check 50 cm higher in the form").click();
+  assert.equal(picked(panel, "worth"), "own");
+  assert.deepEqual([cost.figures().value_at_risk_rm, cost.figures().raise_cm], [2500, 50]);
 });
 
 test("the shop-front photo's floor fills question 2 until the owner answers it", () => {

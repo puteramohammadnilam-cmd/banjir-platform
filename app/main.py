@@ -156,6 +156,7 @@ class StockIn(PhotoIn):
     """A photo of the shop's inside, and the floor height above the street if known (from the shop-front photo or the
     owner)."""
     floor_height_cm: float = Field(default=0, ge=0, le=300, allow_inf_nan=False)
+    language: Literal["ms", "en"] = "en"
 
 
 class EstimateIn(BaseModel):
@@ -560,7 +561,7 @@ def stock_photo(body: StockIn) -> dict:
     under the modelled water in each flood size. A photo that is not a shop's inside gets no figures."""
     place = known_place(body.place)
     raw, mime = decode_photo(body.image)
-    estimate = call_ai(ai.read_stock_photo, raw, mime)
+    estimate = call_ai(ai.read_stock_photo, raw, mime, body.language)
     found = stock.summarise([item.model_dump() for item in estimate.items], place["depth_m"], body.floor_height_cm)
     if not estimate.is_shop_inside:
         found = {"total": None, "suggested_value_rm": None, "per_flood": None}

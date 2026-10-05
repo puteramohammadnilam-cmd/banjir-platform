@@ -37,6 +37,8 @@ const CHOICES = {
   motos: [["0", "cost.motosNone"], ["1", "cost.motos1"], ["2", "cost.motos2"], ["5", "cost.motos5"]],
   motoValue: [["3000", "cost.motoValue3"], ["6000", "cost.motoValue6"], ["10000", "cost.motoValue10"]],
 };
+/** The heights of the "put things higher" answers, low to high (the stock photo's advice picks one). */
+export const RAISE_STEPS = CHOICES.raise.map(([value]) => Number(value)).filter((cm) => cm > 0);
 // Ready to answer at once: a typical figure for a medium shop, the floor level with the road, lost trade not sure (the
 // guideline's 30%), no measure.
 // No built-in works, workers or vehicles until the owner says so; workers are taken as unpaid while shut until they say not.
@@ -269,6 +271,14 @@ export function createCostForm(onEstimate) {
       parts.valueNote.textContent = t("cost.fromStock");
       show(parts);
       parts.boxes.value.input.focus();
+    },
+    /** The stock photo's advice: that "put things higher" answer picked, with focus on it. Checking it needs a value in
+     *  question 1, so a "Not sure" there takes the photo's value too. */
+    useRaise(cm, value) {
+      if (chosen(parts.groups.worth) === SIZE && value > 0) this.useValue(value);
+      choose(parts.groups.raise, String(cm));
+      show(parts);
+      parts.groups.raise.radios.find((choice) => choice.value === String(cm))?.radio.focus();
     },
     /** The shop-front photo's floor height, unless the owner has answered that question for this place. */
     useFloor(cm) {

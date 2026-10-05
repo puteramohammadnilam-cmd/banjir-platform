@@ -46,7 +46,7 @@ export function initialState(url, start, linked) {
     points: place?.is_point ? { [place.id]: place } : {},   // points checked on this visit, by id
     squares: linked?.squares ? { [place.id]: linked.squares } : {},   // {blocks, cells} that came with the latest point, by its id
     photos: {},    // by place id: { busy, preview, estimate, water_above_floor_m, error }
-    stocks: {},    // by place id: { busy, result, error }: the photo of the stock (POST /api/stock)
+    stocks: {},    // by place id: { busy, photos, off, reject, error }: the photos of the stock (POST /api/stock)
     plans: {},     // by place id: { busy, result, error }: the flood plan (POST /api/plan)
     planLanguage: lang,   // the plan is written in the page's language unless the owner picks the other
     compare: [],   // ids of the places side by side on My business, oldest first (compare.js)

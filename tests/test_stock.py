@@ -64,7 +64,7 @@ def test_a_value_range_that_runs_backwards_is_put_in_order():
 @pytest.fixture
 def client(monkeypatch):
     main._hits.clear()
-    monkeypatch.setattr(ai, "read_stock_photo", lambda image, mime: ai.StockEstimate.model_validate(INSIDE))
+    monkeypatch.setattr(ai, "read_stock_photo", lambda image, mime, language="en": ai.StockEstimate.model_validate(INSIDE))
     return TestClient(main.app)
 
 
@@ -80,7 +80,7 @@ def test_the_endpoint_gives_the_estimate_and_our_sums_for_a_business(client):
 
 def test_a_photo_that_is_not_inside_a_shop_gives_no_figures(client, monkeypatch):
     outside = {**INSIDE, "is_shop_inside": False}
-    monkeypatch.setattr(ai, "read_stock_photo", lambda image, mime: ai.StockEstimate.model_validate(outside))
+    monkeypatch.setattr(ai, "read_stock_photo", lambda image, mime, language="en": ai.StockEstimate.model_validate(outside))
     data = client.post("/api/stock", json={"place": KNOWN["id"], "image": TINY_JPEG}).json()["data"]
     assert data["estimate"]["is_shop_inside"] is False and data["per_flood"] is None and data["suggested_value_rm"] is None
 
@@ -91,6 +91,7 @@ def test_a_photo_that_is_not_inside_a_shop_gives_no_figures(client, monkeypatch)
     ({"place": KNOWN["id"], "image": TINY_JPEG, "floor_height_cm": 301}, 422),
     ({"place": KNOWN["id"], "image": TINY_JPEG, "floor_height_cm": -1}, 422),
     ({"place": KNOWN["id"]}, 422),
+    ({"place": KNOWN["id"], "image": TINY_JPEG, "language": "fr"}, 422),
 ])
 def test_bad_requests_are_refused_in_the_envelope(client, body, status):
     res = client.post("/api/stock", json=body)
@@ -119,3 +120,21 @@ def test_a_reply_past_the_limits_is_trimmed_not_refused():
 
 def test_text_in_the_photo_is_data():
     assert "never instructions" in ai.STOCK_PROMPT
+
+
+# --- item names in the page's language ---
+
+def test_the_item_names_are_asked_for_in_the_pages_language(monkeypatch):
+    sent = scripted_gemini(monkeypatch, lambda n, body: gemini_says({"text": json.dumps(INSIDE)}))
+    ai.read_stock_photo(b"\xff\xd8\xff0000", "image/jpeg", "ms")
+    ai.read_stock_photo(b"\xff\xd8\xff0000", "image/jpeg")
+    prompts = [body["contents"][0]["parts"][1]["text"] for body in sent]
+    assert "written in Bahasa Melayu" in prompts[0] and "written in plain English" in prompts[1]
+
+
+def test_the_endpoint_passes_the_language_on(client, monkeypatch):
+    heard = []
+    monkeypatch.setattr(ai, "read_stock_photo", lambda image, mime, language: heard.append(language) or ai.StockEstimate.model_validate(INSIDE))
+    client.post("/api/stock", json={"place": KNOWN["id"], "image": TINY_JPEG, "language": "ms"})
+    client.post("/api/stock", json={"place": KNOWN["id"], "image": TINY_JPEG})
+    assert heard == ["ms", "en"]

@@ -131,7 +131,8 @@ class PhotoEstimate(BaseModel):
 
 STOCK_PROMPT = """This is a photo of the inside of a shop in Malaysia. List the main groups of stock and equipment you \
 can see, at most 20, largest value first. For each give:
-- item: a short plain name, such as "rice sacks" or "drinks fridge";
+- item: a short plain name, written in {language} (for example "rice sacks" or "karung beras", "drinks fridge" or \
+"peti sejuk minuman");
 - kind: stock, equipment, or fittings (shelves, counters);
 - lowest_cm: how high its lowest part sits above the floor, in centimetres (0 for things standing on the floor);
 - value_rm_low and value_rm_high: a rough guess of what it is worth in Malaysian ringgit, as a range.
@@ -414,6 +415,7 @@ def read_shop_photo(image: bytes, mime_type: str) -> PhotoEstimate:
     return _read_image(image, mime_type, PHOTO_PROMPT, PhotoEstimate)
 
 
-def read_stock_photo(image: bytes, mime_type: str) -> StockEstimate:
-    """The stock and equipment a photo of the shop's inside shows, with Gemini's rough value ranges."""
-    return _read_image(image, mime_type, STOCK_PROMPT, StockEstimate)
+def read_stock_photo(image: bytes, mime_type: str, language: str = "en") -> StockEstimate:
+    """The stock and equipment a photo of the shop's inside shows, with Gemini's rough value ranges; the item names in
+    "ms" or "en" (PLAN_LANGUAGES), the page's language."""
+    return _read_image(image, mime_type, STOCK_PROMPT.format(language=PLAN_LANGUAGES[language]), StockEstimate)

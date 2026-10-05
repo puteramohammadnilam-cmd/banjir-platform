@@ -368,7 +368,13 @@
 .stock-card .table-scroll { width: 100%; }
 .stock-table tr.is-under th, .stock-table tr.is-under td { background: var(--brand-wash); }
 .stock-table tr.is-under td:last-child { font-weight: 700; color: var(--brand-deep); }
+.stock-findings { display: grid; gap: var(--space-3); justify-items: start; width: 100%; }
+.stock-findings > * { max-width: 100%; }
 .stock-use { display: grid; gap: var(--space-1); justify-items: start; }
+/* a tick box per item, a full touch target; an unticked row is struck through, not only greyed */
+.stock-count { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; cursor: pointer; }
+.stock-count input { width: 1.25rem; height: 1.25rem; flex: none; accent-color: var(--brand); }
+.stock-table tr.is-off th, .stock-table tr.is-off td { background: none; color: var(--ink-3); text-decoration: line-through; font-weight: 400; }
 /* wide screens: the form on the left, the answer and the photo of the stock on the right; phones: the answer first.
    The DOM order is answer, form, photo, so phones and screen readers get the answer first; on wide screens the one Tab
    stop in the answer ("How this is worked out") comes before the form. */

@@ -186,13 +186,16 @@ function showEmpty(empty, parts, isEmpty, { onFind, onCheckPoint }) {
 /** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up.
  *  onPick(rp) picks the size of flood for the whole page, as the Area overview's picker does; floodExample(place) is
  *  the month of a past flood bigger than the model shows there, for the note under the picker, or null.
- *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form; isReady is false when the
+ *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form, onStockToggle(key) counts an
+ *  item in or out and onStockClear() starts the photos again; isReady is false when the
  *  build has no Gemini key, which switches the photo off. With no place picked the
  *  tab shows the empty state (pick.js), with onFind and onCheckPoint behind its buttons. */
-export function createCost(panel, { onEstimate, onPick = () => {}, floodExample = () => null, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true }) {
+export function createCost(panel, { onEstimate, onPick = () => {}, floodExample = () => null, onStockPhoto = () => {}, onStockToggle = () => {},
+  onStockClear = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true }) {
   const head = buildHead();
   const form = createCostForm(onEstimate);
-  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, form.floorCm()), onUse: (value) => form.useValue(value), isReady });
+  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, form.floorCm()), onUse: (value) => form.useValue(value),
+    onRaise: (cm, value) => form.useRaise(cm, value), onToggle: onStockToggle, onClear: onStockClear, isReady });
   const output = h("section", { class: "surface cost-results", "aria-label": t("cost.output") });
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   // the answer comes first, so a phone shows it before the form; views.css puts it beside the form on wide screens
@@ -204,12 +207,12 @@ export function createCost(panel, { onEstimate, onPick = () => {}, floodExample 
 
   return {
     /** photoFloorCm fills the floor field unless the owner has typed their own for this place. estimate is the place's
-     *  estimate (estimateState), stockState its stock photo ({busy, result, error}) and rp the flood size on show, which
+     *  estimate (estimateState), stockState its stock photos ({busy, photos, off, reject, error}) and rp the flood size on show, which
      *  the picker in the heading changes for every tab (onPick). */
     render(place, photoFloorCm, estimate, stockState, rp = DEFAULT_RP) {
       showEmpty(empty, parts, !place, { onFind, onCheckPoint });
       if (!place) return;
-      stock.render(stockState, rp);
+      stock.render(stockState, rp, place.id);
       const isNewPlace = place.id !== shownId;
       if (isNewPlace) {
         if (shownId) form.save(shownId);

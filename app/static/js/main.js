@@ -9,6 +9,7 @@ import { createInsurance } from "./insurance.js";
 import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard, planFigures } from "./plan.js";
+import { MAX_PHOTOS } from "./stock.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
@@ -187,22 +188,37 @@ async function sendPhoto(app, file) {
   }
 }
 
-/** A photo of the stock inside: Gemini lists it, the server says what is under the modelled water. The last result
- *  stays on show while a new photo is read, and if reading it fails. */
+/** A photo of the stock inside: Gemini lists it, the server says what is under the modelled water. A photo that lists
+ *  something is added to the place's photos (stock.js MAX_PHOTOS); one that lists nothing only says why. The photos so
+ *  far stay on show while a new one is read, and if reading it fails. */
 async function sendStock(app, file, floorCm) {
   const { store } = app;
   const id = store.state.placeKey;
-  if (store.state.stocks[id]?.busy) return;
-  const before = store.state.stocks[id];
+  // one photo at a time, and no more than the card takes: a fifth would shift the keys of the items left out
+  if (store.state.stocks[id]?.busy || (store.state.stocks[id]?.photos?.length ?? 0) >= MAX_PHOTOS) return;
+  const before = { photos: [], off: [], ...store.state.stocks[id], reject: null, error: null };
   const setStock = (value) => store.update({ stocks: { ...store.state.stocks, [id]: value } });
-  setStock({ result: before?.result, busy: true });
+  setStock({ ...before, busy: true });
   try {
     const image = await shrinkPhoto(file).catch(() => { throw new Error(t("common.photoUnreadable")); });
-    setStock({ result: await api.sendStock({ place: id, image, floor_height_cm: floorCm }) });
+    const result = await api.sendStock({ place: id, image, floor_height_cm: floorCm, language: lang });
+    const reject = !result.estimate.is_shop_inside ? "notInside" : !result.estimate.items.length ? "nothing" : null;
+    setStock({ ...before, reject, photos: reject ? before.photos : [...before.photos, result] });
   } catch (error) {
-    setStock({ result: before?.result, error: error.message });
+    setStock({ ...before, error: error.message });
   }
 }
+
+/** Counts a listed item in or out (key "photo-item"), or starts the place's stock photos again. */
+function toggleStock(app, key) {
+  const { store } = app;
+  const id = store.state.placeKey;
+  const now = store.state.stocks[id];
+  if (!now?.photos) return;
+  const off = now.off.includes(key) ? now.off.filter((k) => k !== key) : [...now.off, key];
+  store.update({ stocks: { ...store.state.stocks, [id]: { ...now, off } } });
+}
+const clearStock = (app) => app.store.update({ stocks: { ...app.store.state.stocks, [app.store.state.placeKey]: undefined } });
 
 async function writePlan(app, language) {
   const { store } = app;
@@ -412,7 +428,8 @@ function createViews(app) {
   });
   const { plan, compare } = createExtras(app);
   const cost = createCost($("panel-cost"), {
-    onEstimate: (figures) => sendEstimate(app, figures), onPick: pickRp, onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm), ...empty,
+    onEstimate: (figures) => sendEstimate(app, figures), onPick: pickRp, onStockPhoto: (file, floorCm) => sendStock(app, file, floorCm),
+    onStockToggle: (key) => toggleStock(app, key), onStockClear: () => clearStock(app), ...empty,
     // as My business: the page's own area's example, for a business or a point in that area
     floodExample: (place) => (!place.is_point || place.area_id === start.page.id ? start.page.bigger_flood_example : null),
     isReady: start.status.ai_ready,
