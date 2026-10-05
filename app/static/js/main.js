@@ -417,6 +417,7 @@ function createViews(app) {
     isReady: start.status.ai_ready,
   });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
+  for (const link of document.querySelectorAll("[data-goto]")) link.addEventListener("click", () => goto(app, link.dataset.goto));
   wireWaysIn(app, checkPoint, overview);
   const chat = createChat({
     messages: $("messages"), chips: $("chips"), form: $("ask-form"), input: $("question"), news: $("news"),

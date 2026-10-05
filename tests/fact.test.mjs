@@ -115,20 +115,21 @@ test("no chip or fact on My business says safe, in either language", () => {
   useLang("en");
 });
 
-test("the area's data notes fold under short headings, and an area with none shows nothing", () => {
+test("the area's data notes are listed open in the Reference tab, and fold under the business list", () => {
   const elements = new Map();
   globalThis.document.getElementById = (id) => {
     if (!elements.has(id)) elements.set(id, h(id === "finder-hero-label" ? "label" : "div"));
     return elements.get(id);
   };
-  renderAreaLabels({ ...HOME, notes: { depths: "Depths note.", shelters: "Shelters note.", businesses: "Businesses note." } });
+  renderAreaLabels({ ...HOME, notes: { depths: "Depths note.", shelters: "Shelters note.", sections: "Sections note.", businesses: "Businesses note." } });
   const notes = elements.get("map-note");
-  assert.equal(notes.hidden, false);
-  assert.deepEqual(notes.querySelectorAll("summary").map((summary) => summary.textContent),
-    ["Where the flood depths come from", "Where the relief centres come from"]);
-  assert.deepEqual(notes.querySelectorAll("p").map((line) => line.textContent), ["Depths note.", "Shelters note."]);
-  assert.equal(elements.get("directory-note").querySelector("summary").textContent, "Where this list comes from");
+  assert.equal(elements.get("map-notes-card").hidden, false);
+  assert.deepEqual(notes.querySelectorAll("h3").map((heading) => heading.textContent), ["Where the flood depths come from",
+    "Where the relief centres come from", "Where the section outlines come from", "Where the list of businesses comes from"]);
+  assert.deepEqual(notes.querySelectorAll("p").map((line) => line.textContent), ["Depths note.", "Shelters note.", "Sections note.", "Businesses note."]);
+  assert.equal(elements.get("directory-note").querySelector("summary").textContent, "Where the list of businesses comes from");
   renderAreaLabels({ ...HOME, notes: null });
-  assert.equal(elements.get("map-note").hidden, true);
+  assert.equal(elements.get("map-notes-card").hidden, true);
   assert.equal(elements.get("map-note").children.length, 0);
 });
+

@@ -660,3 +660,12 @@ body[data-tab="overview"] .finder { display: none; }
 .index-method-body ul { padding-left: 1.2rem; list-style: disc; }
 .section-table:has(.col-flash) .col-share { width: 26%; }   /* room for the index's columns */
 .col-score .sort-button { white-space: nowrap; }
+
+/* ---------- Reference: the data, its working and its limits, to read at leisure ---------- */
+.reference-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: var(--space-4); align-items: start; margin-top: var(--space-4); }
+.reference-card { display: grid; gap: var(--space-3); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.6; }
+.reference-card h2 { font-size: var(--text-lg); color: var(--ink); }
+.reference-notes { display: grid; gap: var(--space-1); }
+.reference-notes h3 { margin-top: var(--space-2); color: var(--ink); }
+.reference-card .index-method-body { padding: 0; }
+.reference-card.index-method { margin-top: 0; }

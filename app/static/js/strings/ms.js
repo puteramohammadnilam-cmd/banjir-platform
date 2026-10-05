@@ -571,7 +571,7 @@ export default Object.freeze({
   "cost.splitTrade": "Jualan hilang {rm}",
   "overview.noteShelters": "Dari mana senarai pusat pemindahan",
   "overview.noteDepths": "Dari mana kedalaman banjir",
-  "overview.noteBusinesses": "Dari mana senarai ini",
+  "overview.noteBusinesses": "Dari mana senarai perniagaan",
 
   // ---------- Flood cost questions with ready answers ----------
   "common.notSure": "Tak pasti",
@@ -619,4 +619,14 @@ export default Object.freeze({
   "cost.cost500to2k": "RM 500 hingga 2,000",
   "cost.cost2kto5k": "RM 2,000 hingga 5,000",
   "cost.worthUsesOver": "Kami kira {rm}, angka bulat untuk lebih RM 150k. Taip sendiri jika jauh lebih banyak.",
+  // ---------- Reference tab ----------
+  "tab.reference": "Rujukan",
+  "overview.mapReference": "Dari mana data peta ini dan cara ia dikira",
+  "reference.title": "Dari mana semua ini",
+  "reference.lead": "Data di sebalik setiap tab, cara ia dikira, dan apa yang tidak dapat diberitahunya.",
+  "reference.whatHeading": "Apa yang ditunjukkan alat ini",
+  "reference.moneyHeading": "Angka ringgit",
+  "reference.sourcesHeading": "Sumber data dan penghargaan",
+  "reference.privacyHeading": "Privasi",
+  "overview.noteSections": "Dari mana garis sempadan setiap bahagian bandar",
 });

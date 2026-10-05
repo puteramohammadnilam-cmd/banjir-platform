@@ -570,7 +570,7 @@ export default Object.freeze({
   "cost.splitTrade": "Lost sales {rm}",
   "overview.noteShelters": "Where the relief centres come from",
   "overview.noteDepths": "Where the flood depths come from",
-  "overview.noteBusinesses": "Where this list comes from",
+  "overview.noteBusinesses": "Where the list of businesses comes from",
 
   // ---------- Flood cost questions with ready answers ----------
   "common.notSure": "Not sure",
@@ -618,4 +618,14 @@ export default Object.freeze({
   "cost.cost500to2k": "RM 500 to 2,000",
   "cost.cost2kto5k": "RM 2,000 to 5,000",
   "cost.worthUsesOver": "We count {rm}, a round figure for more than RM 150k. Type your own if it is much more.",
+  // ---------- Reference tab ----------
+  "tab.reference": "Reference",
+  "overview.mapReference": "Where the map's data comes from and how it is worked out",
+  "reference.title": "Where this comes from",
+  "reference.lead": "The data behind each tab, how it is worked out, and what it cannot tell you.",
+  "reference.whatHeading": "What this tool shows",
+  "reference.moneyHeading": "Ringgit figures",
+  "reference.sourcesHeading": "Data sources and credits",
+  "reference.privacyHeading": "Privacy",
+  "overview.noteSections": "Where the section outlines come from",
 });

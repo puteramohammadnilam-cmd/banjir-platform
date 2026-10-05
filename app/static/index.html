@@ -90,6 +90,7 @@
     <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span data-i18n="tab.overview">Area overview</span></button>
     <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span data-i18n="tab.business">My business</span></button>
     <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span data-i18n="tab.cost">Flood cost</span></button>
+    <button type="button" role="tab" id="tab-reference" aria-controls="panel-reference" data-tab="reference"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="tab.reference">Reference</span></button>
   </nav>
 
   <main>
@@ -129,11 +130,7 @@
       <section class="surface map-extras" aria-labelledby="map-extras-heading">
         <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
         <div class="map-controls" id="map-controls" hidden></div>
-        <div class="area-notes" id="map-note" hidden></div>
-        <details class="about-more index-method" id="index-method" hidden>
-          <summary data-i18n="flash.methodHeading">How these are worked out</summary>
-          <div class="index-method-body" id="index-method-body"></div>
-        </details>
+        <p class="small"><button type="button" class="btn btn-link" data-goto="reference" data-i18n="overview.mapReference">Where the map's data comes from and how it is worked out</button></p>
       </section>
       <div class="overview-side">
         <section class="surface" id="history" aria-labelledby="history-heading"></section>
@@ -165,18 +162,47 @@
     <section class="panel" id="panel-business" role="tabpanel" aria-labelledby="tab-business" tabindex="-1" hidden></section>
 
     <section class="panel" id="panel-cost" role="tabpanel" aria-labelledby="tab-cost" tabindex="-1" hidden></section>
+
+    <section class="panel" id="panel-reference" role="tabpanel" aria-labelledby="tab-reference" tabindex="-1" hidden>
+      <header class="view-head">
+        <p class="kicker" data-i18n="tab.reference">Reference</p>
+        <h1 class="view-title" data-i18n="reference.title">Where this comes from</h1>
+        <p class="muted" data-i18n="reference.lead">The data behind each tab, how it is worked out, and what it cannot tell you.</p>
+      </header>
+      <div class="reference-grid">
+        <section class="surface reference-card" aria-labelledby="ref-what">
+          <h2 id="ref-what" data-i18n="reference.whatHeading">What this tool shows</h2>
+          <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
+        </section>
+        <section class="surface reference-card" id="map-notes-card" aria-labelledby="ref-map" hidden>
+          <h2 id="ref-map" data-i18n="overview.mapExtrasHeading">About this map</h2>
+          <div class="reference-notes" id="map-note"></div>
+        </section>
+        <section class="surface reference-card index-method" id="index-method" aria-labelledby="ref-method" hidden>
+          <h2 id="ref-method" data-i18n="flash.methodHeading">How these are worked out</h2>
+          <div class="index-method-body" id="index-method-body"></div>
+        </section>
+        <section class="surface reference-card" aria-labelledby="ref-money">
+          <h2 id="ref-money" data-i18n="reference.moneyHeading">Ringgit figures</h2>
+          <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
+        </section>
+        <section class="surface reference-card" aria-labelledby="ref-sources">
+          <h2 id="ref-sources" data-i18n="reference.sourcesHeading">Data sources and credits</h2>
+          <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Ground height: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Businesses, roads, rivers and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
+        </section>
+        <section class="surface reference-card" aria-labelledby="ref-privacy">
+          <h2 id="ref-privacy" data-i18n="reference.privacyHeading">Privacy</h2>
+          <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.</p>
+        </section>
+      </div>
+    </section>
   </main>
 
   <footer class="about" id="about">
     <h2 data-i18n="footer.heading">About this data</h2>
     <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
     <p><span data-i18n="footer.forecasts">River flood forecasts:</span> <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer" translate="no">Google Flood Hub</a><span data-i18n="footer.levels">. Live river levels and warnings:</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a><span data-i18n="footer.emergency">. In an emergency call 999.</span></p>
-    <details class="about-more">
-      <summary data-i18n="footer.more">More about the data, privacy and costs</summary>
-      <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Ground height: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Businesses, roads, rivers and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.</p>
-      <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.</p>
-      <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.</p>
-    </details>
+    <p><button type="button" class="btn btn-link" data-goto="reference" data-i18n="footer.more">More about the data, privacy and costs</button></p>
   </footer>
 
   <button type="button" class="chat-fab" id="chat-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-dialog" hidden>

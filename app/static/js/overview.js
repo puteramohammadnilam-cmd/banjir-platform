@@ -192,6 +192,14 @@ export function createCityDirectory(parts, index, { area, sections, ...ways }) {
 
 /** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
  *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
+/** The area's data notes in the Reference tab, open to read, each under its short heading; the card is hidden when the
+ *  area has none. */
+function listNotes(element, card, notes) {
+  const shown = notes.filter(([, text]) => text);
+  element.replaceChildren(...shown.flatMap(([key, text]) => [h("h3", { class: "small-heading" }, t(key)), h("p", {}, text)]));
+  card.hidden = !shown.length;
+}
+
 function foldNotes(element, notes) {
   const shown = notes.filter(([, text]) => text);
   element.replaceChildren(...shown.map(([key, text]) => h("details", { class: "area-note" }, h("summary", {}, t(key)), h("p", { class: "fineprint" }, text))));
@@ -206,7 +214,8 @@ export function renderAreaLabels(area, city = null) {
   $("finder-hero-label").textContent = t("hero.headingIn", { area: area.name });
   $("directory-heading").textContent = t("overview.directoryHeading", { area: area.name });
   foldNotes($("directory-note"), [["overview.noteBusinesses", area.notes?.businesses]]);
-  foldNotes($("map-note"), [["overview.noteDepths", area.notes?.depths], ["overview.noteShelters", area.notes?.shelters]]);
+  listNotes($("map-note"), $("map-notes-card"), [["overview.noteDepths", area.notes?.depths], ["overview.noteShelters", area.notes?.shelters],
+    ["overview.noteSections", area.notes?.sections], ["overview.noteBusinesses", area.notes?.businesses]]);
   if (!city) {
     $("map").setAttribute("aria-label", t("overview.mapLabel", { area: area.display_name }));
     return;
