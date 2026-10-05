@@ -1,22 +1,9 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
+import { SIZES, createCostForm } from "./cost-form.js";
 import { CHANCE_YEARS, SCENARIOS, chanceWithin, depthText, h, icon, renderPicker, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
 import { DEFAULT_RP, emptyState } from "./pick.js";
 import { createStockCard } from "./stock.js";
-
-// The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
-const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, closed_days: 365, raise_cm: 300, measure_cost_rm: 50_000_000 };
-const SIZES = [["small", "cost.sizeSmall"], ["medium", "cost.sizeMedium"], ["complex", "cost.sizeComplex"]];
-// The form starts ready to answer: a typical figure for a medium shop, so one press of Estimate gives a result. The owner
-// who knows their stock's worth switches to their own value.
-const DEFAULT_MODE = "size";
-const DEFAULT_SIZE = "medium";
-
-function numberField(name, label, unit, extra = {}) {
-  const input = h("input", { class: "field", type: "number", name, id: `cost-${name}`, min: 0, max: MAX[name], step: "any", inputmode: "decimal", ...extra });
-  const box = unit === "RM" ? h("div", { class: "money" }, input) : h("div", { class: "unit", "data-unit": unit }, input);
-  return { input, node: h("label", { class: "input-label", for: input.id }, label, box) };
-}
 
 const metresAbove = (m) => (m > 0 ? t("common.metres", { m: m.toFixed(2) }) : t("cost.none"));
 
@@ -44,7 +31,7 @@ function lossTable(result, flat, rp) {
     }))));
 }
 
-/** The key figure split in two: damage and lost trade, as one bar and its two figures. None for a flood that costs nothing. */
+/** The key figure split in two: damage and lost sales, as one bar and its two figures. None for a flood that costs nothing. */
 function splitBar(flood) {
   if (!(flood.total_rm > 0)) return null;
   return h("div", { class: "split" },
@@ -120,9 +107,6 @@ export function results(result, { isAssumed = false, rp = DEFAULT_RP } = {}) {
   ].filter(Boolean);
 }
 
-const FLOOR_NOTE = t("cost.floorNote");
-const number = (field) => Number(field.input.value || 0);
-
 /** The tab's heading: a point is a 90 m square someone picked, so it has no name. */
 export const costTitle = (place) => (place.is_point ? t("cost.titlePoint") : t("cost.titleBusiness", { name: place.name }));
 
@@ -167,121 +151,6 @@ function showEstimate({ output, status, submit, error }, estimate, { isAnswered,
   if (isAnswered) bringIntoView(output);
 }
 
-/** The form's inputs, built once: the figures, the shop size choice and the optional measure, with the error line and
- *  the submit button. */
-function buildFields() {
-  const size = h("select", { class: "field", name: "shop_size", id: "cost-shop_size" },
-    h("option", { value: "" }, t("cost.choose")), SIZES.map(([key, text]) => h("option", { value: key }, t(text))));
-  size.value = DEFAULT_SIZE;
-  const raise = numberField("raise_cm", t("cost.raiseBy"), "cm");
-  const measureCost = numberField("measure_cost_rm", t("cost.measureCost"), "RM");
-  const fields = {
-    numbers: {
-      value: numberField("value_at_risk_rm", t("cost.value"), "RM", { min: 1, required: true, placeholder: "50000" }),
-      floor: numberField("floor_height_cm", t("cost.floor"), "cm", { placeholder: "0" }),
-      takings: numberField("daily_takings_rm", t("cost.takings"), "RM"),
-      days: numberField("closed_days", t("cost.days"), t("cost.unitDays")),
-      raise,
-      measureCost,
-    },
-    size,
-    sizeBox: h("label", { class: "input-label", for: size.id, hidden: true }, t("cost.myShop"), size),
-    floorNote: h("p", { class: "hint" }, FLOOR_NOTE),
-    valueNote: h("p", { class: "hint", "aria-live": "polite" }),
-    measure: h("details", {}, h("summary", {}, t("cost.measure")),
-      h("p", { class: "hint" }, t("cost.measureHint")),
-      h("div", { class: "pair" }, raise.node, measureCost.node)),
-    error: h("p", { class: "form-error", role: "alert" }),
-    submit: h("button", { type: "submit", class: "btn btn-primary" }, t("cost.submit")),
-  };
-  setMode(fields, DEFAULT_MODE);
-  return fields;
-}
-
-/** Show the value field or the shop size choice, as `mode` ("value" or "size") asks. */
-function setMode({ numbers, size, sizeBox }, mode) {
-  numbers.value.node.hidden = mode !== "value";
-  numbers.value.input.required = mode === "value";
-  sizeBox.hidden = mode !== "size";
-  size.required = mode === "size";
-}
-
-/** The figures to send, or the problem to show. The server checks these too; saying so here keeps its wording, written
- *  for the AI model, out of the form. */
-function readFigures(form, { numbers, size }) {
-  const byValue = form.elements.mode.value === "value";
-  const [raiseCm, costRm] = [number(numbers.raise), number(numbers.measureCost)];
-  if ((raiseCm > 0) !== (costRm > 0)) return { error: t("cost.errBoth") };
-  if (raiseCm > 0 && !byValue) return { error: t("cost.errSize") };
-  return {
-    figures: {
-      value_at_risk_rm: byValue ? number(numbers.value) : 0, shop_size: byValue ? "" : size.value,
-      floor_height_cm: number(numbers.floor), daily_takings_rm: number(numbers.takings), closed_days: number(numbers.days),
-      raise_cm: raiseCm, measure_cost_rm: costRm,
-    },
-  };
-}
-
-/** The form: stock, shop, lost trade and the optional measure. Submitting checks it and calls onEstimate(figures). */
-function buildForm(fields, onEstimate) {
-  const { numbers, sizeBox, floorNote, valueNote, measure, error, submit } = fields;
-  const modeChoice = (mode, text, checked) => h("label", { class: "choice" },
-    h("input", { type: "radio", name: "mode", value: mode, checked, onchange: () => setMode(fields, mode) }), text);
-  const form = h("form", { class: "surface cost-form", onsubmit: (event) => {
-    event.preventDefault();
-    if (!form.reportValidity()) return;
-    const read = readFigures(form, fields);
-    error.textContent = read.error ?? "";
-    if (read.figures) onEstimate(read.figures);
-  } },
-  h("fieldset", {}, h("legend", {}, t("cost.stockLegend")),
-    h("p", { class: "hint" }, t("cost.stockHint")),
-    modeChoice("value", t("cost.modeValue"), DEFAULT_MODE === "value"),
-    modeChoice("size", t("cost.modeSize"), DEFAULT_MODE === "size"),
-    numbers.value.node, valueNote, sizeBox),
-  h("fieldset", {}, h("legend", {}, t("cost.shopLegend")), numbers.floor.node, floorNote),
-  h("fieldset", {}, h("legend", {}, t("cost.tradeLegend")),
-    h("p", { class: "hint" }, t("cost.tradeHint")),
-    h("div", { class: "pair" }, numbers.takings.node, numbers.days.node)),
-  measure, error, submit);
-  numbers.floor.input.addEventListener("input", () => { numbers.floor.input.dataset.touched = "true"; });
-  return form;
-}
-
-/** What was typed for each place, by its id, so going to another business or point and back never mixes figures up. */
-function createDrafts(form, fields) {
-  const { numbers, size, measure, floorNote, valueNote, error } = fields;
-  const drafts = new Map();
-  const snapshot = () => ({
-    mode: form.elements.mode.value, size: size.value, open: measure.open, note: floorNote.textContent, valueNote: valueNote.textContent,
-    touched: numbers.floor.input.dataset.touched === "true",
-    ...Object.fromEntries(Object.entries(numbers).map(([key, field]) => [key, field.input.value])),
-  });
-  function restore(draft) {
-    for (const [key, field] of Object.entries(numbers)) field.input.value = draft?.[key] ?? "";
-    size.value = draft?.size ?? DEFAULT_SIZE;
-    form.elements.mode.value = draft?.mode ?? DEFAULT_MODE;
-    setMode(fields, form.elements.mode.value);
-    measure.open = draft?.open ?? false;
-    if (draft?.touched) numbers.floor.input.dataset.touched = "true";
-    else delete numbers.floor.input.dataset.touched;
-    floorNote.textContent = draft?.note ?? FLOOR_NOTE;
-    valueNote.textContent = draft?.valueNote ?? "";
-    error.textContent = "";
-  }
-  return { save: (id) => drafts.set(id, snapshot()), restore: (id) => restore(drafts.get(id)) };
-}
-
-/** "Use these figures" from the stock photo: the value goes in the form, said to be Gemini's guess, and focus goes to
- *  it so the owner sees what changed. */
-function useStockValue(form, fields, value) {
-  form.elements.mode.value = "value";
-  setMode(fields, "value");
-  fields.numbers.value.input.value = String(value);
-  fields.valueNote.textContent = t("cost.fromStock");
-  fields.numbers.value.input.focus();
-}
-
 /** The tab's heading: the title, the size of flood (the same choice as on the Area overview and My business), and a
  *  line only screen readers get, saying when the owner's estimate is in. The answer itself is not a live region: a first
  *  look on every place would be read out whole. */
@@ -290,21 +159,6 @@ function buildHead() {
   const picker = h("div", { class: "cost-picker" });
   const status = h("p", { class: "visually-hidden", role: "status" });
   return { title, picker, status, node: h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, picker, status) };
-}
-
-/** The floor from the shop-front photo goes in the form, unless the owner has typed their own for this place. */
-function useFloorFromPhoto({ numbers, floorNote }, photoFloorCm) {
-  const { input } = numbers.floor;
-  if (photoFloorCm == null || input.dataset.touched || input.value === String(photoFloorCm)) return;
-  input.value = String(photoFloorCm);
-  floorNote.textContent = t("cost.fromPhoto");
-}
-
-/** The figures the form would send now, or null while it holds a problem (a required value left empty, a measure half
- *  given): what the tab works out by itself when it opens on a place. */
-function formFigures(form, fields) {
-  if (form.checkValidity && !form.checkValidity()) return null;
-  return readFigures(form, fields).figures ?? null;
 }
 
 /** The empty state while nothing is picked; the form and its figures (`parts`), kept as they were, once a place is. */
@@ -322,15 +176,13 @@ function showEmpty(empty, parts, isEmpty, { onFind, onCheckPoint }) {
  *  tab shows the empty state (pick.js), with onFind and onCheckPoint behind its buttons. */
 export function createCost(panel, { onEstimate, onPick = () => {}, floodExample = () => null, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true }) {
   const head = buildHead();
-  const fields = buildFields();
-  const form = buildForm(fields, onEstimate);
-  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(fields.numbers.floor)), onUse: (value) => useStockValue(form, fields, value), isReady });
+  const form = createCostForm(onEstimate);
+  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, form.floorCm()), onUse: (value) => form.useValue(value), isReady });
   const output = h("section", { class: "surface cost-results", "aria-label": t("cost.output") });
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   // the answer comes first, so a phone shows it before the form; views.css puts it beside the form on wide screens
-  const parts = [head.node, h("div", { class: "cost-grid" }, output, form, stock.node)];
+  const parts = [head.node, h("div", { class: "cost-grid" }, output, form.node, stock.node)];
   panel.replaceChildren(empty, ...parts);
-  const drafts = createDrafts(form, fields);
   let shownId = null;
   let shownEstimate;
   let shownRp;
@@ -345,12 +197,12 @@ export function createCost(panel, { onEstimate, onPick = () => {}, floodExample 
       stock.render(stockState, rp);
       const isNewPlace = place.id !== shownId;
       if (isNewPlace) {
-        if (shownId) drafts.save(shownId);
-        drafts.restore(place.id);
+        if (shownId) form.save(shownId);
+        form.restore(place.id);
         shownId = place.id;
         head.title.textContent = costTitle(place);
       }
-      useFloorFromPhoto(fields, photoFloorCm);
+      form.useFloor(photoFloorCm);
       const isNewRp = rp !== shownRp;
       shownRp = rp;
       if (isNewRp || isNewPlace) renderPicker(head.picker, rp, onPick, floodExample(place));   // the note is the place's area's
@@ -358,10 +210,10 @@ export function createCost(panel, { onEstimate, onPick = () => {}, floodExample 
       if (isNewEstimate || isNewRp) {
         const isAnswered = !isNewPlace && isOwnAnswer(shownEstimate, estimate);
         shownEstimate = estimate;
-        showEstimate({ output, status: head.status, submit: fields.submit, error: fields.error }, estimate, { isAnswered, isNewEstimate, rp });
+        showEstimate({ output, status: head.status, submit: form.submit, error: form.error }, estimate, { isAnswered, isNewEstimate, rp });
       }
     },
-    /** What the form would send now, or null (formFigures). */
-    figures: () => formFigures(form, fields),
+    /** What the form would send now, or null while it holds a problem. */
+    figures: () => form.figures(),
   };
 }

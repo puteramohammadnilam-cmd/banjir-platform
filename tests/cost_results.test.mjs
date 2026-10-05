@@ -1,7 +1,7 @@
 // Run from 11_Platform_Draft:  node --test tests/cost_results.test.mjs
 // The Flood cost answer (cost.js results), on the small fake DOM: the key figure is the size of flood on show, the yearly
 // loss reads as a floor, and the flat shop-size figure says depth does not count. The key figure carries its own tags,
-// its split into damage and lost trade, and its chance and water one line each.
+// its split into damage and lost sales, and its chance and water one line each.
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
@@ -39,7 +39,7 @@ test("the key figure is the flood size on show: its cost, its water in the model
   assert.deepEqual(key.querySelectorAll("li").map((line) => line.textContent), [
     "40% chance of a flood this big or bigger in the next 10 years.",
     "Water in the model: 1.58 m at the street, 1.48 m above your floor."]);
-  assert.match(key.querySelector(".split-legend").textContent, /^Damage RM\s?31,647Lost trade RM\s?3,000$/);
+  assert.match(key.querySelector(".split-legend").textContent, /^Damage RM\s?31,647Lost sales RM\s?3,000$/);
   const fifty = results(FLAT, { rp: "50" })[0].children[0];
   assert.match(fifty.textContent, /if a 1 in 50 years flood comes/);
   assert.match(fifty.querySelectorAll("li")[0].textContent, /^18% chance of a flood this big or bigger/);
@@ -53,13 +53,13 @@ test("the discounted sum over 10 years moves into How this is worked out", () =>
 
 test("the flat figure says depth does not count, and drops the repeated columns", () => {
   const nodes = results(FLAT);
-  assert.match(text(nodes), /Enter what your stock is worth/);
+  assert.match(text(nodes), /Pick a value in question 1/);
   assert.equal(nodes.find((node) => node.getAttribute("class") === "table-scroll").querySelectorAll("th").length, 3 + 3);   // 3 columns, 3 rows
 });
 
 test("the owner's own value keeps the full table and no flat note", () => {
   const nodes = results(OWN);
-  assert.ok(!/Enter what your stock is worth/.test(text(nodes)));
+  assert.ok(!/Pick a value in question 1/.test(text(nodes)));
   assert.equal(nodes.find((node) => node.getAttribute("class") === "table-scroll").querySelectorAll("th").length, 5 + 3);
 });
 

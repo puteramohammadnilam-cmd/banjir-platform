@@ -1,4 +1,4 @@
-// "Fill in from a photo of your stock" on the Flood cost tab (plan card G1). Gemini lists what a photo of the shop's
+// "Not sure what it is worth? Take a photo inside your shop" on the Flood cost tab (plan card G1). Gemini lists what a photo of the shop's
 // inside shows and guesses a rough value range for each thing; the server works out which of them sit under the
 // modelled water (app/stock.py). Nothing reaches the cost form until the owner presses "Use these figures".
 import { h, icon, ringgit } from "./dom.js";

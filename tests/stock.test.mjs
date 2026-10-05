@@ -107,7 +107,7 @@ test("a shop with nothing seen offers nothing to use", () => {
   const empty = { ...RESULT, estimate: { ...RESULT.estimate, items: [] }, total: { value_rm_low: 0, value_rm_high: 0 }, suggested_value_rm: 0,
     per_flood: { 10: RESULT.per_flood[10], 20: { ...RESULT.per_flood[100], under_water: [], value_rm_low: 0, value_rm_high: 0 }, 50: RESULT.per_flood[10] } };
   card.render({ result: empty }, "20");
-  assert.match(text(), /Gemini saw no stock or equipment/);
+  assert.match(text(), /Gemini saw nothing that water could spoil/);
   assert.equal(button("Use these figures"), undefined);
 });
 

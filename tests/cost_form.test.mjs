@@ -10,63 +10,204 @@ import { shop } from "./point_fixtures.mjs";
 
 beforeEach(() => installFakeDom());
 
-/** The tab with a place on show. The fake DOM has no form controls collection, so one is given, reading the radios. */
+/** The tab with a place on show. */
 function mount(options = {}) {
   const sent = [];
   const panel = document.createElement("section");
   const cost = createCost(panel, { onEstimate: (figures) => sent.push(figures), ...options });
   const form = panel.querySelector("form");
-  const radios = form.querySelectorAll("input").filter((input) => input.getAttribute("name") === "mode");
-  const mode = { get value() { return radios.find((radio) => radio.checked)?.getAttribute("value"); }, set value(next) { radios.forEach((radio) => { radio.checked = radio.getAttribute("value") === next; }); } };
-  form.elements = { mode };
   form.reportValidity = () => true;
   cost.render(shop, null, undefined, undefined, "20");
-  return { panel, cost, form, sent, mode, radios };
+  return { panel, cost, form, sent };
 }
 
-test("the form starts on a typical figure for a medium shop, with the shop size chosen and the value box away", () => {
-  const { panel, mode } = mount();
-  assert.equal(mode.value, "size");
-  const size = panel.querySelector("select");
-  assert.equal(size.value, "medium");
-  assert.equal(size.parent.hidden, false);
-  const value = panel.querySelector("#cost-value_at_risk_rm") ?? panel.querySelectorAll("input").find((input) => input.getAttribute("name") === "value_at_risk_rm");
-  assert.equal(value.parent.parent.hidden, true);
-  assert.notEqual(value.required, true, "an empty value box cannot block Estimate");
+/** The radio of answer `value` in question group `name` (worth, floor, customers, spend, days, raise, measureCost). */
+const radio = (panel, name, value) => panel.querySelectorAll("input").find((input) => input.getAttribute("name") === `cost-${name}` && input.getAttribute("value") === value);
+const picked = (panel, name) => panel.querySelectorAll("input").find((input) => input.getAttribute("name") === `cost-${name}` && input.checked)?.getAttribute("value");
+/** Tap an answer, as the owner does. */
+function tap(panel, name, value) {
+  for (const input of panel.querySelectorAll("input").filter((one) => one.getAttribute("name") === `cost-${name}`)) input.checked = false;
+  const chosen = radio(panel, name, value);
+  chosen.checked = true;
+  chosen.dispatch("change");
+}
+const box = (panel, name) => panel.querySelectorAll("input").find((input) => input.getAttribute("name") === name);
+const shown = (node) => !node.hidden && !node.parent?.hidden && !node.parent?.parent?.hidden;
+
+test("the form starts ready: not sure of the value (a medium shop's typical figure), floor level, lost sales not sure, no measure", () => {
+  const { panel } = mount();
+  assert.deepEqual(["worth", "floor", "customers", "raise"].map((name) => picked(panel, name)), ["size", "0", "unsure", "0"]);
+  assert.equal(panel.querySelector("select").value, "medium");
+  assert.ok(shown(panel.querySelector("select")));
+  assert.ok(!shown(box(panel, "value_at_risk_rm")), "no box to type in until Type my own");
+  assert.notEqual(box(panel, "value_at_risk_rm").required, true, "an empty value box cannot block Estimate");
+  assert.match(panel.textContent, /Not sure is fine: we use a typical figure for your shop's size\./);
+  assert.match(panel.textContent, /Not sure is fine: we add 30% of the damage/);
 });
 
-test("pressing Estimate with nothing typed sends a medium shop's typical figure", () => {
+test("the four questions come in order, each with its answers to tap", () => {
+  const { panel } = mount();
+  assert.deepEqual(panel.querySelectorAll(".question-title").map((legend) => legend.textContent), [
+    "Things in your shop that water can spoil", "How high is your shop floor above the road?",
+    "On a normal day, how many customers?", "What if you put things higher?"]);
+  assert.match(panel.textContent, /kedai runcit has shelves of goods/, "an example that is not only a kedai runcit's");
+});
+
+test("each follow-on question is its own fieldset with a legend, so its answers are named", () => {
+  const { panel } = mount();
+  assert.deepEqual(panel.querySelectorAll(".sub-question").map((set) => [set.tagName.toLowerCase(), set.querySelector("legend").textContent]), [
+    ["fieldset", "Each spends about"],
+    ["fieldset", "If water comes in, how long would you close? Cleaning, drying, fixing and restocking."],
+    ["fieldset", "What would that cost?"]]);
+});
+
+test("a box out of sight is switched off, so a figure left in it never blocks Estimate unseen", () => {
+  const { panel } = mount();
+  tap(panel, "floor", "own");
+  box(panel, "floor_height_cm").value = "999";   // over the 300 cm limit
+  assert.equal(box(panel, "floor_height_cm").disabled, false);
+  tap(panel, "floor", "15");
+  assert.equal(box(panel, "floor_height_cm").disabled, true);
+  for (const name of ["value_at_risk_rm", "daily_takings_rm", "measure_cost_rm"]) assert.equal(box(panel, name).disabled, true, name);
+  tap(panel, "raise", "50");
+  tap(panel, "measureCost", "own");
+  assert.equal(box(panel, "measure_cost_rm").disabled, false);
+  tap(panel, "raise", "0");
+  assert.equal(box(panel, "measure_cost_rm").disabled, true, "hidden with its question, though Type my own is still picked");
+});
+
+test("ringgit boxes start at 1, as the server takes them, and a measure cost under 1 is asked for again", () => {
+  const { panel, cost } = mount();
+  assert.deepEqual(["value_at_risk_rm", "measure_cost_rm", "floor_height_cm"].map((name) => box(panel, name).getAttribute("min")), ["1", "1", "0"]);
+  tap(panel, "worth", "30000");
+  tap(panel, "raise", "15");
+  tap(panel, "measureCost", "own");
+  box(panel, "measure_cost_rm").value = "0.5";
+  assert.equal(cost.figures(), null);
+});
+
+test("Over RM 150k says it is a round figure, not a middle", () => {
+  const { panel } = mount();
+  tap(panel, "worth", "200000");
+  assert.match(panel.textContent, /We count RM\s?200,000, a round figure for more than RM 150k\./);
+  assert.ok(!/about the middle/.test(panel.textContent));
+});
+
+test("the 30% line shows only for Not sure, not while the owner's own sales box is empty", () => {
+  const { panel } = mount();
+  tap(panel, "customers", "own");
+  assert.ok(!/Not sure is fine: we add 30%/.test(panel.textContent));
+  box(panel, "daily_takings_rm").value = "400";
+  box(panel, "daily_takings_rm").dispatch("input");
+  assert.match(panel.textContent, /About RM\s?400 a day for 7 days: RM\s?2,800 of lost sales\./);
+});
+
+test("a tap on question 1 or 2 clears the photo's note on it", () => {
+  const { panel, cost } = mount();
+  cost.render(shop, 30, undefined, undefined, "20");
+  assert.match(panel.textContent, /Filled in from your shop-front photo/);
+  tap(panel, "floor", "0");
+  assert.ok(!/Filled in from your shop-front photo/.test(panel.textContent));
+});
+
+test("every ready answer stays inside what the server takes (floodtools.ESTIMATE_MAX)", () => {
+  const { panel, cost } = mount();
+  const most = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, closed_days: 365, raise_cm: 300, measure_cost_rm: 50_000_000 };
+  tap(panel, "worth", "200000");
+  tap(panel, "floor", "45");
+  tap(panel, "customers", "150");
+  tap(panel, "spend", "50");
+  tap(panel, "days", "30");
+  tap(panel, "raise", "100");
+  tap(panel, "measureCost", "3500");
+  const figures = cost.figures();
+  for (const [name, limit] of Object.entries(most)) assert.ok(figures[name] <= limit, name);
+  assert.deepEqual([figures.daily_takings_rm, figures.closed_days], [7500, 30]);
+});
+
+test("pressing Estimate with nothing tapped sends a medium shop's typical figure", () => {
   const { form, sent } = mount();
   form.dispatch("submit");
-  assert.equal(sent.length, 1);
-  assert.deepEqual(sent[0], { value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 });
+  assert.deepEqual(sent, [{ value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 }]);
 });
 
-test("a value filled in from the stock photo switches to the owner's own value", () => {
-  const { panel, form, sent, mode, radios } = mount();
-  const useStock = radios.find((radio) => radio.getAttribute("value") === "value");
-  useStock.checked = true;
-  useStock.dispatch("change");
-  assert.equal(mode.value, "value");
-  const value = panel.querySelectorAll("input").find((input) => input.getAttribute("name") === "value_at_risk_rm");
-  value.value = "25000";
+test("a range counts as about its middle and says so; a step counts as its height", () => {
+  const { panel, cost } = mount();
+  tap(panel, "worth", "30000");
+  tap(panel, "floor", "15");
+  assert.match(panel.textContent, /We count RM\s?30,000, about the middle of what you picked\./);
+  assert.ok(!shown(panel.querySelector("select")), "the shop size goes away once a value is picked");
+  assert.deepEqual(cost.figures(), { value_at_risk_rm: 30000, shop_size: "", floor_height_cm: 15, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 });
+});
+
+test("customers times what each spends gives the day's sales, times the days closed the lost sales", () => {
+  const { panel, cost } = mount();
+  const [spend, days] = panel.querySelectorAll(".sub-question");
+  assert.ok(!shown(spend) && !shown(days), "no spend or days closed until the customers are answered");
+  tap(panel, "customers", "35");
+  assert.ok(shown(spend) && shown(days));
+  tap(panel, "spend", "15");
+  tap(panel, "days", "14");
+  assert.match(panel.textContent, /About RM\s?525 a day for 14 days: RM\s?7,350 of lost sales\./);
+  assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [525, 14]);
+  tap(panel, "customers", "own");
+  box(panel, "daily_takings_rm").value = "800";
+  assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [800, 14]);
+  tap(panel, "customers", "unsure");
+  assert.deepEqual([cost.figures().daily_takings_rm, cost.figures().closed_days], [0, 0], "not sure: the guideline's 30% on the server");
+});
+
+test("putting things higher needs a value, not Not sure, and counts the picked cost", () => {
+  const { panel, cost, form } = mount();
+  tap(panel, "raise", "50");
+  assert.equal(cost.figures(), null);
   form.dispatch("submit");
-  assert.equal(sent[0].value_at_risk_rm, 25000);
-  assert.equal(sent[0].shop_size, "");
+  assert.match(panel.querySelector(".form-error").textContent, /pick a value in question 1, not Not sure/);
+  tap(panel, "worth", "100000");
+  assert.deepEqual([cost.figures().raise_cm, cost.figures().measure_cost_rm], [50, 1250]);
+  tap(panel, "measureCost", "own");
+  assert.equal(cost.figures(), null, "Type my own with nothing typed");
+  box(panel, "measure_cost_rm").value = "900";
+  assert.equal(cost.figures().measure_cost_rm, 900);
+  tap(panel, "raise", "0");
+  assert.deepEqual([cost.figures().raise_cm, cost.figures().measure_cost_rm], [0, 0]);
 });
 
-test("another place gets the same ready-to-answer form, not the last place's mode", () => {
-  const { cost, mode, radios } = mount();
-  radios.find((radio) => radio.getAttribute("value") === "value").dispatch("change");
-  mode.value = "value";
+test("Use these figures from the photo inside the shop picks Type my own with Gemini's value, said to be its guess", () => {
+  const { panel, cost } = mount();
+  const items = [{ item: "Rice", kind: "stock", lowest_cm: 0, value_rm_low: 2000, value_rm_high: 3000 }];
+  const flood = { water_above_floor_m: 0.3, under_water: [0], value_rm_low: 2000, value_rm_high: 3000 };
+  const result = { estimate: { is_shop_inside: true, items, confidence: "medium", reasoning: "" }, floor_height_cm: 0,
+    total: { value_rm_low: 2000, value_rm_high: 3000 }, suggested_value_rm: 2500, per_flood: { 10: flood, 20: flood, 50: flood } };
+  cost.render(shop, null, undefined, { result }, "20");
+  panel.querySelectorAll("button").find((button) => button.textContent === "Use these figures").click();
+  assert.equal(picked(panel, "worth"), "own");
+  assert.equal(cost.figures().value_at_risk_rm, 2500);
+  assert.match(panel.textContent, /Filled in from your photo inside the shop: Gemini's rough guess/);
+});
+
+test("the shop-front photo's floor fills question 2 until the owner answers it", () => {
+  const { panel, cost } = mount();
+  cost.render(shop, 30, undefined, undefined, "20");
+  assert.equal(picked(panel, "floor"), "own");
+  assert.equal(cost.figures().floor_height_cm, 30);
+  tap(panel, "floor", "45");
+  cost.render(shop, 60, undefined, undefined, "20");
+  assert.equal(cost.figures().floor_height_cm, 45, "the owner's own answer stays");
+});
+
+test("each place keeps its own answers, and a new place starts ready", () => {
+  const { panel, cost } = mount();
+  tap(panel, "worth", "200000");
   cost.render({ ...shop, id: "node-9", name: "Other" }, null, undefined, undefined, "20");
-  assert.equal(mode.value, "size");
+  assert.equal(picked(panel, "worth"), "size");
+  cost.render(shop, null, undefined, undefined, "20");
+  assert.equal(picked(panel, "worth"), "200000");
 });
 
 // ---------- the tab opens with an answer ----------
 
 const DEFAULT_FIGURES = { value_at_risk_rm: 0, shop_size: "medium", floor_height_cm: 0, daily_takings_rm: 0, closed_days: 0, raise_cm: 0, measure_cost_rm: 0 };
-const field = (panel, name) => panel.querySelectorAll("input").find((input) => input.getAttribute("name") === name);
 
 test("figures() gives what Estimate would send, so the tab can work out a first look when it opens", () => {
   const { cost, sent } = mount();
@@ -75,10 +216,7 @@ test("figures() gives what Estimate would send, so the tab can work out a first 
 });
 
 test("figures() gives none while the form holds a problem", () => {
-  const { panel, cost, form } = mount();
-  field(panel, "raise_cm").value = "30";   // a measure needs its cost too
-  assert.equal(cost.figures(), null);
-  field(panel, "raise_cm").value = "";
+  const { cost, form } = mount();
   form.checkValidity = () => false;        // a required value left empty, as the browser reports it
   assert.equal(cost.figures(), null);
 });
@@ -204,10 +342,10 @@ test("another size of flood keeps the form's own message, and neither scrolls no
   const { panel, cost, form } = mount();
   const done = { result: ANSWER };   // the store keeps the same estimate when only the size changes
   cost.render(shop, null, done, undefined, "20");
-  field(panel, "raise_cm").value = "30";   // a measure without its cost
+  tap(panel, "raise", "50");   // a measure with no value of one's own
   form.dispatch("submit");
   const message = panel.querySelector(".form-error").textContent;
-  assert.match(message, /give both how far to raise the stock and what it costs/);
+  assert.match(message, /pick a value in question 1/);
   const scrolls = placedOutput(panel, -600);
   cost.render(shop, null, done, undefined, "50");
   assert.equal(panel.querySelector(".form-error").textContent, message);
