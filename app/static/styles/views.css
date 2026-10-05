@@ -320,6 +320,27 @@
 
 @media (max-width: 900px) { .biz-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (min-width: 901px) { .gauge text { font-size: 10.5px; } }   /* the drawing scales up on wide screens; its labels should not */
+/* a laptop or wider, with a place on show: the drawing, then the flood plan and the compare card (main.js puts those after
+   the grid) on the left, the facts and next steps on the right. So neither column ends far above the other, and no card
+   runs the page's whole width with little in it. Phones keep the page's own order: drawing, facts, plan, compare */
+@media (min-width: 901px) {
+  #panel-business:has(> .biz-grid:not([hidden])) {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
+    grid-template-areas: "head head" "risk side" "plan side" "compare side";
+  }
+  #panel-business > .biz-grid { display: contents; }
+  #panel-business > :first-child:empty { display: none; }   /* the empty state's slot, with a place on show */
+  #panel-business > .biz-head { grid-area: head; margin-bottom: var(--space-1); }
+  #panel-business .risk { grid-area: risk; }
+  #panel-business .biz-side { grid-area: side; }
+  #panel-business > .plan-card { grid-area: plan; margin-top: 0; }
+  #panel-business > .compare-card { grid-area: compare; margin-top: 0; }
+}
+/* a wide screen: the drawing fills its card, its labels the same size on screen as at 34rem */
+@media (min-width: 1280px) {
+  .risk .gauge { max-width: 44rem; }
+  .risk .gauge text { font-size: 8.2px; }
+}
 
 /* ---------- flood cost ---------- */
 /* the stock photo: rows under the modelled water carry the water's colour and a mark, so colour is not the only cue */
