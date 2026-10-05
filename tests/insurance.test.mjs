@@ -27,7 +27,7 @@ function mount() {
 }
 
 test("the model's figures are the yearly floor and the biggest flood with its chance in 10 years", () => {
-  assert.deepEqual(riskFigures(RESULT), { yearly: 1440, bad: 41141, rp: "50", pct: 18 });
+  assert.deepEqual(riskFigures(RESULT), { yearly: 1440, bad: 41141, rp: "50", pct: 18, leftOut: false });
   assert.equal(riskFigures(undefined), null);
 });
 
@@ -102,4 +102,30 @@ test("the words inform without advising: no insurer named, no verdict, never saf
     assert.ok(!/\b(safe|selamat)\b/i.test(words));
   }
   assert.match(en["insurance.lead"], /does not recommend any insurer, takaful operator or product, and is not financial advice/);
+});
+
+test("vehicles and workers' pay are left out of the comparison, and said to be", () => {
+  const wide = { expected_yearly_loss_rm: 3000, expected_yearly_shop_loss_rm: 1500,
+    per_flood: { 10: { total_rm: 0 }, 20: { total_rm: 0 }, 50: { total_rm: 60000, vehicles_rm: 15000, wages_rm: 1000 } } };
+  assert.deepEqual(riskFigures(wide), { yearly: 1500, bad: 44000, rp: "50", pct: 18, leftOut: true });
+  const { panel, view } = mount();
+  view.render(shop, { result: wide });
+  assert.match(panel.textContent, /Vehicles and workers' pay from Flood cost are left out here/);
+});
+
+test("a first look is said to be one, not the owner's answers", () => {
+  const { panel, view } = mount();
+  view.render(shop, { result: RESULT, assumed: true });
+  assert.match(panel.textContent, /First look: these are for a typical medium shop, not your answers\./);
+  assert.ok(!/From your answers on Flood cost/.test(panel.textContent));
+  view.render(shop, { result: { ...RESULT }, assumed: false });
+  assert.ok(!/First look/.test(panel.textContent));
+  assert.match(panel.textContent, /From your answers on Flood cost/);
+});
+
+test("going back to no place clears the old heading, so focus finds the empty state's", () => {
+  const { panel, view } = mount();
+  view.render(shop, { result: RESULT });
+  view.render(undefined, undefined);
+  assert.deepEqual(panel.querySelectorAll("h1").map((h1) => h1.textContent).length, 1);
 });

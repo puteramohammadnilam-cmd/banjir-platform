@@ -19,6 +19,8 @@ const lossBar = (share) => h("span", { class: "loss-bar", style: `--share: ${Mat
 const PARTS = [["direct_damage_rm", "cost.splitDamage", "damage"], ["built_in_rm", "cost.splitBuiltIn", "built-in"],
   ["indirect_loss_rm", "cost.splitTrade", "trade"], ["vehicles_rm", "cost.splitVehicles", "vehicles"], ["wages_rm", "cost.splitWages", "wages"]];
 const WIDER = ["built_in_rm", "vehicles_rm", "wages_rm"];
+// How the server says each was worked out (wider_costs.basis), for How this is worked out.
+const WIDER_BASIS = [["built_in", "cost.basisBuiltIn"], ["vehicles", "cost.basisVehicles"], ["wages", "cost.basisWages"]];
 /** What the owner added beyond stock and lost sales in this flood. */
 const otherOf = (flood) => WIDER.reduce((sum, field) => sum + (flood[field] ?? 0), 0);
 const hasOther = (result) => SCENARIOS.some((rp) => otherOf(result.per_flood[rp]) > 0);
@@ -114,6 +116,7 @@ export function results(result, { isAssumed = false, rp = DEFAULT_RP } = {}) {
       h("p", {}, t("cost.yearlyNote", { rp: SCENARIOS[0], big: SCENARIOS.at(-1) })),
       h("p", {}, t("cost.overYearsLine", { rm: ringgit(overYears), years, pct: Math.round(rate * 100) })),
       h("p", {}, t("cost.damage", { text: result.basis.direct })), h("p", {}, t("cost.trade", { text: result.basis.indirect })),
+      WIDER_BASIS.filter(([field]) => result.basis[field]).map(([field, key]) => h("p", {}, t(key, { text: result.basis[field] }))),
       h("p", {}, result.method), h("p", {}, result.limits)),
   ].filter(Boolean);
 }

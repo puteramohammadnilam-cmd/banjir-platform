@@ -142,13 +142,13 @@ function answers(parts) {
   const daily = customers === OWN ? typed(parts.boxes.takings.input)
     : isNumber(customers) ? Number(customers) * Number(pick.spend) : 0;
   const raise = Number(pick.raise);
-  const hasValue = pick.worth === OWN || isNumber(pick.worth);   // built-in works add only to the owner's own value
+  const value = pick.worth === OWN ? typed(parts.boxes.value.input) : isNumber(pick.worth) ? Number(pick.worth) : 0;
+  const hasValue = value > 0;   // built-in works add only to the owner's own value, and one actually given
   return {
-    pick, daily, days: Number(pick.days), raise, hasValue,
+    pick, daily, days: Number(pick.days), raise, hasValue, value,
     builtIn: !hasValue ? 0 : pick.builtIn === OWN ? typed(parts.boxes.builtIn.input) : Number(pick.builtIn),
     vehicles: Number(pick.cars) * Number(pick.carValue) + Number(pick.motos) * Number(pick.motoValue),
     unpaid: pick.paid === "no" ? Number(pick.workers) : 0,
-    value: pick.worth === OWN ? typed(parts.boxes.value.input) : isNumber(pick.worth) ? Number(pick.worth) : 0,
     floor: pick.floor === OWN ? typed(parts.boxes.floor.input) : Number(pick.floor),
     measureCost: raise > 0 ? (pick.measureCost === OWN ? typed(parts.boxes.measureCost.input) : Number(pick.measureCost)) : 0,
   };
@@ -184,7 +184,9 @@ function show(parts) {
 /** Built-in works only beside one's own value; the workers' pay and the vehicles, said in ringgit as they are picked. */
 function showWider(parts) {
   const { pick, days, hasValue, unpaid, vehicles } = answers(parts);
-  parts.builtInBox.hidden = !hasValue;
+  parts.builtInBox.hidden = !(pick.worth === OWN || isNumber(pick.worth));   // asked beside a value, sent once it is given
+  // days closed count for the day's sales and for the workers' pay; with neither they would change nothing
+  parts.daysBox.hidden = pick.customers === UNSURE && Number(pick.workers) === 0;
   const workers = Number(pick.workers);
   parts.paidBox.hidden = workers === 0;
   parts.workersLine.textContent = workers === 0 ? ""

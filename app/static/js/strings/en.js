@@ -546,13 +546,13 @@ export default Object.freeze({
   "footer.heading": "About this data",
   "footer.testBuild": "This is a test build.",
   "footer.model": "Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.",
-  "footer.credits": "Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Ground height: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Businesses, roads, rivers and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search.",
+  "footer.credits": "Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Ground height: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Businesses, roads, rivers and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search. Car flood damage: US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain.",
   "footer.privacy": "Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.",
   "footer.forecasts": "River flood forecasts:",
   "footer.levels": ". Live river levels and warnings:",
   "footer.emergency": ". In an emergency call 999.",
   "footer.more": "More about the data, privacy and costs",
-  "footer.money": "Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline.",
+  "footer.money": "Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline. For vehicles parked at the shop, a US car damage curve (US Army Corps of Engineers, 2009); for workers' pay, the minimum wage (Minimum Wages Order 2024).",
 
   // ---------- at-a-glance facts, cost tags and folded notes ----------
   "fact.more": "How to read this",
@@ -730,4 +730,11 @@ export default Object.freeze({
   "cost.splitVehicles": "Vehicles {rm}",
   "cost.splitWages": "Workers' pay {rm}",
   "cost.colOther": "Other",
+  // ---------- review: first look on Insurance, wider bases ----------
+  "insurance.assumed": "First look: these are for a typical medium shop, not your answers. Change your answers to fit your shop before you compare a price.",
+  "insurance.basisAssumed": "A model, not an assessment of your shop.",
+  "insurance.leftOut": "Vehicles and workers' pay from Flood cost are left out here: a shop's fire or flood cover does not pay them, and cars need their own motor cover.",
+  "cost.basisBuiltIn": "Renovation and built-ins: {text}.",
+  "cost.basisVehicles": "Vehicles: {text}.",
+  "cost.basisWages": "Workers' pay: {text}.",
 });

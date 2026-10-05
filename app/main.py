@@ -572,6 +572,8 @@ FORM_WORDS = (
     ("value_at_risk_rm", "the value of stock and equipment"), ("floor_height_cm", "the floor height in cm"),
     ("daily_takings_rm", "the takings per day"), ("closed_days", "the days closed"),
     ("raise_cm", "how far to raise the stock"), ("measure_cost_rm", "what that costs"), ("shop_size", "the shop size"),
+    ("built_in_rm", "the value of renovation and built-ins"), ("vehicles_rm", "the value of vehicles"),
+    ("unpaid_workers", "the number of workers"),
     ("Ask the owner which one fits.", "Choose the one that fits."), ("the owner's own", "your own"),
     ("Ask for that value.", "Give that value."), ("Ask for the value", "Give the value"),
 )

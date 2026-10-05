@@ -149,8 +149,7 @@ test("a range counts as about its middle and says so; a step counts as its heigh
 test("customers times what each spends gives the day's sales, times the days closed the lost sales", () => {
   const { panel, cost } = mount();
   const [, spend, days] = panel.querySelectorAll(".sub-question");
-  assert.ok(!shown(spend), "no spend until the customers are answered");
-  assert.ok(shown(days), "days closed always: they count for workers' pay too");
+  assert.ok(!shown(spend) && !shown(days), "no spend or days closed until the customers or workers are answered");
   tap(panel, "customers", "35");
   assert.ok(shown(spend) && shown(days));
   tap(panel, "spend", "15");
@@ -401,4 +400,21 @@ test("cars and motorcycles count as their number times what each is worth", () =
   assert.ok(shown(carValue));
   assert.equal(cost.figures().vehicles_rm, 63000);
   assert.match(panel.textContent, /Vehicles worth RM\s?63,000 in all\. .*motorcycles use the car curve, our assumption\./);
+});
+
+test("days closed show for workers too, as their pay counts the days", () => {
+  const { panel } = mount();
+  const days = panel.querySelectorAll(".sub-question")[2];
+  assert.ok(!shown(days));
+  tap(panel, "workers", "1");
+  assert.ok(shown(days));
+});
+
+test("Type my own left empty sends no renovation, so the server never asks for a value the owner cannot see", () => {
+  const { panel, cost } = mount();
+  tap(panel, "worth", "own");
+  tap(panel, "builtIn", "20000");
+  assert.equal(cost.figures().built_in_rm, 0);
+  box(panel, "value_at_risk_rm").value = "40000";
+  assert.equal(cost.figures().built_in_rm, 20000);
 });

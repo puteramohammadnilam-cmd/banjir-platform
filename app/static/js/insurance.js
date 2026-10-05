@@ -18,12 +18,19 @@ const MAX_QUOTE_RM = 10_000_000;
 const link = (href, text) => h("a", { href, target: "_blank", rel: "noopener noreferrer" }, text);
 const card = (heading, ...body) => h("section", { class: "surface insurance-card" }, h("h2", {}, heading), ...body);
 
-/** The model's figures from a Flood cost estimate: the yearly floor and the biggest flood's loss with its chance. */
+/** What a shop's own fire or flood cover is about in one flood: its total without the vehicles parked there (motor
+ *  cover) and the workers' pay (their loss), which Flood cost may also count. */
+const shopLoss = (flood) => flood.total_rm - (flood.vehicles_rm ?? 0) - (flood.wages_rm ?? 0);
+
+/** The model's figures from a Flood cost estimate, the shop's own: the yearly floor and the biggest flood's loss with
+ *  its chance; leftOut when vehicles or workers' pay were counted there and are not here. */
 export function riskFigures(result) {
   if (!result) return null;
   const rp = SCENARIOS.at(-1);
-  return { yearly: result.expected_yearly_loss_rm, bad: result.per_flood[rp].total_rm, rp,
-    pct: Math.round(chanceWithin(Number(rp), CHANCE_YEARS) * 100) };
+  const flood = result.per_flood[rp];
+  return { yearly: result.expected_yearly_shop_loss_rm ?? result.expected_yearly_loss_rm, bad: shopLoss(flood), rp,
+    pct: Math.round(chanceWithin(Number(rp), CHANCE_YEARS) * 100),
+    leftOut: SCENARIOS.some((key) => shopLoss(result.per_flood[key]) !== result.per_flood[key].total_rm) };
 }
 
 /** Rows to set side by side: the quote (when typed) and the model's two figures, each with its share of the largest. */
@@ -53,8 +60,10 @@ function riskBody(estimate, figures, goto) {
     h("div", { class: "insurance-figures" },
       h("p", {}, h("span", { class: "kpi-figure" }, t("cost.atLeast", { rm: ringgit(figures.yearly) })), h("span", { class: "kpi-label" }, t("cost.yearly"))),
       h("p", {}, h("span", { class: "kpi-figure" }, ringgit(figures.bad)), h("span", { class: "kpi-label" }, t("insurance.badLabel", { rp: figures.rp, pct: figures.pct })))),
-    h("p", { class: "hint" }, t("insurance.basis")), change,
-  ];
+    estimate.assumed && h("p", { class: "cost-first-look" }, t("insurance.assumed")),
+    h("p", { class: "hint" }, t(estimate.assumed ? "insurance.basisAssumed" : "insurance.basis")),
+    figures.leftOut && h("p", { class: "hint" }, t("insurance.leftOut")), change,
+  ].filter(Boolean);
 }
 
 /** The quote box and its comparison; the comparison redraws as the owner types. */
@@ -102,6 +111,7 @@ export function createInsurance(panel, { goto, onFind = () => {}, onCheckPoint =
       shown = { place, estimate };
       for (const part of [head, body, fixed]) part.hidden = !place;
       if (!place) {
+        head.replaceChildren();   // so the tab's heading to focus is the empty state's, not a hidden old one
         if (!empty.children.length) empty.append(emptyState({ kicker: t("tab.insurance"), onFind, onCheckPoint }));
         return;
       }

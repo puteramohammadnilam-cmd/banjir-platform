@@ -72,7 +72,6 @@ MAPS_SPENT = "Enough Google lookups for one question. Answer with what you have.
 ESTIMATE_MAX = {"value_at_risk_rm": 50_000_000, "floor_height_cm": 300, "daily_takings_rm": 1_000_000,
                 "closed_days": 365, "raise_cm": 300, "measure_cost_rm": 50_000_000,
                 "built_in_rm": 50_000_000, "vehicles_rm": 20_000_000, "unpaid_workers": 1_000}
-WIDER = ("built_in_rm", "vehicles_rm", "unpaid_workers")
 
 
 @dataclass(frozen=True)
@@ -456,6 +455,9 @@ def estimate_for(place: dict, value_at_risk_rm: float, shop_size: str = "", floo
         size = ""   # the owner's own value wins, so do not echo a size that was not used
     found = costs.estimate(place["depth_m"], shop_size=size, **given, extra_rm=_wider_by_flood(place["depth_m"], given, wider))
     found["basis"] = {**found["basis"], **wider_costs.basis(**wider)}
+    # what a shop's own fire or flood cover is about: without the vehicles (motor cover) and the workers' pay (theirs)
+    found["expected_yearly_shop_loss_rm"] = round(costs.expected_yearly(
+        {rp: flood["total_rm"] - flood.get("vehicles_rm", 0) - flood.get("wages_rm", 0) for rp, flood in found["per_flood"].items()}))
     return {"place": place["id"], "business": _clean(place["name"]), "inputs": {**given, **wider, "shop_size": size},
             **found, "method": costs.METHOD, "limits": f"{costs.LIMITS} {LIMITS}"}
 
@@ -480,7 +482,8 @@ def _figures_error(given: dict, size: str | None) -> str | None:
         if not (is_number and 0 <= value <= ESTIMATE_MAX[name]):
             return f"{name} must be a number from 0 to {ESTIMATE_MAX[name]}."
     value, raise_cm, measure = given["value_at_risk_rm"], given["raise_cm"], given["measure_cost_rm"]
-    if 0 < value < 1 or 0 < measure < 1:
+    ringgit = (value, measure, given.get("built_in_rm", 0), given.get("vehicles_rm", 0))
+    if any(0 < amount < 1 for amount in ringgit):
         return "Ringgit amounts must be 0 or at least 1."
     if (raise_cm > 0) != (measure > 0):
         return "To test a measure give both raise_cm and measure_cost_rm, or 0 for both."
@@ -490,8 +493,6 @@ def _figures_error(given: dict, size: str | None) -> str | None:
     if given.get("built_in_rm") and not value:
         return ("Built-in works can only be added to the owner's own value of stock and equipment: the shop-size "
                 "figure already counts the building.")
-    if 0 < given.get("built_in_rm", 0) < 1 or 0 < given.get("vehicles_rm", 0) < 1:
-        return "Ringgit amounts must be 0 or at least 1."
     if not (value or size or given["daily_takings_rm"] * given["closed_days"]):
         return "Nothing to estimate from. Ask for the value of stock and equipment, or the shop size."
     return None

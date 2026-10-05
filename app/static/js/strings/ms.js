@@ -547,13 +547,13 @@ export default Object.freeze({
   "footer.heading": "Tentang data ini",
   "footer.testBuild": "Ini versi ujian.",
   "footer.model": "Kedalaman air diambil daripada model komputer global dalam petak 90 m. Ia bukan peta banjir rasmi, bukan ramalan, dan bukan rekod banjir sebenar. Perniagaan ialah titik pada peta awam dan belum disemak di lapangan.",
-  "footer.credits": "Kedalaman banjir: peta bahaya banjir sungai global JRC Suruhanjaya Eropah v2.1, CC BY 4.0. Ketinggian tanah: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Perniagaan, jalan, sungai dan peta asas: © penyumbang OpenStreetMap, ODbL. Indeks harga: Bank Dunia, CC BY 4.0. Ramalan hujan: Google Weather. Buka atau tutup: Google Maps. Berita: Gemini dengan Google Search.",
+  "footer.credits": "Kedalaman banjir: peta bahaya banjir sungai global JRC Suruhanjaya Eropah v2.1, CC BY 4.0. Ketinggian tanah: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Perniagaan, jalan, sungai dan peta asas: © penyumbang OpenStreetMap, ODbL. Indeks harga: Bank Dunia, CC BY 4.0. Ramalan hujan: Google Weather. Buka atau tutup: Google Maps. Berita: Gemini dengan Google Search. Kerosakan banjir kereta: US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), domain awam.",
   "footer.privacy": "Jubin peta datang daripada pelayan OpenStreetMap, yang melihat bahagian peta yang anda lihat; pada skala jalan, iaitu tempat peta beralih apabila anda berkongsi lokasi, itu dalam lingkungan kira-kira 300 m. Jika anda bertanya kepada pembantu AI tentang hujan, Google Weather mendapat titik tengah kawasan itu, atau bagi titik yang anda pilih di luar kawasan yang disenaraikan, petak 90 m titik itu yang dibundarkan kepada kira-kira 1 km. Bagi titik yang anda pilih, Gemini mendapat nama kawasan, kedalaman air banjir dan pusat pemindahan banjir terdekat berserta jaraknya, tetapi tidak pernah mendapat koordinatnya. Foto dan rakaman suara dihantar kepada Gemini untuk dibaca dan tidak disimpan oleh alat ini. Bahasa dan kedai yang anda pilih hanya disimpan dalam pelayar ini.",
   "footer.forecasts": "Ramalan banjir sungai:",
   "footer.levels": ". Paras sungai semasa dan amaran:",
   "footer.emergency": ". Dalam kecemasan, hubungi 999.",
   "footer.more": "Lagi tentang data, privasi dan kos",
-  "footer.money": "Angka ringgit ialah anggaran kasar, bukan penilaian atau angka insurans: daripada nilai yang anda berikan, lengkung kerosakan seluruh Asia (JRC 2017) dan garis panduan kerosakan banjir JPS 2003.",
+  "footer.money": "Angka ringgit ialah anggaran kasar, bukan penilaian atau angka insurans: daripada nilai yang anda berikan, lengkung kerosakan seluruh Asia (JRC 2017) dan garis panduan kerosakan banjir JPS 2003. Untuk kenderaan di kedai, lengkung kerosakan kereta Amerika Syarikat (US Army Corps of Engineers, 2009); untuk gaji pekerja, gaji minimum (Perintah Gaji Minimum 2024).",
 
   // ---------- at-a-glance facts, cost tags and folded notes ----------
   "fact.more": "Cara membaca ini",
@@ -731,4 +731,11 @@ export default Object.freeze({
   "cost.splitVehicles": "Kenderaan {rm}",
   "cost.splitWages": "Gaji pekerja {rm}",
   "cost.colOther": "Lain-lain",
+  // ---------- review: first look on Insurance, wider bases ----------
+  "insurance.assumed": "Gambaran awal: angka ini untuk kedai sederhana biasa, bukan jawapan anda. Ubah jawapan anda supaya sesuai dengan kedai anda sebelum membandingkan harga.",
+  "insurance.basisAssumed": "Satu model, bukan penilaian kedai anda.",
+  "insurance.leftOut": "Kenderaan dan gaji pekerja daripada Kos banjir tidak dikira di sini: perlindungan kebakaran atau banjir kedai tidak membayarnya, dan kereta memerlukan perlindungan motornya sendiri.",
+  "cost.basisBuiltIn": "Ubah suai dan binaan tetap: {text}.",
+  "cost.basisVehicles": "Kenderaan: {text}.",
+  "cost.basisWages": "Gaji pekerja: {text}.",
 });

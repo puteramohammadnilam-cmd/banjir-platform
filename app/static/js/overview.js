@@ -192,8 +192,6 @@ export function createCityDirectory(parts, index, { area, sections, ...ways }) {
   return directory;
 }
 
-/** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
- *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
 /** The area's data notes in the Reference tab, open to read, each under its short heading; the card is hidden when the
  *  area has none. */
 function listNotes(element, card, notes) {
@@ -202,6 +200,8 @@ function listNotes(element, card, notes) {
   card.hidden = !shown.length;
 }
 
+/** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
+ *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
 function foldNotes(element, notes) {
   const shown = notes.filter(([, text]) => text);
   element.replaceChildren(...shown.map(([key, text]) => h("details", { class: "area-note" }, h("summary", {}, t(key)), h("p", { class: "fineprint" }, text))));

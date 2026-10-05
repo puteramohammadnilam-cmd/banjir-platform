@@ -158,15 +158,7 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 .about > p { max-width: 110ch; }   /* readable lines on a wide page */
 .about h2 { font-size: var(--text-sm); color: var(--ink); }
 /* the rest of the footer folds away: a full-width row that reads as a control, with a plus that turns when open */
-.about-more { margin-top: var(--space-2); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); }
-.about-more summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 44px; padding: var(--space-2) var(--space-4); border-radius: inherit; font-size: var(--text-sm); font-weight: 700; color: var(--brand); cursor: pointer; list-style: none; }
-.about-more summary::-webkit-details-marker { display: none; }
-.about-more summary::after { content: "+" / ""; flex: none; width: 1.5rem; text-align: center; font-size: var(--text-xl); line-height: 1; transition: transform var(--duration-normal) var(--ease-out); }
-.about-more[open] summary::after { transform: rotate(45deg); }
-.about-more summary:hover { background: var(--brand-wash); }
-.about-more[open] summary { border-bottom: 1px solid var(--line); border-radius: var(--radius-md) var(--radius-md) 0 0; }
-.about-more > p { padding: var(--space-3) var(--space-4) 0; }
-.about-more > p:last-child { padding-bottom: var(--space-4); }
+[data-goto].btn-link { min-height: 44px; }   /* the footer and map links to Reference: a full touch target */
 
 /* ---------- phones: compact header, tabs become a bottom bar ---------- */
 @media (max-width: 720px) {

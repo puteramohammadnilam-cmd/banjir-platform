@@ -60,7 +60,8 @@ INDIRECT_DEFAULT = ("30% of the direct damage, the JPS guideline's usual allowan
                     "cleaning up and lost income (it gives 20% to 45%)")
 
 METHOD = (
-    "Loss in each flood = direct damage + indirect loss; see 'basis' for how each was worked out here. "
+    "Loss in each flood = direct damage + indirect loss, plus any renovation and built-ins, vehicles parked at the "
+    "shop and workers' unpaid pay the owner gave; see 'basis' for how each was worked out here. "
     "Yearly loss = area under the loss against yearly-chance curve for the 1 in 10, 20 and 50 year floods, "
     "with every flood rarer than 1 in 50 years counted at the 1 in 50 loss. "
     "Ten-year loss = yearly loss discounted at 4% a year, the rate used for flood mitigation cost-benefit "

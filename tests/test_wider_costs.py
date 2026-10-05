@@ -75,3 +75,36 @@ def test_costs_estimate_takes_extra_losses_by_flood():
     plain = costs.estimate(DEPTHS, value_at_risk_rm=40_000)
     found = costs.estimate(DEPTHS, value_at_risk_rm=40_000, extra_rm=extra)
     assert [found["per_flood"][rp]["total_rm"] - plain["per_flood"][rp]["total_rm"] for rp in DEPTHS] == [100, 200, 300]
+
+
+def test_built_ins_use_the_shops_own_floor_and_a_measure_still_ignores_them():
+    figures = {"floor_height_cm": 20, "raise_cm": 50, "measure_cost_rm": 1_000}
+    plain = floodtools.estimate_for(WET, 40_000, **figures)
+    wider = floodtools.estimate_for(WET, 40_000, **figures, built_in_rm=20_000)
+    for rp, depth in WET["depth_m"].items():
+        above = max(0.0, (depth or 0.0) - 0.2)
+        assert wider["per_flood"][rp]["built_in_rm"] == round(20_000 * costs.damage_share(above))
+    assert wider["measure"]["benefit_present_value_rm"] == plain["measure"]["benefit_present_value_rm"]
+
+
+def test_the_shops_own_yearly_loss_leaves_out_vehicles_and_workers_pay():
+    shop_only = floodtools.estimate_for(WET, 40_000, built_in_rm=10_000)
+    wider = floodtools.estimate_for(WET, 40_000, built_in_rm=10_000, vehicles_rm=60_000, unpaid_workers=2, closed_days=7)
+    assert wider["expected_yearly_shop_loss_rm"] == shop_only["expected_yearly_loss_rm"]
+    assert wider["expected_yearly_loss_rm"] > wider["expected_yearly_shop_loss_rm"]
+
+
+def test_the_estimate_route_takes_the_wider_figures_and_words_a_bad_one_for_people():
+    from fastapi.testclient import TestClient
+    from app import main
+    client = TestClient(main.app)
+    sent = {"place": WET["id"], "value_at_risk_rm": 40_000, "closed_days": 7,
+            "built_in_rm": 10_000, "vehicles_rm": 60_000, "unpaid_workers": 2}
+    answer = client.post("/api/estimate", json=sent)
+    assert answer.status_code == 200
+    assert answer.json()["data"]["per_flood"]["50"]["vehicles_rm"] > 0
+    bad = client.post("/api/estimate", json={**sent, "vehicles_rm": 0.5})
+    assert bad.status_code == 422
+    too_many = client.post("/api/estimate", json={**sent, "unpaid_workers": 5_000})
+    assert too_many.status_code == 422
+    assert "The number of workers must be" in too_many.text

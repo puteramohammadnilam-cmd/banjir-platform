@@ -36,7 +36,7 @@
 /* phones and tablets: one column, in the page's order (index.html) */
 .map-surface, .map-extras, .overview-side { margin-bottom: var(--space-4); }
 .map-extras { display: grid; gap: var(--space-3); align-content: start; }
-.map-extras > .map-controls, .map-extras > .index-method { margin-top: 0; }
+.map-extras > .map-controls { margin-top: 0; }
 .map-extras:not(:has(> :not(h2):not([hidden]))) { display: none; }   /* nothing to say about this map: no empty card */
 .map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
 #map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
@@ -695,3 +695,4 @@ body[data-tab="overview"] .finder { display: none; }
 .insurance-questions li::marker { font-weight: 800; color: var(--brand); }
 .insurance-example { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--line-strong); font-size: var(--text-sm); color: var(--ink-2); }
 .insurance-card > .btn { justify-self: start; }
+.cost-first-look { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: var(--text-sm); font-weight: 600; }
