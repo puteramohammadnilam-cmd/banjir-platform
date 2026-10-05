@@ -33,7 +33,11 @@
 .kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-2); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
 
 .overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
-.overview-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+/* phones and tablets: one column, in the page's order (index.html) */
+.map-surface, .map-extras, .overview-side { margin-bottom: var(--space-4); }
+.map-extras { display: grid; gap: var(--space-3); align-content: start; }
+.map-extras > .map-controls, .map-extras > .index-method { margin-top: 0; }
+.map-extras:not(:has(> :not(h2):not([hidden]))) { display: none; }   /* nothing to say about this map: no empty card */
 .map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
 #map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
 .leaflet-container { font-family: var(--font); }
@@ -211,8 +215,43 @@
 }
 @media (max-width: 360px) { .section-table tbody th { white-space: normal; } }   /* 320 px: a long name wraps, not the table */
 
+/* a laptop: the map card, its notes under it, beside the past floods and the area summary */
 @media (min-width: 1040px) {
-  .overview-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
+  #panel-overview {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
+    grid-template-areas: "hero hero" "scope scope" "kpis kpis" "map side" "extras side" "sections sections" "dir dir";
+  }
+  #panel-overview > * { margin: 0; }   /* the grid's gap spaces them */
+  .finder-hero { grid-area: hero; }
+  .scope-bar { grid-area: scope; }
+  .kpis { grid-area: kpis; }
+  .map-surface { grid-area: map; }
+  .map-extras { grid-area: extras; }
+  .overview-side { grid-area: side; }
+  .sections-surface { grid-area: sections; }
+  .directory { grid-area: dir; }
+}
+/* a wide screen, tall enough for a big map (a desktop monitor, a projector, a larger laptop): map first. The map card
+   fills the left of the page and stays in view under the tab bar while the search, the figures, the map's notes and
+   switches, the records and the lists scroll beside it. It is as tall as the window below the tab bar, so at the very
+   top of the page the foot of its key starts just below the fold. Its key is compact, and the panel of aim mode floats
+   over the map, as on a phone on its side. A shorter screen keeps the laptop layout, where the map is bigger */
+@media (min-width: 1280px) and (min-height: 860px) {
+  #panel-overview {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: var(--space-5);
+    grid-template-areas: "map hero" "map scope" "map kpis" "map extras" "map side" "map sections" "map dir";
+  }
+  .map-surface { position: sticky; top: 4rem; display: flex; flex-direction: column; height: calc(100vh - 5rem); }
+  .map-surface .surface-head { flex: none; }
+  .map-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .map-stage #map { flex: 1 1 auto; height: auto; min-height: 18rem; }
+  .map-stage .legend, .map-stage .squares-status { flex: none; }
+  .map-stage .legend { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-top: var(--space-3); }
+  .map-stage .legend-heading { margin-bottom: var(--space-1); }
+  .map-stage .legend-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+  .map-stage .aim-panel { position: absolute; z-index: 900; top: var(--space-2); right: var(--space-2); width: min(20rem, 45%); max-height: calc(100% - 2 * var(--space-2)); margin: 0; overflow-y: auto; box-shadow: var(--shadow-md); }
+  .kpis, .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* four tiles in a narrower column */
+  .kpis[data-tiles="3"] .kpi-hero { grid-column: 1 / -1; }
 }
 @media (max-width: 900px) {
   .kpis, .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -323,7 +362,8 @@
 .figure-box .kpi-note { color: inherit; opacity: 0.75; }
 .flat-line { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-left: 3px solid var(--brand); border-radius: var(--radius-sm); background: var(--brand-wash); }
 .flat-line .fineprint { margin-top: var(--space-1); }
-.table-scroll { overflow-x: auto; }   /* the table scrolls inside its card on narrow screens, not the page */
+.table-scroll { position: relative; overflow-x: auto; }   /* the table scrolls inside its card on narrow screens, not the page; relative,
+   so a visually hidden line in it stays inside its box and adds no blank scroll under the page */
 .loss-table.is-flat { min-width: 0; }   /* three columns fit a phone; the five of an own value scroll */
 .loss-table { width: 100%; min-width: 26rem; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .loss-table th, .loss-table td { padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--line); text-align: right; }

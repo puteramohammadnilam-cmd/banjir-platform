@@ -60,6 +60,7 @@ export default Object.freeze({
   "kind.shop": "Kedai",
 
   // ---------- Area overview: index.html ----------
+  "overview.mapExtrasHeading": "Tentang peta ini",
   "overview.mapHeading": "Model banjir",
   "overview.mapLead": "Kedalaman air dalam model di setiap perniagaan. Ketik titik untuk butiran.",
   "overview.mapLabelStatic": "Peta kedalaman banjir dalam model di setiap perniagaan",

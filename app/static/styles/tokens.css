@@ -57,7 +57,7 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --gutter: clamp(1rem, 0.6rem + 1.6vw, 2rem);
-  --content-max: 76rem;
+  --content-max: 100rem;   /* 1600 px: the page uses a wide screen, the map-first overview most of all */
 
   --radius-sm: 8px;
   --radius-md: 12px;

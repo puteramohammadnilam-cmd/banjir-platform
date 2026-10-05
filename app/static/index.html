@@ -111,34 +111,35 @@
       </section>
       <div class="scope-bar" id="scope"></div>
       <div class="kpis" id="kpis" aria-live="polite"></div>
-      <div class="overview-grid">
-        <section class="surface map-surface" aria-labelledby="map-heading">
-          <div class="surface-head">
-            <div>
-              <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
-              <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
-            </div>
-            <div class="scenario-slot" data-scenario></div>
+      <section class="surface map-surface" aria-labelledby="map-heading">
+        <div class="surface-head">
+          <div>
+            <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
+            <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
           </div>
-          <div class="map-stage">
-            <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
-            <div class="map-controls" id="map-controls" hidden></div>
-            <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
-            <p class="fineprint area-note" id="map-note" hidden></p>
-            <details class="about-more index-method" id="index-method" hidden>
-              <summary data-i18n="flash.methodHeading">How these are worked out</summary>
-              <div class="index-method-body" id="index-method-body"></div>
-            </details>
-          </div>
-        </section>
-        <div class="overview-side">
-          <section class="surface" id="history" aria-labelledby="history-heading"></section>
-          <section class="surface area-print" aria-labelledby="area-print-heading">
-            <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
-            <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
-            <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
-          </section>
+          <div class="scenario-slot" data-scenario></div>
         </div>
+        <div class="map-stage">
+          <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
+          <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
+        </div>
+      </section>
+      <section class="surface map-extras" aria-labelledby="map-extras-heading">
+        <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
+        <div class="map-controls" id="map-controls" hidden></div>
+        <p class="fineprint area-note" id="map-note" hidden></p>
+        <details class="about-more index-method" id="index-method" hidden>
+          <summary data-i18n="flash.methodHeading">How these are worked out</summary>
+          <div class="index-method-body" id="index-method-body"></div>
+        </details>
+      </section>
+      <div class="overview-side">
+        <section class="surface" id="history" aria-labelledby="history-heading"></section>
+        <section class="surface area-print" aria-labelledby="area-print-heading">
+          <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
+          <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
+          <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
+        </section>
       </div>
       <section class="surface sections-surface" id="sections-surface" aria-labelledby="sections-heading" hidden>
         <h2 id="sections-heading"></h2>

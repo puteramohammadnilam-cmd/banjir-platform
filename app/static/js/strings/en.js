@@ -59,6 +59,7 @@ export default Object.freeze({
   "kind.shop": "Shop",
 
   // ---------- Area overview: index.html ----------
+  "overview.mapExtrasHeading": "About this map",
   "overview.mapHeading": "Flood model",
   "overview.mapLead": "Modelled water depth at each business. Tap a dot for details.",
   "overview.mapLabelStatic": "Map with modelled flood depth at each business",
