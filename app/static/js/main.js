@@ -2,12 +2,12 @@ import * as api from "./api.js";
 import { createBusiness } from "./card.js";
 import { createChat } from "./chat.js";
 import { createChatWidget } from "./chat-widget.js";
-import { createCost } from "./cost.js";
+import { createCost, estimateState, needsFirstLook } from "./cost.js";
 import { h } from "./dom.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
-import { createPlanCard } from "./plan.js";
+import { createPlanCard, planFigures } from "./plan.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
@@ -203,15 +203,6 @@ async function sendStock(app, file, floorCm) {
   }
 }
 
-/** The figures the plan is written from: the owner's last estimate for this place, else the floor from the shop-front
- *  photo, else none. */
-function planFigures(state, id) {
-  const inputs = state.estimates[id]?.result?.inputs;
-  if (inputs) return inputs;
-  const photo = state.photos[id]?.estimate;
-  return photo?.is_shop_front ? { floor_height_cm: photo.floor_height_cm } : {};
-}
-
 async function writePlan(app, language) {
   const { store } = app;
   const id = store.state.placeKey;
@@ -241,17 +232,26 @@ function printSheet(sheet) {
   window.print();
 }
 
-async function sendEstimate(app, figures) {
+/** Work out the cost for the place on show. isAssumed marks the first look the tab works out by itself (estimateState). */
+async function sendEstimate(app, figures, { isAssumed = false } = {}) {
   const { store } = app;
   const id = store.state.placeKey;
   const setEstimate = (estimate) => store.update({ estimates: { ...store.state.estimates, [id]: estimate } });
-  const shown = store.state.estimates[id]?.result;
-  setEstimate({ busy: true, result: shown });
+  const before = store.state.estimates[id];
+  setEstimate(estimateState.busy(before, isAssumed));
   try {
-    setEstimate({ result: await api.estimate({ place: id, ...figures }) });
+    setEstimate(estimateState.done(await api.estimate({ place: id, ...figures }), isAssumed));
   } catch (error) {
-    setEstimate({ error: error.message, result: shown });
+    setEstimate(estimateState.failed(before, error.message, isAssumed));
   }
+}
+
+/** Flood cost opens with an answer: the first time a place is on show there, the form's figures as they stand (a
+ *  typical medium shop unless the owner has typed others) are worked out as a first look. */
+function estimateOnOpen(app, views, state, place) {
+  if (!needsFirstLook(state, place)) return;
+  const figures = views.cost.figures();
+  if (figures) sendEstimate(app, figures, { isAssumed: true });
 }
 
 /** How Google Maps lists a business. Never for a point: it is not a business, and it is not sent to Google. */
@@ -456,6 +456,7 @@ function render(app, views, state, previous) {
     window.scrollTo({ top: 0 });
   }
   history.replaceState(null, "", linkFor(app, state));
+  estimateOnOpen(app, views, state, place);   // last: it updates the store, which draws again
 }
 
 /** The area's name in the header. It comes from the area's config: the page itself names no place. */

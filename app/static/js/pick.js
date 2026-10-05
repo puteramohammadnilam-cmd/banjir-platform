@@ -51,7 +51,7 @@ export function initialState(url, start, linked) {
     planLanguage: lang,   // the plan is written in the page's language unless the owner picks the other
     compare: [],   // ids of the places side by side on My business, oldest first (compare.js)
     listings: {},  // by business id: { busy } | { configured, place } | { error }
-    estimates: {}, // by place id: { busy, result } | { result } | { error, result }
+    estimates: {}, // by place id: cost.js estimateState, { busy, result, assumed } | { result, assumed } | { error, result, assumed }
     rain: start.status.maps_ready ? { busy: true, configured: true } : { configured: false },
   };   // aim mode, the mode in which a point is picked, is the Area overview's own and lives in pin.js
 }

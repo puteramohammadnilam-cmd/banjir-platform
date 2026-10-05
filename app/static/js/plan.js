@@ -155,3 +155,12 @@ export function createPlanCard({ onWrite, onPrint, onLanguage, isReady = true })
     },
   };
 }
+
+/** The figures the plan is written from: the owner's last estimate for this place, else the floor from the shop-front
+ *  photo, else none. The first look Flood cost works out by itself (assumed) is not the owner's, so it is left out. */
+export function planFigures(state, id) {
+  const estimate = state.estimates[id];
+  if (estimate?.result?.inputs && !estimate.assumed) return estimate.result.inputs;
+  const photo = state.photos[id]?.estimate;
+  return photo?.is_shop_front ? { floor_height_cm: photo.floor_height_cm } : {};
+}

@@ -58,3 +58,16 @@ test("no costly flood at all: no chance figure to show", () => {
   const dry = result({ 10: flood(0, 0, 0, 0), 20: flood(0, 0, 0, 0), 50: flood(0, 0, 0, 0) });
   assert.match(text(results(dry)), /no flood in the model costs this shop money/);
 });
+
+test("the first look says it is one, and which shop size's typical figure it used", () => {
+  const shown = results({ ...FLAT, inputs: { shop_size: "medium" } }, { isAssumed: true });
+  assert.equal(shown[0].getAttribute("class"), "cost-basis is-first-look");
+  assert.equal(shown[0].textContent, "For a medium shop, using the typical figure. This is a first look: change the figures and press Estimate the cost to fit your own shop.");
+});
+
+test("an answer the owner pressed for names the shop size, and says nothing for their own value", () => {
+  assert.equal(results({ ...FLAT, inputs: { shop_size: "complex" } })[0].textContent,
+    "For a large complex, such as a mall or hypermarket, using the typical figure.");
+  const own = results({ ...OWN, inputs: { shop_size: "", value_at_risk_rm: 25000 } });
+  assert.ok(!own.some((node) => /cost-basis/.test(node.getAttribute("class") ?? "")));
+});

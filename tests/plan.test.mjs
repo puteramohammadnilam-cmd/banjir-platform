@@ -255,3 +255,13 @@ test("with the AI on there is no such line and the button works", () => {
   assert.equal(button("Write my flood plan").disabled, false);
   assert.doesNotMatch(card.node.textContent, /switched off/);
 });
+
+import { planFigures } from "../app/static/js/plan.js";
+
+test("the plan uses the owner's own estimate, never the first look the page worked out by itself", () => {
+  const inputs = { shop_size: "medium", floor_height_cm: 0 };
+  const photos = { "node-1": { estimate: { is_shop_front: true, floor_height_cm: 40 } } };
+  assert.deepEqual(planFigures({ estimates: { "node-1": { result: { inputs } } }, photos }, "node-1"), inputs);
+  assert.deepEqual(planFigures({ estimates: { "node-1": { result: { inputs }, assumed: true } }, photos }, "node-1"), { floor_height_cm: 40 });
+  assert.deepEqual(planFigures({ estimates: { "node-1": { assumed: true } }, photos: {} }, "node-1"), {});
+});

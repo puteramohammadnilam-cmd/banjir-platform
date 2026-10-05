@@ -1,5 +1,5 @@
 // The "Flood cost" tab: the owner's own figures in, a rough ringgit loss out. The sums run on the server (app/costs.py).
-import { CHANCE_YEARS, SCENARIOS, chanceWithin, depthText, h, icon, ringgit } from "./dom.js";
+import { CHANCE_YEARS, SCENARIOS, band, chanceWithin, depthText, h, icon, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
 import { DEFAULT_RP, emptyState } from "./pick.js";
 import { createStockCard } from "./stock.js";
@@ -25,7 +25,7 @@ const isFlat = (result) => SCENARIOS.every((rp) => result.per_flood[rp].damage_s
 
 function lossTable(result, flat) {
   const cols = flat ? ["cost.colSize", "cost.colWater", "cost.colTotal"] : ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"];
-  return h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
+  return h("div", { class: "table-scroll" }, h("table", { class: `loss-table${flat ? " is-flat" : ""}` },
     h("caption", { class: "visually-hidden" }, t("cost.caption")),
     h("thead", {}, h("tr", {}, cols.map((key) => h("th", { scope: "col" }, t(key))))),
     h("tbody", {}, SCENARIOS.map((rp) => {
@@ -72,13 +72,25 @@ function verdict(measure, years) {
     h("p", {}, saving));
 }
 
-export function results(result) {
+const lowerFirst = (text) => text.charAt(0).toLocaleLowerCase() + text.slice(1);
+
+/** What the answer was worked out from: a first look the page made by itself, and the shop size whose typical figure
+ *  it used. Null when it was the owner's own value, pressed for. */
+function basisLine(inputs, isAssumed) {
+  const size = SIZES.find(([key]) => key === inputs?.shop_size);
+  const words = [size && t("cost.forSize", { size: lowerFirst(t(size[1])) }), isAssumed && t("cost.firstLook")].filter(Boolean);
+  return words.length ? h("p", { class: `cost-basis${isAssumed ? " is-first-look" : ""}` }, words.join(" ")) : null;
+}
+
+/** The answer, or the empty state with none. isAssumed marks the first look the tab works out when it opens. */
+export function results(result, { isAssumed = false } = {}) {
   if (!result) {
     return [h("div", { class: "cost-empty" }, icon("cash"), h("strong", {}, t("cost.emptyTitle")), h("p", {}, t("cost.emptyNote")))];
   }
   const { years, discount_rate: rate, present_value_rm: overYears } = result.loss_over_years;
   const flat = isFlat(result);
   return [
+    basisLine(result.inputs, isAssumed),
     h("div", { class: "headline-figures" },
       // floods more frequent than 1 in 10 years are not in the model (costs.expected_yearly), so this is a floor
       h("div", { class: "figure-box is-key" }, h("p", { class: "kpi-figure" }, t("cost.atLeast", { rm: ringgit(result.expected_yearly_loss_rm) })),
@@ -101,8 +113,51 @@ const number = (field) => Number(field.input.value || 0);
 /** The tab's heading: a point is a 90 m square someone picked, so it has no name. */
 export const costTitle = (place) => (place.is_point ? t("cost.titlePoint") : t("cost.titleBusiness", { name: place.name }));
 
-const depthsLine = (place) =>
-  t("cost.depths", { list: SCENARIOS.map((rp) => t("cost.depthItem", { depth: depthText(place.depth_m[rp]), rp })).join(", ") });
+/** The modelled water at the street in each flood size, as chips in the map's depth colours. */
+function depthChips(place) {
+  const chip = (rp) => {
+    const level = band(place.depth_m[rp]);
+    return h("span", { class: `depth-chip${level ? ` band-${level}` : ""}` }, t("cost.depthChip", { rp, depth: depthText(place.depth_m[rp]) }));
+  };
+  return [h("span", { class: "cost-depths-label" }, t("cost.depthsLabel")), ...SCENARIOS.map(chip)];
+}
+
+/** After the owner presses Estimate the answer may be off screen (on a phone it sits above the form): bring it in. */
+function bringIntoView(node) {
+  const top = node.getBoundingClientRect?.().top;
+  if (top == null || (top >= 0 && top < globalThis.innerHeight)) return;
+  const isCalm = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  node.scrollIntoView?.({ block: "start", behavior: isCalm ? "auto" : "smooth" });
+}
+
+/** One place's estimate as main.js keeps it. `assumed` marks the first look the tab works out by itself when it opens:
+ *  the flood plan leaves it out (plan.planFigures), and if it fails nothing is said, as the owner asked for nothing. */
+export const estimateState = {
+  busy: (before, isAssumed) => ({ busy: true, result: before?.result, assumed: Boolean(isAssumed || before?.assumed) }),
+  done: (result, isAssumed) => ({ result, assumed: isAssumed }),
+  failed: (before, message, isAssumed) =>
+    (isAssumed ? { assumed: true } : { error: message, result: before?.result, assumed: Boolean(before?.assumed) }),
+};
+
+/** Whether to work out a first look now: Flood cost is on show with a place that has no estimate yet. */
+export const needsFirstLook = (state, place) => state.tab === "cost" && Boolean(place) && !state.estimates[state.placeKey];
+
+/** Whether `next` answers the owner's own press of Estimate: not a first look, and not a failure. */
+export const isOwnAnswer = (previous, next) => Boolean(previous?.busy && next?.result && !next.busy && !next.assumed && !next.error);
+
+/** Draws one place's estimate: the button, the error under the form, and the answer, or a working line while there is
+ *  none yet. An answer to the owner's own press gets a short line for screen readers and is brought into view. */
+function showEstimate({ output, status, submit, error }, estimate, isAnswered) {
+  submit.disabled = Boolean(estimate?.busy);
+  submit.textContent = t(estimate?.busy ? "cost.working" : "cost.submit");
+  if (!estimate?.busy) error.textContent = estimate?.error ?? "";
+  const isWaiting = estimate?.busy && !estimate.result;
+  output.replaceChildren(...(isWaiting ? [h("p", { class: "muted" }, t("cost.working"))]
+    : results(estimate?.result, { isAssumed: Boolean(estimate?.assumed) })));
+  const yearly = isAnswered && t("cost.atLeast", { rm: ringgit(estimate.result.expected_yearly_loss_rm) });
+  status.textContent = yearly ? `${t("cost.output")}: ${yearly} ${t("cost.yearly")}` : "";
+  if (isAnswered) bringIntoView(output);
+}
 
 /** The form's inputs, built once: the figures, the shop size choice and the optional measure, with the error line and
  *  the submit button. */
@@ -219,21 +274,43 @@ function useStockValue(form, fields, value) {
   fields.numbers.value.input.focus();
 }
 
+/** The tab's heading: the title, the modelled water as chips, and a line only screen readers get, saying when the
+ *  owner's estimate is in. The answer itself is not a live region: a first look on every place would be read out whole. */
+function buildHead() {
+  const title = h("h1", { class: "view-title" });
+  const depths = h("p", { class: "cost-depths" });
+  const status = h("p", { class: "visually-hidden", role: "status" });
+  return { title, depths, status, node: h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths, status) };
+}
+
+/** The floor from the shop-front photo goes in the form, unless the owner has typed their own for this place. */
+function useFloorFromPhoto({ numbers, floorNote }, photoFloorCm) {
+  const { input } = numbers.floor;
+  if (photoFloorCm == null || input.dataset.touched || input.value === String(photoFloorCm)) return;
+  input.value = String(photoFloorCm);
+  floorNote.textContent = t("cost.fromPhoto");
+}
+
+/** The figures the form would send now, or null while it holds a problem (a required value left empty, a measure half
+ *  given): what the tab works out by itself when it opens on a place. */
+function formFigures(form, fields) {
+  if (form.checkValidity && !form.checkValidity()) return null;
+  return readFigures(form, fields).figures ?? null;
+}
+
 /** Builds the form once. Each business or point keeps its own figures, so switching never mixes them up.
  *  onStockPhoto(file, floorCm) sends a photo of the stock with the floor height in the form; isReady is false when the
  *  build has no Gemini key, which switches the photo off. With no place picked the
  *  tab shows the empty state (pick.js), with onFind and onCheckPoint behind its buttons. */
 export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true }) {
-  const title = h("h1", { class: "view-title" });
-  const depths = h("p", { class: "muted" });
+  const head = buildHead();
   const fields = buildFields();
-  const { numbers, floorNote, error, submit } = fields;
   const form = buildForm(fields, onEstimate);
-  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(numbers.floor)), onUse: (value) => useStockValue(form, fields, value), isReady });
-  const output = h("section", { class: "surface cost-results", "aria-live": "polite", "aria-label": t("cost.output") });
+  const stock = createStockCard({ onPhoto: (file) => file && onStockPhoto(file, number(fields.numbers.floor)), onUse: (value) => useStockValue(form, fields, value), isReady });
+  const output = h("section", { class: "surface cost-results", "aria-label": t("cost.output") });
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
-  const parts = [h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("cost.kicker")), title, depths),
-    stock.node, h("div", { class: "cost-grid" }, form, output)];
+  // the answer comes first, so a phone shows it before the form; views.css puts it beside the form on wide screens
+  const parts = [head.node, h("div", { class: "cost-grid" }, output, form, stock.node)];
   panel.replaceChildren(empty, ...parts);
   const drafts = createDrafts(form, fields);
   let shownId = null;
@@ -246,8 +323,8 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind 
   };
 
   return {
-    /** photoFloorCm fills the floor field unless the owner has typed their own for this place. stockState is the
-     *  place's stock photo ({busy, result, error}) and rp the flood size on show. */
+    /** photoFloorCm fills the floor field unless the owner has typed their own for this place. estimate is the place's
+     *  estimate (estimateState), stockState its stock photo ({busy, result, error}) and rp the flood size on show. */
     render(place, photoFloorCm, estimate, stockState, rp = DEFAULT_RP) {
       showEmpty(!place);
       if (!place) return;
@@ -257,20 +334,17 @@ export function createCost(panel, { onEstimate, onStockPhoto = () => {}, onFind 
         if (shownId) drafts.save(shownId);
         drafts.restore(place.id);
         shownId = place.id;
-        title.textContent = costTitle(place);
-        depths.textContent = depthsLine(place);
+        head.title.textContent = costTitle(place);
+        head.depths.replaceChildren(...depthChips(place));
       }
-      if (photoFloorCm != null && !numbers.floor.input.dataset.touched && numbers.floor.input.value !== String(photoFloorCm)) {
-        numbers.floor.input.value = String(photoFloorCm);
-        floorNote.textContent = t("cost.fromPhoto");
-      }
+      useFloorFromPhoto(fields, photoFloorCm);
       if (isNewPlace || estimate !== shownEstimate) {
+        const isAnswered = !isNewPlace && isOwnAnswer(shownEstimate, estimate);
         shownEstimate = estimate;
-        submit.disabled = Boolean(estimate?.busy);
-        submit.textContent = t(estimate?.busy ? "cost.working" : "cost.submit");
-        if (!estimate?.busy) error.textContent = estimate?.error ?? "";
-        output.replaceChildren(...results(estimate?.result));
+        showEstimate({ output, status: head.status, submit: fields.submit, error: fields.error }, estimate, isAnswered);
       }
     },
+    /** What the form would send now, or null (formFigures). */
+    figures: () => formFigures(form, fields),
   };
 }
