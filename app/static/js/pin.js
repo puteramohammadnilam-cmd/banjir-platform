@@ -87,14 +87,16 @@ function onMove(ctx) {
 }
 
 /** Brings the cross into view, with the panel's last button, and not under the panel when that sticks to the screen
- *  over the map (on a phone). The tab bar is sticky at the top of wide screens, so the map must clear it. */
+ *  over the map (on a phone). The tab bar is sticky at the top of wide screens, so the map must clear it. A panel that
+ *  floats over the map's corner (a wide screen's map-first layout, a phone on its side) never covers the cross, so
+ *  then only the map itself has to be on the screen. */
 function keepCrossInView(ctx) {
   const map = ctx.anchor.getBoundingClientRect();
   const panel = ctx.panel.node.getBoundingClientRect();
   const crossBottom = map.top + map.height / 2 + CROSS_CLEARANCE_PX;
-  if (map.top < TOP_CLEARANCE_PX || panel.bottom > window.innerHeight || crossBottom > panel.top) {
-    ctx.anchor.scrollIntoView({ block: "start" });
-  }
+  const floats = globalThis.getComputedStyle?.(ctx.panel.node).position === "absolute";
+  const isPanelInTheWay = floats ? map.bottom > window.innerHeight : panel.bottom > window.innerHeight || crossBottom > panel.top;
+  if (map.top < TOP_CLEARANCE_PX || isPanelInTheWay) ctx.anchor.scrollIntoView({ block: "start" });
 }
 
 /** Aim mode begins. `opener` is what to give focus back to on Cancel; `at` (a Place) is where to put the cross, for

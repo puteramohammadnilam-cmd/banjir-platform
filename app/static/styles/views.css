@@ -230,23 +230,29 @@
   .overview-side { grid-area: side; }
   .sections-surface { grid-area: sections; }
   .directory { grid-area: dir; }
+  /* the sections table is only on a whole city's page: elsewhere its row goes, so there is no double gap */
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "hero hero" "scope scope" "kpis kpis" "map side" "extras side" "dir dir"; }
 }
 /* a wide screen, tall enough for a big map (a desktop monitor, a projector, a larger laptop): map first. The map card
    fills the left of the page and stays in view under the tab bar while the search, the figures, the map's notes and
    switches, the records and the lists scroll beside it. It is as tall as the window below the tab bar, so at the very
-   top of the page the foot of its key starts just below the fold. Its key is compact, and the panel of aim mode floats
-   over the map, as on a phone on its side. A shorter screen keeps the laptop layout, where the map is bigger */
-@media (min-width: 1280px) and (min-height: 860px) {
+   top of the page the foot of its key starts just below the fold. Its key is compact (a long one scrolls inside the
+   card), and the panel of aim mode floats over the map, as on a phone on its side. A narrower or shorter screen keeps
+   the laptop layout: the right-hand column needs about 620 px for the figures and the sections table, and below
+   860 px tall the laptop's map is the bigger one. The page's order is the phone's, so here the keyboard goes from the
+   search and the area choice on the right to the map on the left, and back to the right for the rest */
+@media (min-width: 1480px) and (min-height: 860px) {
   #panel-overview {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: var(--space-5);
     grid-template-areas: "map hero" "map scope" "map kpis" "map extras" "map side" "map sections" "map dir";
   }
-  .map-surface { position: sticky; top: 4rem; display: flex; flex-direction: column; height: calc(100vh - 5rem); }
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "map hero" "map scope" "map kpis" "map extras" "map side" "map dir"; }
+  .map-surface { position: sticky; top: 4rem; display: flex; flex-direction: column; height: calc(100vh - 5rem); height: calc(100dvh - 5rem); }
   .map-surface .surface-head { flex: none; }
   .map-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
   .map-stage #map { flex: 1 1 auto; height: auto; min-height: 18rem; }
-  .map-stage .legend, .map-stage .squares-status { flex: none; }
-  .map-stage .legend { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-top: var(--space-3); }
+  .map-stage .squares-status { flex: none; }
+  .map-stage .legend { flex: 0 1 auto; min-height: 0; overflow-y: auto; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-top: var(--space-3); }
   .map-stage .legend-heading { margin-bottom: var(--space-1); }
   .map-stage .legend-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
   .map-stage .aim-panel { position: absolute; z-index: 900; top: var(--space-2); right: var(--space-2); width: min(20rem, 45%); max-height: calc(100% - 2 * var(--space-2)); margin: 0; overflow-y: auto; box-shadow: var(--shadow-md); }

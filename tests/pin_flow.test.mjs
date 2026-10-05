@@ -62,6 +62,23 @@ test("the map is brought into view when the page is scrolled away from it", asyn
   assert.equal(page.anchor.scrolledIntoView, 3, "the cross would be under the sheet: scrolled");
 });
 
+test("a panel that floats over the map's corner scrolls the page only when the map is off the screen", async () => {
+  const page = setup();
+  globalThis.getComputedStyle = (node) => ({ position: node === page.panel ? "absolute" : "static" });
+  try {
+    page.anchor.rect = { top: 300, bottom: 760, height: 460 };
+    page.panel.rect = { top: 310, bottom: 560, height: 250 };   // over the map's top right, level with the cross
+    await aim(page);
+    assert.equal(page.anchor.scrolledIntoView, 0, "the map is on the screen: left alone");
+    page.pin.close();
+    page.anchor.rect = { top: 500, bottom: 960, height: 460 };
+    await aim(page);
+    assert.equal(page.anchor.scrolledIntoView, 1, "its foot is below the screen: scrolled");
+  } finally {
+    delete globalThis.getComputedStyle;
+  }
+});
+
 test("the verdict follows the cross: each place that cannot be checked says why and turns the button off", async () => {
   const page = setup();
   await aim(page);

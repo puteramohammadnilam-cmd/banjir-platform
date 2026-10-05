@@ -29,7 +29,7 @@ function openMap(element, { view: [west, south, east, north], zoom, fit = false 
     scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM, zoomSnap: fit ? FIT_SNAP : 1,
     zoomAnimation: glide, fadeAnimation: glide, markerZoomAnimation: glide,
   });
-  // a whole city fills the map when the map is on show to measure; a hidden tab's map has no size yet
+  // a whole city fills the map, once the map has a size to measure (followResize shows the view again as that changes)
   const showView = () => (fit && element.clientHeight > 0
     ? map.fitBounds([[south, west], [north, east]], { animate: false })
     : map.setView([(south + north) / 2, (west + east) / 2], zoom, { animate: false }));
@@ -40,9 +40,10 @@ function openMap(element, { view: [west, south, east, north], zoom, fit = false 
 }
 
 /** Leaflet measures its box once. The box can change after the map opens: the size picker and the key are drawn into the
- *  card later, a wide screen's map fills the window's height, and a hidden tab's map has no size at all. So Leaflet is
- *  told of each change, and until someone (or the page, going to a shop) moves the map, the area's view is shown again. */
-function followResize(map, element, showView) {
+ *  card later, a wide screen's map fills the window's height, and a map on a tab that is not on show has no size. So
+ *  Leaflet is told of each change, and until someone (or the page, going to a shop) moves the map, the area's view is
+ *  shown again. Leaflet fires movestart at once for a move without animation, and none for invalidateSize. */
+export function followResize(map, element, showView) {
   if (typeof ResizeObserver !== "function") return;
   let isUntouched = true;
   map.on("movestart", () => { isUntouched = false; });   // a drag, a zoom, a shop or point shown; resizing fires no movestart
