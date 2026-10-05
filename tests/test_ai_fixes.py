@@ -29,7 +29,7 @@ def model_without_override(**env) -> str:
 
 
 def test_the_model_is_a_fixed_stable_id_unless_overridden():
-    assert model_without_override() == "gemini-2.5-flash"
+    assert model_without_override() == "gemini-3.8-flash"
     assert model_without_override(GEMINI_MODEL="gemini-3-flash-preview") == "gemini-3-flash-preview"
 
 
