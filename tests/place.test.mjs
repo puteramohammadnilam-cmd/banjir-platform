@@ -149,7 +149,7 @@ test("a link's tab and rp are kept only when valid; area and place are passed on
   assert.deepEqual(url, { ...NOTHING, area: "Nowhere", place: "<b>" });
   assert.deepEqual(readUrl({ search: "?area=&place=&tab=&rp=", hash: "#place=" }), NOTHING);
   for (const tab of TABS) assert.equal(readUrl({ search: `?tab=${tab}` }).tab, tab);
-  assert.deepEqual(TABS, ["overview", "business", "cost", "reference"], "Ask AI is the floating chat, not a tab");
+  assert.deepEqual(TABS, ["overview", "business", "cost", "insurance", "reference"], "Ask AI is the floating chat, not a tab");
   for (const rp of ["10", "20", "50"]) assert.equal(readUrl({ search: `?rp=${rp}` }).rp, rp);
 });
 

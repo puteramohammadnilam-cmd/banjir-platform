@@ -39,6 +39,7 @@
   <link rel="modulepreload" href="js/chat-widget.js">
   <link rel="modulepreload" href="js/cost-form.js">
   <link rel="modulepreload" href="js/cost.js">
+  <link rel="modulepreload" href="js/insurance.js">
   <link rel="modulepreload" href="js/pin-words.js">
   <link rel="modulepreload" href="js/pin-panel.js">
   <link rel="modulepreload" href="js/pin.js">
@@ -64,6 +65,7 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
   </svg>
 
@@ -90,6 +92,7 @@
     <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span data-i18n="tab.overview">Area overview</span></button>
     <button type="button" role="tab" id="tab-business" aria-controls="panel-business" data-tab="business"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg><span data-i18n="tab.business">My business</span></button>
     <button type="button" role="tab" id="tab-cost" aria-controls="panel-cost" data-tab="cost"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg><span data-i18n="tab.cost">Flood cost</span></button>
+    <button type="button" role="tab" id="tab-insurance" aria-controls="panel-insurance" data-tab="insurance"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span data-i18n="tab.insurance">Insurance</span></button>
     <button type="button" role="tab" id="tab-reference" aria-controls="panel-reference" data-tab="reference"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="tab.reference">Reference</span></button>
   </nav>
 
@@ -162,6 +165,8 @@
     <section class="panel" id="panel-business" role="tabpanel" aria-labelledby="tab-business" tabindex="-1" hidden></section>
 
     <section class="panel" id="panel-cost" role="tabpanel" aria-labelledby="tab-cost" tabindex="-1" hidden></section>
+
+    <section class="panel" id="panel-insurance" role="tabpanel" aria-labelledby="tab-insurance" tabindex="-1" hidden></section>
 
     <section class="panel" id="panel-reference" role="tabpanel" aria-labelledby="tab-reference" tabindex="-1" hidden>
       <header class="view-head">

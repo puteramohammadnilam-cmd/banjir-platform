@@ -5,6 +5,7 @@ import { createChatWidget } from "./chat-widget.js";
 import { createCost, estimateState, needsFirstLook } from "./cost.js";
 import { h } from "./dom.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
+import { createInsurance } from "./insurance.js";
 import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard, planFigures } from "./plan.js";
@@ -416,6 +417,7 @@ function createViews(app) {
     floodExample: (place) => (!place.is_point || place.area_id === start.page.id ? start.page.bigger_flood_example : null),
     isReady: start.status.ai_ready,
   });
+  const insurance = createInsurance($("panel-insurance"), { goto: (tab) => goto(app, tab), ...empty });
   const showTab = wireTabs((tab) => store.update({ tab }));   // the tab bar keeps focus on the tab itself
   for (const link of document.querySelectorAll("[data-goto]")) link.addEventListener("click", () => goto(app, link.dataset.goto));
   wireWaysIn(app, checkPoint, overview);
@@ -425,7 +427,7 @@ function createViews(app) {
     isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     voice: { ...realVoice, speak: (text, language) => widget.isOpen && realVoice.speak(text, language) },   // a late answer is not read to a closed chat
   });
-  return { overview, business, cost, chat, widget, showTab, pin, plan, compare };
+  return { overview, business, cost, insurance, chat, widget, showTab, pin, plan, compare };
 }
 
 /** What the chat's "About" line names: the place, or the area while none is picked. */
@@ -450,6 +452,7 @@ function render(app, views, state, previous) {
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey] });
   views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
     state.stocks[state.placeKey], state.rp);
+  views.insurance.render(place, state.estimates[state.placeKey]);
   renderExtras(app, views, state, place);
   views.chat.render(place);   // the chips, the question box and the flood news that fit the place
   $("chat-about").textContent = t("chat.about", { place: askingAbout(app, place) });

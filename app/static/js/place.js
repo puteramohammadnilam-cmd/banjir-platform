@@ -9,7 +9,7 @@
 import { SCENARIOS } from "./dom.js";
 import { LANGS } from "./i18n.js";
 
-export const TABS = ["overview", "business", "cost", "reference"];
+export const TABS = ["overview", "business", "cost", "insurance", "reference"];
 const BUSINESS_ID = /^(?:node|way|relation)-[0-9]{1,19}$/;
 const POINT_ID = /^pt:(-?[0-9]{1,2}\.[0-9]{5}),(-?[0-9]{1,3}\.[0-9]{5})$/;
 const POINT_PREFIX = "pt:";

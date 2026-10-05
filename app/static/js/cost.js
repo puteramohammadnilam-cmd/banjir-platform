@@ -127,8 +127,9 @@ export const estimateState = {
     (isAssumed ? { assumed: true } : { error: message, result: before?.result, assumed: Boolean(before?.assumed) }),
 };
 
-/** Whether to work out a first look now: Flood cost is on show with a place that has no estimate yet. */
-export const needsFirstLook = (state, place) => state.tab === "cost" && Boolean(place) && !state.estimates[state.placeKey];
+/** Whether to work out a first look now: Flood cost or Insurance (which shows its figures) is on show with a place that
+ *  has no estimate yet. */
+export const needsFirstLook = (state, place) => ["cost", "insurance"].includes(state.tab) && Boolean(place) && !state.estimates[state.placeKey];
 
 /** Whether `next` answers the owner's own press of Estimate: not a first look, and not a failure. */
 export const isOwnAnswer = (previous, next) => Boolean(previous?.busy && next?.result && !next.busy && !next.assumed && !next.error);
