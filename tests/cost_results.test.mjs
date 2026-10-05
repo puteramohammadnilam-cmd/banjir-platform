@@ -1,6 +1,7 @@
 // Run from 11_Platform_Draft:  node --test tests/cost_results.test.mjs
 // The Flood cost answer (cost.js results), on the small fake DOM: the key figure is the size of flood on show, the yearly
-// loss reads as a floor, and the flat shop-size figure says depth does not count.
+// loss reads as a floor, and the flat shop-size figure says depth does not count. The key figure carries its own tags,
+// its split into damage and lost trade, and its chance and water one line each.
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
@@ -35,9 +36,13 @@ test("the key figure is the flood size on show: its cost, its water in the model
   assert.equal(key.getAttribute("class"), "figure-box is-key");
   assert.match(key.textContent, /about RM\s?34,647/);
   assert.match(key.textContent, /if a 1 in 20 years flood comes/);
-  assert.match(key.textContent, /Water in the model: 1\.58 m at the street, 1\.48 m above your floor\./);
-  assert.match(key.textContent, /\b40% chance of a flood this big or bigger in the next 10 years\./);
-  assert.match(text(results(FLAT, { rp: "50" })), /if a 1 in 50 years flood comes.* 18% chance of a flood this big or bigger/s);
+  assert.deepEqual(key.querySelectorAll("li").map((line) => line.textContent), [
+    "40% chance of a flood this big or bigger in the next 10 years.",
+    "Water in the model: 1.58 m at the street, 1.48 m above your floor."]);
+  assert.match(key.querySelector(".split-legend").textContent, /^Damage RM\s?31,647Lost trade RM\s?3,000$/);
+  const fifty = results(FLAT, { rp: "50" })[0].children[0];
+  assert.match(fifty.textContent, /if a 1 in 50 years flood comes/);
+  assert.match(fifty.querySelectorAll("li")[0].textContent, /^18% chance of a flood this big or bigger/);
   assert.match(text(results(FLAT)), /if a 1 in 50 years flood comes/, "the page's default size when none is given");
 });
 
@@ -46,16 +51,15 @@ test("the discounted sum over 10 years moves into How this is worked out", () =>
   assert.match(how.textContent, /Over 10 years: about RM\s?28,102 in today's money/);
 });
 
-test("the flat figure gives one line, says depth does not count, and drops the repeated columns", () => {
+test("the flat figure says depth does not count, and drops the repeated columns", () => {
   const nodes = results(FLAT);
-  assert.match(text(nodes), /Any flood that reaches your floor: about RM\s?34,647/);
   assert.match(text(nodes), /Enter what your stock is worth/);
   assert.equal(nodes.find((node) => node.getAttribute("class") === "table-scroll").querySelectorAll("th").length, 3 + 3);   // 3 columns, 3 rows
 });
 
-test("the owner's own value keeps the full table and no flat line", () => {
+test("the owner's own value keeps the full table and no flat note", () => {
   const nodes = results(OWN);
-  assert.ok(!/Any flood that reaches your floor/.test(text(nodes)));
+  assert.ok(!/Enter what your stock is worth/.test(text(nodes)));
   assert.equal(nodes.find((node) => node.getAttribute("class") === "table-scroll").querySelectorAll("th").length, 5 + 3);
 });
 
@@ -68,6 +72,17 @@ test("a flood that stays below the floor costs RM 0 and says so, never that the 
   assert.ok(!/safe/i.test(key));
 });
 
+test("a flood that costs nothing has no split bar", () => {
+  const key = results(OWN, { rp: "10" })[0].children[0];
+  assert.equal(key.querySelector(".split"), null);
+  assert.ok(results(OWN, { rp: "20" })[0].children[0].querySelector(".split"));
+});
+
+test("each total above nothing has a bar against the largest, the largest full", () => {
+  const table = results(OWN).find((node) => node.getAttribute("class") === "table-scroll");
+  assert.deepEqual(table.querySelectorAll(".loss-bar").map((bar) => bar.getAttribute("style")), ["--share: 70%", "--share: 100%"]);
+});
+
 test("the table marks the flood size on show", () => {
   const table = results(OWN, { rp: "20" }).find((node) => node.getAttribute("class") === "table-scroll");
   const rows = table.querySelectorAll("tr").filter((row) => row.getAttribute("aria-current") === "true");
@@ -77,14 +92,16 @@ test("the table marks the flood size on show", () => {
 });
 
 test("the first look says it is one, and which shop size's typical figure it used", () => {
-  const shown = results({ ...FLAT, inputs: { shop_size: "medium" } }, { isAssumed: true });
-  assert.equal(shown[0].getAttribute("class"), "cost-basis is-first-look");
-  assert.equal(shown[0].textContent, "For a medium shop, using the typical figure. This is a first look: change the figures and press Estimate the cost to fit your own shop.");
+  const [figures] = results({ ...FLAT, inputs: { shop_size: "medium" } }, { isAssumed: true });
+  const tags = figures.children[0].querySelector(".cost-basis");
+  assert.equal(tags.getAttribute("class"), "cost-basis is-first-look");
+  assert.deepEqual(tags.querySelectorAll("li").map((tag) => tag.textContent),
+    ["Typical figure for a medium shop", "First look: change the figures to fit your shop"]);
 });
 
 test("an answer the owner pressed for names the shop size, and says nothing for their own value", () => {
-  assert.equal(results({ ...FLAT, inputs: { shop_size: "complex" } })[0].textContent,
-    "For a large complex, such as a mall or hypermarket, using the typical figure.");
+  assert.equal(results({ ...FLAT, inputs: { shop_size: "complex" } })[0].querySelector(".cost-basis").textContent,
+    "Typical figure for a large complex, such as a mall or hypermarket");
   const own = results({ ...OWN, inputs: { shop_size: "", value_at_risk_rm: 25000 } });
-  assert.ok(!own.some((node) => /cost-basis/.test(node.getAttribute("class") ?? "")));
+  assert.equal(own[0].querySelector(".cost-basis"), null);
 });

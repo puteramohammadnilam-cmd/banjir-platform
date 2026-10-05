@@ -2,7 +2,8 @@
 // lowest height above the nearest mapped river there, said in bands with what the numbers cannot tell. The server sends
 // place.elevation (app/elevation.py): {ground_m, above_river_m}, above_river_m null with no mapped river within 3 km,
 // or null where none is loaded.
-import { h, icon } from "./dom.js";
+import { h } from "./dom.js";
+import { factCard } from "./fact.js";
 import { formatNumber, t } from "./i18n.js";
 
 // Bands on the whole metres the note shows, so the band and the number never disagree: under 1 m (or below the river's
@@ -37,11 +38,15 @@ export function elevationWords(elevation) {
   return { value: t(band ? BAND_KEYS[band] : "business.elevationNoRiver"), note: band ? `${surface} ${riverNote(above)}` : surface };
 }
 
-/** The "Height of the ground" fact beside the drawing (card.js), with the limits wherever there is a number. */
+// Lower ground floods first: a band's tone and the chip that says it.
+const BAND_VERDICT = { near: ["high", "business.elevationChipNear"], mid: ["some", "business.elevationChipMid"], high: ["low", "business.elevationChipHigh"] };
+
+/** The "Height of the ground" fact beside the drawing (card.js): the band leads, with the heights and the limits folded
+ *  away wherever there is a number. */
 export function elevationFact(place) {
   const { value, note } = elevationWords(place.elevation);
-  return h("section", { class: "fact" }, h("h2", { class: "fact-label" }, icon("map"), t("business.elevation")),
-    h("p", { class: "fact-value" }, value),
-    h("p", { class: "fact-note" }, note),
-    place.elevation && h("p", { class: "fineprint" }, t("business.elevationLimits")));
+  const [tone, chip] = BAND_VERDICT[riverBand(place.elevation?.above_river_m)] ?? [null, null];
+  return factCard({ iconName: "map", label: t("business.elevation"), value, tone, chip: chip && t(chip),
+    lead: place.elevation ? [] : h("p", { class: "fact-note" }, note),
+    more: place.elevation && [h("p", {}, note), h("p", { class: "fineprint" }, t("business.elevationLimits"))] });
 }

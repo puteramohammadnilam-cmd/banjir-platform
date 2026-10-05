@@ -21,6 +21,16 @@
   --dry: #2f7a3d;
   --danger-wash: #fbe9e7;
 
+  /* a fact's tone on My business: how much this one thing adds to flooding here, high to low. Chip text on its wash is
+     4.6:1 or more; --tone-some-line is the brighter edge, the text uses --tone-some */
+  --tone-high: #b42318;
+  --tone-high-wash: #fdecea;
+  --tone-some: #8a5a00;
+  --tone-some-line: #d99a1e;
+  --tone-some-wash: #fdf2d8;
+  --tone-low: var(--dry);
+  --tone-low-wash: #e8f3ea;
+
   /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js.
      Water-blue for the first three, then indigo and deep plum, so the two deepest do not blur into one navy. */
   --band-1: #c2e6f5;

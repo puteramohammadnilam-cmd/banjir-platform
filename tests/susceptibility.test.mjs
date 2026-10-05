@@ -71,29 +71,43 @@ test("a note from the data is a plain string or {en, ms}; a swatch is its colour
 
 // ---------- the My business fact ----------
 
-const factText = (node) => node.children.map((child) => child.textContent);
+/** A fact's parts as fact.js lays them out: label, chip, value, and the lines folded under "How to read this". */
+const factParts = (node) => ({
+  label: node.querySelector(".fact-label").textContent,
+  chip: node.querySelector(".fact-chip")?.textContent ?? null,
+  value: node.querySelector(".fact-value").textContent,
+  tone: node.getAttribute("data-tone"),
+  more: node.querySelector(".fact-more")?.querySelectorAll("p").map((line) => line.textContent) ?? [],
+});
 
-test("the fact says the class and the figure out of 10, what it measures, and that it is not a depth", () => {
+test("the fact says the class as its chip and the figure out of 10, with what it measures and that it is not a depth folded away", () => {
   const node = flashFact({ ...shop, flash_flood: { score: 7.24, class: "high" } });
-  const [label, value, note, fineprint] = factText(node);
-  assert.equal(`${label}: ${value}`, "Flash flood potential: High (7.2 of 10)");
-  assert.match(note, /heavy rain/);
-  assert.match(fineprint, /susceptibility, not a water depth/);
+  const { label, chip, value, tone, more } = factParts(node);
+  assert.equal(`${label}: ${chip}, ${value}`, "Flash flood potential: High, 7.2 of 10");
+  assert.equal(tone, "high");
+  assert.match(more[0], /heavy rain/);
+  assert.match(more.at(-1), /susceptibility, not a water depth/);
   assert.equal(node.querySelector(".ramp-swatch").getAttribute("style"), swatchStyle(FLASH_RAMP[2]));
+});
+
+test("each class has its tone: low reads low, medium some, high and extreme high", () => {
+  const toneOf = (key) => flashFact({ ...shop, flash_flood: { score: 5, class: key } }).getAttribute("data-tone");
+  assert.deepEqual(["low", "medium", "high", "extreme"].map(toneOf), ["low", "some", "high", "high"]);
 });
 
 test("with the area's own example, a section its record names, the fact says floods like those are what it measures", () => {
   const node = flashFact({ ...shop, flash_flood: { score: 2, class: "low" } }, INDEXED_AREA);
-  assert.match(factText(node)[3], /^Flash floods are on record in Section 24, where the river model shows little or no water/);
-  assert.match(factText(node)[1], /^Low \(2\.0 of 10\)$/);
+  assert.match(factParts(node).more[1], /^Flash floods are on record in Section 24, where the river model shows little or no water/);
+  assert.equal(factParts(node).value, "2.0 of 10");
   inMalay(() => assert.match(flashFact({ ...shop, flash_flood: { score: 2, class: "low" } }, INDEXED_AREA).textContent, /di Seksyen 24/));
   const unnamed = flashFact({ ...shop, flash_flood: { score: 2, class: "low" } }, { ...INDEXED_AREA, flash_flood_example: "seksyen-u1" });
-  assert.equal(factText(unnamed).length, 4, "a section the record does not name: no example, never its id");
+  assert.equal(factParts(unnamed).more.length, 2, "a section the record does not name: no example, never its id");
 });
 
 test("null means not worked out for this spot; a field the server never sent hides the fact", () => {
   const node = flashFact({ ...shop, flash_flood: null }, INDEXED_AREA);
-  assert.equal(factText(node)[1], "Not worked out for this spot yet");
+  assert.equal(factParts(node).value, "Not worked out for this spot yet");
+  assert.equal(factParts(node).chip, null);
   assert.ok(!node.textContent.includes("flash floods on record"), "no example beside a figure that is not there");
   assert.equal(flashFact(shop), null);
   assert.equal(flashFact({ ...shop, flash_flood: { score: 5, class: "odd" } }), null, "a class the page cannot name is not guessed at");
@@ -101,10 +115,10 @@ test("null means not worked out for this spot; a field the server never sent hid
 
 test("in Bahasa Melayu the fact reads naturally", () => {
   inMalay(() => {
-    const [label, value, , fineprint] = factText(flashFact({ ...shop, flash_flood: { score: 7.2, class: "high" } }));
-    assert.equal(`${label}: ${value}`, "Potensi banjir kilat: Tinggi (7.2 daripada 10)");
-    assert.match(fineprint, /bukan kedalaman air/);
-    assert.equal(factText(flashFact({ ...shop, flash_flood: null }))[1], "Belum dikira untuk tempat ini");
+    const { label, chip, value, more } = factParts(flashFact({ ...shop, flash_flood: { score: 7.2, class: "high" } }));
+    assert.equal(`${label}: ${chip}, ${value}`, "Potensi banjir kilat: Tinggi, 7.2 daripada 10");
+    assert.match(more.at(-1), /bukan kedalaman air/);
+    assert.equal(factParts(flashFact({ ...shop, flash_flood: null })).value, "Belum dikira untuk tempat ini");
   });
 });
 
@@ -113,9 +127,9 @@ test("My business shows the fact beside the others, with the example only for th
   const area = { ...HOME, flash_flood_example: "s-1", history: { ...HOME.history, section_names: { "s-1": { en: "Low Street", ms: "Jalan Rendah" } } } };
   const card = createBusiness(panel, { area, areas: AREAS, onPhoto() {}, onPick() {}, goto() {}, showOnMap() {} });
   card.render({ premise: { ...shop, flash_flood: { score: 7.2, class: "high" } }, rp: "50" });
-  assert.match(panel.textContent, /Flash flood potential.*High \(7\.2 of 10\).*on record in Low Street/);
+  assert.match(panel.textContent, /Flash flood potential.*High.*7\.2 of 10.*on record in Low Street/);
   card.render({ premise: point({ area_id: "far", flash_flood: { score: 3, class: "medium" } }), rp: "50" });
-  assert.match(panel.textContent, /Medium \(3\.0 of 10\)/);
+  assert.match(panel.textContent, /Medium3\.0 of 10/);
   assert.ok(!panel.textContent.includes("Low Street"), "another area's point does not get this area's example");
   card.render({ premise: shop, rp: "20" });
   assert.ok(!panel.textContent.includes("Flash flood potential"), "an older server: no fact at all");

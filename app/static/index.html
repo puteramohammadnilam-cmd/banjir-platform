@@ -31,6 +31,7 @@
   <link rel="modulepreload" href="js/kpis.js">
   <link rel="modulepreload" href="js/overview.js">
   <link rel="modulepreload" href="js/gauge.js">
+  <link rel="modulepreload" href="js/fact.js">
   <link rel="modulepreload" href="js/elevation.js">
   <link rel="modulepreload" href="js/point.js">
   <link rel="modulepreload" href="js/card.js">
@@ -127,7 +128,7 @@
       <section class="surface map-extras" aria-labelledby="map-extras-heading">
         <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
         <div class="map-controls" id="map-controls" hidden></div>
-        <p class="fineprint area-note" id="map-note" hidden></p>
+        <div class="area-notes" id="map-note" hidden></div>
         <details class="about-more index-method" id="index-method" hidden>
           <summary data-i18n="flash.methodHeading">How these are worked out</summary>
           <div class="index-method-body" id="index-method-body"></div>
@@ -152,7 +153,7 @@
           <label class="visually-hidden" for="directory-filter" data-i18n="overview.filterLabel">Filter businesses</label>
           <input id="directory-filter" class="field" type="search" data-i18n-attr="placeholder:overview.filterPlaceholder" placeholder="Filter by name or type" autocomplete="off">
         </div>
-        <p class="fineprint area-note" id="directory-note" hidden></p>
+        <div class="area-notes" id="directory-note" hidden></div>
         <p class="directory-status" id="directory-status" role="status"></p>
         <div class="directory-next" id="directory-next" hidden></div>
         <div class="directory-head" aria-hidden="true"><span data-i18n="overview.colBusiness">Business</span><span data-i18n="overview.col10">1 in 10</span><span data-i18n="overview.col20">1 in 20</span><span data-i18n="overview.col50">1 in 50</span></div>

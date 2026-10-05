@@ -3,7 +3,8 @@ import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName,
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
-import { formatNumber, t } from "./i18n.js";
+import { t } from "./i18n.js";
+import { distanceText, factCard, factGroup, openFolds, reopenFolds } from "./fact.js";
 import { emptyState } from "./pick.js";
 import { NO_WATER_NOTE, pointHeader } from "./point.js";
 import { flashFact } from "./susceptibility.js";
@@ -28,35 +29,55 @@ function headline(premise, rp) {
     ...(depth >= DEEP_M ? [h("p", { class: "deep-note" }, t("business.deepNote"))] : [])];
 }
 
-const fact = (iconName, label, ...body) => h("section", { class: "fact" }, h("h2", { class: "fact-label" }, icon(iconName), label), ...body);
+// Water on the road a car meets: about 15 cm reaches the underside of most cars and 30 cm can float one (US National
+// Weather Service, "Turn Around Don't Drown"). Said in the chip only; the number is the model's.
+const ROAD_HARD_M = 0.15;
+const ROAD_DEEP_M = 0.3;
+
+/** The road's tone and chip: dry in the model, shallow, hard for cars, or too deep for them. */
+function roadVerdict(depth) {
+  if (!band(depth)) return { tone: "low", chip: t("business.roadChipDry") };
+  if (depth < ROAD_HARD_M) return { tone: "some", chip: t("business.roadChipShallow") };
+  if (depth < ROAD_DEEP_M) return { tone: "some", chip: t("business.roadChipHard") };
+  return { tone: "high", chip: t("business.roadChipDeep") };
+}
 
 function roadFact(premise, rp) {
   const depth = premise.road.depth_m[rp];
-  return fact("road", t("business.road"),
-    h("p", { class: "fact-value" }, band(depth) ? t("business.roadWet", { depth: depthText(depth) }) : t("business.roadDry")),
-    h("p", { class: "fact-note" }, t("business.roadNote", { road: roadName(premise.road.name), distance: premise.road.distance_m })));
+  return factCard({ iconName: "road", label: t("business.road"), ...roadVerdict(depth),
+    value: band(depth) ? t("business.roadWet", { depth: depthText(depth) }) : t("business.roadDry"),
+    lead: h("p", { class: "fact-note" }, t("business.roadWhere", { road: roadName(premise.road.name), distance: distanceText(premise.road.distance_m) })),
+    more: h("p", {}, t("business.roadLimit")) });
 }
 
 function shelterFact(shelter) {
-  return fact("pin", t("common.relief"),
-    h("p", { class: "fact-value" }, shelter.name),
-    h("p", { class: "fact-note" }, t("business.shelterNote", { distance: formatNumber(shelter.distance_m) })));
+  return factCard({ iconName: "pin", label: t("common.relief"), value: distanceText(shelter.distance_m),
+    lead: h("p", { class: "fact-note" }, shelter.name), more: h("p", {}, t("business.shelterLine")) });
 }
 
 function listingFact(listing) {
   if (!listing || listing.configured === false) return null;
-  if (listing.busy) return fact("pin", "Google Maps", h("p", { class: "fact-note" }, t("business.mapsChecking")));
-  if (listing.error) return fact("pin", "Google Maps", h("p", { class: "fact-note" }, listing.error));
-  if (!listing.place) {
-    return fact("pin", "Google Maps", h("p", { class: "fact-value" }, t("business.mapsNone")),
-      h("p", { class: "fact-note" }, t("business.mapsNoneNote")));
-  }
+  const card = (value, lead, more = []) => factCard({ iconName: "pin", label: "Google Maps", value, lead, more });
+  if (listing.busy) return card(null, h("p", { class: "fact-note" }, t("business.mapsChecking")));
+  if (listing.error) return card(null, h("p", { class: "fact-note" }, listing.error));
+  if (!listing.place) return card(t("business.mapsNone"), h("p", { class: "fact-note" }, t("business.mapsNoneNote")));
   const { place } = listing;
-  return fact("pin", "Google Maps",
-    h("p", { class: "fact-value" }, t("business.listedAs", { status: t(LISTED[place.status] ?? "listing.unknown") })),
+  return card(t("business.listedAs", { status: t(LISTED[place.status] ?? "listing.unknown") }),
     h("p", { class: "fact-note" }, place.name ? `${t("business.listedName", { name: place.name })} ` : "",
       place.maps_uri && h("a", { href: place.maps_uri, target: "_blank", rel: "noopener noreferrer" }, t("business.mapsView"))),
-    h("p", { class: "fineprint" }, t("business.mapsSource")));
+    h("p", {}, t("business.mapsSource")));
+}
+
+/** What the floor photo says: the floor's height, and the water above it, or why there is none. */
+function floorWords(rp, photo) {
+  const estimate = photo?.estimate;
+  if (!estimate) return { value: t("business.floorUnknown"), note: t("business.floorHint") };
+  if (!estimate.is_shop_front) return { value: t("business.notShopFront"), note: t("business.notShopFrontNote") };
+  const above = photo.water_above_floor_m[rp];
+  const water = above == null ? "" : above > 0
+    ? t("business.aboveFloor", { m: above.toFixed(2), words: depthWords(above) }) : t("business.belowFloor");
+  return { value: t("business.floorAbout", { cm: estimate.floor_height_cm }),
+    note: `${t("business.floorAi", { confidence: confidenceText(estimate.confidence) })} ${water}` };
 }
 
 function floorFact(rp, photo, onPhoto, isReady) {
@@ -65,38 +86,32 @@ function floorFact(rp, photo, onPhoto, isReady) {
   const picker = h("label", { class: "btn btn-secondary photo-button", "aria-disabled": isOff ? "true" : null }, icon("camera"),
     photo?.busy ? t("common.photoReading") : photo?.estimate ? t("common.photoAgain") : t("business.photoAdd"), input);
   const estimate = photo?.estimate;
-  let value = t("business.floorUnknown");
-  let note = t("business.floorHint");
-  if (estimate && !estimate.is_shop_front) {
-    value = t("business.notShopFront");
-    note = t("business.notShopFrontNote");
-  } else if (estimate) {
-    const above = photo.water_above_floor_m[rp];
-    value = t("business.floorAbout", { cm: estimate.floor_height_cm });
-    note = `${t("business.floorAi", { confidence: confidenceText(estimate.confidence) })} ${above == null ? "" : above > 0
-      ? t("business.aboveFloor", { m: above.toFixed(2), words: depthWords(above) })
-      : t("business.belowFloor")}`;
-  }
-  return fact("camera", t("business.floor"),
-    h("p", { class: "fact-value" }, value),
+  const { value, note } = floorWords(rp, photo);
+  return factCard({ iconName: "camera", label: t("business.floor"), value, lead: [
     h("p", { class: "fact-note" }, note),
-    estimate?.is_shop_front && h("p", { class: "fact-note" }, `${estimate.reasoning} ${t("business.goodsAtFloor", { stock: estimate.stock_at_floor_level })}`),
     photo?.error && h("p", { class: "fact-note", role: "alert" }, photo.error),
     photo?.preview && h("img", { class: "photo-thumb", src: photo.preview, alt: t("business.photoAlt"), width: 96, height: 72 }),
     picker,
     !isReady && h("p", { class: "fact-note ai-off" }, t("common.needsAi")),
-    h("p", { class: "fineprint" }, t("common.photoPrivacy")));
+    h("p", { class: "fineprint" }, t("common.photoPrivacy"))].filter(Boolean),
+  more: estimate?.is_shop_front && h("p", {}, `${estimate.reasoning} ${t("business.goodsAtFloor", { stock: estimate.stock_at_floor_level })}`) });
 }
+
+// Floods on record since the recent years began: this many or more is said as "often". The record is the whole area's,
+// not this shop's, so it never takes the high tone: any recent flood is "some".
+const OFTEN_RECENT = 3;
 
 /** The area's own flood record. An area with none collected shows no fact: the Area overview says so. */
 function historyFact(area, goto) {
   const counts = floodCounts(area.history);
   if (!counts) return null;
   const { dated, recent, since, recentFrom } = counts;
-  return fact("clock", t("history.heading"),
-    h("p", { class: "fact-value" }, t("business.historyValue", { recent, from: recentFrom })),
-    h("p", { class: "fact-note" }, `${t("business.historyNote", { dated, area: area.name, since })} `,
-      h("button", { type: "button", class: "btn btn-link", onclick: () => goto("overview") }, t("business.historySee"))));
+  const tone = recent > 0 ? "some" : null;
+  return factCard({ iconName: "clock", label: t("history.heading"), tone,
+    chip: tone && t(recent >= OFTEN_RECENT ? "business.historyChipOften" : "business.historyChipSome"),
+    value: t("business.historyValue", { recent, from: recentFrom }),
+    lead: h("button", { type: "button", class: "btn btn-link fact-link", onclick: () => goto("overview") }, t("business.historySee")),
+    more: h("p", {}, t("business.historyNote", { dated, area: area.name, since })) });
 }
 
 /** The Ask AI shortcut's second line: what it reads, or that the assistant is off in this build. */
@@ -161,20 +176,24 @@ function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea, onOpe
 
 const header = (place, options) => (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap));
 
-/** The facts beside the drawing. A point has no road or Google Maps listing: it is not a business. Its relief centre
- *  is the server's, for a point in a listed area with one; the flood record is the page's area's, so only a point in
- *  that area shows it (another area's record is on that area's own page). */
+/** The facts beside the drawing, in three groups: the water at this place, getting out, and what makes it more exact.
+ *  A point has no road or Google Maps listing: it is not a business. Its relief centre is the server's, for a point in
+ *  a listed area with one; the flood record is the page's area's, so only a point in that area shows it (another
+ *  area's record is on that area's own page). */
 function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isReady }) {
   const isPoint = premise.is_point;
   const hasPageRecord = !isPoint || premise.area_id === area.id;
   return h("div", { class: "facts" },
-    !isPoint && premise.road && roadFact(premise, rp),
-    elevationFact(premise),
-    flashFact(premise, hasPageRecord && area),   // the example is the page's area's
-    premise.shelter && shelterFact(premise.shelter),
-    !isPoint && listingFact(listing),
-    floorFact(rp, photo, onPhoto, isReady),
-    hasPageRecord && historyFact(area, goto));
+    factGroup(t("business.groupWater"), [
+      flashFact(premise, hasPageRecord && area),   // the example is the page's area's
+      elevationFact(premise),
+      hasPageRecord && historyFact(area, goto)]),
+    factGroup(t("business.groupOut"), [
+      !isPoint && premise.road && roadFact(premise, rp),
+      premise.shelter && shelterFact(premise.shelter)]),
+    factGroup(t("business.groupCheck"), [
+      floorFact(rp, photo, onPhoto, isReady),
+      !isPoint && listingFact(listing)]));
 }
 
 /** Built once, for the page's area (its name and flood record). `areas` are the listed areas, to name the one a point
@@ -229,11 +248,13 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
         drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM));
         announcer.textContent = spoken(premise, rp);
       }
+      const wasOpen = openFolds(side);   // a fold the reader opened stays open when the listing arrives or the size changes
       side.replaceChildren(
         sideFacts(shown, { area, goto, onPhoto, isReady }),
         h("div", { class: "next" },
           nextStep(t("business.nextCost"), t("business.nextCostNote"), () => goto("cost"), true),
           nextStep(t("business.nextAsk"), askNote(isReady, hasMaps), (event) => onAsk(event.currentTarget))));
+      reopenFolds(side, wasOpen);
     },
   };
 }

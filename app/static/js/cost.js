@@ -23,9 +23,14 @@ const metresAbove = (m) => (m > 0 ? t("common.metres", { m: m.toFixed(2) }) : t(
 /** The typical shop-size figure is one flat amount per flooded shop (JPS 2003), whatever the depth. */
 const isFlat = (result) => SCENARIOS.every((rp) => result.per_flood[rp].damage_share == null);
 
-/** Every flood size's loss, the one on show (rp) marked. */
+/** A thin bar, as wide as `share` (0 to 1) of the cell, so the table's totals read as sizes. Decorative: the figure is
+ *  beside it, and none for a flood that costs nothing. */
+const lossBar = (share) => h("span", { class: "loss-bar", style: `--share: ${Math.round(share * 100)}%`, "aria-hidden": "true" });
+
+/** Every flood size's loss, the one on show (rp) marked, each total with a bar against the largest. */
 function lossTable(result, flat, rp) {
   const cols = flat ? ["cost.colSize", "cost.colWater", "cost.colTotal"] : ["cost.colSize", "cost.colWater", "cost.colDamage", "cost.colTrade", "cost.colTotal"];
+  const largest = Math.max(...SCENARIOS.map((key) => result.per_flood[key].total_rm));
   return h("div", { class: "table-scroll" }, h("table", { class: `loss-table${flat ? " is-flat" : ""}` },
     h("caption", { class: "visually-hidden" }, t("cost.caption")),
     h("thead", {}, h("tr", {}, cols.map((key) => h("th", { scope: "col" }, t(key))))),
@@ -35,40 +40,43 @@ function lossTable(result, flat, rp) {
       return h("tr", { class: isChosen ? "is-chosen" : null, "aria-current": isChosen ? "true" : null },
         h("th", { scope: "row" }, t("common.rpYears", { rp: key })), h("td", {}, metresAbove(flood.water_above_floor_m)),
         !flat && h("td", {}, ringgit(flood.direct_damage_rm)), !flat && h("td", {}, ringgit(flood.indirect_loss_rm)),
-        h("td", {}, h("strong", {}, ringgit(flood.total_rm))));
+        h("td", { class: "loss-total" }, h("strong", {}, ringgit(flood.total_rm)), flood.total_rm > 0 && lossBar(flood.total_rm / largest)));
     }))));
 }
 
-/** With the flat figure, one line says what any flood that reaches the floor costs, and how to make depth count. */
-function flatLine(result) {
-  const wettest = result.per_flood[SCENARIOS.at(-1)];
-  if (!wettest.direct_damage_rm) return null;
-  return h("div", { class: "flat-line" },
-    h("p", {}, h("strong", {}, t("cost.flatLine", { total: ringgit(wettest.total_rm) })), " ",
-      t("cost.flatParts", { damage: ringgit(wettest.direct_damage_rm), trade: ringgit(wettest.indirect_loss_rm) })),
-    h("p", { class: "fineprint" }, t("cost.flatNote")));
+/** The key figure split in two: damage and lost trade, as one bar and its two figures. None for a flood that costs nothing. */
+function splitBar(flood) {
+  if (!(flood.total_rm > 0)) return null;
+  return h("div", { class: "split" },
+    h("div", { class: "split-bar", "aria-hidden": "true" },
+      h("span", { class: "split-damage", style: `flex-grow: ${flood.direct_damage_rm}` }),
+      h("span", { class: "split-trade", style: `flex-grow: ${flood.indirect_loss_rm}` })),
+    h("p", { class: "split-legend" },
+      h("span", { class: "split-key is-damage" }, t("cost.splitDamage", { rm: ringgit(flood.direct_damage_rm) })),
+      h("span", { class: "split-key is-trade" }, t("cost.splitTrade", { rm: ringgit(flood.indirect_loss_rm) }))));
 }
 
-/** The key figure: what the flood size on show (the page's "Size of flood", rp) costs, with its water in the model and
- *  its chance of coming at least once in the next CHANCE_YEARS. */
-function floodBox(result, rp) {
+/** The key figure: what the flood size on show (the page's "Size of flood", rp) costs, what it is made of, with its
+ *  water in the model and its chance of coming at least once in the next CHANCE_YEARS, one line each. */
+function floodBox(result, rp, basis) {
   const flood = result.per_flood[rp];
   const water = flood.depth_m > 0
     ? t("cost.floodWater", { street: depthText(flood.depth_m), floor: metresAbove(flood.water_above_floor_m) })
     : t("cost.floodDry");
   const chance = t("cost.floodChance", { pct: Math.round(chanceWithin(Number(rp), CHANCE_YEARS) * 100), years: CHANCE_YEARS });
   return h("div", { class: "figure-box is-key" },
+    basis,
     h("p", { class: "kpi-figure" }, flood.total_rm > 0 ? t("cost.floodFigure", { rm: ringgit(flood.total_rm) }) : ringgit(0)),
     h("p", { class: "kpi-label" }, t("cost.floodLabel", { rp })),
-    h("p", { class: "kpi-note" }, `${water} ${chance}`));
+    splitBar(flood),
+    h("ul", { class: "figure-facts" }, h("li", {}, icon("clock"), chance), h("li", {}, icon("wave"), water)));
 }
 
 /** The average a year over every flood size. Floods more frequent than 1 in 10 years are not in the model
- *  (costs.expected_yearly), so it is a floor. */
+ *  (costs.expected_yearly), so it is a floor: "at least" says so, and why is under How this is worked out. */
 const yearlyBox = (result) => h("div", { class: "figure-box" },
   h("p", { class: "kpi-figure" }, t("cost.atLeast", { rm: ringgit(result.expected_yearly_loss_rm) })),
-  h("p", { class: "kpi-label" }, t("cost.yearly")),
-  h("p", { class: "kpi-note" }, t("cost.yearlyNote", { rp: SCENARIOS[0], big: SCENARIOS.at(-1) })));
+  h("p", { class: "kpi-label" }, t("cost.yearly")));
 
 function verdict(measure, years) {
   if (!measure) return null;
@@ -82,12 +90,12 @@ function verdict(measure, years) {
 
 const lowerFirst = (text) => text.charAt(0).toLocaleLowerCase() + text.slice(1);
 
-/** What the answer was worked out from: a first look the page made by itself, and the shop size whose typical figure
- *  it used. Null when it was the owner's own value, pressed for. */
-function basisLine(inputs, isAssumed) {
+/** What the answer was worked out from, as small tags on the key figure: the shop size whose typical figure it used,
+ *  and that it is a first look the page made by itself. Null when it was the owner's own value, pressed for. */
+function basisTags(inputs, isAssumed) {
   const size = SIZES.find(([key]) => key === inputs?.shop_size);
-  const words = [size && t("cost.forSize", { size: lowerFirst(t(size[1])) }), isAssumed && t("cost.firstLook")].filter(Boolean);
-  return words.length ? h("p", { class: `cost-basis${isAssumed ? " is-first-look" : ""}` }, words.join(" ")) : null;
+  const tags = [size && t("cost.tagSize", { size: lowerFirst(t(size[1])) }), isAssumed && t("cost.tagFirstLook")].filter(Boolean);
+  return tags.length ? h("ul", { class: `cost-basis${isAssumed ? " is-first-look" : ""}` }, tags.map((tag) => h("li", {}, tag))) : null;
 }
 
 /** The answer, or the empty state with none. isAssumed marks the first look the tab works out when it opens; rp is
@@ -99,13 +107,13 @@ export function results(result, { isAssumed = false, rp = DEFAULT_RP } = {}) {
   const { years, discount_rate: rate, present_value_rm: overYears } = result.loss_over_years;
   const flat = isFlat(result);
   return [
-    basisLine(result.inputs, isAssumed),
-    h("div", { class: "headline-figures" }, floodBox(result, rp), yearlyBox(result)),
-    flat && flatLine(result),
+    h("div", { class: "headline-figures" }, floodBox(result, rp, basisTags(result.inputs, isAssumed)), yearlyBox(result)),
     lossTable(result, flat, rp),
+    flat && h("p", { class: "fineprint" }, t("cost.flatNote")),
     verdict(result.measure, years),
     h("p", { class: "fineprint" }, t("cost.rough")),
     h("details", {}, h("summary", {}, t("cost.how")),   // the method's own words come from the server, in English
+      h("p", {}, t("cost.yearlyNote", { rp: SCENARIOS[0], big: SCENARIOS.at(-1) })),
       h("p", {}, t("cost.overYearsLine", { rm: ringgit(overYears), years, pct: Math.round(rate * 100) })),
       h("p", {}, t("cost.damage", { text: result.basis.direct })), h("p", {}, t("cost.trade", { text: result.basis.indirect })),
       h("p", {}, result.method), h("p", {}, result.limits)),

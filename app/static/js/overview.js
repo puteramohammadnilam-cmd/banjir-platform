@@ -190,7 +190,13 @@ export function createCityDirectory(parts, index, { area, sections, ...ways }) {
   return directory;
 }
 
-const setNote = (element, text) => { element.textContent = text ?? ""; element.hidden = !text; };
+/** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
+ *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
+function foldNotes(element, notes) {
+  const shown = notes.filter(([, text]) => text);
+  element.replaceChildren(...shown.map(([key, text]) => h("details", { class: "area-note" }, h("summary", {}, t(key)), h("p", { class: "fineprint" }, text))));
+  element.hidden = !shown.length;
+}
 
 /** The page's words that name the area come from its config: the search's heading, the map's and the list's labels,
  *  and what the area's data notes say about where its businesses and relief centres come from (an area may have no notes).
@@ -199,8 +205,8 @@ const setNote = (element, text) => { element.textContent = text ?? ""; element.h
 export function renderAreaLabels(area, city = null) {
   $("finder-hero-label").textContent = t("hero.headingIn", { area: area.name });
   $("directory-heading").textContent = t("overview.directoryHeading", { area: area.name });
-  setNote($("directory-note"), area.notes?.businesses);
-  setNote($("map-note"), [area.notes?.shelters, area.notes?.depths].filter(Boolean).join(" "));
+  foldNotes($("directory-note"), [["overview.noteBusinesses", area.notes?.businesses]]);
+  foldNotes($("map-note"), [["overview.noteDepths", area.notes?.depths], ["overview.noteShelters", area.notes?.shelters]]);
   if (!city) {
     $("map").setAttribute("aria-label", t("overview.mapLabel", { area: area.display_name }));
     return;

@@ -2,7 +2,8 @@
 // section (1 to 5, weights after Leeonis et al. 2024): how readily a place floods from heavy rain, which the river model
 // leaves out. Never a depth or a chance, in any word here. The server sends a place's `flash_flood` {score, class} |
 // null, a section's `indexes`, the area's `index_method` and `layers.flash_flood`; a field it never sent hides its part.
-import { h, icon } from "./dom.js";
+import { h } from "./dom.js";
+import { factCard } from "./fact.js";
 import { dataWord, formatNumber, t } from "./i18n.js";
 
 export const FLASH_CLASSES = Object.freeze(["low", "medium", "high", "extreme"]);
@@ -55,20 +56,22 @@ export const rampSwatch = (step) => h("span", { class: "ramp-swatch", style: swa
 
 export const oneDecimal = (value) => formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-/** My business's fact: "High (7.2 of 10)", what it measures, the example of `area` (the page's, for a place in it), and
- *  that it is not a depth. null: not worked out; no field (an older server) or an unknown class: no fact. */
+// A class's tone on My business: how readily heavy rain runs off here, high to low.
+const FLASH_TONE = { low: "low", medium: "some", high: "high", extreme: "high" };
+
+/** My business's fact: "7.2 of 10" with the class as its chip, what it measures, the example of `area` (the page's,
+ *  for a place in it), and that it is not a depth. null: not worked out; no field (an older server) or an unknown
+ *  class: no fact. */
 export function flashFact(place, area = null) {
   const value = place.flash_flood;
   if (value === undefined || (value && !flashWord(value.class))) return null;
   const step = value && FLASH_RAMP[FLASH_CLASSES.indexOf(value.class)];
   const example = value && exampleNote(area);
-  return h("section", { class: "fact flash-fact" },
-    h("h2", { class: "fact-label" }, icon("rain"), t("flash.label")),
-    h("p", { class: "fact-value" }, step && rampSwatch(step),
-      value ? t("flash.value", { level: flashWord(value.class), score: oneDecimal(value.score) }) : t("flash.notWorkedOut")),
-    h("p", { class: "fact-note" }, value ? t("flash.note") : t("flash.notWorkedOutNote")),
-    example && h("p", { class: "fact-note" }, example),
-    h("p", { class: "fineprint" }, t("flash.fineprint")));
+  return factCard({ iconName: "rain", label: t("flash.label"), className: "flash-fact",
+    tone: value && FLASH_TONE[value.class], chip: value && flashWord(value.class),
+    value: value ? [rampSwatch(step), t("flash.score", { score: oneDecimal(value.score) })] : t("flash.notWorkedOut"),
+    lead: value ? [] : h("p", { class: "fact-note" }, t("flash.notWorkedOutNote")),
+    more: [value && h("p", {}, t("flash.note")), example && h("p", {}, example), h("p", { class: "fineprint" }, t("flash.fineprint"))] });
 }
 
 // How closely an index's ranking of the sections follows the floods on record (Spearman's rho, index_method.validation).

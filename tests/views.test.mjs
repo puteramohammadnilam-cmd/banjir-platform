@@ -35,7 +35,9 @@ const headButtons = (panel) => head(panel).querySelectorAll("button").map((butto
 test("a business shows its road, its Google Maps listing, its floor and the page's flood record", () => {
   const { panel, card } = mountCard();
   show(card, shop, { listing: LISTING });
-  assert.deepEqual(factLabels(panel), ["Road access", "Height of the ground", "Google Maps", "Floor height", "Floods recorded here"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floods recorded here", "Road access", "Floor height", "Google Maps"]);
+  assert.deepEqual(panel.querySelectorAll(".fact-group-heading").map((heading) => heading.textContent),
+    ["Water at this place", "Getting out", "Make it more exact"]);
   assert.equal(head(panel).querySelector("h1").textContent, "A Shop");
   assert.deepEqual(headButtons(panel), ["See on map"]);
   assert.ok(!panel.textContent.includes(NO_WATER_NOTE));
@@ -55,13 +57,14 @@ test("the bigger-flood example is the page's area's own: a point in another area
 test("a business of an area with no flood record shows no record fact", () => {
   const { panel, card } = mountCard({ area: { ...HOME, history: null } });
   show(card, shop);
-  assert.deepEqual(factLabels(panel), ["Road access", "Height of the ground", "Floor height"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "Road access", "Floor height"]);
 });
 
 test("a point shows no road or Google Maps fact, even when handed a road and a listing, but keeps the floor photo and the record", () => {
   const { panel, card } = mountCard();
   show(card, point({ road: shop.road }), { listing: LISTING });
-  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floor height", "Floods recorded here"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floods recorded here", "Floor height"]);
+  assert.ok(!panel.textContent.includes("Getting out"), "a group with nothing in it has no heading");
 });
 
 test("a point's head carries its kicker, title, square, tags and the way to see it on the map", () => {
@@ -124,11 +127,12 @@ test("a point shows the relief centre its area has, and a business keeps its own
   const shelter = { name: "A Hall", distance_m: 1806 };
   const inArea = mountCard();
   show(inArea.card, point({ shelter }));
-  assert.deepEqual(factLabels(inArea.panel), ["Height of the ground", "Flood relief centre", "Floor height", "Floods recorded here"]);
+  assert.deepEqual(factLabels(inArea.panel), ["Height of the ground", "Floods recorded here", "Flood relief centre", "Floor height"]);
   assert.ok(inArea.panel.textContent.includes("A Hall"));
+  assert.ok(inArea.panel.textContent.includes("1.8 km away"), "the distance leads, as a person says it");
   const business = mountCard();
   show(business.card, { ...shop, shelter });
-  assert.equal(factLabels(business.panel)[2], "Flood relief centre");
+  assert.equal(factLabels(business.panel)[3], "Flood relief centre");
 });
 
 test("a dry point says what the model does not show; a dry business, or a wet point, does not", () => {
