@@ -10,10 +10,12 @@ from __future__ import annotations
 import base64
 import binascii
 import logging
+import os
 import threading
 import time
 from collections import defaultdict, deque
 from collections.abc import Mapping
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -59,6 +61,10 @@ MAX_AI_CALLS = 8            # Gemini calls in flight at once: each holds a pool 
 AI_SLOT_WAIT_S = 2          # is shared with the data routes, so a visitor past the cap waits this long, then is told
 AI_BUSY_WORDS = "The AI assistant is busy. Please try again in a minute."
 AI_BUSY_CODES = (429, 503)   # Gemini's own "too many requests" and "overloaded"
+AI_DAILY_LIMIT = int(os.environ.get("AI_DAILY_LIMIT", "1500"))   # AI answers a day, all visitors together (one answer
+# can take up to ai.MAX_MODEL_REQUESTS Gemini requests; a spoken question is two answers)
+AI_DAY_ZONE = timezone(timedelta(hours=8))   # the day turns at midnight Malaysia time
+AI_RESTING_WORDS = "The AI assistant has reached today's limit and is resting. Please try again tomorrow."
 GZIP_MIN_BYTES = 1024
 GZIP_LEVEL = 6               # level 9 gains 2% on the area data for over twice the time, on the event loop
 MAX_TRACKED_CLIENTS = 10_000
@@ -108,6 +114,7 @@ app.add_middleware(GZipMiddleware, minimum_size=GZIP_MIN_BYTES, compresslevel=GZ
 _hits: dict[str, deque[float]] = defaultdict(deque)
 _hits_lock = threading.Lock()
 _ai_slots = threading.BoundedSemaphore(MAX_AI_CALLS)
+_ai_today = {"day": None, "calls": 0}   # guarded by _hits_lock
 areas.preload()   # a malformed area file stops the server here, at start-up, not in the middle of a request
 sections.preload()
 
@@ -306,9 +313,24 @@ def decode_audio(data_url: str) -> tuple[bytes, str]:
     return raw, mime
 
 
+def count_ai_call() -> None:
+    """One more AI answer today, or a 503 once AI_DAILY_LIMIT is reached: a cap on the bill whoever is asking.
+    ponytail: in memory, per instance, so a restart starts the day's count again. Behind it sit the quotas and
+    budget alert set in Google Cloud; with several instances, move the count to a shared store."""
+    day = datetime.now(AI_DAY_ZONE).date()
+    with _hits_lock:
+        if _ai_today["day"] != day:
+            _ai_today.update(day=day, calls=0)
+        if _ai_today["calls"] >= AI_DAILY_LIMIT:
+            raise HTTPException(503, AI_RESTING_WORDS)
+        _ai_today["calls"] += 1
+
+
 def call_ai(fn, *args):
     """Run an AI call; turn provider failures into clean HTTP errors without leaking details. At most MAX_AI_CALLS run
-    at once; a visitor past that, or one Gemini itself turns away as over its rate limit or overloaded, gets a 503."""
+    at once, and at most AI_DAILY_LIMIT a day; a visitor past either, or one Gemini itself turns away as over its rate
+    limit or overloaded, gets a 503."""
+    count_ai_call()
     if not _ai_slots.acquire(timeout=AI_SLOT_WAIT_S):
         raise HTTPException(503, AI_BUSY_WORDS)
     try:
