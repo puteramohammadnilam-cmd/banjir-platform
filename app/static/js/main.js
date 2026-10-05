@@ -334,6 +334,7 @@ function createExtras(app) {
     onAdd: (id) => store.update({ compare: addCompared(store.state.compare, id) }),
     onRemove: (id) => store.update({ compare: store.state.compare.filter((kept) => kept !== id) }),
     onOpen: (place) => (place.is_point ? openPoint(app, place, null) : open(app, place.id)),
+    onFind: () => findShop(app),
   });
   $("panel-business").append(plan.node, compare.node);
   return { plan, compare };
