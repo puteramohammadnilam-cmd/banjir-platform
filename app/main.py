@@ -32,7 +32,7 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, floodtools, googlemaps, indexes, places, plan, raster, sections, stock  # noqa: E402
+from . import ai, areas, floodtools, googlemaps, indexes, lowground, places, plan, raster, sections, stock  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -467,9 +467,20 @@ def one_section(area_id: str, section_id: str) -> dict:
 @app.api_route("/api/areas/{area_id}/layers/flash-flood.png", dependencies=[Depends(map_limit)],
                methods=GET_AND_HEAD)
 def flash_flood_layer(area_id: str, request: Request) -> Response:
-    """The flash flood potential map layer of an area (app/indexes.py), checked again on every load: an unchanged file
-    (its ETag, from its size and time) is a 304."""
-    path = indexes.png_path(area_id)
+    """The flash flood potential map layer of an area (app/indexes.py)."""
+    return png_answer(indexes.png_path(area_id), request)
+
+
+@app.api_route("/api/areas/{area_id}/layers/low-ground-{level}.png", dependencies=[Depends(map_limit)],
+               methods=GET_AND_HEAD)
+def low_ground_layer(area_id: str, level: str, request: Request) -> Response:
+    """The low ground map layer of an area at one level, 1, 2, 3 or 5 m (app/lowground.py); any other is a 404."""
+    return png_answer(lowground.png_path(area_id, level), request)
+
+
+def png_answer(path: Path | None, request: Request) -> Response:
+    """A map layer's PNG, checked again on every load: an unchanged file (its ETag, from its size and time) is a 304;
+    no file is a 404."""
     if path is None:
         raise HTTPException(404, "No layer.")
     found = FileResponse(path, media_type="image/png", headers={"Cache-Control": "no-cache"}, stat_result=path.stat())

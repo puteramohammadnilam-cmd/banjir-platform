@@ -639,7 +639,7 @@ body[data-tab="overview"] .finder { display: none; }
 }
 
 /* ---------- flash flood potential: its layer, the controls under the map, and swatches of a ramp on the map's ground ---------- */
-.flash-overlay { image-rendering: pixelated; }   /* each ~30 m square stays a square: a susceptibility, not a smooth surface */
+.flash-overlay, .lowground-overlay { image-rendering: pixelated; }   /* each ~30 m square stays a square, not a smooth surface */
 .map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-5); margin-top: var(--space-3); padding: var(--space-1) var(--space-3); border-radius: var(--radius-md); background: var(--surface-sunk); font-size: var(--text-sm); }
 .map-controls label { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; cursor: pointer; }
 .map-controls input { width: 1.1rem; height: 1.1rem; margin: 0; accent-color: var(--brand); }

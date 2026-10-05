@@ -1,0 +1,107 @@
+{
+ "version": 1,
+ "area": "shah-alam",
+ "layer": "low_ground",
+ "levels": [
+  1,
+  2,
+  3,
+  5
+ ],
+ "tones": [
+  {
+   "index": 1,
+   "above_m": null,
+   "up_to_m": 1.0,
+   "colour": "#1d4c41",
+   "oklch": [
+    0.38,
+    0.055,
+    175
+   ]
+  },
+  {
+   "index": 2,
+   "above_m": 1.0,
+   "up_to_m": 2.0,
+   "colour": "#417467",
+   "oklch": [
+    0.52,
+    0.06,
+    175
+   ]
+  },
+  {
+   "index": 3,
+   "above_m": 2.0,
+   "up_to_m": 3.0,
+   "colour": "#6e9e90",
+   "oklch": [
+    0.66,
+    0.055,
+    175
+   ]
+  },
+  {
+   "index": 4,
+   "above_m": 3.0,
+   "up_to_m": 5.0,
+   "colour": "#a0c8bc",
+   "oklch": [
+    0.8,
+    0.045,
+    175
+   ]
+  }
+ ],
+ "rule": "A square is shaded on a level's layer when the lowest height above the nearest mapped river of the 3 x 3 squares around it is at or below that level; the tone says how high it sits.",
+ "source": {
+  "file": "shah-alam_above_river.tif",
+  "bytes": 1109220,
+  "sha256": "d735c54dc628119455c73c1ab02c761f9f4208428ba2e9e7fb5427de89465919"
+ },
+ "files": {
+  "1": {
+   "file": "shah-alam_lowground_1m.png",
+   "bytes": 29017,
+   "sha256": "637d317fcb069d5947f1438ff8cb11ed537b428c1f4bf30ee25743701941640d"
+  },
+  "2": {
+   "file": "shah-alam_lowground_2m.png",
+   "bytes": 45204,
+   "sha256": "ff1a85c1a1dba022a2bc840cd3a4c0bdc163ff5ec2508f158c303e831acef764"
+  },
+  "3": {
+   "file": "shah-alam_lowground_3m.png",
+   "bytes": 60393,
+   "sha256": "8b816d1f6083b5b14a5da9026a06537987ac5d73a2c0bec8c948f3aa2e80a67e"
+  },
+  "5": {
+   "file": "shah-alam_lowground_5m.png",
+   "bytes": 75369,
+   "sha256": "3e1357e9cf3aae034b03a45ef492dd30c98104049cd39547d98235c6e6b0c9ed"
+  }
+ },
+ "grid": {
+  "west": 101.41208333333333,
+  "north": 3.2481944444444446,
+  "px": 0.0002777777777777778,
+  "py": 0.0002777777777777778,
+  "rows": 1139,
+  "cols": 705
+ },
+ "bounds": [
+  101.41208333333333,
+  2.9318055555555556,
+  101.60791666666667,
+  3.2481944444444446
+ ],
+ "png": {
+  "width": 705,
+  "height": 1139,
+  "transparent_index": 0,
+  "masked": "Transparent above the level and beyond 3 km of a mapped river (no data)."
+ },
+ "credit": "Ground height: Copernicus GLO-30; rivers © OpenStreetMap contributors",
+ "not": "Not a flood forecast or extent: banks, bunds, drains and pumps are left out, and land that is not shaded can still flood from rain or drains."
+}

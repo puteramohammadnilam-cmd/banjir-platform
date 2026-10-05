@@ -182,9 +182,9 @@ def test_a_section_without_the_file_is_sent_as_it_was(city):
     assert sections.index_doc(CITY) is None
     assert "indexes" not in sections.public(sections.listed(CITY)[0], CITY)
     sent = sections.details(areas.get(CITY))
-    assert sent["index_method"] is None and sent["layers"] == {"flash_flood": None}
+    assert sent["index_method"] is None and sent["layers"] == {"flash_flood": None, "low_ground": None}
     plain = sections.details(areas.get(PLAIN))
-    assert plain["index_method"] is None and plain["layers"] == {"flash_flood": None}
+    assert plain["index_method"] is None and plain["layers"] == {"flash_flood": None, "low_ground": None}
 
 
 def test_a_section_carries_its_flash_and_score_figures(city):

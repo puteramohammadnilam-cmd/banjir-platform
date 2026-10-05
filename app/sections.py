@@ -26,7 +26,8 @@ flash and the score are null for a section with no land square, the score alone 
 and `score`, the method (`flash`, whose classes and breaks must be those of the flash flood potential files, and `score`
 with its weights, deviations and citations) and `validation`, how the figures compare with the flood record. A section
 is sent `indexes` {flash, score} (no ratings), the area's details `index_method` {flash, score, validation} and `layers`
-{flash_flood} (app/indexes.py layer): null, or left out of a section, where there are no files. While the area holds the
+{flash_flood (app/indexes.py layer), low_ground (app/lowground.py layer)}: null, or left out of a section, where there
+are no files. While the area holds the
 score back (area.json show_index_score false), nothing of it is sent: no `indexes.score`, no `index_method.score`, and
 no score correlations or hotspot score ranks in the validation.
 
@@ -39,7 +40,7 @@ import re
 from collections.abc import Mapping
 from functools import lru_cache
 
-from . import areas, geo, indexes, raster
+from . import areas, geo, indexes, lowground, raster
 from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
@@ -368,7 +369,7 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
     found = {**summary(area), "council": area.council, "notes": areas._thaw(area.notes),
              "history": history_for(area, section_id), "bigger_flood_example": area.bigger_flood_example,
              "flash_flood_example": area.flash_flood_example, "index_method": index_method(area.id),
-             "layers": {"flash_flood": indexes.layer(area.id)}}
+             "layers": {"flash_flood": indexes.layer(area.id), "low_ground": lowground.layer(area.id)}}
     if has_sections(area):
         found.update(section_word=areas._thaw(area.section_word), default_section=area.default_section)
     return found
