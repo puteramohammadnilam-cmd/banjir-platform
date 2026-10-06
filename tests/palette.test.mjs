@@ -179,3 +179,12 @@ test("the low ground PNGs' palette is the page's ramp, lowest ground first", () 
   assert.deepEqual(doc.tones.map((tone) => tone.colour), LOW_RAMP.map(({ color }) => color));
   assert.deepEqual(doc.tones.map((tone) => tone.up_to_m), LOW_RAMP.map(({ upTo }) => upTo));
 });
+
+test("every stylesheet in styles/ is linked from the page, after tokens.css and app.css", async () => {
+  const { readdirSync } = await import("node:fs");
+  const page = readFileSync(new URL("../app/static/index.html", import.meta.url), "utf8");
+  const linked = [...page.matchAll(/<link rel="stylesheet" href="styles\/([\w-]+\.css)">/g)].map((match) => match[1]);
+  const files = readdirSync(new URL("../app/static/styles/", import.meta.url)).filter((name) => name.endsWith(".css"));
+  assert.deepEqual([...linked].sort(), [...files].sort());
+  assert.deepEqual(linked.slice(0, 2), ["tokens.css", "app.css"]);
+});

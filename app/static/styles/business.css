@@ -1,0 +1,131 @@
+/* My business: the drawing, the facts, the flood plan and Compare places. Split from views.css (6 Oct 2026) so each surface fits the 800-line limit; linked after views.css. */
+
+/* ---------- my business ---------- */
+.biz-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.biz-head .tags { margin-top: var(--space-2); }
+.biz-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.biz-actions .btn, .biz-head .fact-note .btn-link { min-height: 44px; }   /* touch targets */
+.biz-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.risk .scenario { margin-bottom: var(--space-5); }
+.headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+.headline strong { font-size: var(--text-figure); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums; }
+.headline span { font-size: var(--text-xl); font-weight: 700; }
+.headline.is-dry strong { color: var(--dry); }
+.subhead { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
+
+.gauge { display: block; width: 100%; max-width: 34rem; height: auto; margin: var(--space-5) 0 var(--space-2); }
+.gauge text { font: 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }   /* a light outline keeps labels readable over water */
+.gauge .figure, .gauge .knob { fill: var(--ink-3); }
+.gauge .door { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.gauge .counter { fill: var(--surface-sunk); stroke: var(--ink); stroke-width: 1.5; }
+.gauge .floor { fill: var(--line); }
+.gauge .water { fill-opacity: 0.6; transform-box: fill-box; transform-origin: bottom; transition: transform 700ms var(--ease-out-expo); }
+.gauge .waterline { stroke: var(--brand); stroke-width: 2; transition: transform 700ms var(--ease-out-expo); }
+.gauge .other-level { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.55; }
+.gauge .level.is-active, .gauge .object-label { font-weight: 700; fill: var(--ink); }
+.gauge .street { stroke: var(--ink); stroke-width: 2; }
+.gauge.gauge-mini { max-width: 12rem; margin: var(--space-2) 0 0; }   /* the first-screen picture: no text in it, so it can be small */
+.gauge .storey { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 1 3; }
+
+.biz-side { display: grid; gap: var(--space-3); }
+/* Facts read at a glance: grouped under a heading, the answer large, a coloured edge and chip for its tone, and the
+   limits folded under "How to read this" */
+.facts { display: grid; gap: var(--space-5); }
+.fact-group { display: grid; gap: var(--space-2); }
+.fact-group-heading { margin: 0; font-size: var(--text-md); font-weight: 800; color: var(--ink); }
+.fact { padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: inset 4px 0 0 var(--tone-edge, var(--line)); }
+.fact[data-tone="high"] { --tone-edge: var(--tone-high); --tone-ink: var(--tone-high); --tone-wash: var(--tone-high-wash); }
+.fact[data-tone="some"] { --tone-edge: var(--tone-some-line); --tone-ink: var(--tone-some); --tone-wash: var(--tone-some-wash); }
+.fact[data-tone="low"] { --tone-edge: var(--tone-low); --tone-ink: var(--tone-low); --tone-wash: var(--tone-low-wash); }
+.fact-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-3); }
+.fact-label { margin: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.fact-chip { padding: 2px var(--space-3); border-radius: 999px; font-size: var(--text-xs); font-weight: 700; background: var(--tone-wash, var(--surface-sunk)); color: var(--tone-ink, var(--ink-2)); }
+.fact-value { margin-top: var(--space-1); font-size: var(--text-xl); font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fact-note { margin-top: 2px; font-size: var(--text-sm); color: var(--ink-2); }
+.fact .btn { margin-top: var(--space-2); }
+.fact .fact-link { margin-top: var(--space-1); padding: 0; min-height: 2.25rem; }
+.fact-more { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
+.fact-more > p { margin-top: var(--space-2); }
+.fact-more summary, .area-note summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 2.25rem; font-size: var(--text-sm); font-weight: 700; color: var(--brand); cursor: pointer; list-style: none; }
+.fact-more summary::-webkit-details-marker, .area-note summary::-webkit-details-marker { display: none; }
+.fact-more summary::after, .area-note summary::after { content: "›" / ""; font-size: var(--text-lg); line-height: 1; transition: transform var(--duration-fast) var(--ease-out); }
+.fact-more[open] summary::after, .area-note[open] summary::after { transform: rotate(90deg); }
+.fact-more summary:hover, .area-note summary:hover { text-decoration: underline; }
+.photo-thumb { display: block; width: 96px; height: 72px; margin-top: var(--space-2); object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+.photo-button { position: relative; }
+.photo-button:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.photo-button[aria-disabled="true"] { opacity: 0.6; pointer-events: none; }
+
+.next { display: grid; gap: var(--space-2); }
+.next-step { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); text-align: left; cursor: pointer; transition: border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast); }
+.next-step:hover { border-color: var(--ink-3); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.next-step strong { display: block; font-size: var(--text-md); color: var(--ink); }
+.next-step span { font-size: var(--text-sm); color: var(--ink-2); }
+.next-step .icon { width: 20px; height: 20px; color: var(--ink-2); }
+.next-step.is-primary { border: 1.5px solid var(--accent); background: var(--accent-wash); }
+.next-step.is-primary .icon { color: var(--accent); }
+
+@media (max-width: 900px) { .biz-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 901px) { .gauge text { font-size: 10.5px; } }   /* the drawing scales up on wide screens; its labels should not */
+/* a laptop or wider, with a place on show: the drawing, then the flood plan and the compare card (main.js puts those after
+   the grid) on the left, the facts and next steps on the right. So neither column ends far above the other, and no card
+   runs the page's whole width with little in it. Phones keep the page's own order: drawing, facts, plan, compare */
+@media (min-width: 901px) {
+  #panel-business:has(> .biz-grid:not([hidden])) {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
+    grid-template-areas: "head head" "risk side" "plan side" "compare side";
+  }
+  #panel-business > .biz-grid { display: contents; }
+  #panel-business > :first-child:empty { display: none; }   /* the empty state's slot, with a place on show */
+  #panel-business > .biz-head { grid-area: head; margin-bottom: var(--space-1); }
+  #panel-business .risk { grid-area: risk; }
+  #panel-business .biz-side { grid-area: side; }
+  #panel-business > .plan-card { grid-area: plan; margin-top: 0; }
+  #panel-business > .compare-card { grid-area: compare; margin-top: 0; }
+}
+/* a wide screen: the drawing fills its card, its labels the same size on screen as at 34rem */
+@media (min-width: 1280px) {
+  .risk .gauge { max-width: 44rem; }
+  .risk .gauge text { font-size: 8.2px; }
+}
+
+/* ---------- the flood plan ---------- */
+.area-print { display: grid; gap: var(--space-2); justify-items: start; }
+.area-report ul { list-style: disc; }
+.compare-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
+.compare-card > * { max-width: 100%; }
+.compare-card .table-scroll { width: 100%; }
+.compare-table .btn-link { min-height: 44px; text-align: left; }
+.compare-step { font-weight: 600; color: var(--ink); }
+.compare-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.compare-verdict { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--brand); background: var(--brand-wash); color: var(--ink); }
+/* the least water in a column: a word tag, and a tint, so colour is not the only cue */
+.compare-table td.is-least { background: var(--brand-wash); font-weight: 700; }
+.least-tag, .here-tag { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--brand-deep); }
+.here-tag { color: var(--ink-3); }
+.compare-table thead th.is-current { box-shadow: inset 0 3px 0 var(--brand); }
+.loss-table.compare-table { min-width: 0; }   /* places across, at most three: fits a phone */
+.loss-table.compare-table th, .loss-table.compare-table td { padding-inline: var(--space-1); vertical-align: top; }
+.loss-table.compare-table tbody th { text-align: left; font-weight: 600; color: var(--ink-2); width: 34%; }
+.loss-table.compare-table thead th, .compare-table thead .btn-link { text-align: right; }
+.plan-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
+.plan-card > * { max-width: 100%; }
+.plan-language { display: flex; flex-wrap: wrap; gap: var(--space-4); border: 0; padding: 0; margin: 0; }
+.plan-language legend { font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: var(--space-1); }
+.plan-sheet { display: grid; gap: var(--space-2); width: 100%; max-width: 48rem; padding: var(--space-5); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); }
+.plan-sheet h3 { font-size: var(--text-xl); }
+.plan-sheet h4 { margin-top: var(--space-3); color: var(--brand-deep); }
+.plan-sheet ol, .plan-sheet ul { margin: 0; padding-left: 1.4rem; display: grid; gap: var(--space-1); }
+.plan-sheet ol { list-style: decimal; }
+.plan-sheet ul { list-style: disc; }
+.plan-sheet li { display: list-item; }
+.plan-sheet .table-scroll { width: 100%; }
+.plan-actions, .plan-share { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.plan-print { justify-self: start; }
+#print-root { display: none; }
+@media print {
+  body:has(> #print-root:not(:empty)) > :not(#print-root) { display: none !important; }
+  #print-root { display: block; }
+  #print-root .plan-sheet { border: 0; padding: 0; max-width: none; }
+  #print-root .plan-actions { display: none; }
+}

@@ -185,3 +185,21 @@ h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* tables of figures, used by Flood cost, Reference and Compare places */
+.table-scroll { position: relative; overflow-x: auto; }   /* the table scrolls inside its card on narrow screens, not the page; relative,
+   so a visually hidden line in it stays inside its box and adds no blank scroll under the page */
+.loss-table.is-flat { min-width: 0; }   /* three columns fit a phone; the five of an own value scroll */
+/* past losses on the Reference tab: years down the side; a year with none recorded is quieter */
+.loss-table.losses-table { min-width: 0; }   /* four short columns fit a phone */
+#losses-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+#losses-body .fineprint { overflow-wrap: anywhere; }   /* the source's long links wrap instead of widening the card */
+.losses-table tr.is-none td { color: var(--ink-3); }
+.loss-table.losses-table th, .loss-table.losses-table td { padding-inline: var(--space-1); }
+.loss-table { width: 100%; min-width: 26rem; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.loss-table th, .loss-table td { padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+.loss-table th:first-child, .loss-table td:first-child { text-align: left; }
+.loss-table thead th { font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); }
+.loss-table tbody th { font-weight: 600; }
+.loss-table tr.is-chosen th, .loss-table tr.is-chosen td { background: var(--brand-wash); }   /* the size of flood on show */
+.loss-table tr.is-chosen th { box-shadow: inset 3px 0 0 var(--brand); }
