@@ -6,6 +6,7 @@
 import { carStep } from "./car.js";
 import { band, depthText, h } from "./dom.js";
 import { distanceText } from "./fact.js";
+import { forecastLine } from "./forecast.js";
 import { t } from "./i18n.js";
 import { combine } from "./stock.js";
 
@@ -43,11 +44,12 @@ function carBody({ premise, rp, dry }) {
   return carStep(premise, rp, dry) ?? [h("p", {}, t("mode.carEarly"))];
 }
 
-function goStep(premise) {
+function goStep(premise) {   // the river forecast link is Google's, beside the official one
   const shelter = premise.shelter;
   return [
     h("p", {}, shelter ? t("mode.goShelter", { name: shelter.name, distance: distanceText(shelter.distance_m) }) : t("mode.goNoShelter")),
     h("p", {}, t("mode.goCall"), " ", h("a", { href: INFOBANJIR, target: "_blank", rel: "noopener noreferrer", translate: "no" }, "JPS Public Infobanjir"), "."),
+    forecastLine(premise),
   ];
 }
 

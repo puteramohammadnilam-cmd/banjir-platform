@@ -63,7 +63,7 @@ test("a business of an area with no flood record shows no record fact", () => {
 test("a point shows no road or Google Maps fact, even when handed a road and a listing, but keeps the floor photo and the record", () => {
   const { panel, card } = mountCard();
   show(card, point({ road: shop.road }), { listing: LISTING });
-  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floods recorded here", "Floor height"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floods recorded here", "River forecast", "Floor height"]);
   assert.ok(!panel.textContent.includes("Getting out"), "a group with nothing in it has no heading");
 });
 
@@ -105,7 +105,7 @@ test("a point in another listed area names it, offers to open it, and leaves tha
   assert.equal(head(panel).querySelector(".fact-note").textContent, "This point is in Far Town. Open Far Town");
   buttonNamed(panel, "Open Far Town").click();
   assert.deepEqual(opened, ["far"]);
-  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floor height"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "River forecast", "Floor height"]);
 });
 
 test("without a way to open the other area only the sentence shows", () => {
@@ -120,14 +120,14 @@ test("a point in no listed area is a point you picked: no offer, no record", () 
   show(card, point({ area_id: null }));
   assert.equal(head(panel).querySelector("h1").textContent, "Point you picked");
   assert.equal(head(panel).querySelector(".fact-note"), null);
-  assert.deepEqual(factLabels(panel), ["Height of the ground", "Floor height"]);
+  assert.deepEqual(factLabels(panel), ["Height of the ground", "River forecast", "Floor height"]);
 });
 
 test("a point shows the relief centre its area has, and a business keeps its own", () => {
   const shelter = { name: "A Hall", distance_m: 1806 };
   const inArea = mountCard();
   show(inArea.card, point({ shelter }));
-  assert.deepEqual(factLabels(inArea.panel), ["Height of the ground", "Floods recorded here", "Flood relief centre", "Floor height"]);
+  assert.deepEqual(factLabels(inArea.panel), ["Height of the ground", "Floods recorded here", "River forecast", "Flood relief centre", "Floor height"]);
   assert.ok(inArea.panel.textContent.includes("A Hall"));
   assert.ok(inArea.panel.textContent.includes("1.8 km away"), "the distance leads, as a person says it");
   const business = mountCard();

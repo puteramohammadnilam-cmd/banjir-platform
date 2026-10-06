@@ -61,4 +61,8 @@ export default Object.freeze({
   "mode.urgent": "Jika air sudah naik, atau pihak berkuasa menyuruh anda keluar, keluar sekarang dan tinggalkan langkah yang lain. Ikut arahan mereka dahulu.",
   "mode.powerAfter": "Selepas banjir, jangan hidupkan semula elektrik sehingga juruelektrik memeriksanya.",
   "mode.andMore": " dan {n} lagi",
+  "forecast.label": "Ramalan sungai",
+  "forecast.link": "Lihat ramalan Google berhampiran",
+  "forecast.note": "Ramalan banjir sungai AI Google, bagi tolok sungai yang ada berhampiran; sesetengah tempat tiada. Ia bukan amaran banjir: semak JPS Public Infobanjir dan ikut pihak berkuasa. Pautan ini menghantar tempat ini kepada Google, dibundarkan kepada kira-kira 1 km.",
+  "forecast.lead": "Ramalan banjir sungai Google:",
 });

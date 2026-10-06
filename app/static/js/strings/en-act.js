@@ -61,4 +61,8 @@ export default Object.freeze({
   "mode.urgent": "If water is already rising, or the authorities tell you to leave, leave now and skip the rest. Follow their instructions first.",
   "mode.powerAfter": "After the flood, do not switch the power back on until an electrician has checked it.",
   "mode.andMore": " and {n} more",
+  "forecast.label": "River forecast",
+  "forecast.link": "See Google's forecast near here",
+  "forecast.note": "Google's AI forecast of river floods, for the river gauges it has near here; some places have none. It is not a flood warning: check JPS Public Infobanjir and follow the authorities. The link sends Google this place rounded to about 1 km.",
+  "forecast.lead": "Google's river flood forecast:",
 });

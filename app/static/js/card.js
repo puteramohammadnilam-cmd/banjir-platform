@@ -2,6 +2,7 @@
 import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName, scenarioLabel } from "./dom.js";
 import { carFact } from "./car.js";
 import { floodModeButton } from "./floodmode.js";
+import { forecastFact } from "./forecast.js";
 import { shareButton } from "./share.js";
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
@@ -190,7 +191,8 @@ function sideFacts({ premise, rp, photo, listing, dry }, { area, goto, onPhoto, 
     factGroup(t("business.groupWater"), [
       flashFact(premise, hasPageRecord && area),   // the example is the page's area's
       elevationFact(premise),
-      hasPageRecord && historyFact(area, goto)]),
+      hasPageRecord && historyFact(area, goto),
+      forecastFact(premise)]),
     factGroup(t("business.groupOut"), [
       !isPoint && premise.road && roadFact(premise, rp),
       carFact(premise, rp, dry),
