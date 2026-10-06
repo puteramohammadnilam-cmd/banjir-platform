@@ -1,0 +1,25 @@
+// The Insurance tab's "kinds of flood cover" card in English, kept apart so strings/en.js stays under the file size
+// limit; en.js spreads it in. Facts from the insurance research notes, FINDINGS_PRODUCTS.md (checked 6 Oct 2026).
+export default Object.freeze({
+  "insurance.kindsHeading": "Kinds of flood cover, by size of business",
+  "insurance.kindsLead": "What each kind usually covers, and prices where insurers publish them. In every small-business policy we read, flood was an add-on: ask for it by name.",
+  "insurance.kindsSmall": "Small shop",
+  "insurance.kindsSmall1": "A fire policy with a flood add-on (special perils). It covers the building, renovation, stock and fittings you list, against water coming in from outside.",
+  "insurance.kindsSmall2": "A shop or SME package: fire, burglary, money and glass in one policy. Flood is still an add-on.",
+  "insurance.kindsSmall3": "Daily cash while closed: some packages pay a set sum a day after damage they cover, so flood must be on the policy.",
+  "insurance.kindsSmallPrice": "Published examples from insurers' product sheets (2024 to 2026): the flood add-on is about 0.086% of the sum insured a year (RM 430 on RM 500,000). Fire cover itself for a retail shop is about 0.15% to 0.29% a year, by insurer and type of building.",
+  "insurance.kindsMedium": "Medium shop or small firm",
+  "insurance.kindsMedium1": "A fire or property all risks policy. Check flood by name: some all risks policies for small firms leave flood out unless you add it.",
+  "insurance.kindsMedium2": "Business interruption (consequential loss): pays lost profit after damage the property policy covers, so both need flood.",
+  "insurance.kindsMedium3": "In the wordings we read, machine breakdown and electronic equipment cover leave flood out, so machines usually need to be on the fire or property policy.",
+  "insurance.kindsMediumPrice": "No flood-specific price is published for this size. Business interruption is priced on your yearly gross profit and how many months it covers.",
+  "insurance.kindsLarge": "Factory, warehouse or large complex",
+  "insurance.kindsLarge1": "Industrial all risks with business interruption. The wording we read does not leave flood out, but the limit and excess are set for each site, and some policies give flood a smaller limit of its own. Check flood by name, with its limit and excess.",
+  "insurance.kindsLarge2": "Suppliers: contingent business interruption can pay when damage at a supplier's site stops your work. It is usually capped and starts after a waiting period; check that flood counts.",
+  "insurance.kindsLarge3": "Contractors all risks covers a site while it is being built or extended.",
+  "insurance.kindsLargePrice": "No published prices. Each site is priced after a survey, usually through a broker, and insurers look at past floods and flood-proofing. Some firms are offered less flood cover, or none.",
+  "insurance.kindsCheck": "None of these is a recommendation. Before you buy, check that the insurer, takaful operator, broker or adviser is on Bank Negara Malaysia's lists.",
+  "insurance.kindsInsurersLink": "Licensed insurers and takaful operators",
+  "insurance.kindsAdvisersLink": "Approved brokers and financial advisers",
+  "insurance.kindsSource": "Sources: insurers' and takaful operators' product disclosure sheets, brochures and policy wordings (2015 to 2026); Bank Negara Malaysia; World Bank and Bank Negara Malaysia (2024). Prices are examples, not quotes.",
+});

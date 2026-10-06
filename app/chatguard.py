@@ -27,7 +27,7 @@ from pathlib import Path
 from . import costs
 
 STRINGS = Path(__file__).parent / "static" / "js" / "strings"
-GUIDE_FILES = ("en.js", "en-reference.js", "en-act.js", "en-look.js")
+GUIDE_FILES = ("en.js", "en-reference.js", "en-act.js", "en-look.js", "en-cover.js")
 # the page strings that explain the tool; labels for form fields and buttons are left out
 GUIDE_PREFIXES = ("tab.", "reference.", "insurance.", "mode.", "footer.", "flash.", "history.", "compare.", "car.",
                   "share.", "plan.", "stock.", "hero.")

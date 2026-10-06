@@ -20,3 +20,8 @@
 .insurance-example { font-size: var(--text-sm); color: var(--ink-3); }
 .insurance-card > .btn { justify-self: start; }
 .cost-first-look { padding: var(--space-1) 0 var(--space-1) var(--space-4); border-left: 4px solid var(--line-strong); font-size: var(--text-sm); font-weight: 600; }   /* the inset caveat (cost.css .inset) */
+.insurance-kinds { grid-column: 1 / -1; }   /* the three sizes side by side need the full width */
+.insurance-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-4); }
+.insurance-tier { display: grid; gap: var(--space-2); align-content: start; padding-top: var(--space-3); border-top: 2px solid var(--brand); }
+.insurance-tier h3 { font-size: var(--text-md); }
+.insurance-tier .insurance-example { padding-top: var(--space-2); border-top: 1px solid var(--line); }

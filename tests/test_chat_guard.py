@@ -81,7 +81,7 @@ def test_the_guide_is_the_pages_own_words_with_no_formula_place_or_secret():
     assert "{" not in guide and not re.search(r"[×÷=]", guide)
     assert not [word for word in PLACE_WORDS if word.lower() in guide.lower()]
     assert not re.search(r"AIza|/opt/|\.env|GOOGLE_API_KEY|43\.156", guide)
-    assert len(guide) < 15_000   # it goes with every question
+    assert len(guide) < 16_000   # it goes with every question (cached as part of the fixed prompt)
 
 
 @pytest.mark.parametrize("question", ATTACKS)

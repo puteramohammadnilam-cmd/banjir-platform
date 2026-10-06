@@ -1,0 +1,25 @@
+// Kad "jenis perlindungan banjir" tab Insurans dalam Bahasa Melayu, kunci yang sama dengan strings/en-cover.js; ms.js
+// menyebarkannya supaya ms.js kekal di bawah had saiz fail.
+export default Object.freeze({
+  "insurance.kindsHeading": "Jenis perlindungan banjir, ikut saiz perniagaan",
+  "insurance.kindsLead": "Apa yang biasanya dilindungi oleh setiap jenis, dan harga jika syarikat insurans menerbitkannya. Dalam setiap polisi perniagaan kecil yang kami baca, banjir ialah tambahan: mintalah secara khusus.",
+  "insurance.kindsSmall": "Kedai kecil",
+  "insurance.kindsSmall1": "Polisi kebakaran dengan tambahan banjir (bencana khas). Ia melindungi bangunan, ubah suai, stok dan kelengkapan yang anda senaraikan, daripada air yang masuk dari luar.",
+  "insurance.kindsSmall2": "Pakej kedai atau PKS: kebakaran, pecah masuk, wang dan kaca dalam satu polisi. Banjir tetap tambahan.",
+  "insurance.kindsSmall3": "Wang tunai harian semasa tutup: sesetengah pakej membayar jumlah tetap sehari selepas kerosakan yang dilindunginya, jadi banjir mesti ada dalam polisi.",
+  "insurance.kindsSmallPrice": "Contoh yang diterbitkan dalam helaian produk syarikat insurans (2024 hingga 2026): tambahan banjir kira-kira 0.086% daripada jumlah diinsuranskan setahun (RM 430 bagi RM 500,000). Perlindungan kebakaran sendiri bagi kedai runcit kira-kira 0.15% hingga 0.29% setahun, ikut syarikat insurans dan jenis bangunan.",
+  "insurance.kindsMedium": "Kedai sederhana atau firma kecil",
+  "insurance.kindsMedium1": "Polisi kebakaran atau semua risiko harta. Semak banjir dengan namanya: sesetengah polisi semua risiko untuk firma kecil tidak melindungi banjir kecuali anda menambahnya.",
+  "insurance.kindsMedium2": "Gangguan perniagaan (kerugian berbangkit): membayar untung yang hilang selepas kerosakan yang dilindungi polisi harta, jadi kedua-duanya perlu ada banjir.",
+  "insurance.kindsMedium3": "Dalam teks polisi yang kami baca, perlindungan kerosakan mesin dan peralatan elektronik tidak melindungi banjir, jadi mesin biasanya perlu ada dalam polisi kebakaran atau harta.",
+  "insurance.kindsMediumPrice": "Tiada harga khusus banjir yang diterbitkan bagi saiz ini. Gangguan perniagaan diberi harga ikut untung kasar tahunan anda dan berapa bulan ia melindungi.",
+  "insurance.kindsLarge": "Kilang, gudang atau kompleks besar",
+  "insurance.kindsLarge1": "Semua risiko industri dengan gangguan perniagaan. Teks polisi yang kami baca tidak mengecualikan banjir, tetapi had dan ekses ditetapkan bagi setiap tapak, dan sesetengah polisi memberi banjir had sendiri yang lebih kecil. Semak banjir secara khusus, dengan had dan eksesnya.",
+  "insurance.kindsLarge2": "Pembekal: gangguan perniagaan kontingen boleh membayar apabila kerosakan di tapak pembekal menghentikan kerja anda. Ia biasanya berhad dan bermula selepas tempoh menunggu; semak bahawa banjir termasuk.",
+  "insurance.kindsLarge3": "Semua risiko kontraktor melindungi tapak semasa ia dibina atau dibesarkan.",
+  "insurance.kindsLargePrice": "Tiada harga yang diterbitkan. Setiap tapak diberi harga selepas tinjauan, biasanya melalui broker, dan syarikat insurans melihat banjir lalu dan langkah kalis banjir. Sesetengah firma ditawarkan perlindungan banjir yang kurang, atau tiada langsung.",
+  "insurance.kindsCheck": "Tiada satu pun daripada ini ialah syor. Sebelum membeli, semak bahawa syarikat insurans, pengendali takaful, broker atau penasihat itu ada dalam senarai Bank Negara Malaysia.",
+  "insurance.kindsInsurersLink": "Syarikat insurans dan pengendali takaful berlesen",
+  "insurance.kindsAdvisersLink": "Broker dan penasihat kewangan yang diluluskan",
+  "insurance.kindsSource": "Sumber: helaian pendedahan produk, brosur dan teks polisi syarikat insurans dan pengendali takaful (2015 hingga 2026); Bank Negara Malaysia; Bank Dunia dan Bank Negara Malaysia (2024). Harga ialah contoh, bukan sebut harga.",
+});

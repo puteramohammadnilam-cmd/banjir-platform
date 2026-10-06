@@ -1,7 +1,8 @@
 // The "Insurance" tab: what a flood could cost this place in the model (from Flood cost's estimate), set beside a yearly
 // price the owner was quoted for flood cover; how flood cover usually works in Malaysia; questions to ask an insurer; and
 // help after a flood. It names no insurer and gives no verdict on a quote: analysing someone's cover or recommending a
-// product is financial advice, which needs a licence. Every fact comes from 05_Raw_Data_Sources/shah_alam/insurance/FINDINGS.md.
+// product is financial advice, which needs a licence. Every fact comes from 05_Raw_Data_Sources/shah_alam/insurance/FINDINGS.md
+// and FINDINGS_PRODUCTS.md.
 import { CHANCE_YEARS, SCENARIOS, chanceWithin, h, icon, ringgit } from "./dom.js";
 import { drawing } from "./drawing.js";
 import { t } from "./i18n.js";
@@ -13,7 +14,12 @@ const LINKS = {
   raft: "https://www.bnm.gov.my/funds4sme",
   fmos: "https://www.fmos.org.my/en/our-scope/",
   calculator: "https://bcc.piam.org.my/",
+  insurers: "https://www.bnm.gov.my/list-of-licensed-financial-institutions",
+  advisers: "https://www.bnm.gov.my/list-of-approved-and-registered-intermediaries",
 };
+// Kinds of flood cover by size of business (strings/en-cover.js): each size has three covers and a published price.
+const SIZES = ["Small", "Medium", "Large"];
+const COVERS_PER_SIZE = 3;
 const MAX_QUOTE_RM = 10_000_000;
 
 const link = (href, text) => h("a", { href, target: "_blank", rel: "noopener noreferrer" }, text);
@@ -82,9 +88,26 @@ function quoteCard(state, figures) {
     h("p", { class: "hint" }, t("insurance.quoteHint")), output);
 }
 
-/** The cards that are the same for every place: how cover works, questions to ask, help after a flood. */
+/** Kinds of flood cover for a small shop, a medium firm and a large site, with published example prices: generic kinds
+ *  only, no insurer or product named, and a pointer to Bank Negara Malaysia's lists of licensed firms. */
+function kindsCard() {
+  return h("section", { class: "surface insurance-card insurance-kinds" },
+    h("h2", {}, t("insurance.kindsHeading")), h("p", { class: "muted" }, t("insurance.kindsLead")),
+    h("div", { class: "insurance-tiers" }, SIZES.map((size) => h("section", { class: "insurance-tier" },
+      h("h3", {}, t(`insurance.kinds${size}`)),
+      h("ul", { class: "insurance-list" }, Array.from({ length: COVERS_PER_SIZE }, (_, i) => h("li", {}, t(`insurance.kinds${size}${i + 1}`)))),
+      h("p", { class: "insurance-example" }, t(`insurance.kinds${size}Price`))))),
+    h("p", { class: "hint" }, t("insurance.kindsCheck")),
+    h("p", { class: "hint" }, link(LINKS.insurers, t("insurance.kindsInsurersLink")), " · ",
+      link(LINKS.advisers, t("insurance.kindsAdvisersLink"))),
+    h("p", { class: "fineprint" }, t("insurance.kindsSource")));
+}
+
+/** The cards that are the same for every place: kinds of cover by size (full width, so it goes first, above the
+ *  narrower cards), how cover works, questions to ask, help after a flood. */
 function staticCards() {
   return [
+    kindsCard(),
     card(t("insurance.worksHeading"), drawing("c-cover"), h("ul", { class: "insurance-list" }, WORKS.map((key) => h("li", {}, t(key)))),
       h("p", { class: "insurance-example" }, t("insurance.example")),
       h("p", { class: "fineprint" }, t("insurance.worksSource"), " ", link(LINKS.calculator, t("insurance.calculator")))),

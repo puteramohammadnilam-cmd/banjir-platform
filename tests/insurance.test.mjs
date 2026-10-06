@@ -93,7 +93,7 @@ test("opening Insurance works out a first look, as Flood cost does", () => {
 });
 
 test("the words inform without advising: no insurer named, no verdict, never safe, in both languages", () => {
-  const INSURERS = /\b(AIG|Zurich|QBE|Tokio|Etiqa|Allianz|Takaful Malaysia|Berjaya|Sompo|RHB)\b/i;
+  const INSURERS = /\b(AIG|Zurich|QBE|Tokio|Etiqa|Allianz|Takaful Malaysia|Berjaya|Sompo|RHB|MSIG|Chubb|Liberty|Lonpac|Great Eastern|Ikhlas|Howden|Marsh|Kurnia|Generali|Bjak|PolicyStreet)\b/i;
   const VERDICT = /\b(good deal|overpriced|worth it|you should|recommended|cheapest|best)\b/i;
   for (const strings of [en, ms]) {
     const words = Object.entries(strings).filter(([key]) => key.startsWith("insurance.")).map(([, text]) => text).join(" ");
@@ -102,6 +102,21 @@ test("the words inform without advising: no insurer named, no verdict, never saf
     assert.ok(!/\b(safe|selamat)\b/i.test(words));
   }
   assert.match(en["insurance.lead"], /does not recommend any insurer, takaful operator or product, and is not financial advice/);
+});
+
+test("kinds of cover come by size of business, each with its covers and a published price, and point to BNM's lists", () => {
+  const { panel, view } = mount();
+  view.render(shop, { result: RESULT });
+  const tiers = panel.querySelectorAll(".insurance-tier");
+  assert.deepEqual(tiers.map((tier) => tier.querySelector("h3").textContent), ["Small shop", "Medium shop or small firm", "Factory, warehouse or large complex"]);
+  for (const tier of tiers) {
+    assert.equal(tier.querySelectorAll("li").length, 3);
+    assert.ok(tier.querySelector(".insurance-example").textContent.length > 40, "a price line, or why there is none");
+  }
+  assert.match(tiers[0].textContent, /0\.086%/);
+  assert.match(tiers[2].textContent, /No published prices/);
+  const links = panel.querySelector(".insurance-kinds").querySelectorAll("a").map((a) => a.getAttribute("href"));
+  assert.deepEqual(links, ["https://www.bnm.gov.my/list-of-licensed-financial-institutions", "https://www.bnm.gov.my/list-of-approved-and-registered-intermediaries"]);
 });
 
 test("vehicles and workers' pay are left out of the comparison, and said to be", () => {
