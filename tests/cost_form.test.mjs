@@ -419,6 +419,29 @@ test("cars and motorcycles count as their number times what each is worth", () =
   assert.match(panel.textContent, /Vehicles worth RM\s?63,000 in all\. .*motorcycles use the car curve, our assumption\./);
 });
 
+test("there is no limit on how many vehicles or what each is worth: each has its own figure to type", () => {
+  const { panel, cost } = mount();
+  const carValue = panel.querySelectorAll(".sub-question")[4];
+  tap(panel, "cars", "own");
+  assert.ok(shown(box(panel, "car_count")), "the count box shows");
+  assert.ok(shown(carValue), "and the value question with it, before a count is typed");
+  box(panel, "car_count").value = "12";
+  box(panel, "car_count").dispatch("input");
+  tap(panel, "carValue", "own");
+  box(panel, "car_value_rm").value = "250000";
+  box(panel, "car_value_rm").dispatch("input");
+  tap(panel, "motos", "own");
+  box(panel, "moto_count").value = "40";
+  box(panel, "moto_count").dispatch("input");
+  tap(panel, "motoValue", "own");
+  box(panel, "moto_value_rm").value = "8000";
+  box(panel, "moto_value_rm").dispatch("input");
+  assert.equal(cost.figures().vehicles_rm, 12 * 250000 + 40 * 8000);
+  tap(panel, "cars", "0");
+  assert.ok(!shown(box(panel, "car_count")), "a chip again hides the box");
+  assert.equal(cost.figures().vehicles_rm, 40 * 8000);
+});
+
 test("days closed show for workers too, as their pay counts the days", () => {
   const { panel } = mount();
   const days = panel.querySelectorAll(".sub-question")[2];

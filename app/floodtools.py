@@ -71,7 +71,7 @@ MAX_MAPS_LOOKUPS = 3   # per chat question, so a model told to check every shop 
 MAPS_SPENT = "Enough Google lookups for one question. Answer with what you have."
 ESTIMATE_MAX = {"value_at_risk_rm": 50_000_000, "floor_height_cm": 300, "daily_takings_rm": 1_000_000,
                 "closed_days": 365, "raise_cm": 300, "measure_cost_rm": 50_000_000,
-                "built_in_rm": 50_000_000, "vehicles_rm": 20_000_000, "unpaid_workers": 1_000}
+                "built_in_rm": 50_000_000, "vehicles_rm": 50_000_000, "unpaid_workers": 1_000}
 
 
 @dataclass(frozen=True)

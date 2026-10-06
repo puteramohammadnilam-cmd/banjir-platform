@@ -6,7 +6,8 @@ import { h, ringgit } from "./dom.js";
 import { t } from "./i18n.js";
 
 // The browser's own range checks, mirroring floodtools.ESTIMATE_MAX. The server checks again.
-const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, measure_cost_rm: 50_000_000, built_in_rm: 50_000_000 };
+const MAX = { value_at_risk_rm: 50_000_000, floor_height_cm: 300, daily_takings_rm: 1_000_000, measure_cost_rm: 50_000_000, built_in_rm: 50_000_000,
+  car_count: 1_000, car_value_rm: 5_000_000, moto_count: 1_000, moto_value_rm: 1_000_000 };   // vehicles in all: up to ESTIMATE_MAX's RM 50 million
 export const SIZES = [["small", "cost.sizeSmall"], ["medium", "cost.sizeMedium"], ["complex", "cost.sizeComplex"]];
 const OWN = "own";
 const UNSURE = "unsure";
@@ -32,10 +33,11 @@ const CHOICES = {
     [OWN, "common.typeOwn"]],
   workers: [["0", "cost.workersNone"], ["1", "cost.workers1"], ["2", "cost.workers2"], ["4", "cost.workers3to5"], ["8", "cost.workers6to10"]],
   paid: [["no", "cost.paidNo"], ["yes", "cost.paidYes"]],
-  cars: [["0", "cost.carsNone"], ["1", "cost.cars1"], ["2", "cost.cars2"], ["3", "cost.cars3"], ["5", "cost.cars5"]],
-  carValue: [["30000", "cost.carValue30"], ["60000", "cost.carValue60"], ["100000", "cost.carValue100"], ["150000", "cost.carValue150"]],
-  motos: [["0", "cost.motosNone"], ["1", "cost.motos1"], ["2", "cost.motos2"], ["5", "cost.motos5"]],
-  motoValue: [["3000", "cost.motoValue3"], ["6000", "cost.motoValue6"], ["10000", "cost.motoValue10"]],
+  // no limit on how many vehicles or what they are worth: each has its own figure to type (the partner's ask, 6 Oct)
+  cars: [["0", "cost.carsNone"], ["1", "cost.cars1"], ["2", "cost.cars2"], ["3", "cost.cars3"], ["5", "cost.cars5"], [OWN, "common.typeOwn"]],
+  carValue: [["30000", "cost.carValue30"], ["60000", "cost.carValue60"], ["100000", "cost.carValue100"], ["150000", "cost.carValue150"], [OWN, "common.typeOwn"]],
+  motos: [["0", "cost.motosNone"], ["1", "cost.motos1"], ["2", "cost.motos2"], ["5", "cost.motos5"], [OWN, "common.typeOwn"]],
+  motoValue: [["3000", "cost.motoValue3"], ["6000", "cost.motoValue6"], ["10000", "cost.motoValue10"], [OWN, "common.typeOwn"]],
 };
 /** The heights of the "put things higher" answers, low to high (the stock photo's advice picks one). */
 export const RAISE_STEPS = CHOICES.raise.map(([value]) => Number(value)).filter((cm) => cm > 0);
@@ -82,7 +84,9 @@ function buildParts(sync) {
     sizeBox: h("label", { class: "input-label", for: size.id }, t("cost.myShop"), size),
     boxes: { value: numberBox("value_at_risk_rm", t("cost.value"), "RM"), floor: numberBox("floor_height_cm", t("cost.floor"), "cm"),
       takings: numberBox("daily_takings_rm", t("cost.takings"), "RM"), measureCost: numberBox("measure_cost_rm", t("cost.measureCost"), "RM"),
-      builtIn: numberBox("built_in_rm", t("cost.builtInOwn"), "RM") },
+      builtIn: numberBox("built_in_rm", t("cost.builtInOwn"), "RM"),
+      carCount: numberBox("car_count", t("cost.carsOwn"), t("cost.unitCars")), carValue: numberBox("car_value_rm", t("cost.carValueOwn"), "RM"),
+      motoCount: numberBox("moto_count", t("cost.motosOwn"), t("cost.unitMotos")), motoValue: numberBox("moto_value_rm", t("cost.motoValueOwn"), "RM") },
     worthLine: h("p", { class: "hint answer-line" }),
     tradeLine: h("p", { class: "hint answer-line" }),
     valueNote: h("p", { class: "hint", "aria-live": "polite" }),
@@ -110,9 +114,9 @@ function fillSubQuestions(parts) {
   parts.costBox.append(groups.measureCost.node, boxes.measureCost.node);
   parts.builtInBox.append(h("p", { class: "hint" }, t("cost.builtInHint")), groups.builtIn.node, boxes.builtIn.node);
   parts.paidBox.append(groups.paid.node);
-  parts.carValueBox.append(groups.carValue.node);
-  parts.motosBox.append(groups.motos.node);
-  parts.motoValueBox.append(groups.motoValue.node);
+  parts.carValueBox.append(groups.carValue.node, boxes.carValue.node);
+  parts.motosBox.append(groups.motos.node, boxes.motoCount.node);
+  parts.motoValueBox.append(groups.motoValue.node, boxes.motoValue.node);
 }
 
 /** The six questions, in order, with the measure last and optional. */
@@ -126,10 +130,20 @@ function layout(parts) {
     question(t("cost.q2"), groups.floor.node, boxes.floor.node, floorNote),
     question(t("cost.q3"), hint("cost.q3Hint"), groups.customers.node, spendBox, boxes.takings.node, daysBox, tradeLine),
     question(t("cost.qWorkers"), hint("cost.qWorkersHint"), groups.workers.node, parts.paidBox, parts.workersLine),
-    question(t("cost.qVehicles"), hint("cost.qVehiclesHint"), groups.cars.node, parts.carValueBox, parts.motosBox, parts.motoValueBox,
+    question(t("cost.qVehicles"), hint("cost.qVehiclesHint"), groups.cars.node, boxes.carCount.node, parts.carValueBox, parts.motosBox, parts.motoValueBox,
       parts.vehiclesLine),
     question(t("cost.q4"), hint("cost.q4Hint"), groups.raise.node, costBox),
   ];
+}
+
+/** A chip's number, or the figure typed in its box when the pick is one's own. */
+const pickedNumber = (pick, box) => (pick === OWN ? typed(box.input) : Number(pick));
+
+/** How many cars and motorcycles, and what they are worth in all. */
+function vehicleFigures(pick, boxes) {
+  const cars = pickedNumber(pick.cars, boxes.carCount);
+  const motos = pickedNumber(pick.motos, boxes.motoCount);
+  return { cars, motos, total: cars * pickedNumber(pick.carValue, boxes.carValue) + motos * pickedNumber(pick.motoValue, boxes.motoValue) };
 }
 
 const chosen = (group) => group.radios.find((choice) => choice.radio.checked)?.value ?? null;
@@ -149,7 +163,7 @@ function answers(parts) {
   return {
     pick, daily, days: Number(pick.days), raise, hasValue, value,
     builtIn: !hasValue ? 0 : pick.builtIn === OWN ? typed(parts.boxes.builtIn.input) : Number(pick.builtIn),
-    vehicles: Number(pick.cars) * Number(pick.carValue) + Number(pick.motos) * Number(pick.motoValue),
+    vehicles: vehicleFigures(pick, parts.boxes).total,
     unpaid: pick.paid === "no" ? Number(pick.workers) : 0,
     floor: pick.floor === OWN ? typed(parts.boxes.floor.input) : Number(pick.floor),
     measureCost: raise > 0 ? (pick.measureCost === OWN ? typed(parts.boxes.measureCost.input) : Number(pick.measureCost)) : 0,
@@ -168,7 +182,8 @@ function worthWords(pick, value) {
 function show(parts) {
   const { pick, daily, days, value, raise, hasValue } = answers(parts);
   const boxShown = { value: pick.worth === OWN, floor: pick.floor === OWN, takings: pick.customers === OWN, measureCost: raise > 0 && pick.measureCost === OWN,
-    builtIn: hasValue && pick.builtIn === OWN };
+    builtIn: hasValue && pick.builtIn === OWN, carCount: pick.cars === OWN, carValue: pick.carValue === OWN, motoCount: pick.motos === OWN,
+    motoValue: pick.motoValue === OWN };
   for (const [name, box] of Object.entries(parts.boxes)) {
     box.node.hidden = !boxShown[name];
     box.input.disabled = !boxShown[name];
@@ -194,8 +209,9 @@ function showWider(parts) {
   parts.workersLine.textContent = workers === 0 ? ""
     : unpaid > 0 ? t("cost.workersLine", { rm: ringgit(Math.round(unpaid * MIN_WAGE_DAY_RM * days)), days, wage: MIN_WAGE_DAY_RM.toFixed(2) })
       : t("cost.workersPaid");
-  parts.carValueBox.hidden = Number(pick.cars) === 0;
-  parts.motoValueBox.hidden = Number(pick.motos) === 0;
+  const { cars, motos } = vehicleFigures(pick, parts.boxes);
+  parts.carValueBox.hidden = pick.cars !== OWN && cars === 0;   // a count still to be typed keeps its value question
+  parts.motoValueBox.hidden = pick.motos !== OWN && motos === 0;
   parts.vehiclesLine.textContent = vehicles > 0 ? t("cost.vehiclesLine", { rm: ringgit(vehicles) }) : "";
 }
 
