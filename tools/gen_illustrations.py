@@ -30,25 +30,30 @@ OUT = ROOT / "app" / "static" / "img" / "illustrations"
 MAX_BYTES = 150_000
 WEBP_QUALITY = 80
 PNG_COLOURS = 16
+PAPER = 234   # grey level from which a pixel counts as paper (the water band is about 220, the paper 239 to 255)
 
 STYLE = ("Technical ink line drawing in the style of an engineering field guide: an orthographic side cross-section. "
          "Subject: {subject}. Even-weight dark navy (#0c447c) lines on plain white, light hatching only, no gradients, "
          "no shading, no shadows. Flood water, where shown, is one flat pale blue band (#c2e6f5) with a crisp "
-         "darker blue waterline (#2b77a7), the only colour besides the navy ink. No text, letters, numbers, signage or "
-         "labels anywhere; no logos; no faces (people, if any, are simple outlines seen from the side). Wide white "
-         "margins, calm and factual. Not a cartoon, not 3D, not watercolour, not photo-real.")
+         "darker blue waterline (#2b77a7), the only colour besides the navy ink. Water finds one level: the "
+         "waterline is one straight horizontal line at the same height inside and outside the building. No text, "
+         "letters, numbers, signage or labels anywhere; no logos; no faces (people, if any, are simple outlines seen "
+         "from the side). Wide white margins, calm and factual. Not a cartoon, not 3D, not watercolour, not photo-real.")
 
 # name: what it shows, the aspect ratio asked for, and its display size in CSS pixels (the 2x file is twice that)
 DRAWINGS = {
-    "a-shop": {"subject": "a two-storey Malaysian shophouse seen from the street: a covered five-foot walkway, a "
-                          "roller shutter half up, a counter and shelves inside, flood water up to knee height",
+    "a-shop": {"subject": "a two-storey Malaysian shophouse cut in side section: the covered five-foot walkway at "
+                          "the front, a roller shutter half up, a counter and shelves inside, the street outside; flood "
+                          "water up to knee height over the street, the walkway and the shop floor alike; flat, no "
+                          "perspective, no people",
                "aspect": "16:9", "size": (320, 180)},
     "b-contents": {"subject": "the same kind of shop cut open: sacks and boxes of stock on the floor, a drinks fridge, "
                               "built-in shelving and a counter, a small car parked at the kerb outside, flood water "
-                              "above the shop floor", "aspect": "16:9", "size": (320, 180)},
+                              "above the shop floor and at the same level over the road outside, up to the car's "
+                              "wheels", "aspect": "16:9", "size": (320, 180)},
     "c-cover": {"subject": "a cross-section of a shop where the building shell (walls, roof, floor slab) is drawn in "
                            "plain outline and the contents (shelves, stock, machines) are filled with fine hatching, "
-                           "to show what is the building and what is its contents", "aspect": "16:9",
+                           "to show what is the building and what is its contents; no people", "aspect": "16:9",
                 "size": (320, 180)},
     "d-street": {"subject": "a long row of shophouses along a street, an open monsoon drain in front, a river bank "
                             "behind, with three dashed horizontal lines at rising heights marking flood levels",
@@ -70,7 +75,8 @@ def client() -> "genai.Client":
 
 def list_models() -> None:
     """Image models this key can call with generate_content (Imagen models cannot, so they are left out)."""
-    for model in client().models.list():
+    gemini = client()   # kept in a name: a client nothing refers to closes before the list is read
+    for model in gemini.models.list():
         name = getattr(model, "name", "")
         if "image" in name and "generateContent" in (getattr(model, "supported_actions", None) or []):
             print(name)
@@ -102,7 +108,7 @@ def _save_small(image: Image.Image, path: Path, fmt: str) -> int:
     if fmt == "webp":
         image.save(buffer, "WEBP", quality=WEBP_QUALITY, method=6)
     else:
-        image.quantize(colors=PNG_COLOURS, method=Image.Quantize.MEDIANCUT).save(buffer, "PNG", optimize=True)
+        image.quantize(colors=PNG_COLOURS, method=Image.Quantize.FASTOCTREE).save(buffer, "PNG", optimize=True)
     if buffer.tell() > MAX_BYTES:
         raise RuntimeError(f"{path.name} is {buffer.tell()} bytes, over {MAX_BYTES}")
     path.write_bytes(buffer.getvalue())
@@ -110,17 +116,25 @@ def _save_small(image: Image.Image, path: Path, fmt: str) -> int:
 
 
 def convert(name: str, spec: dict) -> list[str]:
-    """The web files for one drawing: WebP at 1x and 2x, and a PNG fallback at 1x, cropped to the display shape."""
+    """The web files for one drawing: WebP at 1x and 2x, and a PNG fallback at 1x, cropped to the display shape, with
+    the paper see-through."""
     source = Image.open(RAW / f"{name}.png").convert("RGB")
     width, height = spec["size"]
     OUT.mkdir(parents=True, exist_ok=True)
     made = []
     for scale, fmt, suffix in ((1, "webp", ""), (2, "webp", "@2x"), (1, "png", "")):
         target = (width * scale, height * scale)
-        fitted = _fit(source, target)
+        fitted = _clear_paper(_fit(source, target))
         path = OUT / f"{name}{suffix}.{fmt}"
         made.append(f"{path.name} {_save_small(fitted, path, fmt)} bytes")
     return made
+
+
+def _clear_paper(image: Image.Image) -> Image.Image:
+    """The paper made see-through, so a drawing sits on any page colour without a white box round it."""
+    clear = image.convert("RGBA")
+    clear.putalpha(image.convert("L").point(lambda grey: 0 if grey >= PAPER else 255))
+    return clear
 
 
 def _fit(image: Image.Image, target: tuple[int, int]) -> Image.Image:

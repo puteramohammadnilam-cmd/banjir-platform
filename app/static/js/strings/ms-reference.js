@@ -68,4 +68,6 @@ export default Object.freeze({
   "reference.sdgLinkGuidelines": "Garis panduan penggunaan logo dan ikon SDG",
   "reference.srcSdgLabel": "Ikon SDG",
   "reference.srcSdg": "Pertubuhan Bangsa-Bangsa Bersatu, digunakan seperti yang dibenarkan oleh garis panduan SDG untuk kegunaan bukan komersial dan bermaklumat",
+  "reference.srcDrawLabel": "Lukisan",
+  "reference.srcDraw": "Dibuat dengan Google Gemini, Oktober 2026. Ia lukisan, bukan foto tempat sebenar",
 });

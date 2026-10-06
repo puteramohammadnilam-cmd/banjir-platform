@@ -36,6 +36,7 @@
   <link rel="modulepreload" href="js/strings/en-act.js">
   <link rel="modulepreload" href="js/strings/ms-act.js">
   <link rel="modulepreload" href="js/dom.js">
+  <link rel="modulepreload" href="js/drawing.js">
   <link rel="modulepreload" href="js/place.js">
   <link rel="modulepreload" href="js/start.js">
   <link rel="modulepreload" href="js/pick.js">
@@ -195,6 +196,10 @@
         <h1 class="view-title" data-i18n="reference.title">Where this comes from</h1>
         <p class="muted" data-i18n="reference.lead">The data behind each tab, how it is worked out, and what it cannot tell you.</p>
       </header>
+      <picture class="drawing drawing-d-street">
+        <source type="image/webp" srcset="img/illustrations/d-street.webp 1x, img/illustrations/d-street@2x.webp 2x">
+        <img src="img/illustrations/d-street.png" width="720" height="309" loading="lazy" decoding="async" data-i18n-attr="alt:drawing.street" alt="Drawing made with Google Gemini: a row of shophouses by a river, with lines marking three flood heights.">
+      </picture>
       <section class="ref-short" aria-labelledby="ref-short-heading">
         <h2 id="ref-short-heading" class="kicker" data-i18n="reference.shortHeading">In short</h2>
         <ul class="ref-short-list">
@@ -282,6 +287,7 @@
             <div class="ref-source"><dt data-i18n="reference.srcOpenLabel">Open or closed</dt><dd data-i18n="reference.srcOpen">Google Maps</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcNewsLabel">News</dt><dd data-i18n="reference.srcNews">Gemini with Google Search</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcSdgLabel">SDG icons</dt><dd data-i18n="reference.srcSdg">United Nations, used as its SDG guidelines allow for non-commercial, informational use</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcDrawLabel">Drawings</dt><dd data-i18n="reference.srcDraw">Made with Google Gemini, October 2026. They are drawings, not photos of real places</dd></div>
             </dl>
           </section>
           <section class="ref-section" aria-labelledby="ref-privacy">

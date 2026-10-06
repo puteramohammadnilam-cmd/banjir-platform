@@ -6,4 +6,9 @@ export default Object.freeze({
   "stamp.cite": "How to cite",
   "stamp.citeText": "Banjir Check ({year}). Modelled flood depth for businesses in {area}. {link}. Accessed {date}. Data: European Commission JRC (CC BY 4.0); OpenStreetMap contributors (ODbL).",
   "overview.scenarioSentence": "Showing a flood expected once in {rp} years. Chance of at least one this big in the next {years} years: {pct}%.",
+  "drawing.shop": "Drawing made with Google Gemini: a two-storey shophouse cut open, with flood water at knee height in the street and on the shop floor.",
+  "drawing.contents": "Drawing made with Google Gemini: a shop cut open, with stock, a drinks fridge and shelves standing in flood water, and a car outside in the same water.",
+  "drawing.cover": "Drawing made with Google Gemini: a shop cut open, the building drawn plain and its contents shaded, to tell the two apart.",
+  "drawing.street": "Drawing made with Google Gemini: a row of shophouses by a river, with lines marking three flood heights.",
+  "drawing.ready": "Drawing made with Google Gemini: a shop owner lifting boxes onto a high shelf, with sandbags at the door and water outside.",
 });

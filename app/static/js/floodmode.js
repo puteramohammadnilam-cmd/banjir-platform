@@ -5,6 +5,7 @@
 // the browser traps focus and Escape closes it. Ticks are for this screen only and are not kept.
 import { carStep } from "./car.js";
 import { band, depthText, h } from "./dom.js";
+import { drawing } from "./drawing.js";
 import { distanceText } from "./fact.js";
 import { forecastLine } from "./forecast.js";
 import { t } from "./i18n.js";
@@ -74,6 +75,7 @@ export function checklist(context) {
   return [
     h("p", { class: "muted" }, t("mode.lead", { name, rp: context.rp })),
     h("p", { class: "mode-urgent", role: "note" }, t("mode.urgent")),
+    drawing("e-ready"),
     h("ol", { class: "mode-steps" }, steps(context).map(stepItem)),
     h("p", { class: "fineprint" }, t("mode.limit")),
   ];

@@ -68,4 +68,6 @@ export default Object.freeze({
   "reference.sdgLinkGuidelines": "Guidelines for the use of the SDG logo and icons",
   "reference.srcSdgLabel": "SDG icons",
   "reference.srcSdg": "United Nations, used as its SDG guidelines allow for non-commercial, informational use",
+  "reference.srcDrawLabel": "Drawings",
+  "reference.srcDraw": "Made with Google Gemini, October 2026. They are drawings, not photos of real places",
 });

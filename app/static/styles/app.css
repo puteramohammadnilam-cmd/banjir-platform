@@ -223,3 +223,13 @@ h2 { font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 600
   .scenario button[aria-pressed="true"], .chip-radio:checked + span, .lang-switch button[aria-pressed="true"] { outline: 3px solid Highlight; outline-offset: -3px; }
   .loss-table tr.is-chosen th { text-decoration: underline; }
 }
+
+/* the line drawings (drawing.js, and the Reference header's in index.html): the paper is see-through, so they sit on
+   any surface; never wider than drawn, narrower on phones; left out of print */
+.drawing { display: block; margin: var(--space-2) 0 var(--space-4); }
+.drawing img { display: block; max-width: 100%; height: auto; }
+.pick-empty .drawing { margin: var(--space-4) 0 0; }   /* under the buttons, past the grid's own gap */
+.mode-content .drawing { margin: 0; }   /* the dialog spaces its parts with a gap */
+@media print { .drawing { display: none; } }
+/* high contrast: the see-through paper would leave navy lines on a dark page, so the drawing keeps a white sheet */
+@media (forced-colors: active) { .drawing img { forced-color-adjust: none; background: #fff; } }

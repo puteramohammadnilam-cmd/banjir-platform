@@ -3,6 +3,7 @@
 // help after a flood. It names no insurer and gives no verdict on a quote: analysing someone's cover or recommending a
 // product is financial advice, which needs a licence. Every fact comes from 05_Raw_Data_Sources/shah_alam/insurance/FINDINGS.md.
 import { CHANCE_YEARS, SCENARIOS, chanceWithin, h, icon, ringgit } from "./dom.js";
+import { drawing } from "./drawing.js";
 import { t } from "./i18n.js";
 import { emptyState } from "./pick.js";
 
@@ -84,7 +85,7 @@ function quoteCard(state, figures) {
 /** The cards that are the same for every place: how cover works, questions to ask, help after a flood. */
 function staticCards() {
   return [
-    card(t("insurance.worksHeading"), h("ul", { class: "insurance-list" }, WORKS.map((key) => h("li", {}, t(key)))),
+    card(t("insurance.worksHeading"), drawing("c-cover"), h("ul", { class: "insurance-list" }, WORKS.map((key) => h("li", {}, t(key)))),
       h("p", { class: "insurance-example" }, t("insurance.example")),
       h("p", { class: "fineprint" }, t("insurance.worksSource"), " ", link(LINKS.calculator, t("insurance.calculator")))),
     card(t("insurance.askHeading"), h("ol", { class: "insurance-questions" }, QUESTIONS.map((key) => h("li", {}, t(key))))),

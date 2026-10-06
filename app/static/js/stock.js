@@ -4,6 +4,7 @@
 // things would need to go, and save the list for an insurer. Nothing reaches the cost form until the owner presses a button.
 import { RAISE_STEPS } from "./cost-form.js";
 import { h, icon, ringgit } from "./dom.js";
+import { drawing } from "./drawing.js";
 import { t } from "./i18n.js";
 
 export const MAX_PHOTOS = 4;
@@ -133,7 +134,7 @@ export function createStockCard({ onPhoto, onUse, onRaise = () => {}, onToggle =
   const alert = h("p", { class: "fact-note", role: "alert" });
   const status = h("p", { class: "stock-status", "aria-live": "polite" });
   const list = h("div", { class: "stock-findings" });
-  const node = h("section", { class: "surface stock-card", "aria-labelledby": "stock-heading" }, heading,
+  const node = h("section", { class: "surface stock-card", "aria-labelledby": "stock-heading" }, heading, drawing("b-contents"),
     h("p", { class: "hint" }, t("stock.hint")), h("p", { class: "hint" }, t("stock.tips")),
     picker, full, !isReady && h("p", { class: "fact-note ai-off" }, t("common.needsAi")), alert, status, list,
     h("p", { class: "fineprint" }, t("common.photoPrivacy")));

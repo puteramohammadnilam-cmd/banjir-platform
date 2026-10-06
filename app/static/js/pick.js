@@ -4,6 +4,7 @@
 // the businesses a name could mean. Only the elements handed in are touched, so node can test all of it
 // (tests/pick.test.mjs).
 import { h, icon, roadName } from "./dom.js";
+import { drawing } from "./drawing.js";
 import { lang, t } from "./i18n.js";
 
 export const DEFAULT_RP = "50";   // the biggest flood size shown (dom.js SCENARIOS)
@@ -161,5 +162,6 @@ export function emptyState({ kicker, onFind, onCheckPoint = null }) {
     h("div", { class: "pick-empty-actions" },
       h("button", { type: "button", class: "btn btn-primary", onclick: () => onFind() }, icon("search"), t("empty.find")),
       onCheckPoint && h("button", { type: "button", class: "btn btn-secondary", onclick: (event) => onCheckPoint(event.currentTarget) },
-        icon("pin"), t("empty.check"))));
+        icon("pin"), t("empty.check"))),
+    drawing("a-shop"));
 }
