@@ -30,6 +30,9 @@
   <link rel="modulepreload" href="js/share.js">
   <link rel="modulepreload" href="js/floodmode.js">
   <link rel="modulepreload" href="js/forecast.js">
+  <link rel="modulepreload" href="js/stamp.js">
+  <link rel="modulepreload" href="js/strings/en-look.js">
+  <link rel="modulepreload" href="js/strings/ms-look.js">
   <link rel="modulepreload" href="js/strings/en-act.js">
   <link rel="modulepreload" href="js/strings/ms-act.js">
   <link rel="modulepreload" href="js/dom.js">
@@ -133,10 +136,12 @@
       </section>
       <div class="scope-bar" id="scope"></div>
       <div class="kpis" id="kpis" aria-live="polite"></div>
+      <div class="stamp" id="stamp"></div>
       <section class="surface map-surface" aria-labelledby="map-heading">
         <div class="surface-head">
           <div>
             <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
+            <p class="scenario-sentence" id="scenario-sentence"></p>
             <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
           </div>
           <div class="scenario-slot" data-scenario></div>

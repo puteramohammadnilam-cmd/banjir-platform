@@ -12,6 +12,7 @@ import { createKpis } from "./kpis.js";
 import { createLowGround } from "./lowground.js";
 import { createMap, createPictureLayer } from "./map.js";
 import { createScopeBar } from "./scope.js";
+import { renderStamp, scenarioSentence } from "./stamp.js";
 import { createSectionTable } from "./section-table.js";
 import {
   FLASH_RAMP, LAYER_OPACITY, flashWord, highShare, mapControls, methodBody, rampSwatch, scoreOf, showsScore,
@@ -348,6 +349,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   renderLegend($("legend"), town.shelters.length > 0, isWholeCity ? city : null);
   renderHistory($("history"), area);   // area.history is the whole city's or the section's, as the server cut it
   const kpis = createKpis($("kpis"), { history: area.history, areaName: area.name, premises: isWholeCity ? city.index : premises });
+  renderStamp($("stamp"), { history: area.history, areaName: area.name });
   const cityParts = isWholeCity ? createCityParts(map, city, showsScore(area.index_method)) : null;
   createIndexParts(map, area, { city, cityParts, hasShelters: town.shelters.length > 0 });
   let shown = {};
@@ -361,6 +363,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
     render({ rp, selectedId, rain }) {
       if (rp !== shown.rp) {
         kpis.setScenario(rp);
+        $("scenario-sentence").textContent = scenarioSentence(rp);
         renderPicker(document.querySelector("[data-scenario]"), rp, onPick, area.bigger_flood_example);
         cityParts?.show(rp);
         scope.refresh();   // "All of {city}" carries the flood size, as the table's links do

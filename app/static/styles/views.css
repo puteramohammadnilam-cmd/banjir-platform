@@ -12,25 +12,38 @@
 .scope-hint { flex: 1 1 100%; margin: calc(-1 * var(--space-2)) 0 0; }
 @media (max-width: 520px) { .scope-area { flex: 1 1 100%; max-width: none; } }
 
-/* data-tiles is set by kpis.js: 4 with the rain forecast, 3 without it; the headline and the depth drawing get the room */
-.kpis { display: grid; grid-template-columns: 1.4fr 1.4fr repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
-.kpis[data-tiles="3"] { grid-template-columns: 1.4fr 1.4fr minmax(0, 1fr); }
-.kpi { display: grid; align-content: start; gap: 2px; padding: var(--space-4) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
-.kpi-figure { font-size: var(--text-figure); font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+/* The area's figures as one ruled band, read like a report's first line: the lead sentence ("132 of 143 businesses in
+   X get water"), then the typical depth, the floods on record and the rain, each beside a thin rule. No boxes, no
+   inverted tile. data-tiles is set by kpis.js: 4 with the rain forecast, 3 without it. */
+.kpis { display: grid; grid-template-columns: 2.2fr 1.3fr repeat(2, minmax(0, 1fr)); gap: 0; margin-bottom: var(--space-2); padding: var(--space-4) 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line-strong); }
+.kpis[data-tiles="3"] { grid-template-columns: 2.2fr 1.3fr minmax(0, 1fr); }
+.kpi { display: grid; align-content: start; gap: 2px; padding: 0 var(--space-5); border-left: 1px solid var(--line); }
+.kpi:first-child { padding-left: 0; border-left: 0; }
+.kpi-figure { font-size: var(--text-figure); font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1.05; font-variant-numeric: tabular-nums lining-nums; }
 .kpi-label { font-size: var(--text-sm); font-weight: 600; }
 .kpi-note { font-size: var(--text-xs); color: var(--ink-3); }
-.kpi .icon { width: 20px; height: 20px; color: var(--brand); margin-bottom: var(--space-1); }
-.kpi-hero { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; box-shadow: var(--shadow-md); }
-.kpi-hero .kpi-note, .kpi-hero .icon { color: var(--band-1); }
-.kpi-bar { height: 6px; margin-top: var(--space-2); border-radius: 2px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
-/* the typical-depth tile: its picture sits right of the icon and figure, so the tile is no taller than the others */
+.kpi .icon { display: none; }   /* the words say what each figure is */
+/* the lead: figure and words run on as one serif sentence */
+.kpi-hero { display: block; }
+.kpi-hero .kpi-figure, .kpi-hero .kpi-label { display: inline; }
+.kpi-hero .kpi-label { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 400; line-height: 1.3; }
+.kpi-hero .kpi-label::before { content: " "; }
+.kpi-hero .kpi-note { margin-top: var(--space-1); }
+.kpi-bar { max-width: 22rem; height: 6px; margin-top: var(--space-3); border-radius: 2px; background: var(--surface-sunk); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+/* the typical-depth figure: its little drawing sits right of the figure */
 .kpi-has-art { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); }
-.kpi-has-art > .icon { grid-area: 1 / 1; }
-.kpi-has-art > .kpi-figure { grid-area: 2 / 1; align-self: end; }
+.kpi-has-art > .kpi-figure { grid-area: 1 / 1; align-self: end; }
 .kpi-has-art > .kpi-label, .kpi-has-art > .kpi-note { grid-column: 1 / -1; }
-.kpi-art { grid-area: 1 / 2 / 3 / 3; align-self: end; width: 6.5rem; }
+.kpi-art { grid-area: 1 / 2 / 2 / 3; align-self: end; width: 5.5rem; }
 .kpi-art .gauge.gauge-mini { margin: 0; max-width: none; }
-.kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-2); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
+.kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-3); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
+/* where the figures come from, right under them */
+.stamp { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-4); margin-bottom: var(--space-5); font-size: var(--text-xs); color: var(--ink-3); }
+.stamp-cite summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.stamp-cite[open] { flex-basis: 100%; }
+.stamp-cite p { max-width: 60rem; margin-top: var(--space-1); user-select: all; }
+/* the flood size on show, as a sentence above the map */
+.scenario-sentence { margin: var(--space-1) 0; font-family: var(--font-serif); font-size: var(--text-lg); line-height: 1.35; max-width: 40rem; }
 
 .overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
 /* phones and tablets: one column, in the page's order (index.html) */
@@ -220,19 +233,20 @@
 @media (min-width: 1040px) {
   #panel-overview {
     display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
-    grid-template-areas: "hero hero" "scope scope" "kpis kpis" "map side" "extras side" "sections sections" "dir dir";
+    grid-template-areas: "hero hero" "scope scope" "kpis kpis" "stamp stamp" "map side" "extras side" "sections sections" "dir dir";
   }
   #panel-overview > * { margin: 0; }   /* the grid's gap spaces them */
   .finder-hero { grid-area: hero; }
   .scope-bar { grid-area: scope; }
   .kpis { grid-area: kpis; }
+  .stamp { grid-area: stamp; }
   .map-surface { grid-area: map; }
   .map-extras { grid-area: extras; }
   .overview-side { grid-area: side; }
   .sections-surface { grid-area: sections; }
   .directory { grid-area: dir; }
   /* the sections table is only on a whole city's page: elsewhere its row goes, so there is no double gap */
-  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "hero hero" "scope scope" "kpis kpis" "map side" "extras side" "dir dir"; }
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "hero hero" "scope scope" "kpis kpis" "stamp stamp" "map side" "extras side" "dir dir"; }
 }
 /* a wide screen, tall enough for a big map (a desktop monitor, a projector, a larger laptop): map first. The map card
    fills the left of the page and stays in view under the tab bar while the search, the figures, the map's notes and
@@ -245,9 +259,9 @@
 @media (min-width: 1480px) and (min-height: 860px) {
   #panel-overview {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: var(--space-5);
-    grid-template-areas: "map hero" "map scope" "map kpis" "map extras" "map side" "map sections" "map dir";
+    grid-template-areas: "map hero" "map scope" "map kpis" "map stamp" "map extras" "map side" "map sections" "map dir";
   }
-  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "map hero" "map scope" "map kpis" "map extras" "map side" "map dir"; }
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "map hero" "map scope" "map kpis" "map stamp" "map extras" "map side" "map dir"; }
   .map-surface { position: sticky; top: 4rem; display: flex; flex-direction: column; height: calc(100vh - 5rem); height: calc(100dvh - 5rem); }
   .map-surface .surface-head { flex: none; }
   .map-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
@@ -257,16 +271,22 @@
   .map-stage .legend-heading { margin-bottom: var(--space-1); }
   .map-stage .legend-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
   .map-stage .aim-panel { position: absolute; z-index: 900; top: var(--space-2); right: var(--space-2); width: min(20rem, 45%); max-height: calc(100% - 2 * var(--space-2)); margin: 0; overflow-y: auto; box-shadow: var(--shadow-md); }
-  .kpis, .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* four tiles in a narrower column */
-  .kpis[data-tiles="3"] .kpi-hero { grid-column: 1 / -1; }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }   /* the lead on its own line, the others under it */
+  .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-3); margin-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+  .kpi-hero + .kpi { padding-left: 0; border-left: 0; }
 }
 @media (max-width: 900px) {
-  .kpis, .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi-hero, .kpis[data-tiles="4"] .kpi:last-child { grid-column: 1 / -1; }   /* the rain tile is last only when it shows */
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-3); margin-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+  .kpi-hero + .kpi { padding-left: 0; border-left: 0; }
 }
 @media (max-width: 720px) {   /* phones: one column, the tiles tighter, and no "Floods recorded" (the timeline under the map says it), so the map comes sooner */
-  .kpis, .kpis[data-tiles="3"] { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin-bottom: var(--space-3); }
-  .kpi { padding: var(--space-3) var(--space-4); }
+  .kpis, .kpis[data-tiles="3"] { grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-2); }
+  .kpi, .kpi-hero + .kpi { padding: var(--space-3) 0; border-left: 0; border-top: 1px solid var(--line); }
+  .kpi:first-child { padding-top: 0; border-top: 0; }
+  .kpi-hero { margin-bottom: 0; border-bottom: 0; }
   .kpi-flood { display: none; }
   .kpi-art { width: 5.5rem; }
 }
@@ -276,7 +296,7 @@
 body[data-tab="overview"] .finder { display: none; }
 
 /* the way in: a big search box, the primary action, with the way to any point beside it as the second */
-.finder-hero { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); padding: var(--space-6) var(--space-6) var(--space-5); background: var(--brand-wash); border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--brand-wash)); border-radius: var(--radius-lg); }
+.finder-hero { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); padding: var(--space-2) 0 var(--space-5); border-bottom: 1px solid var(--line); }   /* the page's question, on the paper itself */
 .finder-hero-title { font-family: var(--font-serif); font-size: var(--text-2xl); font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; color: var(--brand-deep); }
 .finder-hero-title label { cursor: pointer; }
 .finder-hero-lead { color: var(--ink-2); max-width: 40rem; }
@@ -290,7 +310,7 @@ body[data-tab="overview"] .finder { display: none; }
 .finder-hero-point .btn { min-height: 44px; }
 .finder-hero-point .icon { color: var(--accent); }
 @media (max-width: 520px) {
-  .finder-hero { padding: var(--space-5) var(--space-4) var(--space-4); }
+  .finder-hero { padding: 0 0 var(--space-4); }
   .finder-hero-form { flex-wrap: wrap; }   /* the button under the box, so the placeholder is not cut off */
   .finder-hero-form .btn { flex: 1 1 100%; min-height: 48px; }
   .finder-hero-form .icon { top: 28px; }   /* the middle of the 56px box, not of box and button */
