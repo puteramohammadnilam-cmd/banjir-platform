@@ -194,10 +194,11 @@ test("a business chat starts with its five chips and the news button for the pag
   assert.equal(section.children.length, 2, "the note is made only when a place needs it");
 });
 
-test("with nothing picked yet, the chat asks about the area, not a shop", () => {
+test("with nothing picked yet, the chat asks about the area and the tool, not a shop", () => {
   const { chat, chips, input, news } = mountChat();
   chat.render(undefined);
-  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?", "Is heavy rain due today?"]);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?", "Is heavy rain due today?",
+    "How does this tool work out what a flood could cost?"]);
   assert.equal(input.placeholder, "Ask anything about flooding in this area");
   assert.equal(news.textContent, "Latest flood news for Home Town");
 });
@@ -225,7 +226,7 @@ test("without the Maps key the rain and opening-hours questions are left out", (
   const { chat, chips } = mountChat({ hasMaps: false });
   assert.ok(!chipTexts(chips).some((chip) => /rain|still open/i.test(chip)), chipTexts(chips).join(" | "));
   chat.render(undefined);
-  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?"]);
+  assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?", "How does this tool work out what a flood could cost?"]);
 });
 
 test("a point in a listed area gets point chips, and its news is that area's", async () => {

@@ -529,6 +529,7 @@ export default Object.freeze({
   "ask.chipPointLoss": "Roughly how much could a flood cost here?",
   "ask.chipPointDepth": "How deep would the water be here in a 1 in 50 years flood?",
   "ask.chipPointAreaDry": "Which businesses in this area stay dry in a 1 in 50 years flood?",
+  "ask.chipHowCost": "How does this tool work out what a flood could cost?",
 
   // ---------- floating chat: index.html, main.js ----------
   "chat.open": "Ask AI",

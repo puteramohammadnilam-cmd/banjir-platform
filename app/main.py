@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import ipaddress
 import logging
 import os
 import threading
@@ -32,7 +33,8 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, dryspots, floodtools, googlemaps, indexes, lowground, places, plan, raster, sections, stock  # noqa: E402
+from . import (ai, areas, chatguard, dryspots, floodtools, googlemaps, indexes, lowground, places, plan,  # noqa: E402
+               raster, sections, stock)
 
 log = logging.getLogger("banjir")
 
@@ -121,8 +123,11 @@ sections.preload()
 
 
 class Turn(BaseModel):
+    """An earlier turn. The assistant's own come back with the signature they went out with (chatguard.sign); one
+    without a matching signature is dropped, with its question, before the model sees the history."""
     role: Literal["user", "model"]
     text: str = Field(min_length=1, max_length=MAX_TURN_CHARS)
+    sig: str | None = Field(default=None, max_length=64)
 
 
 class AskIn(BaseModel):
@@ -187,9 +192,19 @@ def ok(data: dict) -> dict:
 
 
 def client_ip(request: Request) -> str:
-    # Cloud Run appends the real client address as the last X-Forwarded-For entry.
+    # Cloud Run and nginx append the real client address as the last X-Forwarded-For entry.
     forwarded = request.headers.get("x-forwarded-for", "")
-    return forwarded.split(",")[-1].strip() or (request.client.host if request.client else "unknown")
+    return visitor(forwarded.split(",")[-1].strip() or (request.client.host if request.client else "unknown"))
+
+
+def visitor(address: str) -> str:
+    """Who the limits count: the address, but an IPv6 one by its /64, the block one home or phone line usually gets,
+    so changing the last part of the address does not give a fresh allowance."""
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return address
+    return str(ipaddress.ip_network(f"{ip}/64", strict=False)) if ip.version == 6 else address
 
 
 def _limit(request: Request, bucket: str, limit: int) -> None:
@@ -528,8 +543,20 @@ def coverage() -> dict:
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])
 def ask(body: AskIn) -> dict:
     area, section = question_scope(body.area_id, body.section_id, body.place)
-    history = [turn.model_dump() for turn in body.history]
-    return ok({"answer": call_ai(ai.ask, body.question, body.place, history, area, section)})
+    return ok(answer_question(body.question, body.place, body.history, area, section))
+
+
+def answer_question(question: str, place: str | None, turns: list[Turn], area, section) -> dict:
+    """The answer and its signature. A question after the assistant's set-up or secrets gets the refusal with no AI
+    call; otherwise the model sees only the earlier turns it really answered (chatguard.trusted_history)."""
+    refused = chatguard.screen_question(question)
+    if refused:
+        log.warning("Chat question refused: %s", refused)   # the reason only, never the words
+        answer = chatguard.REFUSAL
+    else:
+        history = chatguard.trusted_history([turn.model_dump() for turn in turns])
+        answer = call_ai(ai.ask, question, place, history, area, section)
+    return {"answer": answer, "sig": chatguard.sign(question, answer[:MAX_TURN_CHARS])}
 
 
 @app.post("/api/voice", dependencies=[Depends(rate_limit)])
@@ -544,9 +571,8 @@ def voice(body: VoiceIn, request: Request) -> dict:
     question = heard.text.strip()[:MAX_QUESTION_CHARS]
     if not heard.is_speech or not question:
         raise HTTPException(422, NOT_HEARD)
-    history = [turn.model_dump() for turn in body.history]
     return ok({"question": question, "language": heard.language,
-               "answer": call_ai(ai.ask, question, body.place, history, area, section)})
+               **answer_question(question, body.place, body.history, area, section)})
 
 
 @app.post("/api/photo", dependencies=[Depends(rate_limit)])

@@ -338,8 +338,7 @@ def test_the_kota_tinggi_prompt_names_its_area_and_no_city_text(monkeypatch):
     ai.ask("Banjir tak?", None, [])
     kota, default = (call["config"].system_instruction for call in calls)
     assert areas.get(KOTA_TINGGI).ai_name in kota and not place_words_in(kota)
-    assert (f"small businesses around {areas.get(CITY).ai_name}. Shop owners ask you what a flood could mean for "
-            "their premises.") in default
+    assert f"the tool's page for small businesses around {areas.get(CITY).ai_name}." in default
 
 
 def gemini_says(*parts: dict):

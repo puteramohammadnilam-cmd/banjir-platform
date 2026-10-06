@@ -530,6 +530,7 @@ export default Object.freeze({
   "ask.chipPointLoss": "Berapa anggaran rugi kalau banjir kat sini?",
   "ask.chipPointDepth": "Berapa dalam air di sini dalam banjir 1 dalam 50 tahun?",
   "ask.chipPointAreaDry": "Perniagaan mana di kawasan ini yang tak kena air dalam banjir 1 dalam 50 tahun?",
+  "ask.chipHowCost": "Bagaimana alat ini mengira kos banjir?",
 
   // ---------- floating chat: index.html, main.js ----------
   "chat.open": "Tanya AI",

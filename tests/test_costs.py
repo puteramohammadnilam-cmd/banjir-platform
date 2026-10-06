@@ -185,15 +185,17 @@ def test_a_cheap_measure_is_judged_on_unrounded_savings():
     assert costs.estimate(depth, measure_cost_rm=4, **kwargs)["measure"]["worth_it"] is False
 
 
-def test_tool_returns_the_estimate_with_its_basis_method_and_limits():
+def test_tool_returns_the_estimate_with_its_basis_and_limits_but_leaves_the_formula_to_the_page():
     result = floodtools.damage_estimate(WET["id"], 50_000, "", 300, 800, 365, 0, 0)   # 300 cm and 365 days are allowed
 
     assert result["business"] == WET["name"]
     assert result["expected_yearly_loss_rm"] > 0
     assert result["basis"]["direct"] and result["basis"]["indirect"]
     assert result["inputs"]["shop_size"] == ""
-    assert "Asia" in result["limits"] and "JPS" in result["limits"] and "4%" in result["method"]
+    assert "Asia" in result["limits"] and "JPS" in result["limits"]
     assert "first approximation" in result["limits"]
+    assert "method" not in result   # the chat explains in words; the page's form still shows it (estimate_for)
+    assert "4%" in floodtools.estimate_for(WET, 50_000)["method"]
 
 
 def test_tool_accepts_a_shop_size_when_the_owner_has_no_value():
@@ -265,7 +267,8 @@ def test_estimate_endpoint_returns_the_tool_result(client):
 
     assert body["success"] is True
     figures = {key: value for key, value in estimate_body().items() if key != "business_id"}
-    assert body["data"] == floodtools.damage_estimate(WET["id"], **figures)   # the tool takes a place id
+    page = {key: value for key, value in body["data"].items() if key != "method"}   # the page also shows the formula
+    assert page == floodtools.damage_estimate(WET["id"], **figures) and "method" in body["data"]   # the tool takes an id
 
 
 def test_estimate_endpoint_fills_missing_fields_with_zero(client):

@@ -11,7 +11,7 @@ const CHIP_KEYS = Object.freeze({
   business: ["ask.chipShopWater", "ask.chipShopLoss", "ask.chipAreaDry", "ask.chipRain", "ask.chipOpen"],
   point: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipRain"],
   pointArea: ["ask.chipPointWater", "ask.chipPointLoss", "ask.chipPointDepth", "ask.chipPointAreaDry", "ask.chipRain"],
-  area: ["ask.chipAreaDry", "ask.chipRain"],   // nothing picked yet: only what the area as a whole can answer
+  area: ["ask.chipAreaDry", "ask.chipRain", "ask.chipHowCost"],   // nothing picked yet: the area as a whole, and the tool
 });
 const NEEDS_MAPS = new Set(["ask.chipRain", "ask.chipOpen"]);   // Google Weather and the Maps listing share the Maps key
 const chipSets = new Map();   // "language|maps" -> {business, point, pointArea, area}
@@ -211,15 +211,16 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     await exchange({
       add, control: button, userText: question, waitText: t("ask.checking"),
       call: () => api.ask({ question, place: getPlaceRef(), ...scope, history }),
-      show: ({ answer }) => {
-        remember(question, answer);
+      show: ({ answer, sig }) => {
+        remember(question, answer, sig);
         add("model", answer);
       },
     });
   }
 
-  const remember = (question, answer) => {
-    history = [...history, { role: "user", text: question }, { role: "model", text: answer.slice(0, MAX_TURN_CHARS) }].slice(-10);
+  // the server signs each answer (sig) and, next time, lets the model see only the answers it signed
+  const remember = (question, answer, sig) => {
+    history = [...history, { role: "user", text: question }, { role: "model", text: answer.slice(0, MAX_TURN_CHARS), sig }].slice(-10);
   };
 
   /** A spoken question: the words heard go in the conversation as the user's, then the answer, read aloud. */
@@ -229,11 +230,11 @@ export function createChat({ messages, chips, form, input, news, getPlaceRef, ar
     button.disabled = true;
     mic.disabled = true;
     try {
-      const { question, language, answer } = await api.askVoice({ audio, place: getPlaceRef(), ...scope, history });
+      const { question, language, answer, sig } = await api.askVoice({ audio, place: getPlaceRef(), ...scope, history });
       waiting.remove();
       add("user", question);
       add("model", answer).append(h("button", { type: "button", class: "btn btn-secondary stop-reading", onclick: voice.stopSpeaking }, VOICE_WORDS.stopReading));
-      remember(question, answer);
+      remember(question, answer, sig);
       voice.speak(answer, language);
     } catch (error) {
       waiting.remove();

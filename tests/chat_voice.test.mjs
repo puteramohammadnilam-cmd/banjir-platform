@@ -11,7 +11,7 @@ import { installFakeDom } from "./fake_dom.mjs";
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 const AUDIO = "data:audio/wav;base64,UklGRg==";
 
-function mount({ canRecord = true, record = null, gate = null, reply = { question: "Kedai ni kena air tak?", language: "ms", answer: "Dalam model, 1.88 m." } } = {}) {
+function mount({ canRecord = true, record = null, gate = null, reply = { question: "Kedai ni kena air tak?", language: "ms", answer: "Dalam model, 1.88 m.", sig: "s1" } } = {}) {
   installFakeDom();
   const asked = [];
   globalThis.fetch = async (path, init) => {
@@ -67,7 +67,7 @@ test("press to record, press again to send: the words heard and the answer join 
   assert.equal(mic.getAttribute("aria-pressed"), "false");
 });
 
-test("the spoken exchange is in the history of the next question", async () => {
+test("the spoken exchange is in the history of the next question, the answer with its signature", async () => {
   const { mic, asked } = mount();
   for (let i = 0; i < 2; i += 1) {
     mic.click();
@@ -76,7 +76,7 @@ test("the spoken exchange is in the history of the next question", async () => {
     await settle();
     await settle();
   }
-  assert.deepEqual(asked[1][1].history, [{ role: "user", text: "Kedai ni kena air tak?" }, { role: "model", text: "Dalam model, 1.88 m." }]);
+  assert.deepEqual(asked[1][1].history, [{ role: "user", text: "Kedai ni kena air tak?" }, { role: "model", text: "Dalam model, 1.88 m.", sig: "s1" }]);
 });
 
 test("a blocked microphone, an unreadable recording and a server refusal each say so", async () => {

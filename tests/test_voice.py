@@ -7,7 +7,7 @@ import logging
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, areas, floodtools, main
+from app import ai, areas, chatguard, floodtools, main
 from test_place_ai import gemini_says, scripted_gemini
 
 KNOWN = areas.business("node-13414432501")[0]   # the checklist business, in the default city
@@ -40,11 +40,12 @@ def client(monkeypatch):
 
 
 def test_the_words_heard_are_asked_like_a_typed_question(client):
-    body = {"audio": WAV, "place": KNOWN["id"], "history": [{"role": "user", "text": "hi"}]}
-    res = client.post("/api/voice", json=body)
+    history = [{"role": "user", "text": "hi"}, {"role": "model", "text": "Hai.", "sig": chatguard.sign("hi", "Hai.")}]
+    res = client.post("/api/voice", json={"audio": WAV, "place": KNOWN["id"], "history": history})
     assert res.status_code == 200
-    assert res.json()["data"] == {"question": HEARD["text"], "language": "ms", "answer": "Dalam model, 1.88 m."}
-    assert client.asked == [(HEARD["text"], KNOWN["id"], [{"role": "user", "text": "hi"}])]
+    answer = "Dalam model, 1.88 m."
+    assert res.json()["data"] == {"question": HEARD["text"], "language": "ms", "answer": answer, "sig": chatguard.sign(HEARD["text"], answer)}
+    assert client.asked == [(HEARD["text"], KNOWN["id"], [{"role": "user", "text": "hi"}, {"role": "model", "text": "Hai."}])]
 
 
 def test_a_recording_with_no_question_in_it_is_not_asked(client, monkeypatch):

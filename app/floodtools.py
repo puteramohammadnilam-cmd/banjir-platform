@@ -424,16 +424,17 @@ def damage_estimate(place_id: str, value_at_risk_rm: float, shop_size: str, floo
     Returns:
         Loss in each of the 10, 20 and 50 year floods, the average loss per year, the loss over
         ten years, whether the measure pays for itself, the basis used for the direct and indirect
-        figures, the method and its limits. Or an error.
+        figures, in words, and the limits. Or an error.
     """
     place, error = _usable(place_id)
     if error:
         return {"error": error}
     found = estimate_for(place, value_at_risk_rm, shop_size, floor_height_cm, daily_takings_rm, closed_days,
                          raise_cm, measure_cost_rm)
-    if "error" in found or not place["is_point"]:
+    if "error" in found:
         return found
-    return {**found, "place": SELECTED_POINT}   # the page's form gets the point's id; the model never does
+    found = {key: value for key, value in found.items() if key != "method"}   # the formula stays on the page
+    return {**found, "place": SELECTED_POINT} if place["is_point"] else found   # the model never gets a point's id
 
 
 def estimate_for(place: dict, value_at_risk_rm: float, shop_size: str = "", floor_height_cm: float = 0,
