@@ -1,23 +1,21 @@
 /* The Reference tab. Split from views.css (6 Oct 2026) so each surface fits the 800-line limit; linked after views.css. */
 
 /* ---------- Reference: the data, its working and its limits, to read at leisure ----------
-   An "In short" strip of four points first; then a contents list beside one readable column of numbered sections
-   (a CSS counter, so a section an area lacks leaves no gap in the numbers). Phones: the contents become a row of chips. */
+   "In short" first, as four plain terms and their meanings; then a contents list beside one readable column of
+   sections on the paper, each under a heavy rule (no boxes, no numbers). Phones: the contents become a row of links. */
 .ref-short { margin-bottom: var(--space-5); }
-.ref-short-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-3); margin-top: var(--space-2); }
-.ref-short-item { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brand); border-radius: var(--radius-lg); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.5; }
-.ref-short-item .icon { flex: none; width: 2.25rem; height: 2.25rem; padding: 0.5rem; border-radius: 50%; background: var(--brand-wash); color: var(--brand); }
-.ref-short-item strong { display: block; margin-bottom: 2px; font-size: var(--text-md); color: var(--ink); }
+.ref-short-list { display: grid; margin-top: var(--space-2); border-top: 2px solid var(--ink); }
+.ref-short-item { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.5; }
+.ref-short-item .icon { display: none; }   /* the words carry it */
+.ref-short-item strong { display: block; margin-bottom: 2px; font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 600; color: var(--ink); }
 .ref-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .ref-nav ol { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }   /* every link in sight on a phone */
 .ref-jump { min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; transition: border-color var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast); }
 .ref-jump:hover { border-color: var(--brand); color: var(--brand); }
 .ref-jump:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.ref-body { display: grid; gap: var(--space-4); counter-reset: ref; }
-.ref-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.65; }
-.ref-section:not([hidden]) { counter-increment: ref; }
-.ref-section > h2 { display: flex; align-items: baseline; gap: var(--space-3); font-size: var(--text-xl); color: var(--ink); scroll-margin-top: 5rem; }
-.ref-section > h2::before { content: counter(ref, decimal-leading-zero) / ""; flex: none; font-size: var(--text-sm); font-weight: 700; color: var(--brand); font-variant-numeric: tabular-nums; }
+.ref-body { display: grid; gap: var(--space-8); }
+.ref-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding-top: var(--space-3); border-top: 2px solid var(--ink); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.65; }
+.ref-section > h2 { font-size: var(--text-xl); color: var(--ink); scroll-margin-top: 5rem; }
 .ref-section > h2:focus { outline: none; }
 .ref-section > h2:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: 4px; }
 .reference-notes { display: grid; gap: var(--space-1); }
@@ -38,7 +36,8 @@
 .ref-privacy li::marker { color: var(--brand); }
 @media (min-width: 900px) {
   .ref-layout { grid-template-columns: 13rem minmax(0, 54rem); gap: var(--space-6); align-items: start; }
-  .ref-short-item { padding: var(--space-4); }
+  .ref-short-item p { position: relative; padding-left: 16rem; }   /* term on the left, its sentence (links and all) on the right */
+  .ref-short-item strong { position: absolute; left: 0; top: 0; width: 15rem; margin: 0; }
   .ref-nav { position: sticky; top: 5rem; }
   .ref-nav ol { flex-direction: column; flex-wrap: nowrap; gap: 0; border-left: 2px solid var(--line); }
   .ref-jump { width: 100%; min-height: 40px; border: 0; border-radius: 0; margin-left: -2px; border-left: 2px solid transparent; background: none; text-align: left; white-space: normal; }
@@ -46,3 +45,7 @@
   .ref-source { grid-template-columns: 12rem minmax(0, 1fr); gap: var(--space-4); }
 }
 @media (prefers-reduced-motion: reduce) { .ref-jump, .index-method-body summary::after { transition: none; } }
+/* the SDG section: the SDG 13 green as its rule only, the two goal icons whole and square in one row (UN guidelines) */
+.ref-section.ref-sdg { border-top-color: var(--sdg-13); border-top-width: 4px; }
+.sdg-icons { display: flex; gap: var(--space-3); }
+.sdg-icons img { display: block; width: 96px; height: 96px; }
