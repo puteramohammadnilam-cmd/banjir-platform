@@ -274,12 +274,15 @@ def test_the_import_pattern_sees_every_form_of_import():
 
 def page_modules(entry: Path) -> set[str]:
     """Every module the page loads from `entry`, following its `from "./x.js"` imports."""
+    root = entry.parent
     seen, todo = set(), [entry.name]
     while todo:
         name = todo.pop()
         if name not in seen:
             seen.add(name)
-            todo += IMPORTED.findall((entry.parent / name).read_text(encoding="utf-8"))
+            folder = (root / name).parent   # "./x.js" is relative to the importing file (strings/en.js imports a neighbour)
+            todo += [(folder / found).relative_to(root).as_posix()
+                     for found in IMPORTED.findall((root / name).read_text(encoding="utf-8"))]
     return seen
 
 

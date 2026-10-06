@@ -9,6 +9,7 @@ import { createInsurance } from "./insurance.js";
 import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard, planFigures } from "./plan.js";
+import { syncReferenceNav, wireReferenceNav } from "./reference.js";
 import { MAX_PHOTOS } from "./stock.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
@@ -459,12 +460,17 @@ function renderExtras(app, views, state, place) {
   views.compare.render({ current: place, compared: state.compare.map((id) => placeOf(app, { ...state, placeKey: id })).filter(Boolean) });
 }
 
+/** The Reference tab's "On this page" buttons, each with the id of the heading it jumps to. */
+const referenceLinks = () => [...document.querySelectorAll(".ref-nav [data-jump]")]
+  .map((button) => ({ item: button.closest("li"), target: button.getAttribute("data-jump") }));
+
 /** Draws every view for `state`. No place may be picked yet (placeKey null): My business and Flood cost then show how
  *  to pick one, and the rest leave it out. */
 function render(app, views, state, previous) {
   const place = placeOf(app, state);
   const photo = state.photos[state.placeKey];
   views.showTab(state.tab);
+  if (state.tab === "reference") syncReferenceNav(referenceLinks(), (id) => $(id)?.closest("section"));
   document.body.dataset.tab = state.tab;   // views.css: the header's search steps aside on the Area overview, which has its own
   views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey] });
@@ -542,5 +548,6 @@ async function main() {
 }
 
 applyStatic(document);   // index.html's own words in the page's language, and <html lang>, before anything is drawn
+wireReferenceNav(document.querySelector(".ref-nav"));
 wireLangSwitch(document);
 main();

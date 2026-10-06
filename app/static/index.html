@@ -17,6 +17,9 @@
   <link rel="modulepreload" href="js/i18n.js">
   <link rel="modulepreload" href="js/strings/en.js">
   <link rel="modulepreload" href="js/strings/ms.js">
+  <link rel="modulepreload" href="js/strings/en-reference.js">
+  <link rel="modulepreload" href="js/strings/ms-reference.js">
+  <link rel="modulepreload" href="js/reference.js">
   <link rel="modulepreload" href="js/dom.js">
   <link rel="modulepreload" href="js/place.js">
   <link rel="modulepreload" href="js/start.js">
@@ -175,36 +178,88 @@
         <h1 class="view-title" data-i18n="reference.title">Where this comes from</h1>
         <p class="muted" data-i18n="reference.lead">The data behind each tab, how it is worked out, and what it cannot tell you.</p>
       </header>
-      <div class="reference-grid">
-        <section class="surface reference-card" aria-labelledby="ref-what">
-          <h2 id="ref-what" data-i18n="reference.whatHeading">What this tool shows</h2>
-          <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
-        </section>
-        <section class="surface reference-card" id="map-notes-card" aria-labelledby="ref-map" hidden>
-          <h2 id="ref-map" data-i18n="overview.mapExtrasHeading">About this map</h2>
-          <div class="reference-notes" id="map-note"></div>
-        </section>
-        <section class="surface reference-card index-method" id="index-method" aria-labelledby="ref-method" hidden>
-          <h2 id="ref-method" data-i18n="flash.methodHeading">How these are worked out</h2>
-          <div class="index-method-body" id="index-method-body"></div>
-        </section>
-        <section class="surface reference-card" aria-labelledby="ref-money">
-          <h2 id="ref-money" data-i18n="reference.moneyHeading">Ringgit figures</h2>
-          <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline. For vehicles parked at the shop, a US car damage curve (US Army Corps of Engineers, 2009); for workers' pay, the minimum wage (Minimum Wages Order 2024).</p>
-        </section>
-        <section class="surface reference-card" id="losses-card" aria-labelledby="ref-losses" hidden>
-          <h2 id="ref-losses" data-i18n="reference.lossesHeading">Past flood losses to business premises</h2>
-          <p data-i18n="reference.lossesLead">What the Department of Statistics Malaysia (DOSM) counted as lost to business premises in floods each year: the total for the whole state or district, not one shop's loss.</p>
-          <div id="losses-body"></div>
-        </section>
-        <section class="surface reference-card" aria-labelledby="ref-sources">
-          <h2 id="ref-sources" data-i18n="reference.sourcesHeading">Data sources and credits</h2>
-          <p data-i18n="footer.credits">Flood depth: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0. Ground height: Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Businesses, roads, rivers and base map: © OpenStreetMap contributors, ODbL. Price index: World Bank, CC BY 4.0. Rain forecast: Google Weather. Open or closed: Google Maps. News: Gemini with Google Search. Car flood damage: US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain. Flood record: news reports, and single facts from the JPS Malaysia annual flood reports for 2021 and 2022, each cited with its page. Past losses to business premises: Department of Statistics Malaysia.</p>
-        </section>
-        <section class="surface reference-card" aria-labelledby="ref-privacy">
-          <h2 id="ref-privacy" data-i18n="reference.privacyHeading">Privacy</h2>
-          <p data-i18n="footer.privacy">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m. If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km. For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates. Photos and voice recordings go to Gemini to be read and are not saved by this tool. Your language and the shop you pick are kept only in this browser.</p>
-        </section>
+      <section class="ref-short" aria-labelledby="ref-short-heading">
+        <h2 id="ref-short-heading" class="kicker" data-i18n="reference.shortHeading">In short</h2>
+        <ul class="ref-short-list">
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-wave"/></svg>
+            <p><strong data-i18n="reference.short1Title">A model, not a record</strong> <span data-i18n="reference.short1">Depths come from a global computer model in 90 m squares: not an official flood map, and not a forecast.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg>
+            <p><strong data-i18n="reference.short2Title">Ringgit are rough</strong> <span data-i18n="reference.short2">Loss figures are estimates from your answers and published damage curves, not a valuation or an insurance figure.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+            <p><strong data-i18n="reference.short3Title">Check before you act</strong> <span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-store"/></svg>
+            <p><strong data-i18n="reference.short4Title">Your choices stay here</strong> <span data-i18n="reference.short4">Your language and the shop you pick are kept only in this browser.</span></p>
+          </li>
+        </ul>
+      </section>
+      <div class="ref-layout">
+        <nav class="ref-nav" aria-labelledby="ref-nav-heading">
+          <h2 id="ref-nav-heading" class="small-heading" data-i18n="reference.contents">On this page</h2>
+          <ol>
+            <li><button type="button" class="ref-jump" data-jump="ref-what" data-i18n="reference.navWhat">What it shows</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-map" data-i18n="reference.navMap">The map</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-method" data-i18n="reference.navMethod">Flood scores</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-money" data-i18n="reference.navMoney">Ringgit figures</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-losses" data-i18n="reference.navLosses">Past losses</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-sources" data-i18n="reference.navSources">Sources</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-privacy" data-i18n="reference.navPrivacy">Privacy</button></li>
+          </ol>
+        </nav>
+        <div class="ref-body">
+          <section class="ref-section" aria-labelledby="ref-what">
+            <h2 id="ref-what" tabindex="-1" data-i18n="reference.whatHeading">What this tool shows</h2>
+            <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
+          </section>
+          <section class="ref-section" id="map-notes-card" aria-labelledby="ref-map" hidden>
+            <h2 id="ref-map" tabindex="-1" data-i18n="overview.mapExtrasHeading">About this map</h2>
+            <div class="reference-notes" id="map-note"></div>
+          </section>
+          <section class="ref-section index-method" id="index-method" aria-labelledby="ref-method" hidden>
+            <h2 id="ref-method" tabindex="-1" data-i18n="flash.methodHeading">How these are worked out</h2>
+            <div class="index-method-body" id="index-method-body"></div>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-money">
+            <h2 id="ref-money" tabindex="-1" data-i18n="reference.moneyHeading">Ringgit figures</h2>
+            <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline. For vehicles parked at the shop, a US car damage curve (US Army Corps of Engineers, 2009); for workers' pay, the minimum wage (Minimum Wages Order 2024).</p>
+          </section>
+          <section class="ref-section" id="losses-card" aria-labelledby="ref-losses" hidden>
+            <h2 id="ref-losses" tabindex="-1" data-i18n="reference.lossesHeading">Past flood losses to business premises</h2>
+            <p data-i18n="reference.lossesLead">What the Department of Statistics Malaysia (DOSM) counted as lost to business premises in floods each year: the total for the whole state or district, not one shop's loss.</p>
+            <div id="losses-body"></div>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-sources">
+            <h2 id="ref-sources" tabindex="-1" data-i18n="reference.sourcesHeading">Data sources and credits</h2>
+            <dl class="ref-sources">
+            <div class="ref-source"><dt data-i18n="reference.srcDepthLabel">Flood depth</dt><dd data-i18n="reference.srcDepth">European Commission JRC global river flood hazard maps v2.1, CC BY 4.0</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcHeightLabel">Ground height</dt><dd data-i18n="reference.srcHeight">Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcMapLabel">Businesses, roads, rivers and base map</dt><dd data-i18n="reference.srcMap">© OpenStreetMap contributors, ODbL</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcRecordLabel">Flood record</dt><dd data-i18n="reference.srcRecord">News reports, and single facts from the JPS Malaysia annual flood reports for 2021 and 2022, each cited with its page</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcLossesLabel">Past losses to business premises</dt><dd data-i18n="reference.srcLosses">Department of Statistics Malaysia</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcCarLabel">Car flood damage</dt><dd data-i18n="reference.srcCar">US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcPriceLabel">Price index</dt><dd data-i18n="reference.srcPrice">World Bank, CC BY 4.0</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcRainLabel">Rain forecast</dt><dd data-i18n="reference.srcRain">Google Weather</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcOpenLabel">Open or closed</dt><dd data-i18n="reference.srcOpen">Google Maps</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcNewsLabel">News</dt><dd data-i18n="reference.srcNews">Gemini with Google Search</dd></div>
+            </dl>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-privacy">
+            <h2 id="ref-privacy" tabindex="-1" data-i18n="reference.privacyHeading">Privacy</h2>
+            <ul class="ref-privacy">
+            <li data-i18n="reference.privTiles">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m.</li>
+            <li data-i18n="reference.privWeather">If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km.</li>
+            <li data-i18n="reference.privGemini">For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates.</li>
+            <li data-i18n="reference.privMedia">Photos and voice recordings go to Gemini to be read and are not saved by this tool.</li>
+            <li data-i18n="reference.privBrowser">Your language and the shop you pick are kept only in this browser.</li>
+            </ul>
+          </section>
+        </div>
       </div>
     </section>
   </main>

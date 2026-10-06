@@ -109,7 +109,8 @@ export function mapControls({ hasLayer, metrics = [], word = null, validation = 
 const sourceItem = (source) => (typeof source === "string" ? h("li", {}, source) : h("li", {}, source?.url
   ? h("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.text ?? source.title) : source?.text ?? source?.title));
 
-const listPart = (heading, items, item) => (items?.length ? [h("h3", { class: "small-heading" }, heading), h("ul", {}, items.map(item))] : []);
+// long and needed by few (the ways we differ from the papers, the papers themselves): folded under their heading
+const listPart = (heading, items, item) => (items?.length ? [h("details", {}, h("summary", {}, heading), h("ul", {}, items.map(item)))] : []);
 
 const both = (method, key, showScore) => [...(method?.flash?.[key] ?? []), ...((showScore && method?.score?.[key]) || [])];
 
