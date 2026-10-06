@@ -1,4 +1,4 @@
-// Words in English for the act-now features on My business (where to move the car), kept apart so strings/en.js
+// Words in English for the act-now features on My business (where to move the car, sharing a result), kept apart so strings/en.js
 // stays under the file size limit; en.js spreads them in, so every key is still in one table.
 export default Object.freeze({
   "car.label": "Where to move your car",
@@ -23,4 +23,15 @@ export default Object.freeze({
   "dir.sw": "south-west",
   "dir.w": "west",
   "dir.nw": "north-west",
+  "share.button": "Share this result",
+  "share.making": "Making the picture…",
+  "share.saved": "Picture saved, and the text with the link copied: paste it with the picture in WhatsApp.",
+  "share.savedOnly": "Picture saved. The text could not be copied here: the link to send with it is the address of this page.",
+  "share.failed": "The picture could not be made in this browser.",
+  "share.fileName": "banjir-check.png",
+  "share.pointName": "A spot I checked",
+  "share.inFlood": "Water in the model, in a 1 in {rp} years flood",
+  "share.footer": "Depths from a global computer model in 90 m squares: not an official flood map, not a forecast.",
+  "share.textWet": "{name}: {depth} of water in the model in a 1 in {rp} years flood ({pct}% chance in {years} years). Check your own shop: {link}",
+  "share.textDry": "{name}: no water in the model in a 1 in {rp} years flood. Check your own shop: {link}",
 });

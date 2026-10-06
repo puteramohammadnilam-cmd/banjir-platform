@@ -1,4 +1,4 @@
-// Words in Bahasa Melayu for the act-now features on My business (where to move the car), kept apart so strings/ms.js
+// Words in Bahasa Melayu for the act-now features on My business (where to move the car, sharing a result), kept apart so strings/ms.js
 // stays under the file size limit; ms.js spreads them in, so every key is still in one table.
 export default Object.freeze({
   "car.label": "Di mana hendak alihkan kereta",
@@ -23,4 +23,15 @@ export default Object.freeze({
   "dir.sw": "barat daya",
   "dir.w": "barat",
   "dir.nw": "barat laut",
+  "share.button": "Kongsi keputusan ini",
+  "share.making": "Membuat gambar…",
+  "share.saved": "Gambar disimpan, dan teks bersama pautan disalin: tampalkannya bersama gambar dalam WhatsApp.",
+  "share.savedOnly": "Gambar disimpan. Teks tidak dapat disalin di sini: pautan untuk dihantar bersamanya ialah alamat halaman ini.",
+  "share.failed": "Gambar tidak dapat dibuat dalam pelayar ini.",
+  "share.fileName": "banjir-check.png",
+  "share.pointName": "Titik yang saya semak",
+  "share.inFlood": "Air dalam model, dalam banjir 1 dalam {rp} tahun",
+  "share.footer": "Kedalaman daripada model komputer global dalam petak 90 m: bukan peta banjir rasmi, bukan ramalan.",
+  "share.textWet": "{name}: {depth} air dalam model dalam banjir 1 dalam {rp} tahun (peluang {pct}% dalam {years} tahun). Semak kedai anda sendiri: {link}",
+  "share.textDry": "{name}: tiada air dalam model dalam banjir 1 dalam {rp} tahun. Semak kedai anda sendiri: {link}",
 });

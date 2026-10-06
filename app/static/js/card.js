@@ -1,6 +1,7 @@
 // The "My business" tab: the depth for one business, drawn to scale, with what it means and what to do next.
 import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName, scenarioLabel } from "./dom.js";
 import { carFact } from "./car.js";
+import { shareButton } from "./share.js";
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
@@ -247,7 +248,8 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
         drawnKey = key;
         const isPageArea = !premise.is_point || premise.area_id === area.id;   // the example is this area's flood
         renderPicker(picker, rp, onPick, isPageArea ? area.bigger_flood_example : null);
-        drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM));
+        drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM),
+          shareButton(premise, rp, isPageArea ? area.display_name : null));
         announcer.textContent = spoken(premise, rp);
       }
       const wasOpen = openFolds(side);   // a fold the reader opened stays open when the listing arrives or the size changes
