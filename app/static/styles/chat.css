@@ -25,11 +25,9 @@
 /* ---------- the floating chat: a button on every tab, the conversation in a native dialog ---------- */
 /* a navy pill with the orange mark in its round end, above the map and under the aim panel; hidden until main.js has built the chat */
 .chat-fab { position: fixed; z-index: 1200; right: var(--space-5); bottom: var(--space-5); display: inline-flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-5) 0 var(--space-2); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: var(--radius-md); background: var(--brand-deep); color: #fff; font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.01em; cursor: pointer; box-shadow: 0 1px 2px rgba(13, 27, 42, 0.2), 0 14px 28px -10px rgba(8, 48, 79, 0.6); transition: transform var(--duration-normal) var(--ease-out-expo), box-shadow var(--duration-normal) var(--ease-out-expo), background-color var(--duration-fast); }
-.chat-fab-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--accent); transition: transform var(--duration-normal) var(--ease-out-expo), background-color var(--duration-fast), color var(--duration-fast); }
+.chat-fab-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--band-3); transition: transform var(--duration-normal) var(--ease-out-expo), background-color var(--duration-fast), color var(--duration-fast); }
 .chat-fab-mark .icon { width: 20px; height: 20px; }
-.chat-fab:hover { background: var(--brand); transform: translateY(-2px); box-shadow: 0 1px 2px rgba(13, 27, 42, 0.2), 0 18px 32px -10px rgba(8, 48, 79, 0.7); }
-.chat-fab:hover .chat-fab-mark { transform: rotate(-8deg) scale(1.08); }
-.chat-fab:active { transform: translateY(0); }
+.chat-fab:hover { background: var(--brand); }   /* a state change, not a show: no lift, no spin */
 .chat-fab[aria-expanded="true"] .chat-fab-mark { background: #fff; color: var(--brand-deep); }
 .chat-fab:focus-visible { outline-offset: 3px; }
 body:has(.aim-panel:not([hidden])) .chat-fab { display: none; }   /* aim mode has its own panel in that corner */
@@ -54,7 +52,7 @@ body:has(.aim-panel:not([hidden])) .chat-fab { display: none; }   /* aim mode ha
 .chat-body > * { flex: none; }
 .chat-body .alert { margin-bottom: 0; }
 .chat-body .messages { flex: 1 0 9rem; min-height: 9rem; max-height: none; align-content: start; }
-.chat-body .msg-model { background: var(--surface); border-left: 3px solid var(--band-2); border-bottom-left-radius: var(--radius-md); }
+.chat-body .msg-model { background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: var(--radius-sm); }
 .chat-body .msg-wait { background: none; border: 0; }
 .chat-body .messages:empty { display: none; }   /* no AI in this build: no greeting, so no empty box either */
 .chat-try { margin-top: auto; }   /* the suggestions and the question box stay at the bottom, where the thumb is */

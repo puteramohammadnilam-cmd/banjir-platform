@@ -128,6 +128,8 @@
 @media print {
   body:has(> #print-root:not(:empty)) > :not(#print-root) { display: none !important; }
   #print-root { display: block; }
+  /* the printed sheet carries the site's ruler of depth bands at its head; browsers drop backgrounds unless asked */
+  #print-root::before { content: ""; display: block; height: 4px; margin-bottom: 12px; background: linear-gradient(90deg, var(--band-1) 0 20%, var(--band-2) 20% 40%, var(--band-3) 40% 60%, var(--band-4) 60% 80%, var(--band-5) 80%); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #print-root .plan-sheet { border: 0; padding: 0; max-width: none; }
   #print-root .plan-actions { display: none; }
 }
