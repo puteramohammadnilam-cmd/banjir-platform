@@ -113,6 +113,12 @@ def _words(text: str) -> set[str]:
     return {w for w in re.findall(r"[a-z0-9]+", text.lower()) if len(w) >= 3}
 
 
+def _same_name(ours: str, theirs: str) -> bool:
+    """Every word of one name is in the other, short words such as "YY" included."""
+    a, b = (set(re.findall(r"[a-z0-9]+", text.lower())) for text in (ours, theirs))
+    return bool(a and b) and (a <= b or b <= a)
+
+
 def _plain(text: str) -> str:
     return re.sub(r"[\x00-\x1f\x7f]", " ", text)[:MAX_NAME_CHARS].strip()
 
@@ -129,7 +135,10 @@ def _listing(p: dict) -> tuple[float, float, str] | None:
 def place_status(name: str, lat: float, lon: float) -> dict | None:
     """The Google Maps listing with a matching name within MATCH_RADIUS_M of a mapped business, else None.
 
-    A name match is a shared word of three or more letters, so a neighbour cannot stand in for the shop."""
+    A name match is a shared word of three or more letters, so a neighbour with nothing in common cannot stand in for
+    the shop. One with the same name wins, then the one sharing the most words, then the nearest. same_name is true
+    when every word of one name is in the other ("KFC" and "KFC Drive Thru"), and false for "Kedai Runcit Abu" against
+    "Kedai Runcit Ali": two shared words, and maybe another shop."""
     if name.startswith(UNNAMED) or not _words(name):
         return None
     dlat, dlon = MATCH_RADIUS_M / 110_574, MATCH_RADIUS_M / (111_320 * math.cos(math.radians(lat)))
@@ -141,12 +150,13 @@ def place_status(name: str, lat: float, lon: float) -> dict | None:
     wanted = _words(name)
     listings = [(p, got) for p in data.get("places") or [] if (got := _listing(p))]   # a broken listing is skipped
     found = [(_metres(lat, lon, plat, plon), p, text) for p, (plat, plon, text) in listings if wanted & _words(text)]
-    near = min(found, key=lambda f: f[0], default=None)
-    if near is None or near[0] > MATCH_RADIUS_M:
+    in_reach = [f for f in found if f[0] <= MATCH_RADIUS_M]
+    best = min(in_reach, key=lambda f: (not _same_name(name, f[2]), -len(wanted & _words(f[2])), f[0]), default=None)
+    if best is None:
         return None
-    distance, p, text = near
+    distance, p, text = best
     raw = p.get("businessStatus", "")
     return {"status": STATUS.get(raw, "unknown"), "google_status": raw or None,
-            "name": _plain(text),
+            "name": _plain(text), "same_name": _same_name(name, text),
             "maps_uri": p["googleMapsUri"] if str(p.get("googleMapsUri", "")).startswith("https://") else None,
             "distance_m": round(distance), "source": "Google Maps"}

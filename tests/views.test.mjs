@@ -43,6 +43,14 @@ test("a business shows its road, its Google Maps listing, its floor and the page
   assert.ok(!panel.textContent.includes(NO_WATER_NOTE));
 });
 
+test("a Google listing with another name says it may be another shop; one with the same name just names it", () => {
+  const { panel, card } = mountCard();
+  show(card, shop, { listing: { configured: true, place: { ...LISTING.place, name: "B Shop", same_name: false } } });
+  assert.ok(panel.textContent.includes('The nearest listing has another name, "B Shop", so it may be another shop.'));
+  show(card, shop, { listing: { configured: true, place: { ...LISTING.place, same_name: true } } });
+  assert.ok(panel.textContent.includes('As "A Shop".') && !panel.textContent.includes("another shop"));
+});
+
 test("the bigger-flood example is the page's area's own: a point in another area gets the plain note", () => {
   const { panel, card } = mountCard({ area: { ...HOME, bigger_flood_example: "2021-12" } });
   const note = () => panel.querySelector(".scenario-note").textContent;
@@ -186,6 +194,24 @@ function stubServer() {
   return asked;
 }
 
+test("an answer is shown from its first line: the list scrolls to its top, not to the bottom", async () => {
+  stubServer();
+  const { chips, messages } = mountChat();
+  // the list 100 px down the screen, its messages 50 px apart; the question and the wait note leave it at the bottom
+  // (0 in the fake), then the answer, the third message, sits 100 px below the list's top
+  messages.getBoundingClientRect = () => ({ top: 100 });
+  const proto = Object.getPrototypeOf(messages);
+  proto.getBoundingClientRect = function () { return { top: 100 + 50 * this.parent.children.indexOf(this) }; };
+  try {
+    chips.children[0].click();
+    await settle();
+    assert.equal(messages.children.at(-1).textContent, "An answer.");
+    assert.equal(messages.scrollTop, 100 - 8);   // its top edge, less the 8 px of room above it
+  } finally {
+    delete proto.getBoundingClientRect;
+  }
+});
+
 test("a business chat starts with its five chips and the news button for the page's area, with no note", () => {
   const { chips, news, section } = mountChat();
   assert.equal(chips.children.length, 5);
@@ -199,18 +225,18 @@ test("with nothing picked yet, the chat asks about the area and the tool, not a 
   chat.render(undefined);
   assert.deepEqual(chipTexts(chips), ["Which businesses stay dry in a 1 in 50 years flood?", "Is heavy rain due today?",
     "How does this tool work out what a flood could cost?"]);
-  assert.equal(input.placeholder, "Ask anything about flooding in this area");
+  assert.equal(input.placeholder, "Ask about floods here, or about this tool");
   assert.equal(news.textContent, "Latest flood news for Home Town");
 });
 
 test("the greeting names the shop, the point, or the area when nothing is picked", () => {
   const { chat, messages } = mountChat();
   const greeting = () => messages.children[0].textContent;
-  assert.match(greeting(), /at A Shop\./);
+  assert.match(greeting(), /at A Shop, how this tool works/);
   chat.render(point());
-  assert.match(greeting(), /at this point\./);
+  assert.match(greeting(), /at this point, how this tool works/);
   chat.render(undefined);
-  assert.match(greeting(), /in Home Town, or pick a shop on the map first/);
+  assert.match(greeting(), /in Home Town, how this tool works, or getting your shop ready\. Pick a shop on the map/);
 });
 
 test("without the AI key every control is off and nothing invites a question", () => {
@@ -302,9 +328,9 @@ test("a question goes with the id of the place selected when it is asked, and th
 test("the question box speaks of a location for a point, and gets its own words back for a business", () => {
   const { chat, input } = mountChat();
   const business = input.placeholder;
-  assert.equal(business, "Ask anything about flooding at this shop");
+  assert.equal(business, "Ask about this shop, or about this tool");
   chat.render(point());
-  assert.equal(input.placeholder, "Ask anything about flooding at this spot");
+  assert.equal(input.placeholder, "Ask about this spot, or about this tool");
   chat.render(shop);
   assert.equal(input.placeholder, business);
 });
@@ -313,11 +339,11 @@ test("in Bahasa Melayu the question box, the greeting and the chips are all in B
   useLang("ms");
   try {
     const { chat, chips, input } = mountChat();
-    assert.equal(input.placeholder, "Tanya apa-apa tentang banjir di kedai ini");
+    assert.equal(input.placeholder, "Tanya tentang kedai ini atau alat ini");
     assert.ok(chipTexts(chips).includes("Kedai ni kena air tak kalau banjir besar?"));
     assert.ok(chipTexts(chips).every((chip) => !/\b(the|this|would|which)\b/i.test(chip)), chipTexts(chips).join(" | "));
     chat.render(point());
-    assert.equal(input.placeholder, "Tanya apa-apa tentang banjir di lokasi ini");
+    assert.equal(input.placeholder, "Tanya tentang lokasi ini atau alat ini");
   } finally {
     useLang("en");
   }

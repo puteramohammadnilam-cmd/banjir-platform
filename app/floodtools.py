@@ -569,9 +569,10 @@ def business_status(business_id: str) -> dict:
         business_id: The business id, for example "node-11075038761".
 
     Returns:
-        found: whether Google Maps lists a business with that name within 150 m of the mapped point;
-        if so its status, its name on Google Maps and a link. Or an error. A listing can be out of
-        date, so say "Google Maps lists it as ...".
+        found: whether Google Maps lists a business with a similar name within 150 m of the mapped
+        business; if so its status, its name on Google Maps, same_name and a link. Or an error. A listing
+        can be out of date, so say "Google Maps lists it as ...". same_name false means the listing's name
+        differs from the map's, so it may be another shop: say so, with both names, before its status.
     """
     ref, error = _reference(business_id)
     if error == POINT_ID_REFUSED or places.is_point_id(ref):   # a point id, or "selected" for a point

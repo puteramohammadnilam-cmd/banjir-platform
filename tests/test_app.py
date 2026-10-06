@@ -207,7 +207,7 @@ def test_vertex_flag_set_to_false_is_not_configured(monkeypatch):
 
 def test_ask_without_a_key_says_so(monkeypatch):
     main._hits.clear()
-    ai._client.cache_clear()
+    ai._made_client.cache_clear()
     for name in ("GOOGLE_API_KEY", "GEMINI_API_KEY", "GOOGLE_GENAI_USE_VERTEXAI", "GOOGLE_GENAI_USE_ENTERPRISE"):
         monkeypatch.delenv(name, raising=False)
     res = TestClient(main.app).post("/api/ask", json={"question": "hi"})

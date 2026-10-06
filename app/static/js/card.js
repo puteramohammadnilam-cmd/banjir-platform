@@ -67,7 +67,7 @@ function listingFact(listing) {
   if (!listing.place) return card(t("business.mapsNone"), h("p", { class: "fact-note" }, t("business.mapsNoneNote")));
   const { place } = listing;
   return card(t("business.listedAs", { status: t(LISTED[place.status] ?? "listing.unknown") }),
-    h("p", { class: "fact-note" }, place.name ? `${t("business.listedName", { name: place.name })} ` : "",
+    h("p", { class: "fact-note" }, place.name ? `${t(place.same_name === false ? "business.listedOther" : "business.listedName", { name: place.name })} ` : "",
       place.maps_uri && h("a", { href: place.maps_uri, target: "_blank", rel: "noopener noreferrer" }, t("business.mapsView"))),
     h("p", {}, t("business.mapsSource")));
 }

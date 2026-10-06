@@ -5,6 +5,8 @@ import os
 import re
 import subprocess
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -88,9 +90,25 @@ def test_the_plan_has_room_for_a_whole_page(monkeypatch):
 @pytest.fixture
 def fresh_client(monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "test-key")
-    ai._client.cache_clear()
+    ai._made_client.cache_clear()
     yield
-    ai._client.cache_clear()
+    ai._made_client.cache_clear()
+
+
+def test_two_first_questions_at_once_share_one_client(fresh_client, monkeypatch):
+    # just after a restart two questions can ask for the client together; a second client, dropped at once, would
+    # close its connection under its own request ("client has been closed", seen 6 Oct 2026)
+    made = []
+
+    def slow_client(**options):
+        time.sleep(0.05)
+        made.append(options)
+        return SimpleNamespace(options=options)
+
+    monkeypatch.setattr(ai.genai, "Client", slow_client)
+    with ThreadPoolExecutor(4) as pool:
+        clients = list(pool.map(lambda _: ai._client(), range(4)))
+    assert len(made) == 1 and all(client is clients[0] for client in clients)
 
 
 def test_the_client_retries_busy_and_overloaded_answers(fresh_client):

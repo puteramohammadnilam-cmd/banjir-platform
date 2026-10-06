@@ -85,6 +85,30 @@ def test_place_status_takes_the_nearest_match_within_reach(monkeypatch):
     assert out["maps_uri"].endswith("near") and out["distance_m"] < 20 and out["source"] == "Google Maps"
 
 
+def test_place_status_prefers_the_same_name_and_flags_a_different_one(monkeypatch):
+    # the case seen live on 6 Oct 2026: three shared words, another shop
+    other = place("Restoran YY Sri Muda", 3.03001, 101.54001, pid="other")
+    same = place("Restoran NTS Sri Muda", 3.0306, 101.5406, pid="same")
+    monkeypatch.setattr(googlemaps, "_post", lambda *args: {"places": [other, same]})
+    out = googlemaps.place_status("Restoran NTS Sri Muda", 3.03, 101.54)
+    assert out["maps_uri"].endswith("same") and out["same_name"] is True   # the farther one, as it has the same name
+    monkeypatch.setattr(googlemaps, "_post", lambda *args: {"places": [other]})
+    out = googlemaps.place_status("Restoran NTS Sri Muda", 3.03, 101.54)
+    assert out["name"] == "Restoran YY Sri Muda" and out["same_name"] is False
+
+
+def test_a_branch_word_is_still_the_same_name_and_more_shared_words_beat_nearer(monkeypatch):
+    branch = place("KFC Seksyen 7", 3.0301, 101.5401, pid="branch")
+    monkeypatch.setattr(googlemaps, "_post", lambda *args: {"places": [branch]})
+    assert googlemaps.place_status("KFC", 3.03, 101.54)["same_name"] is True
+    one = place("Kedai Runcit Abu", 3.03001, 101.54001, pid="one")             # nearer, shares "kedai runcit"
+    two = place("Kedai Runcit Ali Jaya", 3.0305, 101.5405, pid="two")          # farther, shares three words
+    far_same = place("Kedai Runcit Ali Baba", 3.0400, 101.5400, pid="far")     # the same name, but out of reach
+    monkeypatch.setattr(googlemaps, "_post", lambda *args: {"places": [one, two, far_same]})
+    out = googlemaps.place_status("Kedai Runcit Ali Baba", 3.03, 101.54)
+    assert out["maps_uri"].endswith("two") and out["same_name"] is False
+
+
 def test_place_status_is_none_when_nothing_is_close(monkeypatch):
     monkeypatch.setattr(googlemaps, "_post", lambda url, body, headers: {"places": [place("KFC", 3.05, 101.56)]})
     assert googlemaps.place_status("KFC", 3.03, 101.54) is None

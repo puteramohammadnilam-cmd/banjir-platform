@@ -65,11 +65,22 @@ function sources(list, html) {
   ];
 }
 
-/** Adds a message to the conversation and keeps the newest in view. */
+const ANSWER_KINDS = new Set(["model", "error"]);
+const ANSWER_GAP_PX = 8;   // a little room above an answer shown from its top, so its edge is not flush with the box
+
+/** Keeps the newest message in view: an answer from its first line, so a long one reads from the top on a phone
+ *  (where only a few lines show), anything else at the bottom. A short answer ends at the bottom either way. */
+function keepInView(messages, item, kind) {
+  const offset = item.getBoundingClientRect?.().top - messages.getBoundingClientRect?.().top;
+  messages.scrollTop = ANSWER_KINDS.has(kind) && Number.isFinite(offset)
+    ? messages.scrollTop + offset - ANSWER_GAP_PX : messages.scrollHeight;
+}
+
+/** Adds a message to the conversation and keeps it in view. */
 function addMessage(messages, kind, text) {
   const item = h("li", { class: `msg-${kind}` }, text);
   messages.append(item);
-  messages.scrollTop = messages.scrollHeight;
+  keepInView(messages, item, kind);
   return item;
 }
 
@@ -131,7 +142,7 @@ const showChips = (box, list, onPick, isOff = false) =>
 const newsAnswer = (add, messages) => (result) => {
   const item = add("model", result.answer);
   item.append(...sources(result.sources, result.search_html).filter(Boolean));
-  messages.scrollTop = messages.scrollHeight;
+  keepInView(messages, item, "model");
 };
 
 /** Send the typed question on submit. What was typed stays while an answer is pending. */
