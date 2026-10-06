@@ -1,4 +1,4 @@
-// Words in English for the act-now features on My business (where to move the car, sharing a result), kept apart so strings/en.js
+// Words in English for the act-now features on My business (where to move the car, sharing a result, the "Flood is coming" checklist), kept apart so strings/en.js
 // stays under the file size limit; en.js spreads them in, so every key is still in one table.
 export default Object.freeze({
   "car.label": "Where to move your car",
@@ -34,4 +34,31 @@ export default Object.freeze({
   "share.footer": "Depths from a global computer model in 90 m squares: not an official flood map, not a forecast.",
   "share.textWet": "{name}: {depth} of water in the model in a 1 in {rp} years flood ({pct}% chance in {years} years). Check your own shop: {link}",
   "share.textDry": "{name}: no water in the model in a 1 in {rp} years flood. Check your own shop: {link}",
+  "mode.open": "Flood warning? What to do now",
+  "mode.kicker": "Flood warning",
+  "mode.heading": "What to do now",
+  "mode.lead": "For {name}, worked out for a 1 in {rp} years flood in the model. Tick each step as you do it.",
+  "mode.close": "Close",
+  "mode.liftHeading": "Lift stock and machines",
+  "mode.liftCm": "At least {cm} cm off the floor",
+  "mode.liftWhy": "The model puts {depth} of water at street level here in a 1 in {rp} years flood.",
+  "mode.liftWhyFloor": "The model puts {depth} of water at street level here in a 1 in {rp} years flood, and your floor is about {floor} cm above the street, from your shop-front photo.",
+  "mode.liftFirst": "Lift these first (from your stock photo): {items}.",
+  "mode.liftNone": "The model puts no water above your floor in a 1 in {rp} years flood. Drains and bigger floods can still bring water in, so lift what sits on the floor.",
+  "mode.carHeading": "Move the car",
+  "mode.carEarly": "Move cars to higher ground early, well before the water reaches the road.",
+  "mode.powerHeading": "Switch off the power",
+  "mode.power": "Before water comes in, switch off the electricity at the main switch and unplug machines. If the floor or the switchboard is already wet, do not go near it: leave, and call 999 or the power company from outside.",
+  "mode.papersHeading": "Take cash and papers",
+  "mode.papers": "Take cash, documents, licences, stock records and laptops with you, or put them up high in a waterproof bag.",
+  "mode.photoHeading": "Photograph the shop",
+  "mode.photos": "Take photos and a short video of your stock and shop now. After the flood, photograph the damage before you clean: an insurer may ask for both.",
+  "mode.goHeading": "Close early and go",
+  "mode.goShelter": "Nearest relief centre used in past floods: {name}, {distance}. Centres can change between floods, so check with the council.",
+  "mode.goNoShelter": "Know where you will go before the water comes: ask the council or the district office which relief centre is open.",
+  "mode.goCall": "In an emergency call 999. Live river levels and warnings:",
+  "mode.limit": "From a global river model, not a forecast or an official warning.",
+  "mode.urgent": "If water is already rising, or the authorities tell you to leave, leave now and skip the rest. Follow their instructions first.",
+  "mode.powerAfter": "After the flood, do not switch the power back on until an electrician has checked it.",
+  "mode.andMore": " and {n} more",
 });

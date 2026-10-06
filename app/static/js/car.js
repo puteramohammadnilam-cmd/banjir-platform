@@ -38,6 +38,14 @@ function dryHere(premise, rp) {
   return road && !(road[rp] > 0) ? "here" : null;
 }
 
+/** The same answer as plain nodes, for the "Flood is coming" checklist: the value, then its notes; null while the
+ *  answer is not in or the area has no dry spots. */
+export function carStep(premise, rp, dry) {
+  if (!dry?.spots) return null;
+  const { value, lead } = answer(dry.spots[rp], dryHere(premise, rp), rp);
+  return [h("p", { class: "step-answer" }, value), ...[lead].flat()];
+}
+
 /** The fact. `dry` is the place's answer from the server ({busy} | {spots} | {error}); a place in an area without dry
  *  spots (spots null) gets no fact. A business counts its own street; a point counts the water at the point. */
 export function carFact(premise, rp, dry) {

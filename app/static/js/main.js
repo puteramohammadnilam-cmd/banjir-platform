@@ -11,6 +11,7 @@ import { createPin } from "./pin.js";
 import { createPlanCard, planFigures } from "./plan.js";
 import { syncReferenceNav, wireReferenceNav } from "./reference.js";
 import { MAX_PHOTOS } from "./stock.js";
+import { createFloodMode } from "./floodmode.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
@@ -288,6 +289,16 @@ async function loadListing(app, id) {
   }
 }
 
+/** What the "Flood is coming" checklist is worked out from: the place on show and its flood size, the floor height a
+ *  shop-front photo gave, its stock photos and where to move the car. */
+function floodContext(app) {
+  const { state } = app.store;
+  const id = state.placeKey;
+  const photo = state.photos[id]?.estimate;
+  return { premise: placeOf(app, state), rp: state.rp, floorCm: photo?.is_shop_front ? photo.floor_height_cm : 0,
+    stock: state.stocks[id], dry: state.drySpots[id] };
+}
+
 /** Where to move the car, for a business or a point: asked once per place, and again when a place whose answer was an
  *  error is picked again (select, open). render asks for a place it has no answer for. */
 async function loadDrySpot(app, id) {
@@ -436,7 +447,9 @@ function createViews(app) {
     getCoverage: () => coverageOf(app),
     onChecked: (place, squares) => openPoint(app, place, squares),
   });
+  const floodMode = createFloodMode();
   const business = createBusiness($("panel-business"), {
+    onWarning: (opener) => floodMode.open(floodContext(app), opener),
     area: start.page, areas: start.list.areas, onPhoto: (file) => sendPhoto(app, file), onPick: pickRp, goto: (tab) => goto(app, tab),
     showOnMap: () => { goto(app, "overview"); overview.map.focus(store.state.placeKey); },
     onMovePin: () => movePin(app, pin), onAsk: (opener) => widget.open(opener), ...empty, isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
@@ -463,7 +476,7 @@ function createViews(app) {
     isReady: start.status.ai_ready, hasMaps: start.status.maps_ready,
     voice: { ...realVoice, speak: (text, language) => widget.isOpen && realVoice.speak(text, language) },   // a late answer is not read to a closed chat
   });
-  return { overview, business, cost, insurance, chat, widget, showTab, pin, plan, compare };
+  return { overview, business, cost, insurance, chat, widget, showTab, pin, plan, compare, floodMode };
 }
 
 /** What the chat's "About" line names: the place, or the area while none is picked. */
@@ -492,6 +505,7 @@ function render(app, views, state, previous) {
   views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey], dry: state.drySpots[state.placeKey] });
   if (place && !state.drySpots[state.placeKey]) queueMicrotask(() => loadDrySpot(app, state.placeKey));   // after this draw
+  if (place) views.floodMode.refresh(floodContext(app));   // the car step, when its answer comes while the checklist is open
   views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
     state.stocks[state.placeKey], state.rp);
   views.insurance.render(place, state.estimates[state.placeKey]);

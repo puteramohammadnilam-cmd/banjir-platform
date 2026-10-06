@@ -1,4 +1,4 @@
-// Words in Bahasa Melayu for the act-now features on My business (where to move the car, sharing a result), kept apart so strings/ms.js
+// Words in Bahasa Melayu for the act-now features on My business (where to move the car, sharing a result, the "Flood is coming" checklist), kept apart so strings/ms.js
 // stays under the file size limit; ms.js spreads them in, so every key is still in one table.
 export default Object.freeze({
   "car.label": "Di mana hendak alihkan kereta",
@@ -34,4 +34,31 @@ export default Object.freeze({
   "share.footer": "Kedalaman daripada model komputer global dalam petak 90 m: bukan peta banjir rasmi, bukan ramalan.",
   "share.textWet": "{name}: {depth} air dalam model dalam banjir 1 dalam {rp} tahun (peluang {pct}% dalam {years} tahun). Semak kedai anda sendiri: {link}",
   "share.textDry": "{name}: tiada air dalam model dalam banjir 1 dalam {rp} tahun. Semak kedai anda sendiri: {link}",
+  "mode.open": "Amaran banjir? Apa perlu dibuat sekarang",
+  "mode.kicker": "Amaran banjir",
+  "mode.heading": "Apa perlu dibuat sekarang",
+  "mode.lead": "Untuk {name}, dikira bagi banjir 1 dalam {rp} tahun dalam model. Tandakan setiap langkah apabila selesai.",
+  "mode.close": "Tutup",
+  "mode.liftHeading": "Angkat barang dan mesin",
+  "mode.liftCm": "Sekurang-kurangnya {cm} cm dari lantai",
+  "mode.liftWhy": "Dalam banjir 1 dalam {rp} tahun, terdapat {depth} air dalam model pada paras jalan di sini.",
+  "mode.liftWhyFloor": "Dalam banjir 1 dalam {rp} tahun, terdapat {depth} air dalam model pada paras jalan di sini, dan lantai anda kira-kira {floor} cm di atas paras jalan, mengikut foto hadapan kedai anda.",
+  "mode.liftFirst": "Angkat yang ini dahulu (daripada foto barang anda): {items}.",
+  "mode.liftNone": "Tiada air di atas lantai anda dalam model dalam banjir 1 dalam {rp} tahun. Longkang dan banjir yang lebih besar masih boleh membawa air masuk, jadi angkat barang yang ada di lantai.",
+  "mode.carHeading": "Alihkan kereta",
+  "mode.carEarly": "Alihkan kereta ke tempat tinggi awal-awal, jauh sebelum air sampai ke jalan.",
+  "mode.powerHeading": "Matikan bekalan elektrik",
+  "mode.power": "Sebelum air masuk, matikan elektrik di suis utama dan cabut palam mesin. Jika lantai atau papan suis sudah basah, jangan dekati: keluar, dan hubungi 999 atau syarikat elektrik dari luar.",
+  "mode.papersHeading": "Bawa wang tunai dan dokumen",
+  "mode.papers": "Bawa wang tunai, dokumen, lesen, rekod stok dan komputer riba bersama anda, atau letakkan di tempat tinggi dalam beg kalis air.",
+  "mode.photoHeading": "Ambil gambar kedai",
+  "mode.photos": "Ambil gambar dan video pendek barang dan kedai anda sekarang. Selepas banjir, ambil gambar kerosakan sebelum membersihkan: syarikat insurans mungkin meminta kedua-duanya.",
+  "mode.goHeading": "Tutup awal dan pergi",
+  "mode.goShelter": "Pusat pemindahan terdekat yang digunakan dalam banjir lalu: {name}, {distance}. Pusat boleh berubah antara banjir, jadi semak dengan majlis.",
+  "mode.goNoShelter": "Ketahui ke mana anda akan pergi sebelum air datang: tanya majlis atau pejabat daerah pusat pemindahan mana yang dibuka.",
+  "mode.goCall": "Dalam kecemasan, hubungi 999. Paras sungai dan amaran semasa:",
+  "mode.limit": "Daripada model sungai global, bukan ramalan atau amaran rasmi.",
+  "mode.urgent": "Jika air sudah naik, atau pihak berkuasa menyuruh anda keluar, keluar sekarang dan tinggalkan langkah yang lain. Ikut arahan mereka dahulu.",
+  "mode.powerAfter": "Selepas banjir, jangan hidupkan semula elektrik sehingga juruelektrik memeriksanya.",
+  "mode.andMore": " dan {n} lagi",
 });

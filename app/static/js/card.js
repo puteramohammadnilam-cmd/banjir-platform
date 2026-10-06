@@ -1,6 +1,7 @@
 // The "My business" tab: the depth for one business, drawn to scale, with what it means and what to do next.
 import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName, scenarioLabel } from "./dom.js";
 import { carFact } from "./car.js";
+import { floodModeButton } from "./floodmode.js";
 import { shareButton } from "./share.js";
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
@@ -207,7 +208,7 @@ function sideFacts({ premise, rp, photo, listing, dry }, { area, goto, onPhoto, 
  *  its buttons. isReady and hasMaps are false when the build has no Gemini key or no Google Maps key: the photo button
  *  is then off, and the Ask AI shortcut says what it can read. The drawing is rebuilt only when the place, flood size or floor changes, so its water animation is
  *  not restarted by other updates, such as the Google Maps listing arriving. */
-export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onOpenSection = null, onAsk = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
+export function createBusiness(panel, { area, areas = [], onWarning = null, onPhoto, onPick, goto, showOnMap, onMovePin, onOpenArea, onOpenSection = null, onAsk = () => {}, onFind = () => {}, onCheckPoint = null, isReady = true, hasMaps = true }) {
   const empty = h("div");   // first, so that its h1 is the one goto() focuses while it is on show
   const head = h("header", { class: "biz-head" });
   const risk = h("section", { class: "surface risk", "aria-label": t("business.riskLabel") });
@@ -254,6 +255,7 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
       }
       const wasOpen = openFolds(side);   // a fold the reader opened stays open when the listing arrives or the size changes
       side.replaceChildren(
+        ...(onWarning ? [floodModeButton(onWarning)] : []),
         sideFacts(shown, { area, goto, onPhoto, isReady }),
         h("div", { class: "next" },
           nextStep(t("business.nextCost"), t("business.nextCostNote"), () => goto("cost"), true),

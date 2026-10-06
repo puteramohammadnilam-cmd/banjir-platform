@@ -360,10 +360,6 @@
   .risk .gauge text { font-size: 8.2px; }
 }
 
-/* where to move the car: the warning not to drive through water is in words and weight, not colour alone */
-.car-warning { font-weight: 600; color: var(--tone-high); }
-.share { display: grid; gap: var(--space-1); justify-items: start; margin-top: var(--space-3); }
-
 /* ---------- flood cost ---------- */
 /* the stock photo: rows under the modelled water carry the water's colour and a mark, so colour is not the only cue */
 .deep-note { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: var(--text-sm); }
