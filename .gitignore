@@ -11,3 +11,6 @@ __pycache__/
 # JRC flood depth rasters (9 files, about 77 MB): copied in by hand, listed in app/data/rasters/SOURCES.txt
 app/data/rasters/*.tif
 .coverage
+
+# raw answers of tools/gen_illustrations.py (the web files are committed)
+tools/illustrations_raw/
