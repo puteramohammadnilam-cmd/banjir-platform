@@ -10,14 +10,14 @@
 .ref-short-item strong { display: block; margin-bottom: 2px; font-size: var(--text-md); color: var(--ink); }
 .ref-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .ref-nav ol { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }   /* every link in sight on a phone */
-.ref-jump { min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; transition: border-color var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast); }
+.ref-jump { min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; transition: border-color var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast); }
 .ref-jump:hover { border-color: var(--brand); color: var(--brand); }
 .ref-jump:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 .ref-body { display: grid; gap: var(--space-4); counter-reset: ref; }
 .ref-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); font-size: var(--text-sm); color: var(--ink-2); line-height: 1.65; }
 .ref-section:not([hidden]) { counter-increment: ref; }
 .ref-section > h2 { display: flex; align-items: baseline; gap: var(--space-3); font-size: var(--text-xl); color: var(--ink); scroll-margin-top: 5rem; }
-.ref-section > h2::before { content: counter(ref, decimal-leading-zero) / ""; flex: none; font-size: var(--text-sm); font-weight: 800; color: var(--brand); font-variant-numeric: tabular-nums; }
+.ref-section > h2::before { content: counter(ref, decimal-leading-zero) / ""; flex: none; font-size: var(--text-sm); font-weight: 700; color: var(--brand); font-variant-numeric: tabular-nums; }
 .ref-section > h2:focus { outline: none; }
 .ref-section > h2:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: 4px; }
 .reference-notes { display: grid; gap: var(--space-1); }

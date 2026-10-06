@@ -5,7 +5,7 @@ import { t } from "./i18n.js";
 import { overlapsView } from "./place.js";
 
 const INK = "#0d1b2a";
-const SELECTED = "#b94a1b";   // --accent in tokens.css
+const SELECTED = "#0d1b2a";   // --marker in tokens.css: an ink ring, apart from the water and risk colours
 const BRAND = "#0c447c";      // --brand: a section's outline
 const HALO = "#fff";   // every shop dot wears a white ring (and a dark hairline from .biz-dot), so it reads on pale and dark squares
 const FOCUS_ZOOM = 17;

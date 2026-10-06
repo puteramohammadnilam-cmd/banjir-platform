@@ -8,7 +8,7 @@
 .biz-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
 .risk .scenario { margin-bottom: var(--space-5); }
 .headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
-.headline strong { font-size: var(--text-figure); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums; }
+.headline strong { font-size: var(--text-figure); font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums; }
 .headline span { font-size: var(--text-xl); font-weight: 700; }
 .headline.is-dry strong { color: var(--dry); }
 .subhead { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
@@ -32,15 +32,15 @@
    limits folded under "How to read this" */
 .facts { display: grid; gap: var(--space-5); }
 .fact-group { display: grid; gap: var(--space-2); }
-.fact-group-heading { margin: 0; font-size: var(--text-md); font-weight: 800; color: var(--ink); }
+.fact-group-heading { margin: 0; font-size: var(--text-md); font-weight: 700; color: var(--ink); }
 .fact { padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: inset 4px 0 0 var(--tone-edge, var(--line)); }
 .fact[data-tone="high"] { --tone-edge: var(--tone-high); --tone-ink: var(--tone-high); --tone-wash: var(--tone-high-wash); }
 .fact[data-tone="some"] { --tone-edge: var(--tone-some-line); --tone-ink: var(--tone-some); --tone-wash: var(--tone-some-wash); }
 .fact[data-tone="low"] { --tone-edge: var(--tone-low); --tone-ink: var(--tone-low); --tone-wash: var(--tone-low-wash); }
 .fact-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-3); }
-.fact-label { margin: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
-.fact-chip { padding: 2px var(--space-3); border-radius: 999px; font-size: var(--text-xs); font-weight: 700; background: var(--tone-wash, var(--surface-sunk)); color: var(--tone-ink, var(--ink-2)); }
-.fact-value { margin-top: var(--space-1); font-size: var(--text-xl); font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fact-label { margin: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+.fact-chip { padding: 2px var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; background: var(--tone-wash, var(--surface-sunk)); color: var(--tone-ink, var(--ink-2)); }
+.fact-value { margin-top: var(--space-1); font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 600; line-height: 1.25; letter-spacing: -0.005em; color: var(--ink); font-variant-numeric: tabular-nums; }
 .fact-note { margin-top: 2px; font-size: var(--text-sm); color: var(--ink-2); }
 .fact .btn { margin-top: var(--space-2); }
 .fact .fact-link { margin-top: var(--space-1); padding: 0; min-height: 2.25rem; }
@@ -111,7 +111,7 @@
 .plan-card { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); }
 .plan-card > * { max-width: 100%; }
 .plan-language { display: flex; flex-wrap: wrap; gap: var(--space-4); border: 0; padding: 0; margin: 0; }
-.plan-language legend { font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: var(--space-1); }
+.plan-language legend { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); margin-bottom: var(--space-1); }
 .plan-sheet { display: grid; gap: var(--space-2); width: 100%; max-width: 48rem; padding: var(--space-5); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); }
 .plan-sheet h3 { font-size: var(--text-xl); }
 .plan-sheet h4 { margin-top: var(--space-3); color: var(--brand-deep); }

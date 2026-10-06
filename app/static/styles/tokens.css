@@ -1,35 +1,56 @@
 :root {
-  /* surfaces: cool paper, white panels */
-  --canvas: #eef1f5;
+  /* The look of a public-interest flood almanac (6 Oct 2026 revamp): paper and ink, one action colour (navy), a risk
+     ladder in the order Malaysians know from JPS river levels (green, yellow, orange, red), and the depth bands for
+     water. Each colour has one job; every risk colour also comes with words. */
+
+  /* surfaces: paper, white panels, sunk wells */
+  --canvas: #f6f7f9;
   --surface: #ffffff;
-  --surface-sunk: #f6f8fa;
-  --line: #e3e7ed;
-  --line-strong: #cbd3dd;
+  --surface-sunk: #eef1f5;
+  --line: #dde2e9;          /* rules and decorative borders */
+  --line-strong: #c3ccd7;
+  --field-border: #7b8798;  /* inputs and controls: 3.65:1 on white, so their edge is seen */
 
   /* ink */
   --ink: #0d1b2a;
-  --ink-2: #435468;
-  --ink-3: #5c6d81;   /* 4.98:1 on --surface-sunk */
+  --ink-2: #3d4f63;
+  --ink-3: #56677b;   /* 5.1:1 on --surface-sunk */
 
-  /* meaning: deep water is the brand, orange is for action, green for dry */
+  /* action: navy and nothing else (buttons, the tab on show, focus, links) */
   --brand: #0c447c;
   --brand-deep: #08304f;
-  --brand-wash: #e7f0f9;
-  --accent: #b94a1b;   /* white text on it: 5.17:1 */
-  --accent-deep: #9c3e16;
-  --accent-wash: #fbede6;
-  --dry: #2f7a3d;
-  --danger-wash: #fbe9e7;
+  --brand-wash: #e8f0f8;
+  --action: var(--brand);
+  --action-hover: var(--brand-deep);
+  --marker: #0d1b2a;   /* the place picked on the map: an ink ring, apart from the water and risk colours */
 
-  /* a fact's tone on My business: how much this one thing adds to flooding here, high to low. Chip text on its wash is
-     4.6:1 or more; --tone-some-line is the brighter edge, the text uses --tone-some */
-  --tone-high: #b42318;
-  --tone-high-wash: #fdecea;
-  --tone-some: #8a5a00;
-  --tone-some-line: #d99a1e;
-  --tone-some-wash: #fdf2d8;
-  --tone-low: var(--dry);
-  --tone-low-wash: #e8f3ea;
+  /* risk, low to high, in JPS order. The dot colours mark; the -ink colours carry text (4.5:1 or more on their wash) */
+  --risk-normal: #2f7a3d;
+  --risk-normal-wash: #e9f3eb;
+  --risk-alert: #e0b100;
+  --risk-alert-ink: #7a5c00;
+  --risk-alert-wash: #fbf3d0;
+  --risk-warning: #a14a00;
+  --risk-warning-wash: #fdeedd;
+  --risk-danger: #b42318;
+  --risk-danger-wash: #fdecea;
+
+  /* SDG 13 green (UN SDG guidelines, p.68): the rule over the SDG section only */
+  --sdg-13: #3f7e44;
+
+  /* ponytail: old names kept as aliases while each surface moves to the names above; remove when none is left */
+  --accent: var(--action);
+  --accent-deep: var(--action-hover);
+  --accent-wash: var(--brand-wash);
+  --dry: var(--risk-normal);
+  --danger-wash: var(--risk-danger-wash);
+  --tone-high: var(--risk-danger);
+  --tone-high-wash: var(--risk-danger-wash);
+  --tone-some: var(--risk-alert-ink);
+  --tone-some-line: var(--risk-alert);
+  --tone-some-wash: var(--risk-alert-wash);
+  --tone-low: var(--risk-normal);
+  --tone-low-wash: var(--risk-normal-wash);
 
   /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js.
      Water-blue for the first three, then indigo and deep plum, so the two deepest do not blur into one navy. */
@@ -49,14 +70,17 @@
   --square-5: rgb(0 48 83 / 0.58);
   --map-ground: #f2efe9;
 
+  /* type: a serif for headings and figures (Source Serif 4, optical sizes, tabular figures), the sans for everything
+     else. Steps of 1.2 from 1rem up; the two small sizes stay readable at arm's length */
   --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: clamp(1.5rem, 1.15rem + 1.3vw, 2.125rem);
-  --text-figure: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+  --text-lg: 1.2rem;
+  --text-xl: 1.44rem;
+  --text-2xl: clamp(1.728rem, 1.4rem + 1.3vw, 2.074rem);
+  --text-figure: clamp(2.074rem, 1.6rem + 2vw, 2.488rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -69,11 +93,14 @@
   --gutter: clamp(1rem, 0.6rem + 1.6vw, 2rem);
   --content-max: 100rem;   /* 1600 px: the page uses a wide screen, the map-first overview most of all */
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --shadow-sm: 0 1px 2px rgba(13, 27, 42, 0.06);
-  --shadow-md: 0 1px 2px rgba(13, 27, 42, 0.05), 0 12px 28px -14px rgba(13, 27, 42, 0.22);
+  /* square-ish corners, one scale; panels sit on rules, not shadows. Only floating things (popups, dialogs, the aim
+     panel) get a shadow */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: var(--radius-md);   /* ponytail: old name, as above */
+  --shadow-float: 0 1px 2px rgba(13, 27, 42, 0.05), 0 12px 28px -14px rgba(13, 27, 42, 0.22);
+  --shadow-sm: none;
+  --shadow-md: var(--shadow-float);
 
   --duration-fast: 150ms;
   --duration-normal: 240ms;

@@ -10,13 +10,13 @@
 .insurance-figures .kpi-figure { font-size: var(--text-2xl); }
 .insurance-compare { display: grid; gap: var(--space-3); }
 .insurance-compare li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.insurance-bar { grid-column: 1 / -1; display: block; width: var(--share); height: 10px; border-radius: 999px; background: var(--band-2); }
+.insurance-bar { grid-column: 1 / -1; display: block; width: var(--share); height: 10px; border-radius: 2px; background: var(--band-2); }
 .insurance-compare .is-quote .insurance-bar { background: var(--accent); }
 .insurance-compare .is-bad .insurance-bar { background: var(--brand-deep); }
 .insurance-list, .insurance-questions { display: grid; gap: var(--space-2); padding-left: 1.2rem; font-size: var(--text-sm); color: var(--ink-2); }
 .insurance-list { list-style: disc; }
 .insurance-questions { list-style: decimal; }
-.insurance-questions li::marker { font-weight: 800; color: var(--brand); }
+.insurance-questions li::marker { font-weight: 700; color: var(--brand); }
 .insurance-example { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--line-strong); font-size: var(--text-sm); color: var(--ink-2); }
 .insurance-card > .btn { justify-self: start; }
 .cost-first-look { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: var(--text-sm); font-weight: 600; }

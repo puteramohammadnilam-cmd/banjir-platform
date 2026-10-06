@@ -10,7 +10,8 @@ const W = 1080;
 const H = 1350;
 const PAD = 80;
 const FONT = '"Plus Jakarta Sans", system-ui, sans-serif';
-const COLORS = { brand: "#0c447c", ink: "#0d1b2a", ink2: "#435468", wash: "#e7f0f9", line: "#cbd3dd", white: "#ffffff" };
+const SERIF = '"Source Serif 4", Georgia, serif';   // headings and figures, as on the page (tokens.css --font-serif)
+const COLORS = { brand: "#0c447c", ink: "#0d1b2a", ink2: "#3d4f63", wash: "#e8f0f8", line: "#c3ccd7", white: "#ffffff" };
 
 // metres, or the short "no water" (the long one does not fit a box)
 const short = (depth) => (band(depth) ? t("common.metres", { m: depth.toFixed(2) }) : t("compare.noWater"));
@@ -50,8 +51,8 @@ export function wrap(ctx, text, width, max) {
   return kept.map((each) => fit(ctx, each, width));
 }
 
-function text(ctx, value, x, y, { size, weight = 400, color = COLORS.ink, align = "left" }) {
-  ctx.font = `${weight} ${size}px ${FONT}`;
+function text(ctx, value, x, y, { size, weight = 400, color = COLORS.ink, align = "left", font = FONT }) {
+  ctx.font = `${weight} ${size}px ${font}`;
   ctx.fillStyle = color;
   ctx.textAlign = align;
   ctx.fillText(value, x, y);
@@ -61,7 +62,7 @@ function text(ctx, value, x, y, { size, weight = 400, color = COLORS.ink, align 
 function drawTop(ctx, areaName) {
   ctx.fillStyle = COLORS.brand;
   ctx.fillRect(0, 0, W, 200);
-  text(ctx, "Banjir Check", PAD, 105, { size: 56, weight: 800, color: COLORS.white });
+  text(ctx, "Banjir Check", PAD, 105, { size: 56, weight: 700, color: COLORS.white });
   text(ctx, areaName ?? "", PAD, 160, { size: 32, color: COLORS.wash });
 }
 
@@ -76,7 +77,7 @@ function drawSizes(ctx, premise, rp, top) {
     ctx.fillRect(x, top, boxW, 170);
     const color = isOn ? COLORS.white : COLORS.ink;
     text(ctx, t("common.rpYears", { rp: size }), x + boxW / 2, top + 55, { size: 30, weight: 600, color, align: "center" });
-    text(ctx, short(premise.depth_m?.[size]), x + boxW / 2, top + 125, { size: 46, weight: 800, color, align: "center" });
+    text(ctx, short(premise.depth_m?.[size]), x + boxW / 2, top + 125, { size: 46, weight: 600, color, align: "center", font: SERIF });
   });
 }
 
@@ -89,11 +90,11 @@ export function drawCard(premise, rp, areaName, doc = document) {
   ctx.fillStyle = COLORS.white;
   ctx.fillRect(0, 0, W, H);
   drawTop(ctx, areaName);
-  ctx.font = `800 64px ${FONT}`;
-  wrap(ctx, placeName(premise), W - 2 * PAD, 2).forEach((line, i) => text(ctx, line, PAD, 320 + i * 76, { size: 64, weight: 800 }));
+  ctx.font = `600 64px ${SERIF}`;
+  wrap(ctx, placeName(premise), W - 2 * PAD, 2).forEach((line, i) => text(ctx, line, PAD, 320 + i * 76, { size: 64, weight: 600, font: SERIF }));
   const depth = premise.depth_m?.[rp];
   text(ctx, t("share.inFlood", { rp }), PAD, 520, { size: 36, color: COLORS.ink2 });
-  text(ctx, short(depth), PAD, 690, { size: 170, weight: 800, color: COLORS.brand });
+  text(ctx, short(depth), PAD, 690, { size: 170, weight: 600, color: COLORS.brand, font: SERIF });
   if (band(depth)) text(ctx, depthWords(depth), PAD, 770, { size: 48, weight: 600 });
   drawSizes(ctx, premise, rp, 850);
   text(ctx, t("scenario.chance", { pct: pct(rp), years: CHANCE_YEARS }), PAD, 1100, { size: 34, color: COLORS.ink2 });
@@ -112,7 +113,7 @@ const toBlob = (canvas) => new Promise((resolve, reject) => canvas.toBlob((blob)
  *  time after it (iOS about a second), too short to draw and encode in. */
 export async function makeFile(premise, rp, areaName, draw = drawCard) {
   const fonts = globalThis.document?.fonts;   // the picture's words in the page's font, each weight it uses
-  await Promise.all(["400", "600", "800"].map((weight) => fonts?.load(`${weight} 40px ${FONT}`).catch(() => null)));
+  await Promise.all([`400 40px ${FONT}`, `600 40px ${FONT}`, `700 40px ${FONT}`, `600 40px ${SERIF}`].map((face) => fonts?.load(face).catch(() => null)));
   return new File([await toBlob(draw(premise, rp, areaName))], t("share.fileName"), { type: "image/png" });
 }
 
