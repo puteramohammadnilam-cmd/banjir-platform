@@ -75,7 +75,8 @@
 @media (min-width: 901px) {
   #panel-business:has(> .biz-grid:not([hidden])) {
     display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
-    grid-template-areas: "head head" "risk side" "plan side" "compare side";
+    grid-template-areas: "head head" "risk side" "plan side" "compare side" ". side";
+    grid-template-rows: auto auto auto auto 1fr;   /* a taller right column fills the last row, so no holes open between the left ones */
   }
   #panel-business > .biz-grid { display: contents; }
   #panel-business > :first-child:empty { display: none; }   /* the empty state's slot, with a place on show */

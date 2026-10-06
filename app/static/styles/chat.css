@@ -98,3 +98,9 @@ body:has(.aim-panel:not([hidden])) .chat-fab { display: none; }   /* aim mode ha
   .chat-fab:hover, .chat-fab:hover .chat-fab-mark { transform: none; }
 }
 @media print { .chat-fab, .chat-dialog { display: none !important; } }
+/* phones: the button is its mark alone, so it covers less of the page; the page keeps room under its last line */
+@media (max-width: 720px) {
+  .chat-fab { padding: 0 var(--space-2); gap: 0; font-size: 0; min-height: 48px; }
+  .chat-fab-mark { width: 32px; height: 32px; }
+  main { padding-bottom: calc(var(--space-10) + 3.5rem); }
+}

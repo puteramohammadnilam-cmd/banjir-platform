@@ -12,7 +12,7 @@
 .insurance-compare li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .insurance-bar { grid-column: 1 / -1; display: block; width: var(--share); height: 10px; border-radius: 2px; background: var(--band-2); }
 .insurance-compare .is-quote .insurance-bar { background: var(--ink-2); }   /* the price quoted: neutral ink */
-.insurance-compare .is-bad .insurance-bar { background: var(--band-4); }
+.insurance-compare .is-bad .insurance-bar { background: var(--brand); }   /* money in navy; the band colours are for water */
 .insurance-list, .insurance-questions { display: grid; gap: var(--space-2); padding-left: 1.2rem; font-size: var(--text-sm); color: var(--ink-2); }
 .insurance-list { list-style: disc; }
 .insurance-questions { list-style: decimal; }

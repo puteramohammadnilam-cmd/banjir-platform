@@ -7,7 +7,6 @@ import { overlapsView } from "./place.js";
 const INK = "#0d1b2a";
 const SELECTED = "#0d1b2a";   // --marker in tokens.css: an ink ring, apart from the water and risk colours
 const BRAND = "#0c447c";      // --brand: a section's outline
-const HALO = "#fff";   // every shop dot wears a white ring (and a dark hairline from .biz-dot), so it reads on pale and dark squares
 const FOCUS_ZOOM = 17;
 const MIN_ZOOM = 6;   // far enough out to see about all of Malaysia on a wide screen
 const FIT_SNAP = 0.25;   // a city or a section fills the map more closely than whole zoom steps allow
@@ -108,7 +107,7 @@ const paintSquares = (squares, index) => { for (const { depths, layer } of squar
 function dotStyle(depth, selected) {
   if (selected) return { radius: 10, color: SELECTED, weight: 4, fillColor: bandColor(depth) };
   if (!band(depth)) return { radius: 4, color: INK, weight: 1.5, fillColor: DRY_COLOR };   // "no water" differs in size, not just in tint
-  return { radius: 7, color: HALO, weight: 2, fillColor: bandColor(depth) };
+  return { radius: 7, color: INK, weight: 1.5, fillColor: bandColor(depth) };   // an ink ring: pale dots stand out on pale squares
 }
 
 /** The shop dots for one flood size, the selected one ringed. */
