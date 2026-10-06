@@ -89,7 +89,7 @@
 /* the panel sits under the map; on a phone it sticks to the bottom of the screen, as a sheet above the tab bar (pin.js
    measures it into --tab-bar-h; 64 px and the safe area when it cannot). Sticky, not fixed: the tab panel's entrance
    animation would make a fixed sheet's box the panel */
-.aim-panel { margin-top: var(--space-3); padding: var(--space-4); background: var(--accent-wash); border: 1px solid var(--line-strong); border-left: 4px solid var(--accent); border-radius: var(--radius-md); }
+.aim-panel { margin-top: var(--space-3); padding: var(--space-4); background: var(--surface); border: 1px solid var(--field-border); border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
 .aim-heading { font-size: var(--text-md); font-weight: 700; }
 .aim-help { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .aim-status, .aim-panel [role="alert"] { margin-top: var(--space-2); }
@@ -160,7 +160,8 @@
 #directory li[hidden] { display: none; }
 #directory button { width: 100%; padding: var(--space-2) var(--space-3); border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; transition: background-color var(--duration-fast); }
 #directory button:hover { background: var(--surface-sunk); }
-#directory button[aria-current="true"] { background: var(--brand-wash); box-shadow: inset 3px 0 0 var(--accent); }
+#directory button[aria-current="true"] { background: var(--brand-wash); }
+#directory button[aria-current="true"] .name { font-weight: 700; color: var(--brand); }
 .directory .name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: var(--text-sm); }
 .directory .meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-xs); color: var(--ink-3); }
 .depth-chip { padding: 3px 0; border-radius: 6px; text-align: center; font-size: var(--text-xs); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); background: var(--surface-sunk); }
