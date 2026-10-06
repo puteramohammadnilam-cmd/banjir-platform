@@ -4,12 +4,13 @@
 import { CHANCE_YEARS, chanceWithin, h } from "./dom.js";
 import { dateLocale, t } from "./i18n.js";
 
-const day = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString(dateLocale(), { day: "numeric", month: "short", year: "numeric" });
+const DAY = { day: "numeric", month: "short", year: "numeric" };
+const day = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString(dateLocale(), DAY);
 
 /** The citation for the page as it is now: the tool, the area, its address and today's date. */
 export function citation(areaName, href = globalThis.location?.href ?? "", today = new Date()) {
   const link = href.split("#")[0];   // a point someone picked lives after #, and is never cited
-  return t("stamp.citeText", { year: today.getFullYear(), area: areaName, link, date: day(today.toISOString().slice(0, 10)) });
+  return t("stamp.citeText", { year: today.getFullYear(), area: areaName, link, date: today.toLocaleDateString(dateLocale(), DAY) });   // the reader's own day, not UTC's
 }
 
 /** Fill `node` with the source line and a fold holding the citation. */

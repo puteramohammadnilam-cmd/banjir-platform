@@ -1,5 +1,5 @@
 /* The act-now features on My business: where to move the car, sharing a result, and the "Flood is coming" checklist.
-   Apart from views.css, which is near the file size limit. */
+   Kept in their own file, beside the per-surface stylesheets. */
 /* where to move the car: the warning not to drive through water is in words and weight, not colour alone */
 .car-warning { font-weight: 600; color: var(--risk-danger); }
 /* "Flood is coming": the button at the top of the facts, and the checklist in a modal dialog */

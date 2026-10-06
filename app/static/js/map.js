@@ -103,9 +103,9 @@ function addMarkers(map, premises, getRp, { onSelect, onOpen }) {
 
 const paintSquares = (squares, index) => { for (const { depths, layer } of squares) layer.setStyle(squareStyle(depths, index)); };
 
-/** How one shop dot looks: ringed in the accent when selected, small and pale when the model has no water there. */
+/** How one shop dot looks: a thick ink ring and bigger when selected, small and pale when the model has no water there. */
 function dotStyle(depth, selected) {
-  if (selected) return { radius: 10, color: SELECTED, weight: 4, fillColor: bandColor(depth) };
+  if (selected) return { radius: 12, color: SELECTED, weight: 5, fillColor: bandColor(depth) };   // bigger and thicker than any other dot
   if (!band(depth)) return { radius: 4, color: INK, weight: 1.5, fillColor: DRY_COLOR };   // "no water" differs in size, not just in tint
   return { radius: 7, color: INK, weight: 1.5, fillColor: bandColor(depth) };   // an ink ring: pale dots stand out on pale squares
 }

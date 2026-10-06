@@ -41,7 +41,7 @@
 .stamp { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-4); margin-bottom: var(--space-5); font-size: var(--text-xs); color: var(--ink-3); }
 .stamp-cite summary { cursor: pointer; color: var(--brand); font-weight: 600; }
 .stamp-cite[open] { flex-basis: 100%; }
-.stamp-cite p { max-width: 60rem; margin-top: var(--space-1); user-select: all; }
+.stamp-cite p { max-width: 60rem; margin-top: var(--space-1); overflow-wrap: anywhere; user-select: all; }
 /* the flood size on show, as a sentence above the map */
 .scenario-sentence { margin: var(--space-1) 0; font-size: var(--text-md); line-height: 1.45; max-width: 40rem; color: var(--ink); }
 
@@ -73,14 +73,14 @@
 .aim-cross svg { display: block; overflow: visible; }
 .aim-cross .halo { stroke: #fff; stroke-width: 6; stroke-linecap: round; }
 .aim-cross .core { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
-.aim-cross .dot { fill: var(--accent); stroke: #fff; stroke-width: 2; }
+.aim-cross .dot { fill: var(--marker); stroke: #fff; stroke-width: 2; }
 @media (forced-colors: active) {
   .aim-cross .halo { stroke: Canvas; }
   .aim-cross .core { stroke: CanvasText; }
   .aim-cross .dot { fill: Highlight; stroke: Canvas; }
 }
 .point-pin svg { display: block; filter: drop-shadow(0 2px 2px rgba(13, 27, 42, 0.35)); }
-.point-pin path { fill: var(--accent); stroke: #fff; stroke-width: 1.5; }
+.point-pin path { fill: var(--marker); stroke: #fff; stroke-width: 1.5; }
 .point-pin circle { fill: #fff; }
 .map-aim-button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 2px solid rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); background: var(--surface); background-clip: padding-box; color: var(--ink); font-weight: 700; font-size: var(--text-sm); cursor: pointer; }
 .map-aim-button:hover { background: var(--surface-sunk); }
@@ -305,7 +305,7 @@ body[data-tab="overview"] .finder { display: none; }
 .finder-hero-form { position: relative; display: flex; gap: var(--space-2); max-width: 42rem; margin-top: var(--space-2); }
 .finder-hero-form .icon { position: absolute; left: 16px; top: 50%; width: 22px; height: 22px; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
 /* 18 px text: big enough to read at arm's length, and iOS does not zoom into a field of 16 px or more */
-.finder-hero-form .field { flex: 1 1 auto; min-width: 0; min-height: 56px; padding-left: 48px; font-size: var(--text-lg); border-color: var(--line-strong); box-shadow: var(--shadow-sm); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
+.finder-hero-form .field { flex: 1 1 auto; min-width: 0; min-height: 56px; padding-left: 48px; font-size: var(--text-lg); border-color: var(--field-border); box-shadow: var(--shadow-sm); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
 .finder-hero-form .field:focus-visible { box-shadow: 0 0 0 4px var(--accent-wash); }
 .finder-hero-form .btn { flex: none; min-height: 56px; padding: 0 var(--space-6); font-size: var(--text-md); box-shadow: var(--shadow-sm); }
 .finder-hero-point { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }

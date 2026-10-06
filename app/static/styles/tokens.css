@@ -40,17 +40,8 @@
 
   /* ponytail: old names kept as aliases while each surface moves to the names above; remove when none is left */
   --accent: var(--action);
-  --accent-deep: var(--action-hover);
   --accent-wash: var(--brand-wash);
   --dry: var(--risk-normal);
-  --danger-wash: var(--risk-danger-wash);
-  --tone-high: var(--risk-danger);
-  --tone-high-wash: var(--risk-danger-wash);
-  --tone-some: var(--risk-alert-ink);
-  --tone-some-line: var(--risk-alert);
-  --tone-some-wash: var(--risk-alert-wash);
-  --tone-low: var(--risk-normal);
-  --tone-low-wash: var(--risk-normal-wash);
 
   /* depth bands, shallow to deep: counter, adult, door, storey. Same values as BANDS in js/dom.js.
      Water-blue for the first three, then indigo and deep plum, so the two deepest do not blur into one navy. */

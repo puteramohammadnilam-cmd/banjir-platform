@@ -217,3 +217,9 @@ h2 { font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 600
   .scenario button { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
   .scenario .chance { display: inline; text-align: right; }
 }
+
+/* forced colours (Windows high contrast): backgrounds are dropped, so pressed and checked states get an outline */
+@media (forced-colors: active) {
+  .scenario button[aria-pressed="true"], .chip-radio:checked + span, .lang-switch button[aria-pressed="true"] { outline: 3px solid Highlight; outline-offset: -3px; }
+  .loss-table tr.is-chosen th { text-decoration: underline; }
+}

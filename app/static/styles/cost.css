@@ -1,7 +1,6 @@
 /* Flood cost: the form, the answer and the photo of the stock. Split from views.css (6 Oct 2026) so each surface fits the 800-line limit; linked after views.css. */
 
 /* ---------- flood cost ---------- */
-/* the stock photo: rows under the modelled water carry the water's colour and a mark, so colour is not the only cue */
 /* the one caveat style (GOV.UK inset): a grey rule beside the words, no tint */
 .deep-note, .inset { margin-top: var(--space-2); padding: var(--space-1) 0 var(--space-1) var(--space-4); border-left: 4px solid var(--line-strong); font-size: var(--text-sm); color: var(--ink-2); }
 .stock-card { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); justify-items: start; }
