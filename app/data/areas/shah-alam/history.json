@@ -1337,9 +1337,10 @@
    "year": 2024.64
   },
   {
-   "id": "sa-2024-09-26",
-   "date": "2024-09-26",
-   "when": "26 Sep 2024",
+   "id": "sa-2024-09-25",
+   "date": "2024-09-25",
+   "when": "25 Sep 2024",
+   "date_note": "The news report is dated 26 Sep 2024 but was written on the evening of 25 Sep: it says rain since 2 pm today and went online at midnight. JPS rain gauges agree: 124 mm on 25 Sep, almost none on the 26th.",
    "place": "Jalan Kebun, Sri Muda, Kota Kemuning",
    "sections": [
     "seksyen-25",
@@ -1356,7 +1357,7 @@
    ],
    "confidence": "medium",
    "account": false,
-   "year": 2024.74
+   "year": 2024.73
   },
   {
    "id": "sa-2024-10-03",
