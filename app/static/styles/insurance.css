@@ -5,18 +5,18 @@
 .insurance-card { display: grid; gap: var(--space-3); }
 .insurance-card h2 { font-size: var(--text-lg); }
 .insurance-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--space-3); }
-.insurance-figures p { display: grid; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-sunk); }
-.insurance-figures p:last-child { background: var(--brand-deep); color: #fff; }
+.insurance-figures p { display: grid; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.insurance-figures p:last-child { border-top: 2px solid var(--ink); }
 .insurance-figures .kpi-figure { font-size: var(--text-2xl); }
 .insurance-compare { display: grid; gap: var(--space-3); }
 .insurance-compare li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .insurance-bar { grid-column: 1 / -1; display: block; width: var(--share); height: 10px; border-radius: 2px; background: var(--band-2); }
-.insurance-compare .is-quote .insurance-bar { background: var(--accent); }
-.insurance-compare .is-bad .insurance-bar { background: var(--brand-deep); }
+.insurance-compare .is-quote .insurance-bar { background: var(--ink-2); }   /* the price quoted: neutral ink */
+.insurance-compare .is-bad .insurance-bar { background: var(--band-4); }
 .insurance-list, .insurance-questions { display: grid; gap: var(--space-2); padding-left: 1.2rem; font-size: var(--text-sm); color: var(--ink-2); }
 .insurance-list { list-style: disc; }
 .insurance-questions { list-style: decimal; }
 .insurance-questions li::marker { font-weight: 700; color: var(--brand); }
-.insurance-example { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--line-strong); font-size: var(--text-sm); color: var(--ink-2); }
+.insurance-example { font-size: var(--text-sm); color: var(--ink-3); }
 .insurance-card > .btn { justify-self: start; }
-.cost-first-look { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: var(--text-sm); font-weight: 600; }
+.cost-first-look { padding: var(--space-1) 0 var(--space-1) var(--space-4); border-left: 4px solid var(--line-strong); font-size: var(--text-sm); font-weight: 600; }   /* the inset caveat (cost.css .inset) */
