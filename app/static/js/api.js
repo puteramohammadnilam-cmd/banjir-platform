@@ -46,6 +46,9 @@ export const writePlan = (payload) => call("/api/plan", payload);
 /** The rain due over the area, or over the section on show (the page's own link names it already). */
 export const getRain = (areaId, sectionId = null) =>
   call(`/api/rain?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
+/** Evacuation centres open now near the area, or the section on show (JKM's public feed, through the server). */
+export const getEvacuation = (areaId, sectionId = null) =>
+  call(`/api/evacuation?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);
 export const estimate = (payload) => call("/api/estimate", payload);

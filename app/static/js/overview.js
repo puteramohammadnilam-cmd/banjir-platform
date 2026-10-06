@@ -6,6 +6,7 @@
 import { SQUARE_RAMP } from "./cells.js";
 import { DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, choroplethKey, createChoropleth } from "./choropleth.js";
 import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, ringgit, roadName } from "./dom.js";
+import { createEvacuation } from "./evacuation.js";
 import { renderHistory } from "./history.js";
 import { dataWord, numberLocale, t } from "./i18n.js";
 import { createKpis } from "./kpis.js";
@@ -351,6 +352,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   const kpis = createKpis($("kpis"), { history: area.history, areaName: area.name, premises: isWholeCity ? city.index : premises });
   renderStamp($("stamp"), { history: area.history, areaName: area.name });
   const cityParts = isWholeCity ? createCityParts(map, city, showsScore(area.index_method)) : null;
+  const evacuation = createEvacuation($("evacuation"));
   createIndexParts(map, area, { city, cityParts, hasShelters: town.shelters.length > 0 });
   let shown = {};
 
@@ -360,7 +362,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
     /** On a section's page: the city's lean index is in, so the list's filter and a search reach the whole city. */
     widen: (index) => { if (city?.section) directory.widen(index, city.sections, city.cityName); },
     /** Each part changes only when its own inputs do, so focus and the live figures stay put. */
-    render({ rp, selectedId, rain }) {
+    render({ rp, selectedId, rain, evacuation: centres }) {
       if (rp !== shown.rp) {
         kpis.setScenario(rp);
         $("scenario-sentence").textContent = scenarioSentence(rp);
@@ -369,6 +371,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
         scope.refresh();   // "All of {city}" carries the flood size, as the table's links do
       }
       if (rain !== shown.rain) kpis.setRain(rain);
+      evacuation.set(centres);   // it keeps its own last state, so the same answer is not drawn twice
       if (rp !== shown.rp || selectedId !== shown.selectedId) {
         map.show(rp, selectedId);
         directory.markSelected(selectedId);

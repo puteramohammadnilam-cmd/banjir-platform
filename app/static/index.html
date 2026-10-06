@@ -37,6 +37,8 @@
   <link rel="modulepreload" href="js/strings/ms-act.js">
   <link rel="modulepreload" href="js/strings/en-cover.js">
   <link rel="modulepreload" href="js/strings/ms-cover.js">
+  <link rel="modulepreload" href="js/strings/en-social.js">
+  <link rel="modulepreload" href="js/strings/ms-social.js">
   <link rel="modulepreload" href="js/dom.js">
   <link rel="modulepreload" href="js/drawing.js">
   <link rel="modulepreload" href="js/place.js">
@@ -48,6 +50,7 @@
   <link rel="modulepreload" href="js/scope.js">
   <link rel="modulepreload" href="js/choropleth.js">
   <link rel="modulepreload" href="js/section-table.js">
+  <link rel="modulepreload" href="js/evacuation.js">
   <link rel="modulepreload" href="js/history.js">
   <link rel="modulepreload" href="js/kpis.js">
   <link rel="modulepreload" href="js/lowground.js">
@@ -160,6 +163,7 @@
         <p class="small"><button type="button" class="btn btn-link" data-goto="reference" data-i18n="overview.mapReference">Where the map's data comes from and how it is worked out</button></p>
       </section>
       <div class="overview-side">
+        <section class="surface evac" id="evacuation" aria-labelledby="evacuation-heading" hidden></section>
         <section class="surface" id="history" aria-labelledby="history-heading"></section>
         <section class="surface area-print" aria-labelledby="area-print-heading">
           <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
@@ -283,6 +287,7 @@
             <div class="ref-source"><dt data-i18n="reference.srcMapLabel">Businesses, roads, rivers and base map</dt><dd data-i18n="reference.srcMap">© OpenStreetMap contributors, ODbL</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcRecordLabel">Flood record</dt><dd data-i18n="reference.srcRecord">News reports, and single facts from the JPS Malaysia annual flood reports for 2021 and 2022, each cited with its page</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcLossesLabel">Past losses to business premises</dt><dd data-i18n="reference.srcLosses">Department of Statistics Malaysia</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcEvacLabel">Flood evacuation centres open now</dt><dd data-i18n="reference.srcEvac">JKM InfoBencana, the Department of Social Welfare Malaysia: its public list of open centres, flood centres only, counts only</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcCarLabel">Car flood damage</dt><dd data-i18n="reference.srcCar">US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain. Malaysian repair prices for comparison: workshop quotes in Utusan Malaysia (31 Dec 2021) and Sinar Harian, as news reports; Malaysia has no vehicle damage standard</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcPriceLabel">Price index</dt><dd data-i18n="reference.srcPrice">World Bank, CC BY 4.0</dd></div>
             <div class="ref-source"><dt data-i18n="reference.srcRainLabel">Rain forecast</dt><dd data-i18n="reference.srcRain">Google Weather</dd></div>

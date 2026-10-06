@@ -33,8 +33,8 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import (ai, areas, chatguard, dryspots, floodtools, googlemaps, indexes, lowground, places, plan,  # noqa: E402
-               raster, sections, stock)
+from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, places,  # noqa: E402
+               plan, raster, sections, stock)
 
 log = logging.getLogger("banjir")
 
@@ -538,6 +538,14 @@ def check_point(body: PointIn) -> dict:
 @app.api_route("/api/coverage", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
 def coverage() -> dict:
     return ok(places.coverage())
+
+
+@app.api_route("/api/evacuation", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
+def evacuation_centres(area: str | None = None, section: str | None = None) -> dict:
+    """Evacuation centres open now near the area or section, from JKM's public feed (fetched at most every 5 minutes
+    for everyone); `centres` is null while the feed is failing, and the page then leaves the card out."""
+    found, part = known_scope(area, section)
+    return ok({"centres": evacuation.for_box(part["bbox"] if part else found.view)})
 
 
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])
