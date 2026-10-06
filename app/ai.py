@@ -24,7 +24,7 @@ from . import areas, chatguard, floodtools, places, sections
 
 log = logging.getLogger("banjir")
 
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")   # a fixed id, so a new release cannot change answers
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")   # a fixed id, so a new release cannot change answers
 MAX_HISTORY_TURNS = 10
 TIMEOUT_MS = 30_000          # per attempt; with 3 attempts one request can take about 95 s
 ASK_DEADLINE_S = 60          # no new tool round starts after this: a question ends by about 155 s, a spoken one
