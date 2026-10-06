@@ -1,5 +1,6 @@
 // The "My business" tab: the depth for one business, drawn to scale, with what it means and what to do next.
 import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName, scenarioLabel } from "./dom.js";
+import { carFact } from "./car.js";
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
 import { floodCounts } from "./history.js";
@@ -180,7 +181,7 @@ const header = (place, options) => (place.is_point ? pointHead(place, options) :
  *  A point has no road or Google Maps listing: it is not a business. Its relief centre is the server's, for a point in
  *  a listed area with one; the flood record is the page's area's, so only a point in that area shows it (another
  *  area's record is on that area's own page). */
-function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isReady }) {
+function sideFacts({ premise, rp, photo, listing, dry }, { area, goto, onPhoto, isReady }) {
   const isPoint = premise.is_point;
   const hasPageRecord = !isPoint || premise.area_id === area.id;
   return h("div", { class: "facts" },
@@ -190,6 +191,7 @@ function sideFacts({ premise, rp, photo, listing }, { area, goto, onPhoto, isRea
       hasPageRecord && historyFact(area, goto)]),
     factGroup(t("business.groupOut"), [
       !isPoint && premise.road && roadFact(premise, rp),
+      carFact(premise, rp, dry),
       premise.shelter && shelterFact(premise.shelter)]),
     factGroup(t("business.groupCheck"), [
       floorFact(rp, photo, onPhoto, isReady),
@@ -228,11 +230,11 @@ export function createBusiness(panel, { area, areas = [], onPhoto, onPick, goto,
   }
 
   return {
-    render({ premise, rp, photo, listing }) {
+    render({ premise, rp, photo, listing, dry }) {
       // state objects are replaced, never changed, so the same objects mean nothing here changed
-      if (premise === shown.premise && rp === shown.rp && photo === shown.photo && listing === shown.listing) return;
+      if (premise === shown.premise && rp === shown.rp && photo === shown.photo && listing === shown.listing && dry === shown.dry) return;
       const isNewBusiness = premise !== shown.premise;
-      shown = { premise, rp, photo, listing };
+      shown = { premise, rp, photo, listing, dry };
       if (!premise) return showEmpty();
       empty.replaceChildren();
       head.hidden = false;

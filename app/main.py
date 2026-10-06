@@ -32,7 +32,7 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import ai, areas, floodtools, googlemaps, indexes, lowground, places, plan, raster, sections, stock  # noqa: E402
+from . import ai, areas, dryspots, floodtools, googlemaps, indexes, lowground, places, plan, raster, sections, stock  # noqa: E402
 
 log = logging.getLogger("banjir")
 
@@ -55,6 +55,7 @@ RATE_LIMIT = 20             # chat, photo and news: each one is a Gemini call
 MAPS_RATE_LIMIT = 60        # rain and open-or-closed lookups: cheap, and fired as visitors click round the map
 CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no Google call
 GEO_RATE_LIMIT = 120        # point checks: one for each pin dropped or GPS fix
+DRY_RATE_LIMIT = 600        # where to move the car: asked by the page for each place picked; a lookup in a file
 MAP_RATE_LIMIT = 1200       # the flood model's coverage: asked for once per visit, and again after a failure
 RATE_WINDOW_S = 300
 MAX_AI_CALLS = 8            # Gemini calls in flight at once: each holds a pool thread for up to minutes, and the pool
@@ -84,8 +85,8 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin",
     "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",   # GPS and voice for this page, no frame
 }
-NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point")   # Google results may not be cached; a point is personal
-POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
+NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot")   # Google results may not be cached; a point is personal
+POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/dry-spot", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
 # business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
 # {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
 PLACE_NAMES = AliasChoices("place", "business_id")
@@ -221,6 +222,10 @@ def maps_limit(request: Request) -> None:
 
 def calc_limit(request: Request) -> None:
     _limit(request, "calc", CALC_RATE_LIMIT)
+
+
+def dry_limit(request: Request) -> None:
+    _limit(request, "dry", DRY_RATE_LIMIT)
 
 
 def geo_limit(request: Request) -> None:
@@ -584,6 +589,18 @@ def for_people(message: str) -> str:
     for model_words, people_words in FORM_WORDS:
         message = message.replace(model_words, people_words)
     return message[:1].upper() + message[1:]
+
+
+class DrySpotIn(BaseModel):
+    place: str = Field(max_length=MAX_ID_CHARS, validation_alias=PLACE_NAMES)
+
+
+@app.post("/api/dry-spot", dependencies=[Depends(dry_limit)])
+def dry_spot(body: DrySpotIn) -> dict:
+    """Where to move the car: for each flood size, the nearest street point the model keeps dry (dryspots.nearest), or
+    null spots for a place in an area without them. A POST, so a point's coordinates never sit in a URL or a log."""
+    place = known_place(body.place)
+    return ok({"spots": dryspots.nearest(place.get("area_id"), place["lat"], place["lon"])})
 
 
 @app.post("/api/estimate", dependencies=[Depends(calc_limit)])

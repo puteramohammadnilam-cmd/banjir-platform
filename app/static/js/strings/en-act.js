@@ -1,0 +1,26 @@
+// Words in English for the act-now features on My business (where to move the car), kept apart so strings/en.js
+// stays under the file size limit; en.js spreads them in, so every key is still in one table.
+export default Object.freeze({
+  "car.label": "Where to move your car",
+  "car.here": "No water on your street in the model",
+  "car.hereNote": "In a 1 in {rp} years flood the model puts no water on your street. It does not model drains or flash floods, and a bigger flood could still reach it.",
+  "car.point": "No water at this spot in the model",
+  "car.pointNote": "In a 1 in {rp} years flood the model puts no water on this 90 m square. It does not model drains or flash floods, and a bigger flood could still reach it.",
+  "car.none": "No dry street near",
+  "car.noneNote": "No street within {km} km on this area's map stays dry in the model in a 1 in {rp} years flood. Move cars out early, well before a warning turns into water.",
+  "car.away": "{distance} {direction}",
+  "car.spotNote": "The nearest street the model keeps dry in a 1 in {rp} years flood: {road}.",
+  "car.unnamed": "a street with no name",
+  "car.directions": "Directions in Google Maps",
+  "car.finding": "Finding the nearest dry street…",
+  "car.warning": "Go before the water comes: the way there may cross flooded roads, and you should never drive through water.",
+  "car.limit": "A straight-line distance, not the way by road. Dry means the river model's 90 m square has no water; it does not model drains or flash floods, so look at the street yourself. The Flood cost tab counts cars left at the shop.",
+  "dir.n": "north",
+  "dir.ne": "north-east",
+  "dir.e": "east",
+  "dir.se": "south-east",
+  "dir.s": "south",
+  "dir.sw": "south-west",
+  "dir.w": "west",
+  "dir.nw": "north-west",
+});

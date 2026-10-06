@@ -4,10 +4,12 @@
 // perniagaan, kedai, pusat pemindahan banjir, anggaran kasar, majlis. A depth is always "dalam model"; nothing here
 // promises a place is safe or that it will flood.
 
+import act from "./ms-act.js";
 import reference from "./ms-reference.js";
 
 export default Object.freeze({
   ...reference,
+  ...act,
   // ---------- index.html: head, header, tabs ----------
   "meta.title": "Banjir Check · kedalaman banjir dalam model untuk kedai dan perniagaan",
   "meta.description": "Lihat sedalam mana air banjir dalam model di setiap perniagaan di kawasan yang dipetakan, anggaran kosnya, dan tanya pembantu AI dalam Bahasa Melayu atau bahasa Inggeris.",

@@ -3,10 +3,12 @@
 // English too, and the same test holds it equal to this file, so the page reads the same before and after start-up.
 // Server messages (errors, the cost method) come from the API in English and are shown as they come.
 
+import act from "./en-act.js";
 import reference from "./en-reference.js";
 
 export default Object.freeze({
   ...reference,
+  ...act,
   // ---------- index.html: head, header, tabs ----------
   "meta.title": "Banjir Check · modelled flood depth for shops and businesses",
   "meta.description": "See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.",

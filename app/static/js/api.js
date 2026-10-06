@@ -40,6 +40,7 @@ export const ask = (payload) => call("/api/ask", payload);
 /** A spoken question: a WAV data: URL in the body; the answer carries the words Gemini heard. */
 export const askVoice = (payload) => call("/api/voice", payload);
 export const sendPhoto = (payload) => call("/api/photo", payload);
+export const getDrySpot = (place) => call("/api/dry-spot", { place });
 export const sendStock = (payload) => call("/api/stock", payload);
 export const writePlan = (payload) => call("/api/plan", payload);
 /** The rain due over the area, or over the section on show (the page's own link names it already). */

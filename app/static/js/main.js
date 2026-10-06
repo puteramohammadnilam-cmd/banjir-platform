@@ -112,6 +112,7 @@ function select(app, id) {
   rememberPlace(app.start.area.id, id);
   app.store.update({ placeKey: id });
   loadListing(app, id);
+  loadDrySpot(app, id);   // picking it again after an error asks again
 }
 
 /** A business of the city that is not on this page (the whole city's list and search, or a section's search once the
@@ -128,6 +129,7 @@ function open(app, id, { isPicked = true } = {}) {
   if (isPicked) rememberPlace(app.start.area.id, id);
   goto(app, "business", { placeKey: id });
   loadListing(app, id);
+  loadDrySpot(app, id);
 }
 
 /** "Find your shop": the Area overview, with focus in its search. */
@@ -283,6 +285,21 @@ async function loadListing(app, id) {
     setListing(await api.getPlace(id));
   } catch (error) {
     setListing({ error: error.message });
+  }
+}
+
+/** Where to move the car, for a business or a point: asked once per place, and again when a place whose answer was an
+ *  error is picked again (select, open). render asks for a place it has no answer for. */
+async function loadDrySpot(app, id) {
+  const { store } = app;
+  const known = store.state.drySpots[id];
+  if (!id || (known && !known.error)) return;
+  const setDry = (value) => store.update({ drySpots: { ...store.state.drySpots, [id]: value } });
+  setDry({ busy: true });
+  try {
+    setDry(await api.getDrySpot(id));
+  } catch (error) {
+    setDry({ error: error.message });
   }
 }
 
@@ -473,7 +490,8 @@ function render(app, views, state, previous) {
   if (state.tab === "reference") syncReferenceNav(referenceLinks(), (id) => $(id)?.closest("section"));
   document.body.dataset.tab = state.tab;   // views.css: the header's search steps aside on the Area overview, which has its own
   views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain });
-  views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey] });
+  views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey], dry: state.drySpots[state.placeKey] });
+  if (place && !state.drySpots[state.placeKey]) queueMicrotask(() => loadDrySpot(app, state.placeKey));   // after this draw
   views.cost.render(place, photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm : null, state.estimates[state.placeKey],
     state.stocks[state.placeKey], state.rp);
   views.insurance.render(place, state.estimates[state.placeKey]);

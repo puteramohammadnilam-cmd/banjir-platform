@@ -1,0 +1,26 @@
+// Words in Bahasa Melayu for the act-now features on My business (where to move the car), kept apart so strings/ms.js
+// stays under the file size limit; ms.js spreads them in, so every key is still in one table.
+export default Object.freeze({
+  "car.label": "Di mana hendak alihkan kereta",
+  "car.here": "Tiada air di jalan anda dalam model",
+  "car.hereNote": "Dalam banjir 1 dalam {rp} tahun, model tidak menunjukkan air di jalan anda. Ia tidak memodelkan longkang atau banjir kilat, dan banjir yang lebih besar masih boleh sampai ke situ.",
+  "car.point": "Tiada air di titik ini dalam model",
+  "car.pointNote": "Dalam banjir 1 dalam {rp} tahun, model tidak menunjukkan air di petak 90 m ini. Ia tidak memodelkan longkang atau banjir kilat, dan banjir yang lebih besar masih boleh sampai ke situ.",
+  "car.none": "Tiada jalan kering berhampiran",
+  "car.noneNote": "Tiada jalan dalam lingkungan {km} km pada peta kawasan ini yang kekal kering dalam model dalam banjir 1 dalam {rp} tahun. Alihkan kereta awal, jauh sebelum amaran menjadi air.",
+  "car.away": "{distance} ke {direction}",
+  "car.spotNote": "Jalan terdekat yang kekal kering dalam model dalam banjir 1 dalam {rp} tahun: {road}.",
+  "car.unnamed": "jalan tanpa nama",
+  "car.directions": "Arah dalam Google Maps",
+  "car.finding": "Mencari jalan kering terdekat…",
+  "car.warning": "Pergi sebelum air datang: jalan ke sana mungkin melalui jalan yang banjir, dan jangan sekali-kali memandu melalui air.",
+  "car.limit": "Jarak garis lurus, bukan jalan sebenar. Kering bermaksud petak 90 m model sungai tiada air; ia tidak memodelkan longkang atau banjir kilat, jadi lihat sendiri jalan itu. Tab Kos banjir mengira kereta yang ditinggalkan di kedai.",
+  "dir.n": "utara",
+  "dir.ne": "timur laut",
+  "dir.e": "timur",
+  "dir.se": "tenggara",
+  "dir.s": "selatan",
+  "dir.sw": "barat daya",
+  "dir.w": "barat",
+  "dir.nw": "barat laut",
+});
