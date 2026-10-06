@@ -762,6 +762,7 @@ export default Object.freeze({
   "cost.unitMotos": "motorcycles",
   "cost.motoValueOwn": "Each motorcycle is worth",
   "cost.vehiclesLine": "Vehicles worth {rm} in all. Damage by depth of water is from US floods (US Army Corps of Engineers, 2009); motorcycles use the car curve, our assumption.",
+  "cost.vehiclesLocal": "For comparison, Malaysia has no standard for this: after the December 2021 floods, workshops quoted about RM600 to RM3,000 to repair a car with water at the floor, about RM4,000 half under water, and RM13,000 to RM30,000 fully under water (news reports). So the US curve may count too much for shallow water.",
   "cost.splitBuiltIn": "Renovation {rm}",
   "cost.splitVehicles": "Vehicles {rm}",
   "cost.splitWages": "Workers' pay {rm}",

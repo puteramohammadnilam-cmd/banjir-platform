@@ -101,6 +101,7 @@ function buildParts(sync) {
     motoValueBox: subQuestion(t("cost.motoValueQ")),
     workersLine: h("p", { class: "hint answer-line" }),
     vehiclesLine: h("p", { class: "hint answer-line" }),
+    vehiclesLocal: h("p", { class: "hint" }),
     error: h("p", { class: "form-error", role: "alert" }),
     submit: h("button", { type: "submit", class: "btn btn-primary" }, t("cost.submit")),
   };
@@ -131,7 +132,7 @@ function layout(parts) {
     question(t("cost.q3"), hint("cost.q3Hint"), groups.customers.node, spendBox, boxes.takings.node, daysBox, tradeLine),
     question(t("cost.qWorkers"), hint("cost.qWorkersHint"), groups.workers.node, parts.paidBox, parts.workersLine),
     question(t("cost.qVehicles"), hint("cost.qVehiclesHint"), groups.cars.node, boxes.carCount.node, parts.carValueBox, parts.motosBox, parts.motoValueBox,
-      parts.vehiclesLine),
+      parts.vehiclesLine, parts.vehiclesLocal),
     question(t("cost.q4"), hint("cost.q4Hint"), groups.raise.node, costBox),
   ];
 }
@@ -213,6 +214,8 @@ function showWider(parts) {
   parts.carValueBox.hidden = pick.cars !== OWN && cars === 0;   // a count still to be typed keeps its value question
   parts.motoValueBox.hidden = pick.motos !== OWN && motos === 0;
   parts.vehiclesLine.textContent = vehicles > 0 ? t("cost.vehiclesLine", { rm: ringgit(vehicles) }) : "";
+  // Malaysia has no vehicle damage standard: workshop prices from the Dec 2021 floods, beside the US curve, for comparison
+  parts.vehiclesLocal.textContent = vehicles > 0 ? t("cost.vehiclesLocal") : "";
 }
 
 /** The figures to send, or the problem to show. */

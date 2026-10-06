@@ -38,7 +38,7 @@ export default Object.freeze({
   "reference.srcMap": "© penyumbang OpenStreetMap, ODbL",
   "reference.srcRecord": "Laporan berita, dan fakta tunggal daripada laporan banjir tahunan JPS Malaysia bagi 2021 dan 2022, setiap satu dengan halamannya",
   "reference.srcLosses": "Jabatan Perangkaan Malaysia",
-  "reference.srcCar": "US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), domain awam",
+  "reference.srcCar": "US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), domain awam. Harga baik pulih Malaysia sebagai perbandingan: sebut harga bengkel dalam Utusan Malaysia (31 Dis 2021) dan Sinar Harian, sebagai laporan berita; Malaysia tiada piawaian kerosakan kenderaan",
   "reference.srcPrice": "Bank Dunia, CC BY 4.0",
   "reference.srcRain": "Google Weather",
   "reference.srcOpen": "Google Maps",

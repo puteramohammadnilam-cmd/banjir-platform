@@ -417,6 +417,7 @@ test("cars and motorcycles count as their number times what each is worth", () =
   assert.ok(shown(carValue));
   assert.equal(cost.figures().vehicles_rm, 63000);
   assert.match(panel.textContent, /Vehicles worth RM\s?63,000 in all\. .*motorcycles use the car curve, our assumption\./);
+  assert.match(panel.textContent, /Malaysia has no standard for this.*RM13,000 to RM30,000 fully under water/);
 });
 
 test("there is no limit on how many vehicles or what each is worth: each has its own figure to type", () => {

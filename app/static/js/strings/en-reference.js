@@ -38,7 +38,7 @@ export default Object.freeze({
   "reference.srcMap": "© OpenStreetMap contributors, ODbL",
   "reference.srcRecord": "News reports, and single facts from the JPS Malaysia annual flood reports for 2021 and 2022, each cited with its page",
   "reference.srcLosses": "Department of Statistics Malaysia",
-  "reference.srcCar": "US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain",
+  "reference.srcCar": "US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain. Malaysian repair prices for comparison: workshop quotes in Utusan Malaysia (31 Dec 2021) and Sinar Harian, as news reports; Malaysia has no vehicle damage standard",
   "reference.srcPrice": "World Bank, CC BY 4.0",
   "reference.srcRain": "Google Weather",
   "reference.srcOpen": "Google Maps",

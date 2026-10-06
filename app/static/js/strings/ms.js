@@ -763,6 +763,7 @@ export default Object.freeze({
   "cost.unitMotos": "motosikal",
   "cost.motoValueOwn": "Nilai setiap motosikal",
   "cost.vehiclesLine": "Kenderaan bernilai {rm} semuanya. Kerosakan ikut kedalaman air diambil daripada banjir di Amerika Syarikat (US Army Corps of Engineers, 2009); motosikal guna lengkung kereta, andaian kami.",
+  "cost.vehiclesLocal": "Sebagai perbandingan, Malaysia tiada piawaian untuk ini: selepas banjir Disember 2021, bengkel menyebut kira-kira RM600 hingga RM3,000 untuk membaiki kereta dengan air di paras lantai, kira-kira RM4,000 separuh tenggelam, dan RM13,000 hingga RM30,000 tenggelam sepenuhnya (laporan berita). Jadi lengkung Amerika Syarikat mungkin terlebih kira bagi air cetek.",
   "cost.splitBuiltIn": "Ubah suai {rm}",
   "cost.splitVehicles": "Kenderaan {rm}",
   "cost.splitWages": "Gaji pekerja {rm}",
