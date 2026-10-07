@@ -111,10 +111,11 @@ def test_an_answer_with_a_key_address_path_formula_or_tool_name_is_withheld(answ
 def test_an_answer_that_copies_the_rules_is_withheld_but_ordinary_answers_go_out():
     rules = " ".join(ai.SYSTEM.split())
     start = rules.index("Every number you give")
-    copied = "My rules say: " + " ".join(rules[start:].split()[:20])
+    copied = "My rules say: " + " ".join(rules[start:].split()[:30])
     assert chatguard.screen_answer(copied, ai._private(), ai.TOOL_NAMES) == "answer copies the instructions"
     guide_line = next(line[2:] for line in chatguard.site_guide().splitlines() if len(line) > 150)
     for fine in ("This is a model, not a forecast and not an official map.",
+                 "If you are not sure, is it a small shop, a medium shop or a large complex such as a mall or hypermarket?",
                  "In the model, the water here reaches 0.26 m in a 1 in 50 years flood.",
                  guide_line,                      # the pages' own words are public
                  "About RM 500 × 5 days closed: RM 2,500 of lost sales, a rough estimate.",

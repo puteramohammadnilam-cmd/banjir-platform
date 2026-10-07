@@ -75,7 +75,9 @@ LEAKS = tuple(re.compile(pattern) for pattern in (
     r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
     r"(/opt/|/etc/|/home/|/Users/|/var/|\bapp/[\w/]+\.py\b|\.env\b|\bsystemctl\b|\buvicorn\b|\bsystemInstruction\b)",
 ))
-COPIED_RUN_WORDS = 16   # this many words in a row from the private instructions is a leak, not a turn of phrase
+COPIED_RUN_WORDS = 24   # this many words in a row from the private instructions is a leak, not a turn of phrase.
+                        # The rules hold lists the model must offer word for word (the shop sizes are 16 words),
+                        # and an extraction attack repeats whole sentences, so 24 tells the two apart
 SHINGLE = 8
 
 
