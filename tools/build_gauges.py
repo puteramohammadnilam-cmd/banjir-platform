@@ -10,6 +10,7 @@ The page links to JPS's own 7-day river level graph for the gauge, so JPS's read
 from __future__ import annotations
 
 import json
+import re
 import ssl
 import urllib.request
 from pathlib import Path
@@ -22,7 +23,9 @@ OUT = ROOT / "app" / "data" / "gauges.json"
 
 def fetch() -> list[dict]:
     context = ssl.create_default_context()
-    context.check_hostname, context.verify_mode = False, ssl.CERT_NONE   # the site serves an incomplete chain
+    # The site serves an incomplete certificate chain, so it cannot be verified: every id and name kept is checked
+    # against strict patterns below (and again by app/gauges.py), and the run is by hand, once.
+    context.check_hostname, context.verify_mode = False, ssl.CERT_NONE
     request = urllib.request.Request(FEED, headers={"User-Agent": "BanjirCheck (station list, once)"})
     with urllib.request.urlopen(request, timeout=120, context=context) as response:   # noqa: S310  fixed https host
         return json.loads(response.read().decode("utf-8", "replace"))
@@ -36,10 +39,11 @@ def gauges(stations: list[dict]) -> list[dict]:
             lat, lon = float(s["c"]), float(s["d"])
         except (KeyError, TypeError, ValueError):
             continue
-        name = " ".join(str(s.get("b") or "").split())
-        if "WL" not in str(s.get("i") or "") or not name or not (west <= lon <= east and south <= lat <= north):
+        name, sid = " ".join(str(s.get("b") or "").split()), str(s.get("a") or "").strip()
+        plain = re.fullmatch(r"[A-Za-z0-9_ -]{1,20}", sid) and re.fullmatch(r"[^<>]{1,80}", name)
+        if "WL" not in str(s.get("i") or "") or not plain or not (west <= lon <= east and south <= lat <= north):
             continue
-        kept[str(s["a"]).strip()] = {"id": str(s["a"]).strip(), "name": name, "river": " ".join(str(s.get("g") or "").split()),
+        kept[sid] = {"id": sid, "name": name, "river": " ".join(str(s.get("g") or "").split())[:80],
                                      "lat": round(lat, 5), "lon": round(lon, 5)}
     return sorted(kept.values(), key=lambda g: g["id"])
 

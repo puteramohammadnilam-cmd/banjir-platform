@@ -5,7 +5,12 @@ import { h } from "./dom.js";
 import { distanceText, factCard } from "./fact.js";
 import { t } from "./i18n.js";
 
-const link = (gauge) => h("a", { href: gauge.link, target: "_blank", rel: "noopener noreferrer" }, t("river.link"));
+const GRAPH = "https://publicinfobanjir.water.gov.my/wl-graph/?stationid=";
+
+/** JPS's live 7-day river level graph for the gauge. */
+export const graphLink = (gauge) => GRAPH + encodeURIComponent(gauge.id);
+
+const link = (gauge) => h("a", { href: graphLink(gauge), target: "_blank", rel: "noopener noreferrer" }, t("river.link"));
 
 const where = (gauge) => (gauge.river ? t("river.whereRiver", { distance: distanceText(gauge.distance_m), river: gauge.river })
   : t("river.where", { distance: distanceText(gauge.distance_m) }));

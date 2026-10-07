@@ -4,8 +4,8 @@ import { beforeEach, test } from "node:test";
 
 import { checklist } from "../app/static/js/floodmode.js";
 import { useLang } from "../app/static/js/i18n.js";
-import { gaugeFact, gaugeLine } from "../app/static/js/river-gauge.js";
-import { dayText, outlookText, tideLine } from "../app/static/js/tide.js";
+import { gaugeFact, gaugeLine, graphLink } from "../app/static/js/river-gauge.js";
+import { current, dayText, malaysiaToday, outlookText, tideLine } from "../app/static/js/tide.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { shop } from "./point_fixtures.mjs";
 
@@ -14,7 +14,7 @@ beforeEach(() => {
   useLang("en");
 });
 
-const GAUGE = { id: "G1", name: "Sg. Test di Kg. Test", river: "Sg. Test", distance_m: 914, link: "https://publicinfobanjir.water.gov.my/wl-graph/?stationid=G1" };
+const GAUGE = { id: "G1", name: "Sg. Test di Kg. Test", river: "Sg. Test", distance_m: 914 };
 const TIDE = { station: "Gauge Town", date: "2026-10-07", highs: ["03:20", "15:50"], next_big: { from: "2026-10-09", to: "2026-10-13" } };
 const text = (node) => (Array.isArray(node) ? node.map(text).join(" ") : node?.textContent ?? "");
 
@@ -23,7 +23,8 @@ test("the gauge fact names the gauge, how far and on which river, and links to J
   assert.match(card.textContent, /River gauge/);
   assert.match(card.textContent, /Sg\. Test di Kg\. Test/);
   assert.match(card.textContent, /The nearest JPS river level gauge, 914 m away, on Sg\. Test\./);
-  assert.equal(card.querySelector("a").getAttribute("href"), GAUGE.link);
+  assert.equal(card.querySelector("a").getAttribute("href"), "https://publicinfobanjir.water.gov.my/wl-graph/?stationid=G1");
+  assert.equal(graphLink({ id: "SG MUAR" }), "https://publicinfobanjir.water.gov.my/wl-graph/?stationid=SG%20MUAR");
   assert.equal(gaugeFact({ gauge: null }), null);
   assert.match(gaugeFact({ gauge: { ...GAUGE, river: null } }).textContent, /gauge, 914 m away\./);
 });
@@ -35,6 +36,14 @@ test("the checklist says which river to watch and today's high tides", () => {
   const steps = text(checklist({ premise: { ...shop, gauge: GAUGE }, rp: "50", floorCm: 0, stock: undefined, dry: undefined, tide: TIDE }));
   assert.match(steps, /Watch the river at Sg\. Test/);
   assert.match(steps, /High tide today at Gauge Town/);
+});
+
+test("tides are shown only for today in Malaysia, so a page left open past midnight drops them", () => {
+  const now = new Date("2026-10-07T17:30:00Z");   // 01:30 on 8 Oct in Malaysia
+  assert.equal(malaysiaToday(now), "2026-10-08");
+  assert.equal(current(TIDE, now), null);
+  assert.equal(current({ ...TIDE, date: "2026-10-08" }, now).date, "2026-10-08");
+  assert.equal(current(null, now), null);
 });
 
 test("the big tide outlook reads as dates, in both languages", () => {

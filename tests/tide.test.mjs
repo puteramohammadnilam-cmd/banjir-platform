@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
 import { useLang } from "../app/static/js/i18n.js";
-import { createTide, timesText } from "../app/static/js/tide.js";
+import { createTide, malaysiaToday, timesText } from "../app/static/js/tide.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
 beforeEach(() => {
@@ -11,7 +11,8 @@ beforeEach(() => {
   useLang("en");
 });
 
-const TIDE = { station: "Gauge Town", date: "2026-10-07", highs: ["03:20", "15:50"], lows: ["09:55", "22:05"], range_m: 3.0,
+// The card shows only today's tides, so the answer is dated today.
+const TIDE = { station: "Gauge Town", date: malaysiaToday(), highs: ["03:20", "15:50"], lows: ["09:55", "22:05"], range_m: 3.0,
   big: false, next_high: { time: "15:50", tomorrow: false }, typical_error_m: 0.18, source: "Public tide-gauge record" };
 
 test("high tide times read as a list", () => {

@@ -12,6 +12,7 @@ import { createPlanCard, planFigures } from "./plan.js";
 import { syncReferenceNav, wireReferenceNav } from "./reference.js";
 import { MAX_PHOTOS } from "./stock.js";
 import { createFloodMode } from "./floodmode.js";
+import { current } from "./tide.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
@@ -296,7 +297,12 @@ function floodContext(app) {
   const id = state.placeKey;
   const photo = state.photos[id]?.estimate;
   return { premise: placeOf(app, state), rp: state.rp, floorCm: photo?.is_shop_front ? photo.floor_height_cm : 0,
-    stock: state.stocks[id], dry: state.drySpots[id], tide: state.tide?.data };
+    stock: state.stocks[id], dry: state.drySpots[id], tide: tideFor(app, placeOf(app, state)) };
+}
+
+/** The tide for the checklist: only for a place in the area on show (its gauge is that area's), and only today's. */
+function tideFor(app, place) {
+  return place?.area_id === app.start.area.id ? current(app.store.state.tide?.data) : null;
 }
 
 /** Where to move the car, for a business or a point: asked once per place, and again when a place whose answer was an

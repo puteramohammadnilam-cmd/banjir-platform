@@ -21,10 +21,10 @@ def fake(monkeypatch, tmp_path):
     gauges.listed.cache_clear()
 
 
-def test_the_nearest_gauge_has_its_name_river_distance_and_jps_link():
+def test_the_nearest_gauge_has_its_id_name_river_and_distance():
     found = gauges.nearest(*RESTAURANT)
-    assert found["id"] and found["name"] and 0 < found["distance_m"] < 10_000
-    assert found["link"] == f"https://publicinfobanjir.water.gov.my/wl-graph/?stationid={found['id']}"
+    assert set(found) == {"id", "name", "river", "distance_m"}
+    assert gauges.ID.fullmatch(found["id"]) and found["name"] and 0 < found["distance_m"] < 10_000
 
 
 def test_an_older_station_at_the_same_site_is_preferred_to_an_f2_one(fake):
@@ -44,10 +44,21 @@ def test_no_gauge_beyond_ten_km(fake):
     assert gauges.nearest(3.0, 101.5) is None
 
 
-def test_a_bad_list_is_an_error_not_a_silent_gap(fake):
-    fake([{"id": "X", "name": "", "lat": 3.0, "lon": 101.5}])
+@pytest.mark.parametrize("bad", [
+    {"id": "X", "name": "", "lat": 3.0, "lon": 101.5},
+    {"id": "X&next=1", "name": "Sg. A", "lat": 3.0, "lon": 101.5},     # an id that would change the link's query
+    {"id": "X", "name": "<b>Sg. A</b>", "lat": 3.0, "lon": 101.5},
+    {"id": "X", "name": "Sg. A", "lat": "3.0", "lon": 101.5},
+])
+def test_a_bad_list_is_an_error_not_a_silent_gap(fake, bad):
+    fake([bad])
     with pytest.raises(ValueError, match="gauges.json"):
         gauges.nearest(3.0, 101.5)
+
+
+def test_a_real_name_with_an_apostrophe_and_an_id_with_a_space_are_fine(fake):
+    fake([{"id": "SG MUAR", "name": "Kg. Ma'ang", "river": "Sg. Muar", "lat": 3.0, "lon": 101.5}])
+    assert gauges.nearest(3.0, 101.5)["id"] == "SG MUAR"
 
 
 def test_every_mapped_business_carries_its_gauge():

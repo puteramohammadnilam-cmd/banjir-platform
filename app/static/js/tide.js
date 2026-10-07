@@ -8,6 +8,12 @@ import { dateLocale, t } from "./i18n.js";
 /** "03:18 and 15:48" in the page's language. */
 export const timesText = (times) => (times.length > 1 ? t("tide.and", { first: times.slice(0, -1).join(", "), last: times.at(-1) }) : times[0] ?? "");
 
+/** Today's date in Malaysia, "YYYY-MM-DD". */
+export const malaysiaToday = (now = new Date()) => now.toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" });
+
+/** The tide answer when it is still today's, else null: a page left open past midnight must not show yesterday's tides. */
+export const current = (found, now = new Date()) => (found && found.date === malaysiaToday(now) ? found : null);
+
 /** "9 Oct": a Malaysian date, as the page's language writes it. */
 export const dayText = (iso, locale = dateLocale()) =>
   new Date(`${iso}T12:00:00+08:00`).toLocaleDateString(locale, { day: "numeric", month: "short", timeZone: "Asia/Kuala_Lumpur" });
@@ -46,7 +52,7 @@ export function createTide(section) {
     set(state) {
       if (state === shown) return;
       shown = state;
-      const found = state?.data;
+      const found = current(state?.data);
       section.hidden = !found;
       if (!found) return;
       section.replaceChildren(h("h2", { class: "small-heading", id: "tide-heading" }, t("tide.heading", { station: found.station })), ...body(found));
