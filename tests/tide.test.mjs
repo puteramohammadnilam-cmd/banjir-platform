@@ -11,8 +11,8 @@ beforeEach(() => {
   useLang("en");
 });
 
-const TIDE = { station: "Gauge Town", date: "2026-10-07", highs: ["03:18", "15:48"], lows: ["09:54", "22:06"], range_m: 3.0,
-  big: false, next_high: { time: "15:48", tomorrow: false }, typical_error_m: 0.18, source: "Public tide-gauge record" };
+const TIDE = { station: "Gauge Town", date: "2026-10-07", highs: ["03:20", "15:50"], lows: ["09:55", "22:05"], range_m: 3.0,
+  big: false, next_high: { time: "15:50", tomorrow: false }, typical_error_m: 0.18, source: "Public tide-gauge record" };
 
 test("high tide times read as a list", () => {
   assert.equal(timesText(["03:18", "15:48"]), "03:18 and 15:48");
@@ -35,11 +35,12 @@ test("an ordinary day gives the station, today's highs, the next high and why it
   createTide(section).set({ data: TIDE });
   assert.equal(section.hidden, false);
   assert.match(section.textContent, /Tide at Gauge Town/);
-  assert.match(section.textContent, /High tide today: 03:18 and 15:48\./);
-  assert.match(section.textContent, /Next high tide: 15:48 today\./);
+  assert.match(section.textContent, /High tide today: 03:20 and 15:50\./);
+  assert.match(section.textContent, /Next high tide: 15:50 today\./);
   assert.match(section.textContent, /An ordinary tide today: about 3 m between low and high\./);
-  assert.match(section.textContent, /drains away more slowly/);
-  assert.match(section.textContent, /within about 0.18 m/);
+  assert.match(section.textContent, /can drain away more slowly, which can make flooding worse where the river is tidal/);
+  assert.match(section.textContent, /Predicted for the Gauge Town gauge/);
+  assert.match(section.textContent, /typically off by about 0.18 m, sometimes more/);
 });
 
 test("a big tide is said to be one, and tomorrow's next high is labelled tomorrow, in both languages", () => {
@@ -53,7 +54,7 @@ test("a big tide is said to be one, and tomorrow's next high is labelled tomorro
   useLang("ms");
   card.set({ data: { ...big } });
   assert.match(section.textContent, /Pasang surut di Gauge Town/);
-  assert.match(section.textContent, /Air pasang hari ini: 03:18 dan 15:48\./);
+  assert.match(section.textContent, /Air pasang hari ini: 03:20 dan 15:50\./);
   assert.match(section.textContent, /pasang perbani/);
   assert.match(section.textContent, /04:12 esok/);
   assert.ok(!/\b(safe|selamat)\b/i.test(section.textContent));

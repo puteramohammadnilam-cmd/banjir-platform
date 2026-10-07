@@ -55,8 +55,8 @@ export function initialState(url, start, linked) {
     drySpots: {},  // by place id: { busy } | { spots } | { error }: where to move the car (POST /api/dry-spot)
     estimates: {}, // by place id: cost.js estimateState, { busy, result, assumed } | { result, assumed } | { error, result, assumed }
     rain: start.status.maps_ready ? { busy: true, configured: true } : { configured: false },
-    evacuation: { busy: true },
-    tide: { busy: true },         // GET /api/tide: { busy } | { data } (null data: no tide table here) | { error }   // GET /api/evacuation: { busy } | { data } (null data: the feed is failing) | { error }
+    evacuation: { busy: true },   // GET /api/evacuation: { busy } | { data } (null data: the feed is failing) | { error }
+    tide: { busy: true },         // GET /api/tide: { busy } | { data } (null data: no tide table here) | { error }
   };   // aim mode, the mode in which a point is picked, is the Area overview's own and lives in pin.js
 }
 

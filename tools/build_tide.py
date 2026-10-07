@@ -86,11 +86,14 @@ def main(argv: list | None = None) -> int:
     parser.add_argument("--from", dest="first", type=int, default=2026)
     parser.add_argument("--to", dest="last", type=int, default=2027)
     args = parser.parse_args(argv)
+    if args.gauge not in CHECK_RMS_M:
+        parser.error(f"gauge {args.gauge} has no checked error: run 06_Report_Source_Code/src/tide_predict.py's check "
+                     "for it and add it to CHECK_RMS_M first")
     found, fit_from, fit_to = turns(args.gauge, args.first, args.last)
     doc = {"version": 1, "station": args.station, "gauge": args.gauge,
            "source": "University of Hawaii Sea Level Center, research quality hourly tide-gauge record (gauge run by "
                      "JUPEM); free to use and redistribute, not for legal use",
-           "fit": f"{fit_from} to {fit_to}", "typical_error_m": CHECK_RMS_M.get(args.gauge),
+           "fit": f"{fit_from} to {fit_to}", "typical_error_m": CHECK_RMS_M[args.gauge],
            "big_range_m": big_range(found), "turns": found}
     out = ROOT / "app" / "data" / "areas" / args.area / "tide.json"
     out.write_text(json.dumps(doc, separators=(",", ":")) + "\n", encoding="utf-8")

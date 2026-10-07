@@ -19,8 +19,8 @@ export default Object.freeze({
   "tide.tomorrow": "tomorrow",
   "tide.big": "A big tide today (spring tide): about {range} m between low and high.",
   "tide.ordinary": "An ordinary tide today: about {range} m between low and high.",
-  "tide.why": "The lower river rises and falls with the tide. Heavy rain near high tide drains away more slowly, so low ground floods more easily.",
-  "tide.source": "Predicted from a public tide-gauge record (University of Hawaii Sea Level Center; gauge run by JUPEM). Times are usually within 30 minutes, heights within about {error} m. Storm surge and river flow are not included.",
+  "tide.why": "The lower river rises and falls with the tide. Heavy rain near high tide can drain away more slowly, which can make flooding worse where the river is tidal.",
+  "tide.source": "Predicted for the {station} gauge from its public record (University of Hawaii Sea Level Center; gauge run by JUPEM); upriver the tide comes later. Times are usually within 30 minutes; heights are typically off by about {error} m, sometimes more. Storm surge and river flow are not included.",
   "reference.srcTideLabel": "Tide",
   "reference.srcTide": "University of Hawaii Sea Level Center research quality tide-gauge data (gauge run by JUPEM), free to use and redistribute; predicted with utide",
 });

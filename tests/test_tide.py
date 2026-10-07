@@ -30,10 +30,10 @@ def test_the_built_table_covers_2026_and_2027_with_about_four_turns_a_day_altern
 
 def test_today_is_read_in_malaysian_time_with_the_next_high_from_now():
     morning = tide.today(CITY, datetime(2026, 10, 7, 1, 0, tzinfo=timezone.utc))      # 09:00 in Malaysia
-    assert (morning["date"], morning["highs"], morning["lows"]) == ("2026-10-07", ["03:18", "15:48"], ["09:54", "22:06"])
-    assert morning["next_high"] == {"time": "15:48", "tomorrow": False}
+    assert (morning["date"], morning["highs"], morning["lows"]) == ("2026-10-07", ["03:20", "15:50"], ["09:55", "22:05"])
+    assert morning["next_high"] == {"time": "15:50", "tomorrow": False}
     night = tide.today(CITY, datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc))         # 23:00
-    assert night["next_high"] == {"time": "04:12", "tomorrow": True}
+    assert night["next_high"] == {"time": "04:10", "tomorrow": True}
     late_utc = tide.today(CITY, datetime(2026, 10, 6, 17, 0, tzinfo=timezone.utc))      # 01:00 on the 7th in Malaysia
     assert late_utc["date"] == "2026-10-07"
 
@@ -49,6 +49,25 @@ def test_a_big_tide_is_a_day_whose_range_reaches_the_table_s_threshold():
     assert tide.today(CITY, noon(small_day))["big"] is False
 
 
+@pytest.mark.parametrize("clock, rounded", [("03:18", "03:20"), ("15:48", "15:50"), ("12:32", "12:30"),
+                                             ("00:02", "00:00"), ("23:58", "23:55")])
+def test_times_are_shown_to_five_minutes_and_stay_on_their_day(clock, rounded):
+    assert tide.shown(clock) == rounded
+
+
+def test_the_last_day_of_the_table_has_its_tides_but_no_next_high():
+    last = tide.today(CITY, datetime(2027, 12, 31, 15, 30, tzinfo=timezone.utc))   # 23:30 on 31 Dec 2027
+    assert last["highs"] and last["next_high"] is None
+
+
+def test_a_warning_comes_when_the_table_is_about_to_run_out(caplog):
+    tide.check(CITY, datetime(2027, 12, 1, tzinfo=timezone.utc))
+    assert "rebuild it with tools/build_tide.py" in caplog.text
+    caplog.clear()
+    tide.check(CITY, datetime(2026, 10, 7, tzinfo=timezone.utc))
+    assert caplog.text == ""
+
+
 def test_no_tide_outside_the_table_or_for_an_area_without_one():
     assert tide.today(CITY, datetime(2030, 1, 1, tzinfo=timezone.utc)) is None
     plain = next(a for a in areas.load_all() if a.id != CITY)
@@ -60,6 +79,10 @@ def test_no_tide_outside_the_table_or_for_an_area_without_one():
     lambda d: d["turns"].reverse(),                         # not in time order
     lambda d: d["turns"][0].__setitem__(1, "middle"),
     lambda d: d.pop("station"),
+    lambda d: d.pop("typical_error_m"),
+    lambda d: d.update(big_range_m=0),
+    lambda d: d["turns"][1].__setitem__(1, d["turns"][0][1]),   # two highs (or lows) in a row
+    lambda d: d["turns"][0].__setitem__(0, "2026-13-45T99:99"),
 ])
 def test_a_tide_table_that_does_not_fit_stops_the_server_naming_the_area(monkeypatch, fresh, change):
     doc = json.loads(json.dumps(BUILT))

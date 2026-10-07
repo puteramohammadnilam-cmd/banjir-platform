@@ -7,7 +7,8 @@ big_range_m is a big (spring) tide. Read once, checked at start-up.
 """
 from __future__ import annotations
 
-import re
+import logging
+import math
 from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
@@ -16,13 +17,36 @@ from . import areas
 
 TIDE_FILE = "tide.json"
 MYT = timezone(timedelta(hours=8))
-_TIME = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$")
 MAX_HEIGHT_M = 10
+ROUND_MIN = 5                 # times are shown to 5 minutes: 92% of predicted highs fall within 30 minutes
+WARN_DAYS = 60                # warn this long before the table runs out: rebuild it with tools/build_tide.py
+
+log = logging.getLogger(__name__)
+
+
+def _is_time(text) -> bool:
+    try:
+        datetime.strptime(text, "%Y-%m-%dT%H:%M")
+    except (TypeError, ValueError):
+        return False
+    return True
 
 
 def _is_turn(turn) -> bool:
-    return (isinstance(turn, (list, tuple)) and len(turn) == 3 and isinstance(turn[0], str) and bool(_TIME.match(turn[0]))
-            and turn[1] in ("high", "low") and isinstance(turn[2], (int, float)) and abs(turn[2]) <= MAX_HEIGHT_M)
+    return (isinstance(turn, (list, tuple)) and len(turn) == 3 and _is_time(turn[0]) and turn[1] in ("high", "low")
+            and isinstance(turn[2], (int, float)) and math.isfinite(turn[2]) and abs(turn[2]) <= MAX_HEIGHT_M)
+
+
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float)) and math.isfinite(value) and value > 0
+
+
+def shown(clock: str) -> str:
+    """"HH:MM" rounded to the nearest ROUND_MIN minutes, as the card shows it; never past 23:55, so a turn stays on its
+    own day."""
+    hours, minutes = map(int, clock.split(":"))
+    total = min(ROUND_MIN * round((hours * 60 + minutes) / ROUND_MIN), 24 * 60 - ROUND_MIN)
+    return f"{total // 60:02d}:{total % 60:02d}"
 
 
 @lru_cache(maxsize=areas.MAX_CACHED_AREAS)
@@ -38,11 +62,23 @@ def doc(area_id: str) -> Mapping | None:
     turns = found.get("turns") if isinstance(found, Mapping) else None
     ok = (isinstance(turns, list) and turns and all(_is_turn(t) for t in turns)
           and [t[0] for t in turns] == sorted(t[0] for t in turns)
-          and isinstance(found.get("station"), str) and found["station"].strip()
-          and isinstance(found.get("big_range_m"), (int, float)) and isinstance(found.get("source"), str))
+          and all(a[1] != b[1] for a, b in zip(turns, turns[1:]))
+          and isinstance(found.get("station"), str) and found["station"].strip() and isinstance(found.get("source"), str)
+          and _is_number(found.get("big_range_m")) and _is_number(found.get("typical_error_m")))
     if not ok:
-        raise areas.AreaError(f"{area_id}: tide.json must give a station, source, big_range_m and turns in time order.")
+        raise areas.AreaError(f"{area_id}: tide.json must give a station, source, big_range_m, typical_error_m and "
+                              "highs and lows taking turns in time order.")
     return areas._freeze(found)
+
+
+def check(area_id: str, now: datetime | None = None) -> None:
+    """At start-up: the table is well formed, and a warning when it runs out within WARN_DAYS."""
+    found = doc(area_id)
+    if found is None:
+        return
+    last = datetime.strptime(found["turns"][-1][0], "%Y-%m-%dT%H:%M").replace(tzinfo=MYT)
+    if last - (now or datetime.now(timezone.utc)) < timedelta(days=WARN_DAYS):
+        log.warning("%s: tide.json ends on %s: rebuild it with tools/build_tide.py", area_id, last.date())
 
 
 def today(area_id: str, now: datetime | None = None) -> dict | None:
@@ -59,7 +95,7 @@ def today(area_id: str, now: datetime | None = None) -> dict | None:
     heights = [t[2] for t in day]
     coming = next((t for t in found["turns"] if t[1] == "high" and t[0] > clock), None)
     return {"station": found["station"], "date": date,
-            "highs": [t[0][11:] for t in day if t[1] == "high"], "lows": [t[0][11:] for t in day if t[1] == "low"],
+            "highs": [shown(t[0][11:]) for t in day if t[1] == "high"], "lows": [shown(t[0][11:]) for t in day if t[1] == "low"],
             "range_m": round(max(heights) - min(heights), 1), "big": max(heights) - min(heights) >= found["big_range_m"],
-            "next_high": {"time": coming[0][11:], "tomorrow": not coming[0].startswith(date)} if coming else None,
-            "typical_error_m": found.get("typical_error_m"), "source": found["source"]}
+            "next_high": {"time": shown(coming[0][11:]), "tomorrow": not coming[0].startswith(date)} if coming else None,
+            "typical_error_m": found["typical_error_m"], "source": found["source"]}

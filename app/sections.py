@@ -142,7 +142,7 @@ def preload() -> None:
     for area in areas.load_all():
         listed(area.id)
         index_doc(area.id)
-        tide.doc(area.id)
+        tide.check(area.id)
         _check_history(area)
     found = [entry["id"] for area in areas.load_all() for entry in area.aliases]
     clashes = sorted({alias_id for alias_id in found if found.count(alias_id) > 1 or areas.get(alias_id)})

@@ -15,7 +15,7 @@ function body(found) {
     next && h("p", {}, next),
     h("p", { class: found.big ? "tide-big" : "" }, t(found.big ? "tide.big" : "tide.ordinary", { range: found.range_m })),
     h("p", { class: "muted small" }, t("tide.why")),
-    h("p", { class: "fineprint" }, t("tide.source", { error: found.typical_error_m ?? "0.2" })),
+    h("p", { class: "fineprint" }, t("tide.source", { error: found.typical_error_m, station: found.station })),
   ].filter(Boolean);
 }
 
