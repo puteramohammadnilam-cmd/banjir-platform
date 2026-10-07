@@ -34,7 +34,7 @@ from pydantic import AliasChoices, BaseModel, Field, StringConstraints, Validati
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
 from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, places,  # noqa: E402
-               plan, raster, sections, stock)
+               plan, raster, sections, stock, tide)
 
 log = logging.getLogger("banjir")
 
@@ -546,6 +546,13 @@ def evacuation_centres(area: str | None = None, section: str | None = None) -> d
     for everyone); `centres` is null while the feed is failing, and the page then leaves the card out."""
     found, part = known_scope(area, section)
     return ok({"centres": evacuation.for_box(part["bbox"] if part else found.view)})
+
+
+@app.api_route("/api/tide", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
+def tide_today(area: str | None = None, section: str | None = None) -> dict:
+    """Today's predicted high and low tides at the area's tide gauge; `tide` is null for an area without one."""
+    found, _ = known_scope(area, section)
+    return ok({"tide": tide.today(found.id)})
 
 
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])

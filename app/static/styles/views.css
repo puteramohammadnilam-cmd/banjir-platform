@@ -362,8 +362,10 @@ body[data-tab="overview"] .finder { display: none; }
 .index-method-body ul { padding-left: 1.2rem; list-style: disc; }
 .section-table:has(.col-flash) .col-share { width: 26%; }   /* room for the index's columns */
 .col-score .sort-button { white-space: nowrap; }
-/* Area overview: evacuation centres open now */
-.evac { display: grid; gap: var(--space-2); align-content: start; }
+/* Area overview: evacuation centres open now, and the tide */
+.evac, .tide { display: grid; gap: var(--space-2); align-content: start; }
+.tide-highs { font-weight: 600; }
+.tide-big { font-weight: 600; color: var(--brand); }
 .evac-list { display: grid; gap: var(--space-2); }
 .evac-list li { display: grid; gap: 2px; padding-top: var(--space-2); border-top: 1px solid var(--line); }
 .evac-summary { font-weight: 600; }

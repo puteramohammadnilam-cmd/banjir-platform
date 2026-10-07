@@ -320,6 +320,10 @@ function loadEvacuation(app) {
     () => app.store.update({ evacuation: { error: true } }));
 }
 
+function loadTide(app) {
+  api.getTide(app.start.area.id).then(({ tide }) => app.store.update({ tide: { data: tide } }), () => app.store.update({ tide: { error: true } }));
+}
+
 function loadRain(app) {
   if (!app.start.status.maps_ready) return;
   api.getRain(app.start.area.id, app.start.section?.id).then(
@@ -508,7 +512,7 @@ function render(app, views, state, previous) {
   views.showTab(state.tab);
   if (state.tab === "reference") syncReferenceNav(referenceLinks(), (id) => $(id)?.closest("section"));
   document.body.dataset.tab = state.tab;   // views.css: the header's search steps aside on the Area overview, which has its own
-  views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain, evacuation: state.evacuation });
+  views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain, evacuation: state.evacuation, tide: state.tide });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey], dry: state.drySpots[state.placeKey] });
   if (place && !state.drySpots[state.placeKey]) queueMicrotask(() => loadDrySpot(app, state.placeKey));   // after this draw
   if (place) views.floodMode.refresh(floodContext(app));   // the car step, when its answer comes while the checklist is open
@@ -548,6 +552,7 @@ function startApp(start, initial, url) {
   loadListing(app, initial.placeKey);
   loadRain(app);
   loadEvacuation(app);
+  loadTide(app);
   const follow = linkFollower(app);
   window.addEventListener("hashchange", () => follow(readUrl(location).place));
   return follow;

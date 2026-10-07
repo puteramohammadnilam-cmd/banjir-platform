@@ -40,7 +40,7 @@ import re
 from collections.abc import Mapping
 from functools import lru_cache
 
-from . import areas, geo, indexes, lowground, raster
+from . import areas, geo, indexes, lowground, raster, tide
 from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
@@ -142,6 +142,7 @@ def preload() -> None:
     for area in areas.load_all():
         listed(area.id)
         index_doc(area.id)
+        tide.doc(area.id)
         _check_history(area)
     found = [entry["id"] for area in areas.load_all() for entry in area.aliases]
     clashes = sorted({alias_id for alias_id in found if found.count(alias_id) > 1 or areas.get(alias_id)})

@@ -49,6 +49,8 @@ export const getRain = (areaId, sectionId = null) =>
 /** Evacuation centres open now near the area, or the section on show (JKM's public feed, through the server). */
 export const getEvacuation = (areaId, sectionId = null) =>
   call(`/api/evacuation?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
+/** Today's predicted tides at the area's tide gauge (null for an area without one). */
+export const getTide = (areaId) => call(`/api/tide?area=${area(areaId)}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);
 export const estimate = (payload) => call("/api/estimate", payload);

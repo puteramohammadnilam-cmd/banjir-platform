@@ -1,5 +1,5 @@
-// Words in English for the Area overview's "Flood evacuation centres open now" card (6 Oct 2026), from JKM's public
-// feed. Kept apart so strings/en.js stays under the file size limit.
+// Words in English for the Area overview's live cards: "Flood evacuation centres open now" (6 Oct 2026, JKM's public
+// feed) and the tide (7 Oct 2026). Kept apart so strings/en.js stays under the file size limit.
 export default Object.freeze({
   "evac.heading": "Flood evacuation centres open now",
   "evac.none": "JKM lists none open near here right now.",
@@ -11,4 +11,16 @@ export default Object.freeze({
   "evac.link": "JKM InfoBencana: every open centre",
   "reference.srcEvacLabel": "Flood evacuation centres open now",
   "reference.srcEvac": "JKM InfoBencana, the Department of Social Welfare Malaysia: its public list of open centres, flood centres only, counts only",
+  "tide.heading": "Tide at {station}",
+  "tide.highs": "High tide today: {times}.",
+  "tide.and": "{first} and {last}",
+  "tide.next": "Next high tide: {time} {day}.",
+  "tide.today": "today",
+  "tide.tomorrow": "tomorrow",
+  "tide.big": "A big tide today (spring tide): about {range} m between low and high.",
+  "tide.ordinary": "An ordinary tide today: about {range} m between low and high.",
+  "tide.why": "The lower river rises and falls with the tide. Heavy rain near high tide drains away more slowly, so low ground floods more easily.",
+  "tide.source": "Predicted from a public tide-gauge record (University of Hawaii Sea Level Center; gauge run by JUPEM). Times are usually within 30 minutes, heights within about {error} m. Storm surge and river flow are not included.",
+  "reference.srcTideLabel": "Tide",
+  "reference.srcTide": "University of Hawaii Sea Level Center research quality tide-gauge data (gauge run by JUPEM), free to use and redistribute; predicted with utide",
 });

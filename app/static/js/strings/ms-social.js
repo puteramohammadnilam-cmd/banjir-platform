@@ -1,4 +1,4 @@
-// Kad "Pusat pemindahan banjir dibuka sekarang" Gambaran kawasan dalam Bahasa Melayu, kunci yang sama dengan
+// Kad langsung Gambaran kawasan dalam Bahasa Melayu (pusat pemindahan banjir, pasang surut), kunci yang sama dengan
 // strings/en-social.js; ms.js menyebarkannya supaya ms.js kekal di bawah had saiz fail.
 export default Object.freeze({
   "evac.heading": "Pusat pemindahan banjir dibuka sekarang",
@@ -11,4 +11,16 @@ export default Object.freeze({
   "evac.link": "InfoBencana JKM: semua pusat yang dibuka",
   "reference.srcEvacLabel": "Pusat pemindahan banjir dibuka sekarang",
   "reference.srcEvac": "InfoBencana JKM, Jabatan Kebajikan Masyarakat Malaysia: senarai awam pusat yang dibuka, pusat banjir sahaja, bilangan sahaja",
+  "tide.heading": "Pasang surut di {station}",
+  "tide.highs": "Air pasang hari ini: {times}.",
+  "tide.and": "{first} dan {last}",
+  "tide.next": "Air pasang seterusnya: {time} {day}.",
+  "tide.today": "hari ini",
+  "tide.tomorrow": "esok",
+  "tide.big": "Air pasang besar hari ini (pasang perbani): kira-kira {range} m antara surut dan pasang.",
+  "tide.ordinary": "Air pasang biasa hari ini: kira-kira {range} m antara surut dan pasang.",
+  "tide.why": "Bahagian hilir sungai naik dan turun mengikut pasang surut. Hujan lebat berhampiran waktu air pasang lebih lambat mengalir keluar, jadi tanah rendah lebih mudah banjir.",
+  "tide.source": "Diramal daripada rekod tolok pasang surut awam (University of Hawaii Sea Level Center; tolok dikendalikan JUPEM). Masa biasanya tepat dalam 30 minit, ketinggian dalam kira-kira {error} m. Ribut pantai dan aliran sungai tidak diambil kira.",
+  "reference.srcTideLabel": "Pasang surut",
+  "reference.srcTide": "Data tolok pasang surut berkualiti penyelidikan University of Hawaii Sea Level Center (tolok dikendalikan JUPEM), bebas digunakan dan diedarkan semula; diramal dengan utide",
 });
