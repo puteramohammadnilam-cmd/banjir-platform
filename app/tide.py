@@ -20,6 +20,7 @@ MYT = timezone(timedelta(hours=8))
 MAX_HEIGHT_M = 10
 ROUND_MIN = 5                 # times are shown to 5 minutes: 92% of predicted highs fall within 30 minutes
 WARN_DAYS = 60                # warn this long before the table runs out: rebuild it with tools/build_tide.py
+OUTLOOK_DAYS = 14             # big tides ahead are looked for this far
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +72,27 @@ def doc(area_id: str) -> Mapping | None:
     return areas._freeze(found)
 
 
+@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
+def day_ranges(area_id: str) -> dict[str, float]:
+    """{Malaysian date: highest turn minus lowest} over the table."""
+    days: dict[str, list[float]] = {}
+    for when, _, height in doc(area_id)["turns"]:
+        days.setdefault(when[:10], []).append(height)
+    return {day: max(h) - min(h) for day, h in days.items()}
+
+
+def next_big(area_id: str, start: datetime) -> dict | None:
+    """{from, to}: the first run of big-tide days from `start`'s date (today counts) within OUTLOOK_DAYS; None if none."""
+    ranges, threshold, run = day_ranges(area_id), doc(area_id)["big_range_m"], None
+    for k in range(OUTLOOK_DAYS + 1):
+        day = (start + timedelta(days=k)).strftime("%Y-%m-%d")
+        if ranges.get(day, 0) >= threshold:
+            run = {"from": run["from"] if run else day, "to": day}
+        elif run:
+            break
+    return run
+
+
 def check(area_id: str, now: datetime | None = None) -> None:
     """At start-up: the table is well formed, and a warning when it runs out within WARN_DAYS."""
     found = doc(area_id)
@@ -83,7 +105,8 @@ def check(area_id: str, now: datetime | None = None) -> None:
 
 def today(area_id: str, now: datetime | None = None) -> dict | None:
     """What GET /api/tide sends: today's highs and lows (Malaysian time), the day's range and whether it is a big tide,
-    and the next high tide from now; None without a tide.json or outside the dates it covers."""
+    the next high tide from now, and the next run of big-tide days within two weeks; None without a tide.json or
+    outside the dates it covers."""
     found = doc(area_id)
     if found is None:
         return None
@@ -98,4 +121,5 @@ def today(area_id: str, now: datetime | None = None) -> dict | None:
             "highs": [shown(t[0][11:]) for t in day if t[1] == "high"], "lows": [shown(t[0][11:]) for t in day if t[1] == "low"],
             "range_m": round(max(heights) - min(heights), 1), "big": max(heights) - min(heights) >= found["big_range_m"],
             "next_high": {"time": shown(coming[0][11:]), "tomorrow": not coming[0].startswith(date)} if coming else None,
+            "next_big": next_big(area_id, now),
             "typical_error_m": found["typical_error_m"], "source": found["source"]}

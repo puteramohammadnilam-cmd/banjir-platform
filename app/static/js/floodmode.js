@@ -8,6 +8,8 @@ import { band, depthText, h } from "./dom.js";
 import { drawing } from "./drawing.js";
 import { distanceText } from "./fact.js";
 import { forecastLine } from "./forecast.js";
+import { gaugeLine } from "./river-gauge.js";
+import { tideLine } from "./tide.js";
 import { t } from "./i18n.js";
 import { combine } from "./stock.js";
 
@@ -45,12 +47,14 @@ function carBody({ premise, rp, dry }) {
   return carStep(premise, rp, dry) ?? [h("p", {}, t("mode.carEarly"))];
 }
 
-function goStep(premise) {   // the river forecast link is Google's, beside the official one
+function goStep(premise, tide) {   // the river forecast link is Google's, beside the official one
   const shelter = premise.shelter;
   return [
     h("p", {}, shelter ? t("mode.goShelter", { name: shelter.name, distance: distanceText(shelter.distance_m) }) : t("mode.goNoShelter")),
     h("p", {}, t("mode.goCall"), " ", h("a", { href: INFOBANJIR, target: "_blank", rel: "noopener noreferrer", translate: "no" }, "JPS Public Infobanjir"), "."),
     forecastLine(premise),
+    gaugeLine(premise),
+    tideLine(tide),
   ];
 }
 
@@ -61,7 +65,7 @@ const steps = (context) => [
   ["power", "mode.powerHeading", [h("p", {}, t("mode.power")), h("p", {}, t("mode.powerAfter"))]],
   ["papers", "mode.papersHeading", [h("p", {}, t("mode.papers"))]],
   ["photos", "mode.photoHeading", [h("p", {}, t("mode.photos"))]],
-  ["go", "mode.goHeading", goStep(context.premise)],
+  ["go", "mode.goHeading", goStep(context.premise, context.tide)],
 ];
 
 const stepItem = ([id, heading, body], i) => h("li", { class: "mode-step", "data-step": id },

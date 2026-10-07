@@ -296,7 +296,7 @@ function floodContext(app) {
   const id = state.placeKey;
   const photo = state.photos[id]?.estimate;
   return { premise: placeOf(app, state), rp: state.rp, floorCm: photo?.is_shop_front ? photo.floor_height_cm : 0,
-    stock: state.stocks[id], dry: state.drySpots[id] };
+    stock: state.stocks[id], dry: state.drySpots[id], tide: state.tide?.data };
 }
 
 /** Where to move the car, for a business or a point: asked once per place, and again when a place whose answer was an

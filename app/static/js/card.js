@@ -3,6 +3,7 @@ import { band, depthText, depthWords, h, icon, kindText, renderPicker, roadName,
 import { carFact } from "./car.js";
 import { floodModeButton } from "./floodmode.js";
 import { forecastFact } from "./forecast.js";
+import { gaugeFact } from "./river-gauge.js";
 import { shareButton } from "./share.js";
 import { elevationFact } from "./elevation.js";
 import { MAX_DRAWN_FLOOR_M, gauge } from "./gauge.js";
@@ -192,7 +193,8 @@ function sideFacts({ premise, rp, photo, listing, dry }, { area, goto, onPhoto, 
       flashFact(premise, hasPageRecord && area),   // the example is the page's area's
       elevationFact(premise),
       hasPageRecord && historyFact(area, goto),
-      forecastFact(premise)]),
+      forecastFact(premise),
+      gaugeFact(premise)]),
     factGroup(t("business.groupOut"), [
       !isPoint && premise.road && roadFact(premise, rp),
       carFact(premise, rp, dry),

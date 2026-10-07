@@ -27,7 +27,7 @@ TOKYO = (35.68, 139.69)
 SOUTH_THAILAND = (8.0, 101.0)      # inside the fixture grid, outside every region box
 WEST_OF_FILES = (3.0, 99.7)        # inside the Peninsula box, west of the files
 PLACE_KEYS = {"id", "is_point", "name", "sector", "kind", "is_chain", "lat", "lon", "map_last_edited", "area_id",
-              "depth_m", "road", "shelter", "elevation", "flash_flood", "cell", "section"}
+              "depth_m", "road", "shelter", "elevation", "flash_flood", "gauge", "cell", "section"}
 SMALL = (1 / 1024, 1 / 1024)       # exact in binary, about 110 m: squares the size of the curated areas' detail
 SRI_MUDA_GRID, SRI_MUDA_ORIGIN, IN_SRI_MUDA = "N03_E101", (101.5, 3.0625), (3.04, 101.52)
 KOTA_GRID, KOTA_ORIGIN, IN_KOTA_TINGGI = "N02_E103", (103.875, 1.75), (1.74, 103.9)

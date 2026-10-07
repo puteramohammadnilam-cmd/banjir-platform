@@ -71,7 +71,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from . import areas, elevation, indexes, raster, sections
+from . import areas, elevation, gauges, indexes, raster, sections
 
 log = logging.getLogger("banjir")
 
@@ -161,7 +161,7 @@ def _point_place(found: Snap, depth_m: dict) -> dict:
             "lat": lat, "lon": lon, "map_last_edited": None, "area_id": area.id if area else None,
             "section": {"id": section["id"], "name": section["name"]} if section else None,
             "depth_m": depth_m, "road": None, "shelter": nearest_shelter(area, lat, lon) if area else None,
-            "elevation": elevation.at(lat, lon), "flash_flood": indexes.flash_at(lat, lon),
+            "elevation": elevation.at(lat, lon), "flash_flood": indexes.flash_at(lat, lon), "gauge": gauges.nearest(lat, lon),
             "cell": {"grid": found.grid.name, "row": found.row, "col": found.col, "bounds": bounds}}
 
 

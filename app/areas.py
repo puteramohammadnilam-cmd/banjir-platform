@@ -50,7 +50,7 @@ from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 
-from . import elevation, indexes
+from . import elevation, gauges, indexes
 
 AREAS_DIR = Path(__file__).parent / "data" / "areas"
 AREA_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -301,11 +301,12 @@ def default() -> Area:
 
 @lru_cache(maxsize=MAX_CACHED_AREAS)
 def premises(area_id: str) -> tuple[dict, ...]:
-    """The area's mapped businesses, each with its `elevation` (app/elevation.py) and `flash_flood` ({score, class},
-    app/indexes.py): null where none is loaded, both looked up once here at its own point. Raises KeyError for an
-    unknown id."""
+    """The area's mapped businesses, each with its `elevation` (app/elevation.py), `flash_flood` ({score, class},
+    app/indexes.py) and nearest river `gauge` (app/gauges.py): null where none is loaded or near, looked up once here at
+    its own point. Raises KeyError for an unknown id."""
     return tuple({**premise, "elevation": elevation.at(premise["lat"], premise["lon"]),
-                  "flash_flood": indexes.flash_at(premise["lat"], premise["lon"])}
+                  "flash_flood": indexes.flash_at(premise["lat"], premise["lon"]),
+                  "gauge": gauges.nearest(premise["lat"], premise["lon"])}
                  for premise in _read(area_id, "premises.json"))
 
 
