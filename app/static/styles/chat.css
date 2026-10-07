@@ -1,14 +1,14 @@
 /* The chat: messages, the question box and the floating dialog. Split from views.css (6 Oct 2026) so each surface fits the 800-line limit; linked after views.css. */
 
 /* ---------- the conversation: messages and the question box (the dialog around them is below) ---------- */
-.messages { display: grid; align-content: start; gap: var(--space-3); min-height: 16rem; max-height: 30rem; overflow-y: auto; padding-right: var(--space-1); }
-.messages li { max-width: 88%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); white-space: pre-wrap; animation: enter var(--duration-normal) var(--ease-out) both; }
+.messages { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-3); min-height: 16rem; max-height: 30rem; overflow-y: auto; padding-right: var(--space-1); }
+.messages li { min-width: 0; max-width: 88%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); white-space: pre-wrap; animation: enter var(--duration-normal) var(--ease-out) both; }
 .msg-user { justify-self: end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
 .msg-model { justify-self: start; background: var(--surface-sunk); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
 .msg-error { justify-self: start; background: var(--risk-danger-wash); color: var(--risk-danger); }
 .msg-wait { justify-self: start; color: var(--ink-3); font-style: italic; }
 .sources { margin-top: var(--space-2); padding-left: var(--space-4); list-style: disc; white-space: normal; font-size: var(--text-xs); }
-.search-suggestions { display: block; margin-top: var(--space-2); white-space: normal; }
+.search-suggestions { display: block; max-width: 100%; margin-top: var(--space-2); overflow-x: auto; white-space: normal; }   /* Google's chip row scrolls inside the answer, not past the panel */
 .ask-form { display: flex; gap: var(--space-2); }
 .ask-form .field { flex: 1 1 auto; min-width: 0; }
 .mic { flex: none; }
