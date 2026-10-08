@@ -125,6 +125,19 @@ function gapsLine(history) {
     t("history.gaps", { ranges: runs.map(([from, to]) => `${from}–${to}`).join(", ") }));
 }
 
+/** "On JPS Selangor's flood hotspot list (2026): …", or null when no official list names a place in the scope. The list
+ *  is not dated floods, so it is never counted with them; a scope on no list gets no line (not listed is not safe). */
+function hotspotsLine(history) {
+  const spots = history?.hotspots;
+  if (!spots?.places?.length) return null;
+  const link = isHttps(spots.source?.url)
+    ? h("a", { href: spots.source.url, rel: "noopener noreferrer", target: "_blank" }, t("history.hotspotsLink"))
+    : null;
+  return h("p", { class: "history-hotspots" },
+    t("history.hotspots", { year: spots.list_year, places: spots.places.join("; ") }), " ",
+    h("span", { class: "fineprint" }, t("history.hotspotsNote"), link ? " " : "", link));
+}
+
 /** Whether the record was searched for this scope (a city's, or a section's with nothing found in it): it then has a
  *  list of floods, maybe empty, and the years searched. An area never searched has no record at all. */
 export const isSearched = (history) => Array.isArray(history?.floods) && Number.isInteger(history.first_year);
@@ -145,7 +158,8 @@ export function renderHistory(element, area) {
   const heading = h("h2", { id: "history-heading" }, t("history.heading"));
   const scopeName = history?.scope ? sectionName(history.section_names, history.scope) : null;
   if (!counts) {
-    element.replaceChildren(heading, h("p", { class: "history-none" }, noneText(area, history, scopeName ?? area.display_name)));
+    element.replaceChildren(...[heading, h("p", { class: "history-none" }, noneText(area, history, scopeName ?? area.display_name)),
+      hotspotsLine(history)].filter(Boolean));
     return;
   }
   const memory = (history.floods.some((flood) => flood.account) ? t("history.memory") : "")
@@ -158,6 +172,7 @@ export function renderHistory(element, area) {
     strip(history),
     h("p", { class: "fineprint" }, t("history.mapNote", { memory })),
     gapsLine(history),
+    hotspotsLine(history),
     h("details", {}, h("summary", {}, t("history.list")),   // each flood's own words are the area's data, as its sources have them
       h("ol", { class: "flood-list" }, history.floods.map((flood) => floodItem(flood, history)))),
   ];

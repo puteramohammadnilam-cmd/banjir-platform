@@ -4,7 +4,9 @@
 
 Run from 11_Platform_Draft. Inputs (read only; BANJIR_RAW_DIR, else ../05_Raw_Data_Sources):
   shah_alam/flood_history/events.json           the curated events (every one with an opened https source), the place
-                                                names that map to a section, and the two dataset credits
+                                                names that map to a section, the two dataset credits, and
+                                                `hotspots`: JPS Selangor's flood hotspot list, the places in the city
+                                                (copied as it is; app/history.py checks it)
   --points shah_alam/arcgis_flood_points/shah_alam.geojson   optional, not used since 5 Oct 2026: the 2021 and 2022 points
                                                 of ArcGIS Online user d1anameera appear copied from the JPS annual flood
                                                 reports ("Hakcipta terpelihara"), and some have day and month swapped.
@@ -206,6 +208,10 @@ def build(curated_doc: dict, points_doc: dict, sections: list[dict], today: date
            "last_year": history.day_range(curated_doc["checked"])[0].year, "checked": curated_doc["checked"],
            "section_names": section_names(sections),
            "events": merge(curated_doc["events"], groups, curated_doc.get("datasets", {}))}
+    if "hotspots" in curated_doc:   # its `about` stays in events.json; anything not an object goes on to the check
+        spots = curated_doc["hotspots"]
+        doc["hotspots"] = ({key: copy.deepcopy(spots[key]) for key in ("checked", "list_year", "source", "places")
+                            if key in spots} if isinstance(spots, dict) else spots)
     found = history.problems(doc, today=today)
     if found:
         raise history.HistoryError("; ".join(found))

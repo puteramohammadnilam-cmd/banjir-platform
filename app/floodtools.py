@@ -61,6 +61,8 @@ NO_HISTORY = "No flood records have been collected for this area. " + NO_RECORD
 RECORDS_AND_MODEL = ("The records include flash floods from heavy rain and blocked drains; the flood model shows only "
                      "rivers overflowing. So a place can have records where the model shows no water, and the other "
                      "way round: give both, and do not use one to dismiss the other.")
+HOTSPOT_NOTE = ("Places on an official list of flood-prone places, not dated floods: never count them as floods or "
+                "give them a date. Name the list and its source when you mention them.")
 RAIN_HOURS = 12
 WEATHER_DECIMALS = 2   # a point outside the listed areas goes to Google Weather rounded to 0.01 degrees, about 1 km
 # What rain_forecast passes on from googlemaps.rain_outlook: the forecast only, never where it was asked for
@@ -370,8 +372,9 @@ def flood_history(section: str = "") -> dict:
     Returns:
         The years the sources cover, the 20 most recent records (date, what happened, depth as
         reported, the sections named, the source and its link) and how many there are in all,
-        the runs of years with no record, and a note. No record is not proof of no flood: never
-        say a place has never flooded. Or an error.
+        the runs of years with no record, and a note; and, when an official hotspot list (JPS
+        Selangor) names places in the scope, jps_hotspot_list with those places, apart from the
+        records. No record is not proof of no flood: never say a place has never flooded. Or an error.
     """
     area = current_area()
     if area is None:
@@ -387,7 +390,16 @@ def flood_history(section: str = "") -> dict:
             "years_checked": [record["first_year"], record["last_year"]], "records": len(floods),
             "most_recent": [_flood_for_model(area, flood) for flood in floods[:MAX_FLOODS]],
             **({"years_with_no_record": record["gaps"]} if "gaps" in record else {}), "note": NO_RECORD,
-            "records_and_model": RECORDS_AND_MODEL}
+            "records_and_model": RECORDS_AND_MODEL, **_hotspots_for_model(record.get("hotspots"))}
+
+
+def _hotspots_for_model(spots: Mapping | None) -> dict:
+    """The official hotspot list's places in the scope, kept apart from the dated records; {} when none."""
+    if not spots:
+        return {}
+    return {"jps_hotspot_list": {"places": [_clean(place) for place in spots["places"]], "list_year": spots["list_year"],
+                                 "source": spots["source"]["title"], "url": spots["source"]["url"],
+                                 "note": HOTSPOT_NOTE}}
 
 
 FLOOD_FIELDS = ("when", "what", "depth", "source", "url", "confidence", "account")

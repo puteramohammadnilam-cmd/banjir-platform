@@ -27,6 +27,8 @@ export default Object.freeze({
   "reference.srcHeightLabel": "Ground height",
   "reference.srcMapLabel": "Businesses, roads, rivers and base map",
   "reference.srcRecordLabel": "Flood record",
+  "reference.srcHotspotsLabel": "Flood hotspots",
+  "reference.srcHotspots": "JPS Selangor Info Banjir: its 2026 flood hotspot list, place names only, read 8 Oct 2026",
   "reference.srcLossesLabel": "Past losses to business premises",
   "reference.srcCarLabel": "Car flood damage",
   "reference.srcPriceLabel": "Price index",

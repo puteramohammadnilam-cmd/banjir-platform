@@ -173,3 +173,12 @@ def test_a_selected_point_brings_its_section_and_the_model_gets_its_name_only(qu
         assert shown["section"] == "Zon 2" and "3.02998" not in json.dumps(shown)
     finally:
         floodtools.end_question(token)
+
+
+def test_the_hotspot_list_reaches_the_chat_apart_from_the_records_and_only_when_there_is_one():
+    spots = {"places": ["Kampung One"], "list_year": 2026, "checked": "2026-10-08",
+             "source": {"title": "JPS Selangor hotspots", "url": "https://example.org/h", "type": "official"}}
+    given = floodtools._hotspots_for_model(spots)["jps_hotspot_list"]
+    assert given["places"] == ["Kampung One"] and given["list_year"] == 2026 and given["url"] == "https://example.org/h"
+    assert "not dated floods" in given["note"]
+    assert floodtools._hotspots_for_model(None) == {}

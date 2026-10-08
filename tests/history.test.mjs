@@ -146,3 +146,33 @@ test("a city with no record uses the area's name", () => {
   const empty = { ...CITY, section_names: {}, gaps: [[1992, 2026]], floods: [] };
   assert.match(render(empty).querySelector(".history-none").textContent, /^No flood record found for Town, State in/);
 });
+
+// ---------- an official hotspot list: its own line, never counted with the dated floods
+
+const SPOTS = { places: ["Kampung One"], list_year: 2026, checked: "2026-10-08",
+  source: { title: "JPS Selangor hotspots", url: "https://example.org/hotspots", type: "official" } };
+
+test("a scope on a hotspot list gets one line with the list's link, and its flood count is unchanged", () => {
+  const element = render({ ...CITY, hotspots: SPOTS });
+  assert.equal(element.querySelector(".history-hotspots").textContent,
+    "On JPS Selangor's flood hotspot list (2026): Kampung One. Places JPS flags as flood-prone, not dated floods, so not counted as floods. JPS Selangor Info Banjir");
+  const link = element.querySelector(".history-hotspots").querySelector("a");
+  assert.equal(link.getAttribute("href"), "https://example.org/hotspots");
+  assert.equal(link.getAttribute("rel"), "noopener noreferrer");
+  assert.deepEqual(floodCounts({ ...CITY, hotspots: SPOTS }), floodCounts(CITY));
+});
+
+test("a section with no dated flood still shows its hotspot line, in both languages", () => {
+  const empty = { ...CITY, scope: "sec-3", section_names: { "sec-3": NAMES["sec-3"] }, gaps: [[1992, 2026]], floods: [],
+    hotspots: SPOTS };
+  assert.ok(render(empty).querySelector(".history-none"));
+  assert.match(render(empty).querySelector(".history-hotspots").textContent, /^On JPS Selangor's flood hotspot list/);
+  const malay = inLang("ms", () => render(empty).querySelector(".history-hotspots").textContent);
+  assert.match(malay, /^Dalam senarai kawasan panas banjir JPS Selangor \(2026\): Kampung One\./);
+});
+
+test("no hotspot line without a list, and a non-https list link stays plain text", () => {
+  assert.equal(render(CITY).querySelector(".history-hotspots"), null);
+  const plain = render({ ...CITY, hotspots: { ...SPOTS, source: { ...SPOTS.source, url: "javascript:alert(1)" } } });
+  assert.equal(plain.querySelector(".history-hotspots").querySelector("a"), null);
+});

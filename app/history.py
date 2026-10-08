@@ -17,6 +17,10 @@ history.json:
     what        what happened, in our words
     sources     at least one {title, url (https only), type: news | official | dataset | paper}
     confidence  high | medium | low; account: true for one person's memory; undated (optional): no day or month given
+  hotspots                             (optional) an official list of flood hotspots, not dated floods:
+    checked     the day the list was read, "YYYY-MM-DD"; list_year: the year the list is for
+    source      one {title, url, type} as above
+    places      each {name: the place as the list names it, sections: the section ids it lies in ([] for none)}
 
 No text may hold markup or a script link: the page shows it as text, but it is checked here all the same. A missing
 record is not a dry record: a section with no event gets floods: [], and the page says no record was found.
@@ -40,6 +44,8 @@ SECTION_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 DAY = re.compile(r"(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?")
 MARKUP = re.compile(r"[<>]|javascript:|vbscript:|data:text", re.IGNORECASE)
 MAX_ID_CHARS = 80
+MAX_HOTSPOTS = 200              # a whole state's list is about 50
+MAX_HOTSPOT_NAME_CHARS = 200
 EARLIEST_YEAR = 1992
 CONFIDENCE = ("high", "medium", "low")
 SOURCE_TYPES = ("news", "official", "dataset", "paper")
@@ -159,6 +165,36 @@ def _names_problems(names) -> list[str]:
     return [f"section_names: {key!r} needs a lower-case id and en and ms names" for key in bad]
 
 
+def _hotspot_problems(spots, known, today: date) -> list[str]:
+    if not isinstance(spots, dict):
+        return ["hotspots must be an object"]
+    found = _source_problems("hotspots", spots.get("source"))
+    span = day_range(spots.get("checked"))
+    if span is None or span[0] > today or len(spots["checked"]) != 10:
+        found.append("hotspots: checked must be the day the list was read, YYYY-MM-DD, not after today")
+    year = spots.get("list_year")
+    if not (_is_whole(year) and EARLIEST_YEAR <= year <= today.year + 1):
+        found.append("hotspots: list_year must be a whole year")
+    places = spots.get("places")
+    if not (isinstance(places, list) and places):
+        return [*found, "hotspots: places must be a non-empty list"]
+    for index, place in enumerate(places):
+        if not (isinstance(place, dict) and _is_text(place.get("name"))):
+            found.append(f"hotspot {index}: name must be plain text, no markup")
+            continue
+        sections = place.get("sections")
+        if not (isinstance(sections, list) and all(isinstance(s, str) and s in known for s in sections)
+                and len(set(sections)) == len(sections)):
+            found.append(f"hotspot {place['name']}: sections must be known section ids, each once")
+        if len(place["name"]) > MAX_HOTSPOT_NAME_CHARS:
+            found.append(f"hotspot {index}: name must be at most {MAX_HOTSPOT_NAME_CHARS} characters")
+    if len(places) > MAX_HOTSPOTS:
+        found.append(f"hotspots: at most {MAX_HOTSPOTS} places")
+    names = [place.get("name") for place in places if isinstance(place, dict) and _is_text(place.get("name"))]
+    found += [f"hotspot names must be unique: {n} repeats" for n in sorted({n for n in names if names.count(n) > 1})]
+    return found
+
+
 def problems(doc, today: date | None = None) -> list[str]:
     """Everything wrong with a history document, as sentences; [] when it is sound."""
     today = today or date.today()
@@ -178,6 +214,8 @@ def problems(doc, today: date | None = None) -> list[str]:
         found += _event_problems(index, event, known, years[0], today)
     ids = [event.get("id") for event in events if isinstance(event, dict)]
     found += [f"event ids must be unique: {i} repeats" for i in sorted({i for i in ids if ids.count(i) > 1})]
+    if "hotspots" in doc:
+        found += _hotspot_problems(doc["hotspots"], known, today)
     return found
 
 
@@ -227,7 +265,8 @@ def _flood(event: dict) -> dict:
 
 def for_scope(area_id: str, section_id: str | None = None, folder: Path = AREAS_DIR) -> dict | None:
     """The area's flood record for the whole area (section_id None) or one section: {first_year, recent_from,
-    last_year, scope, checked, section_names, gaps, floods}. None when the area has no history.json. Raises
+    last_year, scope, checked, section_names, gaps, floods, and hotspots {places, list_year, checked, source} when an
+    official hotspot list names a place in the scope}. None when the area has no history.json. Raises
     HistoryError for a section the area does not have. The answer is a fresh copy."""
     if not (isinstance(area_id, str) and FOLDER_ID.fullmatch(area_id)):
         return None
@@ -239,6 +278,12 @@ def for_scope(area_id: str, section_id: str | None = None, folder: Path = AREAS_
         raise HistoryError("Unknown section.")
     floods = [_flood(e) for e in doc["events"] if section_id is None or section_id in e["sections"]]
     used = {s for flood in floods for s in flood["sections"]} | ({section_id} if section_id else set())
-    return {**{name: doc[name] for name in YEARS}, "scope": section_id, "checked": doc["checked"],
-            "section_names": {key: dict(value) for key, value in names.items() if key in used},
-            "gaps": gaps(floods, doc["first_year"], doc["last_year"]), "floods": floods}
+    cut = {**{name: doc[name] for name in YEARS}, "scope": section_id, "checked": doc["checked"],
+           "section_names": {key: dict(value) for key, value in names.items() if key in used},
+           "gaps": gaps(floods, doc["first_year"], doc["last_year"]), "floods": floods}
+    spots = doc.get("hotspots")
+    places = [p["name"] for p in spots["places"] if section_id is None or section_id in p["sections"]] if spots else []
+    if places:   # a section on no list gets no hotspots key: not listed is not the same as safe
+        cut["hotspots"] = {"places": places, "list_year": spots["list_year"], "checked": spots["checked"],
+                           "source": dict(spots["source"])}
+    return cut

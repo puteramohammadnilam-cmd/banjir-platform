@@ -27,6 +27,8 @@ export default Object.freeze({
   "reference.srcHeightLabel": "Ketinggian tanah",
   "reference.srcMapLabel": "Perniagaan, jalan, sungai dan peta asas",
   "reference.srcRecordLabel": "Rekod banjir",
+  "reference.srcHotspotsLabel": "Kawasan panas banjir",
+  "reference.srcHotspots": "Info Banjir JPS Selangor: senarai kawasan panas banjir 2026, nama tempat sahaja, dibaca 8 Okt 2026",
   "reference.srcLossesLabel": "Kerugian lalu premis perniagaan",
   "reference.srcCarLabel": "Kerosakan banjir kereta",
   "reference.srcPriceLabel": "Indeks harga",

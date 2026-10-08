@@ -175,3 +175,51 @@ def test_the_built_file_passes_and_every_section_scope_works():
         assert history.for_scope("shah-alam", section_id)["scope"] == section_id
     assert history.for_scope("shah-alam", "seksyen-25")["floods"]
     assert all(flood["url"].startswith("https://") for flood in city["floods"])
+
+
+# ---------- an official hotspot list
+
+SPOTS = {"checked": "2026-10-08", "list_year": 2026,
+         "source": {"title": "JPS Selangor hotspots", "url": "https://example.org/hotspots", "type": "official"},
+         "places": [{"name": "Kampung One", "sections": ["sec-1"]}, {"name": "Taman Three", "sections": ["sec-3"]},
+                    {"name": "Taman Outside", "sections": []}]}
+
+
+@pytest.fixture
+def spot_folder(tmp_path):
+    (tmp_path / "spots" / "town").mkdir(parents=True)
+    (tmp_path / "spots" / "town" / "history.json").write_text(json.dumps({**DOC, "hotspots": SPOTS}), encoding="utf-8")
+    history.load.cache_clear()
+    yield tmp_path / "spots"
+    history.load.cache_clear()
+
+
+def test_hotspots_are_cut_to_the_scope_and_never_counted_as_floods(spot_folder):
+    city = history.for_scope("town", None, folder=spot_folder)
+    assert city["hotspots"]["places"] == ["Kampung One", "Taman Three", "Taman Outside"]
+    assert city["hotspots"]["list_year"] == 2026 and city["hotspots"]["source"]["type"] == "official"
+    assert len(city["floods"]) == 3
+    section = history.for_scope("town", "sec-3", folder=spot_folder)
+    assert section["hotspots"]["places"] == ["Taman Three"] and section["floods"] == []
+
+
+def test_a_scope_on_no_list_and_a_record_with_no_list_get_no_hotspots_key(spot_folder, folder):
+    assert "hotspots" not in history.for_scope("town", "sec-2", folder=spot_folder)
+    assert "hotspots" not in history.for_scope("town", None, folder=folder)
+
+
+@pytest.mark.parametrize("change, words", [
+    (lambda s: s["source"].update(url="http://example.org/h"), "https"),
+    (lambda s: s.update(checked="2026"), "checked"),
+    (lambda s: s.update(checked="2026-10-09"), "checked"),
+    (lambda s: s.update(list_year="2026"), "list_year"),
+    (lambda s: s.update(places=[]), "places"),
+    (lambda s: s["places"][0].update(name="<b>x</b>"), "markup"),
+    (lambda s: s["places"][0].update(sections=["sec-9"]), "section"),
+    (lambda s: s["places"][1].update(name="Kampung One"), "unique"),
+])
+def test_a_bad_hotspot_list_is_named(change, words):
+    doc = copy.deepcopy({**DOC, "hotspots": SPOTS})
+    change(doc["hotspots"])
+    found = history.problems(doc, today=date(2026, 10, 8))
+    assert found and any(words in problem for problem in found), found

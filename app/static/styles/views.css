@@ -135,6 +135,7 @@
 .history-none { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .history-lead { margin-top: var(--space-1); font-size: var(--text-sm); }
 .history-lead strong { color: var(--brand); }
+.history-hotspots { margin-top: var(--space-2); font-size: var(--text-sm); }   /* an official list, kept apart from the dated floods */
 .flood-strip { display: block; width: 100%; margin: var(--space-3) 0 var(--space-2); overflow: visible; }
 .flood-strip .axis { stroke: var(--line-strong); stroke-width: 1; }
 .flood-strip text { font: 11px var(--font); fill: var(--ink-3); }

@@ -1546,5 +1546,74 @@
    "account": false,
    "year": 2026.75
   }
- ]
+ ],
+ "hotspots": {
+  "checked": "2026-10-08",
+  "list_year": 2026,
+  "source": {
+   "title": "JPS Selangor, Info Banjir: flood hotspots (2026 list)",
+   "url": "https://infobanjirjps.selangor.gov.my/",
+   "type": "official"
+  },
+  "places": [
+   {
+    "name": "Kampung Budiman",
+    "sections": [
+     "seksyen-u14"
+    ]
+   },
+   {
+    "name": "Kampung Kubu Gajah",
+    "sections": [
+     "seksyen-u17"
+    ]
+   },
+   {
+    "name": "Seksyen 13, Shah Alam",
+    "sections": [
+     "seksyen-13"
+    ]
+   },
+   {
+    "name": "Kampung Baru HICOM, Seksyen 26",
+    "sections": [
+     "seksyen-26"
+    ]
+   },
+   {
+    "name": "Jalan/Kampung Kebun Bunga",
+    "sections": [
+     "seksyen-22"
+    ]
+   },
+   {
+    "name": "Kampung Padang Jawa",
+    "sections": [
+     "seksyen-17"
+    ]
+   },
+   {
+    "name": "Kampung Paya Jaras Hilir",
+    "sections": [
+     "seksyen-u19"
+    ]
+   },
+   {
+    "name": "Kampung Bukit Naga",
+    "sections": [
+     "seksyen-32"
+    ]
+   },
+   {
+    "name": "Taman Sri Muda",
+    "sections": [
+     "seksyen-25"
+    ]
+   },
+   {
+    "name": "Taman Bukit Kemuning (Jalan Bukit Rimau)",
+    "sections": []
+   }
+  ]
+ }
 }

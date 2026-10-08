@@ -21,6 +21,7 @@ from app import history  # noqa: E402
 RAW = Path(os.environ.get("BANJIR_RAW_DIR") or ROOT.parent / "05_Raw_Data_Sources") / "shah_alam"
 BUILT = ROOT / "app" / "data" / "areas" / "shah-alam" / "history.json"
 TODAY = date(2026, 10, 4)
+BUILT_ON = date(2026, 10, 8)   # the shipped file: the JPS Selangor hotspot list was read on 8 Oct 2026
 
 
 def square(label, west, south, east, north):
@@ -202,7 +203,7 @@ def raw_inputs():
 
 def test_a_fresh_build_from_the_raw_files_matches_the_shipped_file():
     events, _, sections = raw_inputs()   # the ArcGIS points are left out by default since 5 Oct 2026
-    doc = bh.build_from_files(events, None, sections, today=TODAY)
+    doc = bh.build_from_files(events, None, sections, today=BUILT_ON)
     assert bh.dumps(doc) == BUILT.read_text(encoding="utf-8")
 
 
@@ -218,3 +219,17 @@ def test_the_shipped_file_has_every_section_known_sources_and_the_named_floods()
     jps = [e for e in doc["events"] if any("Laporan Banjir Tahunan" in source["title"] for source in e["sources"])]
     assert len(jps) == 22 and all(" p. " in source["title"] for e in jps for source in e["sources"] if "Laporan" in source["title"])
     assert by_id["jps-2022-12-02"]["date"] == "2022-12-02" and by_id["jps-2022-03-07"]["date"] == "2022-03-07", "the swapped dates, put right"
+
+
+# ---------- the official hotspot list
+
+def test_the_hotspot_list_is_copied_without_its_about_and_a_bad_one_stops_the_build():
+    spots = {"about": "notes for us", "checked": "2026-10-04", "list_year": 2026,
+             "source": {"title": "JPS Selangor hotspots", "url": "https://example.org/h", "type": "official"},
+             "places": [{"name": "Kampung One", "sections": ["seksyen-1"]}]}
+    doc = bh.build({**curated_doc(curated()), "hotspots": spots}, {"features": []}, SECTIONS, TODAY)
+    assert doc["hotspots"] == {key: spots[key] for key in ("checked", "list_year", "source", "places")}
+    assert "hotspots" not in build([curated()])
+    for bad in (None, {**spots, "places": [{"name": "Kampung One", "sections": ["seksyen-9"]}]}):
+        with pytest.raises(history.HistoryError, match="hotspot"):
+            bh.build({**curated_doc(curated()), "hotspots": bad}, {"features": []}, SECTIONS, TODAY)
