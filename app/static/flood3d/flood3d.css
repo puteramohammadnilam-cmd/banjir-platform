@@ -1,0 +1,98 @@
+/* The 3D flood mock-up (3d.html): a full-screen tilted map with one floating panel, on the app's tokens. */
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+
+body.f3d {
+  background: var(--canvas);
+  color: var(--ink);
+  font: 400 var(--text-md)/1.5 var(--font);
+}
+
+.f3d-stage { position: relative; height: 100dvh; overflow: hidden; }
+.f3d-map { position: absolute; inset: 0; }
+
+.f3d-back {
+  position: absolute; top: var(--space-4); left: 56px; z-index: 2;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface); color: var(--ink); border-radius: 999px;
+  box-shadow: var(--shadow-float);
+  font-weight: 600; font-size: var(--text-sm); text-decoration: none;
+}
+.f3d-back:hover { color: var(--action); }
+.f3d-back:focus-visible, .f3d-size:focus-visible, .f3d-toggle input:focus-visible {
+  outline: 3px solid var(--action); outline-offset: 2px;
+}
+
+.f3d-panel {
+  position: absolute; z-index: 2; top: var(--space-4); right: var(--space-4); bottom: var(--space-4);
+  width: min(23rem, calc(100% - 2 * var(--space-4)));
+  overflow-y: auto;
+  padding: var(--space-6);
+  background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+  display: flex; flex-direction: column; gap: var(--space-4);
+}
+.f3d-panel > * { margin: 0; }
+
+.f3d-eyebrow { font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.f3d-name { font: 600 var(--text-2xl)/1.15 var(--font-serif); }
+
+/* the answer: one big figure, its words under it */
+.f3d-reading { border-left: 4px solid var(--band-3); padding-left: var(--space-4); }
+.f3d-reading > p { margin: 0; }
+.f3d-depth { font: 600 var(--text-figure)/1 var(--font-serif); font-variant-numeric: tabular-nums; color: var(--band-3); }
+.f3d-depth[data-band="4"] { color: var(--band-4); }
+.f3d-depth[data-band="5"] { color: var(--band-5); }
+.f3d-words { margin-top: var(--space-2) !important; color: var(--ink-2); font-size: var(--text-sm); }
+
+.f3d-sizes { border: 0; padding: 0; margin: 0; }
+.f3d-sizes legend { padding: 0; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+.f3d-size-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1);
+  padding: var(--space-1); background: var(--surface-sunk); border-radius: var(--radius-md); }
+.f3d-size {
+  min-height: 44px; padding: var(--space-2); border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink-2); font: 600 var(--text-xs)/1.2 var(--font); cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+.f3d-size:hover { color: var(--action); }
+.f3d-size[aria-pressed="true"] { background: var(--action); color: var(--surface); }
+
+.f3d-toggle { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
+.f3d-toggle input { width: 1.1rem; height: 1.1rem; accent-color: var(--action); }
+
+.f3d-legend { list-style: none; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
+.f3d-legend li { display: flex; align-items: center; gap: var(--space-2); }
+.f3d-swatch { flex: none; width: 1.1rem; height: 1.1rem; border-radius: 3px; border: 1px solid var(--line-strong); }
+.f3d-swatch-water { background: rgb(43 119 167 / 0.6); }
+.f3d-swatch-wet { background: linear-gradient(to top, var(--risk-danger) 50%, var(--brand) 50%); }
+.f3d-swatch-walls { background: #5b84a8; }   /* WALL_WET in js/flood3d.js */
+.f3d-swatch-known { background: var(--line-strong); }
+.f3d-swatch-guess { background: var(--canvas); }
+
+.f3d-note { font-size: var(--text-xs); color: var(--ink-3); }
+.f3d-credit { margin-top: auto !important; font-size: var(--text-xs); color: var(--ink-3); }
+
+.f3d-failed .f3d-reading, .f3d-failed .f3d-sizes, .f3d-failed .f3d-toggle, .f3d-failed .f3d-legend { display: none; }
+
+/* the shop's label on the map, on a stem down to the shop's door */
+.f3d-pin { display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.f3d-pin-label {
+  display: grid; margin: 0; padding: var(--space-1) var(--space-3);
+  background: var(--ink); color: var(--surface); border-radius: var(--radius-sm);
+  font-size: var(--text-xs); line-height: 1.3; white-space: nowrap; box-shadow: var(--shadow-float);
+}
+.f3d-pin-stem { width: 2px; height: 72px; background: var(--ink); }
+.f3d-pin-stem::after {
+  content: ""; display: block; width: 8px; height: 8px; margin: 70px 0 0 -3px;
+  border-radius: 50%; background: var(--ink); border: 2px solid var(--surface);
+}
+.f3d-pin-depth { color: var(--band-1); font-weight: 600; }
+
+/* a phone: the map on top, the panel as a sheet under it */
+@media (max-width: 700px) {
+  .f3d-stage { display: flex; flex-direction: column; height: auto; min-height: 100dvh; overflow: visible; }
+  .f3d-map { position: relative; height: 62dvh; flex: none; }
+  .f3d-panel { position: relative; inset: auto; width: auto; margin-top: calc(-1 * var(--space-4));
+    border-radius: var(--radius-md) var(--radius-md) 0 0; overflow: visible; }
+  .f3d-credit { margin-top: 0 !important; }
+}

@@ -74,10 +74,12 @@ MAX_TRACKED_CLIENTS = 10_000
 MAX_ID_CHARS = 40
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
-        "default-src 'self'; script-src 'self'; connect-src 'self'; "
+        # the 3D page's map (MapLibre) fetches its tiles, so the tile hosts are in connect-src as well as img-src
+        "default-src 'self'; script-src 'self'; "
+        "connect-src 'self' https://tile.openstreetmap.org https://server.arcgisonline.com; "
         # inline styles only for Google's search suggestions, which must be shown as given; scripts stay 'self'
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
-        "img-src 'self' data: https://tile.openstreetmap.org; "
+        "img-src 'self' data: blob: https://tile.openstreetmap.org https://server.arcgisonline.com; "
         "frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'"
     ),
     "X-Content-Type-Options": "nosniff",

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flood in 3D · Banjir Check</title>
+  <meta name="description" content="A 3D picture of the modelled flood around one shop: the buildings, the water and how high it reaches.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="flood3d/flood3d.css">
+  <script src="vendor/maplibre-gl-csp.js"></script>
+  <script type="module" src="js/flood3d.js"></script>
+</head>
+<body class="f3d">
+  <main class="f3d-stage">
+    <div id="f3d-map" class="f3d-map" role="img" aria-label="3D map of the buildings around the shop with the modelled flood water drawn over them"></div>
+
+    <a class="f3d-back" href="./">&larr; Banjir Check</a>
+
+    <section class="f3d-panel" aria-labelledby="f3d-name">
+      <p class="f3d-eyebrow">3D mock-up · <span id="f3d-section"></span></p>
+      <h1 id="f3d-name" class="f3d-name">Loading the shop…</h1>
+
+      <div class="f3d-reading" aria-live="polite">
+        <p class="f3d-depth" id="f3d-depth"></p>
+        <p class="f3d-words" id="f3d-words"></p>
+      </div>
+
+      <fieldset class="f3d-sizes">
+        <legend>Flood size</legend>
+        <div class="f3d-size-row" id="f3d-sizes"></div>
+      </fieldset>
+
+      <label class="f3d-toggle"><input type="checkbox" id="f3d-satellite" checked> Satellite photo</label>
+
+      <ul class="f3d-legend">
+        <li><span class="f3d-swatch f3d-swatch-water"></span>Flood water, drawn to its modelled depth</li>
+        <li><span class="f3d-swatch f3d-swatch-wet"></span>The shop's building, red up to the water line</li>
+        <li><span class="f3d-swatch f3d-swatch-walls"></span>Other buildings' walls under water</li>
+        <li><span class="f3d-swatch f3d-swatch-known"></span>Building height from the map</li>
+        <li><span class="f3d-swatch f3d-swatch-guess"></span>Height guessed (most have none on the map)</li>
+      </ul>
+
+      <p class="f3d-note">A rough picture. The water comes from the flood model's squares, about 90 m a side, not from
+        each building, and the ground is drawn flat. Drag to turn the map; hold right-click or two fingers to tilt.</p>
+      <p class="f3d-credit" id="f3d-credit"></p>
+    </section>
+  </main>
+</body>
+</html>
