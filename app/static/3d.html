@@ -34,14 +34,15 @@
         <div class="f3d-size-row" id="f3d-sizes"></div>
       </fieldset>
 
-      <label class="f3d-toggle"><input type="checkbox" id="f3d-satellite" checked> Satellite photo</label>
+      <!-- shown by js/flood3d.js only when the server has an imagery key (app/satellite.py) -->
+      <label class="f3d-toggle" id="f3d-satellite-switch" hidden><input type="checkbox" id="f3d-satellite" checked> Satellite photo</label>
 
       <ul class="f3d-legend">
         <li><span class="f3d-swatch f3d-swatch-water"></span>Flood water, drawn to its modelled depth</li>
         <li><span class="f3d-swatch f3d-swatch-wet"></span>The shop's building, red up to the water line</li>
         <li><span class="f3d-swatch f3d-swatch-walls"></span>Other buildings' walls under water</li>
-        <li><span class="f3d-swatch f3d-swatch-known"></span>Building height from the map</li>
-        <li><span class="f3d-swatch f3d-swatch-guess"></span>Height guessed (most have none on the map)</li>
+        <li><span class="f3d-swatch f3d-swatch-known"></span>Building height from the map, or Google's estimate from satellite photos</li>
+        <li><span class="f3d-swatch f3d-swatch-guess"></span>Height guessed (neither has one)</li>
       </ul>
 
       <p class="f3d-note">A rough picture. The water comes from the flood model's squares, about 90 m a side, not from

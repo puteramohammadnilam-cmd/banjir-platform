@@ -8,8 +8,6 @@ import { SCENARIOS, band, depthText, depthWords, h, scenarioLabel } from "./dom.
 const DEFAULT_PLACE = "node-5565878632";   // a 7-Eleven, the one shop baked so far
 const PLACE_ID = /^(node|way|relation)-\d{1,15}$/;
 const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-// ponytail: Esri imagery for the mock-up look; check its licence before this goes live (the app aims to be commercial-safe)
-const SATELLITE_TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const WATER = "#2b77a7";     // --band-3
 const WET = "#b42318";       // --risk-danger: the shop's walls under water
 const SHOP = "#0c447c";      // --brand: the shop's walls above it
@@ -42,19 +40,31 @@ const level = (rp) => (rp ? ["get", `d${rp}`] : 0);
 /** Each square's water height a share k (0 to 1) of the way from one flood size to the next. */
 export const waterHeight = (from, to, k) => ["+", ["*", level(from), 1 - k], ["*", level(to), k]];
 
-function style(data) {
+/** The base map: the satellite photo when the server has an imagery key (the street map stays hidden under it, and
+ *  loads no tiles until it is switched on), else the street map alone. */
+function baseMap(satellite) {
+  const raster = (tiles, attribution) => ({ type: "raster", tiles: [tiles], tileSize: 256, maxzoom: 19, attribution });
+  const osm = raster(OSM_TILES, "© OpenStreetMap contributors");
+  const streets = { id: "osm", type: "raster", source: "osm", layout: { visibility: satellite ? "none" : "visible" } };
+  if (!satellite) return { sources: { osm }, layers: [streets] };
+  return {
+    sources: { osm, satellite: raster(satellite.tiles, satellite.attribution) },
+    layers: [streets, { id: "satellite", type: "raster", source: "satellite" }],
+  };
+}
+
+function style(data, satellite) {
   const shopOnly = ["==", ["get", "shop"], true];
+  const base = baseMap(satellite);
   return {
     version: 8,
     sources: {
-      osm: { type: "raster", tiles: [OSM_TILES], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap contributors" },
-      satellite: { type: "raster", tiles: [SATELLITE_TILES], tileSize: 256, maxzoom: 19, attribution: "Imagery © Esri" },
+      ...base.sources,
       buildings: { type: "geojson", data: data.buildings },
       water: { type: "geojson", data: data.water },   // its credit, with the buildings', is in the panel
     },
     layers: [
-      { id: "osm", type: "raster", source: "osm", layout: { visibility: "none" } },
-      { id: "satellite", type: "raster", source: "satellite" },
+      ...base.layers,
       // each building twice: its walls under water, then the rest of it from the water line up (setLevel moves the line)
       { id: "walls-wet", type: "fill-extrusion", source: "buildings", filter: ["!", shopOnly], paint: {
         "fill-extrusion-color": WALL_WET, "fill-extrusion-height": 0,
@@ -119,24 +129,59 @@ function sizeButtons(onPick) {
   return (picked) => buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rp === picked)));
 }
 
-function openMap(data) {
+function openMap(data, satellite) {
   maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");
   const { lon, lat } = data.place;
-  const map = new maplibregl.Map({ container: "f3d-map", style: style(data), center: [lon, lat], ...START,
+  const map = new maplibregl.Map({ container: "f3d-map", style: style(data, satellite), center: [lon, lat], ...START,
     maxPitch: 75, attributionControl: false });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-left");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");   // clear of the panel
   return map;
 }
 
-async function start() {
-  const id = placeFromLink(window.location.search);
-  let data;
+/** The shop's baked 3D data, or null when there is none (or it cannot be read). */
+async function loadShop(id) {
   try {
     const response = await fetch(`flood3d/${id}.json`);
-    if (!response.ok) throw new Error(String(response.status));
-    data = await response.json();
+    return response.ok ? await response.json() : null;
   } catch {
+    return null;
+  }
+}
+
+/** The satellite tiles the server hands out ({tiles, attribution}), or null: no imagery key on the server, or any
+ *  failure asking. The page then shows the street map, so a missing photo never stops the 3D picture. */
+async function satelliteTiles() {
+  try {
+    const response = await fetch("/api/satellite");
+    const satellite = response.ok ? (await response.json()).data?.satellite : null;
+    return typeof satellite?.tiles === "string" && typeof satellite.attribution === "string" ? satellite : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The "Satellite photo" switch, shown only when there is a photo. A tile Esri refuses switches to the street map; the
+ *  box can be ticked again. (On 11 Oct 2026 Esri sent imagery for a made-up token, so a bad key may not trip this.) */
+function satelliteSwitch(map) {
+  const box = $("f3d-satellite");
+  const show = (photo) => {
+    box.checked = photo;
+    map.setLayoutProperty("satellite", "visibility", photo ? "visible" : "none");
+    map.setLayoutProperty("osm", "visibility", photo ? "none" : "visible");
+  };
+  $("f3d-satellite-switch").hidden = false;
+  box.addEventListener("change", () => show(box.checked));
+  map.on("error", (event) => {
+    if (event.sourceId === "satellite") show(false);
+    else console.error(event.error ?? event);   // what MapLibre does itself when no one listens
+  });
+}
+
+async function start() {
+  const id = placeFromLink(window.location.search);
+  const [data, satellite] = await Promise.all([loadShop(id), satelliteTiles()]);
+  if (!data) {
     showProblem("There is no 3D picture for this shop yet.");
     return;
   }
@@ -147,7 +192,7 @@ async function start() {
 
   let map;
   try {
-    map = openMap(data);
+    map = openMap(data, satellite);
   } catch {
     showProblem("This browser cannot draw the 3D map (it needs WebGL).");
     return;
@@ -174,10 +219,7 @@ async function start() {
   press(first);
   showReading(place, first, pinDepth);
 
-  $("f3d-satellite").addEventListener("change", (event) => {
-    map.setLayoutProperty("satellite", "visibility", event.target.checked ? "visible" : "none");
-    map.setLayoutProperty("osm", "visibility", event.target.checked ? "none" : "visible");
-  });
+  if (satellite) satelliteSwitch(map);
 
   map.on("load", () => {
     const flood = () => {

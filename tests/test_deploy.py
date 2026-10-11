@@ -23,9 +23,11 @@ SECRET_MARKER = "BODY-THAT-MUST-NOT-BE-PRINTED"
 
 # STUB_DIR/bind_failures holds a number: that many add-iam-policy-binding calls fail first (IAM not propagated yet).
 # A file STUB_DIR/no_runner makes "iam service-accounts describe" fail until "... create" has run.
+# The optional secret arcgis-api-key exists only when there is a file STUB_DIR/arcgis.
 GCLOUD_STUB = """#!/usr/bin/env bash
 printf 'gcloud %s\\n' "$*" >> "$CALLS"
 case "$*" in
+  "secrets describe arcgis-api-key"*) [ -e "$STUB_DIR/arcgis" ] || exit 1 ;;
   "iam service-accounts describe"*) [ ! -e "$STUB_DIR/no_runner" ] || [ -e "$STUB_DIR/runner_created" ] || exit 1 ;;
   "iam service-accounts create"*) touch "$STUB_DIR/runner_created" ;;
   "secrets add-iam-policy-binding"*)
@@ -111,7 +113,7 @@ def build_stubs(tmp_path: Path, responses: dict[str, str]) -> Path:
 
 def run_deploy(tmp_path: Path, *, rasters: tuple[str, ...] = RASTER_NAMES, responses: dict[str, str] | None = None,
                env: dict[str, str] | None = None, mapped: bool = False, bind_failures: int = 0,
-               new_runner: bool = False) -> Run:
+               new_runner: bool = False, arcgis: bool = False) -> Run:
     work = build_workdir(tmp_path, rasters)
     stubs = build_stubs(tmp_path, GOOD_RESPONSES if responses is None else responses)
     if mapped:
@@ -120,6 +122,8 @@ def run_deploy(tmp_path: Path, *, rasters: tuple[str, ...] = RASTER_NAMES, respo
         (stubs / "bind_failures").write_text(str(bind_failures), encoding="utf-8")
     if new_runner:
         (stubs / "no_runner").touch()
+    if arcgis:
+        (stubs / "arcgis").touch()
     calls = tmp_path / "calls.log"
     environment = {"PATH": f"{stubs}{os.pathsep}{os.environ['PATH']}", "HOME": str(tmp_path), "PROJECT": "test-project",
                    "CALLS": str(calls), "STUB_DIR": str(stubs), "FAKE_URL": FAKE_URL, "IAM_RETRY_SLEEP": "0",
@@ -313,3 +317,28 @@ def test_the_dns_records_are_read_with_a_describe_of_the_mapping(tmp_path):
     describes = [call for call in run.calls if "domain-mappings describe" in call]
     assert all(f"--domain {DOMAIN} --region asia-southeast1" in call for call in describes)
     assert any("status.resourceRecords" in call for call in describes)
+
+
+# --- the optional ArcGIS key (the 3D page's satellite photo) ---
+
+REQUIRED_SECRETS = "GOOGLE_API_KEY=gemini-api-key:latest,GOOGLE_MAPS_API_KEY=maps-api-key:latest"
+
+
+def test_without_the_arcgis_secret_the_deploy_goes_on_with_the_two_keys(tmp_path):
+    run = run_deploy(tmp_path)
+    assert run.proc.returncode == 0, run.output
+    deploy = run.calls[run.index("gcloud run deploy")]
+    assert f"--set-secrets {REQUIRED_SECRETS} " in deploy and "ARCGIS" not in deploy
+    assert run.count("arcgis-api-key") == 1   # looked for once; never created, asked for or bound
+    assert "No secret arcgis-api-key" in run.output
+
+
+def test_an_existing_arcgis_secret_is_bound_and_passed_as_arcgis_api_key(tmp_path):
+    run = run_deploy(tmp_path, arcgis=True)
+    assert run.proc.returncode == 0, run.output
+    deploy = run.calls[run.index("gcloud run deploy")]
+    assert f"--set-secrets {REQUIRED_SECRETS},ARCGIS_API_KEY=arcgis-api-key:latest " in deploy
+    assert run.count("secrets add-iam-policy-binding arcgis-api-key") == 1
+    assert run.where("add-iam-policy-binding arcgis-api-key") < run.index("gcloud run deploy")
+    assert run.count("secrets create") == 0
+    assert "No secret arcgis-api-key" not in run.output

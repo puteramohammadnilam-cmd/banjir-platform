@@ -6,6 +6,10 @@
 #   PROJECT=my-project ./deploy.sh            later: redeploys with the stored secrets
 #   PROJECT=my-project DOMAIN=banjir.example.org ./deploy.sh     also maps your own domain (see map_domain below)
 #
+# Optional third key, ARCGIS_API_KEY, for the 3D page's satellite photo: create the secret arcgis-api-key once yourself
+# (README, "Satellite photo on the 3D page"); the script uses it when it exists, and the page shows the street map
+# when it does not.
+#
 # After the deploy it reads the service URL and calls the live service three times (a smoke test): /api/status,
 # /api/coverage and a point check at a known square. If one fails it says which and exits non-zero.
 # tests/test_deploy.py runs this script against a stub gcloud and a stub curl.
@@ -97,7 +101,18 @@ for secret in gemini-api-key maps-api-key; do
   fi
 done
 
-# The service runs as its own account that can read the two secrets and nothing else (the default compute
+# The ArcGIS key reaches every visitor's browser (it is in each satellite tile's URL), so it is a public key restricted
+# to the site's address; it is still kept as a secret, out of the repo and the image, like the other two.
+SECRETS=(gemini-api-key maps-api-key)
+ENV_SECRETS=GOOGLE_API_KEY=gemini-api-key:latest,GOOGLE_MAPS_API_KEY=maps-api-key:latest
+if gcloud secrets describe arcgis-api-key >/dev/null 2>&1; then
+  SECRETS+=(arcgis-api-key)
+  ENV_SECRETS+=,ARCGIS_API_KEY=arcgis-api-key:latest
+else
+  echo "No secret arcgis-api-key: the 3D page will show the street map (README, \"Satellite photo on the 3D page\")."
+fi
+
+# The service runs as its own account that can read its secrets and nothing else (the default compute
 # account often holds project Editor).
 RUNNER="${SERVICE}-run@${PROJECT}.iam.gserviceaccount.com"
 gcloud iam service-accounts describe "$RUNNER" >/dev/null 2>&1 \
@@ -117,13 +132,13 @@ bind_secret() {
   echo "Could not give $RUNNER access to $secret after 5 tries. Run the script again in a minute." >&2
   return 1
 }
-for secret in gemini-api-key maps-api-key; do
+for secret in "${SECRETS[@]}"; do
   bind_secret "$secret"
 done
 
 gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated \
   --service-account "$RUNNER" \
-  --set-secrets GOOGLE_API_KEY=gemini-api-key:latest,GOOGLE_MAPS_API_KEY=maps-api-key:latest \
+  --set-secrets "$ENV_SECRETS" \
   --max-instances 2 --memory 512Mi --timeout 300 --cpu-boost --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')

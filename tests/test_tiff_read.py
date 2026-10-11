@@ -254,3 +254,19 @@ def test_a_saved_piece_without_a_sha256_is_refused(tmp_path):
     manifest.write_text(json.dumps(doc), encoding="utf-8")
     with pytest.raises(tr.TiffError, match="has no SHA-256 in pieces.json"):
         tr.PieceSource(folder).read(0, 8)
+
+
+def test_a_utm_file_is_read_only_when_asked_and_says_its_zone(tmp_path):
+    utm_keys = {34735: (gw.SHORT, gw.geo_keys({1024: 1, 1025: 1, 3072: 32647}))}   # projected, WGS 84 / UTM 47N
+    path = gw.write_tiff(tmp_path / "u.tif", floats(4, 4), tile=16, origin=(670_000.0, 340_000.0), pixel=(0.5, 0.5),
+                         padding=-9999.0, tags=utm_keys)
+    with pytest.raises(tr.TiffError, match="GTModelType is 1; need 2"):
+        tr.open_image(tr.FileSource(path))
+    image = tr.open_image(tr.FileSource(path), utm=True)
+    assert (image.crs, image.west, image.north, image.px) == (32647, 670_000.0, 340_000.0, 0.5)
+    assert tr.open_image(tr.FileSource(gw.write_tiff(tmp_path / "g.tif", floats(4, 4), tile=16, origin=ORIGIN,
+                                                     pixel=(PX, PX), padding=-9999.0)), utm=True).crs == 4326
+    other = {34735: (gw.SHORT, gw.geo_keys({1024: 1, 1025: 1, 3072: 3857}))}   # projected, but not UTM
+    with pytest.raises(tr.TiffError, match="ProjectedCSType is 3857"):
+        tr.open_image(tr.FileSource(gw.write_tiff(tmp_path / "m.tif", floats(4, 4), tile=16, origin=(0.0, 0.0),
+                                                  pixel=(1.0, 1.0), padding=-9999.0, tags=other)), utm=True)

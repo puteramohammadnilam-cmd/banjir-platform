@@ -12,7 +12,9 @@ per pixel, interleaved (PlanarConfiguration 1) or one plane each (2); tiles or s
 (8, 32946); no predictor (1), horizontal differencing (2, integers) or the floating point predictor (3, with one
 sample a pixel or one plane per sample: with interleaved samples libtiff sums its bytes a pixel apart, which is not
 undone here); a pixel scale with one tie point on WGS 84 lat/lon (GeoKeys 1024 = 2, 2048 = 4326), pixel is area or
-point. Big-endian files, BigTIFF, JPEG and a ModelTransformation are refused.
+point. Big-endian files, BigTIFF, JPEG and a ModelTransformation are refused. With open_image(source, utm=True) a file
+on WGS 84 / UTM (GeoKeys 1024 = 1, 3072 = 32601 to 32660 north or 32701 to 32760 south) is read too: Image.crs says
+which, and its edges and pixel sizes are then metres east and north, not degrees.
 
 PieceSource keeps a remote file as the byte ranges actually fetched (HTTP Range), one file per range plus pieces.json
 (url, size, and each range's offset, length and SHA-256), so a build runs offline from exactly the bytes downloaded:
@@ -35,8 +37,9 @@ from pathlib import Path
 WIDTH, HEIGHT, BITS, COMPRESSION, PHOTOMETRIC, STRIP_OFFSETS = 256, 257, 258, 259, 262, 273
 SAMPLES, ROWS_PER_STRIP, STRIP_BYTES, PLANAR, PREDICTOR = 277, 278, 279, 284, 317
 TILE_WIDTH, TILE_LENGTH, TILE_OFFSETS, TILE_BYTES, SAMPLE_FORMAT = 322, 323, 324, 325, 339
-PIXEL_SCALE, TIE_POINT, TRANSFORM, GEO_KEYS, NODATA = 33550, 33922, 34264, 34735, 42113
+PIXEL_SCALE, TIE_POINT, TRANSFORM, GEO_KEYS, GDAL_METADATA, NODATA = 33550, 33922, 34264, 34735, 42112, 42113
 TAG_NAMES = {
+    GDAL_METADATA: "GDAL_METADATA",
     WIDTH: "ImageWidth", HEIGHT: "ImageLength", BITS: "BitsPerSample", COMPRESSION: "Compression",
     PHOTOMETRIC: "PhotometricInterpretation", STRIP_OFFSETS: "StripOffsets", SAMPLES: "SamplesPerPixel",
     ROWS_PER_STRIP: "RowsPerStrip", STRIP_BYTES: "StripByteCounts", PLANAR: "PlanarConfiguration",
@@ -50,6 +53,8 @@ SAMPLE_CODES = {(8, 1): "B", (16, 1): "H", (16, 2): "h", (32, 3): "f"}   # (bits
 NO_COMPRESSION, LZW = 1, 5
 DEFLATE = (8, 32946)
 AREA, POINT = 1, 2            # GTRasterType
+WGS84 = 4326
+UTM_CODES = (*range(32601, 32661), *range(32701, 32761))   # WGS 84 / UTM zone 1 to 60, north then south
 LZW_CLEAR, LZW_END = 256, 257
 
 
@@ -182,17 +187,22 @@ def _need(source, tags: dict, tag: int, ok: Callable[[tuple], bool], need: str, 
     return found
 
 
-def _geo_keys(source, tags: dict) -> dict[int, int]:
+def _geo_keys(source, tags: dict, utm: bool = False) -> tuple[dict[int, int], int]:
+    """The short GeoKeys stored inline and the file's EPSG code: 4326, or a WGS 84 / UTM zone when `utm` allows."""
     keys = _need(source, tags, GEO_KEYS, lambda v: len(v) >= 4 and len(v) >= 4 + 4 * v[3], "a GeoKey directory")
     inline = {keys[i]: keys[i + 3] for i in range(4, 4 + 4 * keys[3], 4) if keys[i + 1] == 0}
-    for key, name, want in ((1024, "GTModelType", 2), (2048, "GeographicType", 4326)):
-        if inline.get(key) != want:
+    if utm and inline.get(1024) == 1:
+        wants = ((1024, "GTModelType", 1, (1,)), (3072, "ProjectedCSType", "32601 to 32660 or 32701 to 32760", UTM_CODES))
+    else:
+        wants = ((1024, "GTModelType", 2, (2,)), (2048, "GeographicType", WGS84, (WGS84,)))
+    for key, name, need, allowed in wants:
+        if inline.get(key) not in allowed:
             raise TiffError(f"{source.name}: tag {GEO_KEYS} {TAG_NAMES[GEO_KEYS]}: key {key} {name} is "
-                            f"{inline.get(key, 'missing')}; need {want}")
+                            f"{inline.get(key, 'missing')}; need {need}")
     if inline.get(1025, AREA) not in (AREA, POINT):
         raise TiffError(f"{source.name}: tag {GEO_KEYS} {TAG_NAMES[GEO_KEYS]}: key 1025 GTRasterType is "
                         f"{inline[1025]}; need 1 or 2")
-    return inline
+    return inline, inline[wants[1][0]]
 
 
 @dataclass(frozen=True)
@@ -211,11 +221,12 @@ class Image:
     block_h: int
     offsets: tuple[int, ...] = field(repr=False)
     counts: tuple[int, ...] = field(repr=False)
-    west: float                # outer edges of the image (pixel is area), degrees
+    west: float                # outer edges of the image (pixel is area), degrees (metres on a UTM grid)
     north: float
     px: float
     py: float
     nodata: float | None
+    crs: int = WGS84           # EPSG code: 4326, or a WGS 84 / UTM zone when open_image was given utm=True
 
     @property
     def across(self) -> int:
@@ -256,8 +267,8 @@ def _blocks(source, tags: dict, width: int, height: int) -> tuple[int, int, tupl
         _need(source, tags, STRIP_BYTES, bool, "strip byte counts")
 
 
-def open_image(source) -> Image:
-    """The first image of the file, checked (see the module docstring)."""
+def open_image(source, utm: bool = False) -> Image:
+    """The first image of the file, checked (see the module docstring). `utm` lets in a WGS 84 / UTM grid too."""
     tags = read_tags(source)
     width = _need(source, tags, WIDTH, lambda v: v[0] > 0, "a width")[0]
     height = _need(source, tags, HEIGHT, lambda v: v[0] > 0, "a height")[0]
@@ -275,11 +286,12 @@ def open_image(source) -> Image:
         raise TiffError(f"{source.name}: tag {TRANSFORM} {TAG_NAMES[TRANSFORM]} is set; need a scale and tie point")
     px, py, _ = _need(source, tags, PIXEL_SCALE, lambda v: len(v) == 3 and v[0] > 0 and v[1] > 0, "pixel sizes")
     tie = _need(source, tags, TIE_POINT, lambda v: len(v) == 6 and v[:2] == (0, 0), "one tie point at pixel (0, 0)")
-    point = _geo_keys(source, tags).get(1025, AREA) == POINT
+    keys, crs = _geo_keys(source, tags, utm)
+    point = keys.get(1025, AREA) == POINT
     west, north = (tie[3] - px / 2, tie[4] + py / 2) if point else (tie[3], tie[4])
     nodata = tags.get(NODATA, (None,))[0]
     return Image(source.name, width, height, samples, code, compression, predictor, planar, block_w, block_h,
-                 offsets, counts, west, north, px, py, float(nodata) if nodata not in (None, "") else None)
+                 offsets, counts, west, north, px, py, float(nodata) if nodata not in (None, "") else None, crs)
 
 
 # --- decoding ---

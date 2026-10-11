@@ -34,7 +34,7 @@ from pydantic import AliasChoices, BaseModel, Field, StringConstraints, Validati
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
 from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, places,  # noqa: E402
-               plan, raster, sections, stock, tide)
+               plan, raster, satellite, sections, stock, tide)
 
 log = logging.getLogger("banjir")
 
@@ -74,12 +74,13 @@ MAX_TRACKED_CLIENTS = 10_000
 MAX_ID_CHARS = 40
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
-        # the 3D page's map (MapLibre) fetches its tiles, so the tile hosts are in connect-src as well as img-src
+        # the 3D page's map (MapLibre) fetches its tiles, so the tile hosts are in connect-src as well as img-src;
+        # its satellite photo is Esri's keyed World Imagery (app/satellite.py), never the keyless server
         "default-src 'self'; script-src 'self'; "
-        "connect-src 'self' https://tile.openstreetmap.org https://server.arcgisonline.com; "
+        "connect-src 'self' https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com; "
         # inline styles only for Google's search suggestions, which must be shown as given; scripts stay 'self'
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
-        "img-src 'self' data: blob: https://tile.openstreetmap.org https://server.arcgisonline.com; "
+        "img-src 'self' data: blob: https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com; "
         "frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'"
     ),
     "X-Content-Type-Options": "nosniff",
@@ -89,7 +90,8 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin",
     "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",   # GPS and voice for this page, no frame
 }
-NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot")   # Google results may not be cached; a point is personal
+# Google results may not be cached; a point is personal; a rotated imagery key must not linger in a cache
+NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot", "/api/satellite")
 POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/dry-spot", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
 # business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
 # {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
@@ -527,6 +529,13 @@ def data() -> dict:
 def status() -> dict:
     return ok({"ai_ready": ai.is_configured(), "model": ai.MODEL, "maps_ready": googlemaps.is_configured(),
                "points_ready": places.points_ready()})
+
+
+@app.api_route("/api/satellite", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
+def satellite_photo() -> dict:
+    """The 3D page's satellite tiles: `{tiles, attribution}`, the tile URL holding the public ArcGIS key, or null
+    without ARCGIS_API_KEY (the page then shows the street map)."""
+    return ok({"satellite": satellite.imagery()})
 
 
 @app.post("/api/point", dependencies=[Depends(geo_limit)])

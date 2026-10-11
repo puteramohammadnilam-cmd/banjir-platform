@@ -59,6 +59,7 @@ body.f3d {
 
 .f3d-toggle { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
 .f3d-toggle input { width: 1.1rem; height: 1.1rem; accent-color: var(--action); }
+.f3d-toggle[hidden] { display: none; }   /* no satellite photo without an imagery key */
 
 .f3d-legend { list-style: none; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
 .f3d-legend li { display: flex; align-items: center; gap: var(--space-2); }

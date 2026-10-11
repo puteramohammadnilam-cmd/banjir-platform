@@ -28,6 +28,7 @@ Open http://localhost:8081.
 
 - Gemini key: get a free one at https://aistudio.google.com/apikey and put it in `.env` as `GOOGLE_API_KEY`. Without it the map and cards still work. The chat and photo features say the AI is not connected.
 - Google Maps Platform key (optional): put it in `.env` as `GOOGLE_MAPS_API_KEY`. Enable the Weather API and Places API (New) on it. Without it the rain forecast and the open or closed check are left out.
+- ArcGIS key (optional): put it in `.env` as `ARCGIS_API_KEY` for the satellite photo on the 3D page. See "Satellite photo on the 3D page". Without it that page shows the street map.
 - Without the flood depth files, the two built areas still work, because their depths are already in the repo. Checking any point does not: `/api/status` then says `points_ready: false`.
 
 Try a point check from the command line:
@@ -127,6 +128,7 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 | GET `/api/areas/{id}/layers/flash-flood.png` | The flash flood potential map layer, a PNG, with `Cache-Control: no-cache` and an `ETag` (an unchanged file is a 304). 404 `No layer.` for an area without one. GET and HEAD. |
 | GET `/api/areas/{id}/sections/{sid}/data` | One section of a city: `{area, section, sections, town, premises, limits}`: the section's flood record in `area.history`, its full entry, every section's `{id, name}`, `town.view` = the section's box with the squares that overlap it and every relief centre of the city, and the section's businesses in full. 404 `Unknown section.` for a section the area does not have. |
 | GET `/api/status` | `{ai_ready, model, maps_ready, points_ready}` |
+| GET `/api/satellite` | `{satellite: {tiles, attribution}}` for the 3D page: Esri World Imagery's tile URL with the public ArcGIS key in it, and the credit to show. `{satellite: null}` when `ARCGIS_API_KEY` is not set. |
 | GET `/api/coverage` | `{data_version, return_periods, block_cells, grids, regions}`: what the page needs to snap a point, and coarse boxes for Langkawi, the Peninsula and Borneo |
 | POST `/api/point` | Body `{lat, lon, source: "pin" or "gps"}`. Returns `{coverage, region, place, blocks, cells}`. `coverage` is `covered`, `not_loaded` or `outside`. Only a covered point has a place (its depths, its square, its area and section if it lies in one; a point in a city's box but in none of its sections is in no area), and the wet squares around it in `blocks` and `cells`. If a neighbouring flood tile cannot be read, `blocks` and `cells` are null but the place is still returned. |
 | POST `/api/ask` | `{question, place, area_id, section_id, history}`. The chat answer. `place` is a business or point id (`business_id` is accepted as an older name). |
@@ -141,7 +143,7 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 
 `/api/point`, `/api/ask`, `/api/photo`, `/api/stock`, `/api/plan`, `/api/voice`, `/api/estimate` and `/api/news` take only POST. A GET to them is a 405. Input that does not fit is a 422 with a plain message that does not repeat what was sent.
 
-`/api/rain`, `/api/place/{id}` and `/api/point` send `Cache-Control: no-store`.
+`/api/rain`, `/api/place/{id}`, `/api/point` and `/api/satellite` send `Cache-Control: no-store`.
 
 Rate limits, per visitor in each 5 minute window, counted in memory by each server instance:
 
@@ -151,7 +153,7 @@ Rate limits, per visitor in each 5 minute window, counted in memory by each serv
 | 60 | `/api/rain` and `/api/place/{id}`: Google Maps lookups |
 | 120 | `/api/estimate` |
 | 120 | `/api/point` |
-| 1200 | `/api/coverage` and the flash flood potential layer |
+| 1200 | `/api/coverage`, `/api/satellite` and the flash flood potential layer |
 
 The data and status endpoints have no limit. One chat question may make at most 3 Google Maps lookups. A business with no name on the map is never looked up.
 
@@ -168,6 +170,7 @@ These are the claims this app makes about your location, and what backs each one
 - Rain: for a point outside the listed areas, Google Weather gets the square's centre rounded to 0.01 degrees, about 1 km. Inside an area, it gets the area's centre.
 - Google Places is asked only about mapped businesses, by OpenStreetMap name and coordinates. It is never asked about a point.
 - The map tiles come from OpenStreetMap's servers, which see the map area you view. After a GPS fix the map opens at street level (zoom 17), where one tile is about 300 m wide.
+- On the 3D page the satellite photo's tiles come from Esri's servers (`ibasemaps-api.arcgis.com`), which see the map area you view and this site's address.
 - A photo you upload (of the shop front, or of the stock inside) is sent to Gemini to be read. This app does not save it. Google's Gemini API terms apply to it.
 - A voice question is recorded only while the Speak button is on, sent to Gemini as audio to write down the words, and not saved or logged by this app (`tests/test_voice.py`). Answers to spoken questions are read aloud by your browser's own speech voice (some browsers use an online voice for this).
 - The flood plan is written by Gemini from facts this app gives it: for a point you picked, the same as the chat gets, never coordinates.
@@ -206,6 +209,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/areas.py` | Loads the curated areas from `app/data/areas`. |
 | `app/places.py` | A place is a business or a point, with one id string. Snaps a point to its square, checks coverage, finds the squares around it. |
 | `app/googlemaps.py` | Google Weather and Places calls, server side only. |
+| `app/satellite.py` | The 3D page's satellite photo: Esri World Imagery's tile URL with the ArcGIS key, and its credit. |
 | `app/costs.py` | The ringgit loss arithmetic. No AI, no I/O. See "How the cost estimate works". |
 | `app/main.py` | Web server: page, data, endpoints, limits, compression and security headers. |
 | `app/static/` | The page, in three tabs (area overview, my business, flood cost) with the Ask AI chat as a floating button and dialog on every tab (`chat-widget.js`; `?tab=ask` links open it). Plain HTML, CSS and JavaScript, no build step. `place.js` holds ids, the link and snapping; `pin.js` the aim mode and GPS. |
@@ -268,8 +272,8 @@ PROJECT=your-project-id ./deploy.sh
 It does these things, in order:
 
 1. Stops if any of the nine flood files is missing, before it touches Google Cloud.
-2. Enables the APIs and stores both keys in Secret Manager. It asks you to paste each key once.
-3. Creates a service account that can read only those two secrets. A new account can take a few seconds to show up in IAM, so it retries the secret access grant up to 5 times, 5 seconds apart.
+2. Enables the APIs and stores both keys in Secret Manager. It asks you to paste each key once. If a secret `arcgis-api-key` exists it is used too (see "Satellite photo on the 3D page").
+3. Creates a service account that can read only those secrets. A new account can take a few seconds to show up in IAM, so it retries the secret access grant up to 5 times, 5 seconds apart.
 4. Deploys the service `banjir-check` in `asia-southeast1` (override with `SERVICE` and `REGION`), with 2 instances at most, 512 MiB, a 60 second request timeout and startup CPU boost. It passes `--quiet`, so a first run does not stop to ask questions (for example about creating the Artifact Registry repository).
 5. Reads the service URL and runs a smoke test: `/api/status` and `/api/coverage` must answer with success, and a point check at the Taman Sri Muda spot above must come back `covered` in square `pt:3.02998,101.53667`. If a check fails, it says which one and exits non-zero.
 
@@ -290,6 +294,26 @@ Swapping parts:
 - Another model: set `GEMINI_MODEL`.
 - Another provider: rewrite `ask()` and `read_shop_photo()` in `app/ai.py`. Nothing else changes.
 
+## Satellite photo on the 3D page
+
+The 3D mock-up (`/3d.html`) draws Esri World Imagery under the buildings when the server has an ArcGIS key, and the OpenStreetMap street map when it has none (then the "Satellite photo" switch is hidden). The key comes from a free ArcGIS Location Platform account, which comes with a commercial deployment licence. Esri's keyless imagery server is not used, and the Content-Security-Policy does not allow it.
+
+1. Sign up at https://location.arcgis.com. Signing up is free, and pay-as-you-go is off for a new account. Leave it off: past the free tier (2,000,000 basemap tiles a month) the imagery then stops until the next billing cycle instead of being billed, and the page switches to the street map.
+2. Make the key. Sign in, then **My portal** > **Content** > **My content** > **New item** > **Developer credentials** > **API key credentials**:
+   - **Where will you use these credentials?** Public application.
+   - **Item access:** No item access.
+   - **Privileges:** under **Basemaps**, only **Static basemap tiles**. Esri's MapLibre tutorial for World Imagery asks for this privilege.
+   - **Expiration date:** one year at most. The photo stops working when the key expires, so make a new one before then.
+   - **Referrers:** `https://banjirdemo.katalysmedia.asia`, plus `http://localhost:8081` and `http://localhost:8084` for local runs, and the Cloud Run URL or your own domain if you deploy there. Changing the referrers or the expiry later invalidates the key, and you copy the new one.
+   - Copy the key when it is shown. Esri shows it only once.
+3. Give it to the server as `ARCGIS_API_KEY`:
+   - Local: add `ARCGIS_API_KEY=` and the key to `.env`, then restart uvicorn.
+   - The VPS demo: add the same line to `/opt/banjir-check/.env` on the server, then `sudo systemctl restart banjir-check`.
+   - Cloud Run: once, run `gcloud secrets create arcgis-api-key --data-file=-`, paste the key, press Enter and then Ctrl-D (the line break is ignored). Then run `./deploy.sh`: it gives the service account access to the secret and passes it as `ARCGIS_API_KEY`. Without the secret it deploys as before and says so. A new key later: `gcloud secrets versions add arcgis-api-key --data-file=-`, then deploy again.
+4. Open `/3d.html`: the photo should be on, with "Powered by Esri | Source: Esri, Vantor, …" in the map's credits (the (i) button). Check usage on the Location Platform dashboard after a few visits; a tilted map loads more tiles than a flat one.
+
+The key is public by design: the browser puts it in every tile's URL, as Esri's own MapLibre tutorials do. That is why it has one privilege and a referrer list. The server never calls Esri; `GET /api/satellite` only hands the page the tile URL and the credit (`app/satellite.py`). The page sends `Referrer-Policy: strict-origin`, so Esri still sees the site's origin. Esri's docs recommend referrers but do not say they are enforced on imagery tiles. On 11 October 2026 the tile server sent imagery even for a made-up token (it refused only a URL with no token at all), so a wrong or expired key may not show up as a missing photo: check that your usage appears on the Location Platform dashboard. To see whether yours is, ask for one tile without a referrer: `curl -s "https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/1/0/0?token=YOUR_KEY" | head -c 120`. An error in JSON means the referrer list is enforced; picture bytes mean anyone who copies the key can use it, so keep the privilege list to the one item.
+
 ## Data used and licences
 
 Only sources with clear terms, so the repo can be public.
@@ -303,7 +327,10 @@ Only sources with clear terms, so the repo can be public.
 - Damage share by water depth: Huizinga, de Moel and Szewczyk (2017), Global flood depth-damage functions, European Commission JRC, Table 3-6. Nine published numbers, typed into `app/costs.py`.
 - Consumer price index for Malaysia: World Bank, CC BY 4.0. It gives one factor, 1.65, in `app/costs.py`.
 - `app/static/vendor/leaflet.js` and `leaflet.css`: Leaflet 1.9.4, BSD 2-Clause, see `app/static/vendor/LICENSE-leaflet.txt`.
+- `app/static/vendor/maplibre-gl-csp.js`, `maplibre-gl-csp-worker.js` and `maplibre-gl.css` (the 3D page): MapLibre GL JS 5.6.0, BSD 3-Clause, see `app/static/vendor/LICENSE-maplibre.txt`.
+- The 3D page's building heights (`app/static/flood3d/*.json`, baked by `tools/build_flood3d.py`): Google Open Buildings 2.5D Temporal, 2023 layer, CC BY 4.0, where OpenStreetMap gives no height. Model estimates, not surveyed.
 - Google Weather, Places, Search and Gemini results are fetched live when someone uses the page. They are not stored in the repo and fall under Google's terms.
+- The 3D page's satellite photo: Esri World Imagery through ArcGIS Location Platform, whose subscription comes with a commercial deployment licence. Fetched live by the browser, not stored, and credited on the map as "Powered by Esri | Source: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community" (the sources as Esri's attribution page gave them on 11 October 2026).
 
 Left out on purpose until their terms are read: JPS river levels, PLANMalaysia zoning, JKR federal roads.
 
