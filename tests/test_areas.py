@@ -503,3 +503,12 @@ def test_malformed_losses_are_rejected(tmp_path, bad):
     write_area(tmp_path, "test-town", {**GOOD, "losses": bad})
     with pytest.raises(areas.AreaError, match="losses must be"):
         areas.load_all(tmp_path)
+
+
+def test_a_business_with_a_3d_picture_says_so_and_no_other_does():
+    baked = {path.stem for path in areas.FLOOD3D_DIR.glob("*.json")}
+    assert baked, "the 3D page has at least one shop"
+    for area in areas.load_all():
+        flagged = {p["id"] for p in areas.premises(area.id) if "has_3d" in p}
+        assert flagged == baked & {p["id"] for p in areas.premises(area.id)}
+        assert all(p["has_3d"] is True for p in areas.premises(area.id) if "has_3d" in p)

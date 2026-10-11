@@ -188,6 +188,7 @@ async function start() {
   const { place } = data;
   $("f3d-name").textContent = place.name;
   $("f3d-section").textContent = place.section_name;
+  document.querySelector(".f3d-back").href = `./?place=${encodeURIComponent(place.id)}`;   // back to this shop's card
   $("f3d-credit").textContent = `${data.credit} · buildings fetched ${data.fetched_on}`;
 
   let map;

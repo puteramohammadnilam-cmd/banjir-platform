@@ -142,7 +142,11 @@ const spoken = (premise, rp) => {
 const seeOnMap = (showOnMap) =>
   h("button", { type: "button", class: "btn btn-secondary", onclick: showOnMap }, icon("pin"), t("business.seeOnMap"));
 
-/** A business's name, kind and tags, and the way to see it on the map. */
+/** A link to the business's 3D picture (3d.html), for one that has one (`has_3d`, app/areas.py). */
+const seeIn3d = (premise) => premise.has_3d &&
+  h("a", { class: "btn btn-secondary", href: `3d.html?place=${encodeURIComponent(premise.id)}` }, icon("wave"), t("business.see3d"));
+
+/** A business's name, kind and tags, and the ways to see it on the map and, where there is one, in 3D. */
 function businessHead(premise, showOnMap) {
   return [
     h("div", {},
@@ -152,7 +156,7 @@ function businessHead(premise, showOnMap) {
         h("li", { class: "tag" }, t("business.tagPublic")),
         h("li", { class: "tag" }, t("business.tagUnchecked")),
         premise.is_chain && h("li", { class: "tag" }, t("business.tagChain")))),
-    seeOnMap(showOnMap),
+    h("div", { class: "biz-actions" }, seeOnMap(showOnMap), seeIn3d(premise)),
   ];
 }
 

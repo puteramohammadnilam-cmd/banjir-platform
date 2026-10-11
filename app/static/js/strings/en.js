@@ -312,6 +312,7 @@ export default Object.freeze({
   "business.spokenSquare": "This 90 m square",
   "business.spoken": "{where}: {depth}, in a flood expected {label}.",
   "business.seeOnMap": "See on map",
+  "business.see3d": "See in 3D",
   "business.tagPublic": "From a public map",
   "business.tagUnchecked": "Not checked on the ground",
   "business.tagChain": "Chain outlet",

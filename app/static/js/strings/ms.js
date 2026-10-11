@@ -313,6 +313,7 @@ export default Object.freeze({
   "business.spokenSquare": "Petak 90 m ini",
   "business.spoken": "{where}: {depth}, dalam banjir yang dijangka {label}.",
   "business.seeOnMap": "Lihat di peta",
+  "business.see3d": "Lihat dalam 3D",
   "business.tagPublic": "Daripada peta awam",
   "business.tagUnchecked": "Belum disemak di lapangan",
   "business.tagChain": "Kedai rangkaian",

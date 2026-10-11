@@ -32,6 +32,17 @@ const head = (panel) => panel.querySelector("header");
 const buttonNamed = (panel, text) => panel.querySelectorAll("button").find((button) => button.textContent === text);
 const headButtons = (panel) => head(panel).querySelectorAll("button").map((button) => button.textContent);
 
+test("a business with a 3D picture links to it beside See on map, and one without has no link", () => {
+  const { panel, card } = mountCard();
+  show(card, { ...shop, has_3d: true });
+  const links = head(panel).querySelectorAll("a").filter((link) => link.textContent === "See in 3D");
+  assert.equal(links.length, 1);
+  assert.equal(links[0].getAttribute("href"), "3d.html?place=node-1");
+  assert.deepEqual(headButtons(panel), ["See on map"]);
+  show(card, shop);
+  assert.ok(!head(panel).querySelectorAll("a").some((link) => link.textContent === "See in 3D"));
+});
+
 test("a business shows its road, its Google Maps listing, its floor and the page's flood record", () => {
   const { panel, card } = mountCard();
   show(card, shop, { listing: LISTING });
