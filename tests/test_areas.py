@@ -505,10 +505,31 @@ def test_malformed_losses_are_rejected(tmp_path, bad):
         areas.load_all(tmp_path)
 
 
-def test_a_business_with_a_3d_picture_says_so_and_no_other_does():
-    baked = {path.stem for path in areas.FLOOD3D_DIR.glob("*.json")}
-    assert baked, "the 3D page has at least one shop"
+def test_a_business_whose_section_has_a_3d_bundle_says_so_and_no_other_does():
     for area in areas.load_all():
+        baked = {path.stem for path in (areas.FLOOD3D_DIR / area.id).glob("*.json")}
         flagged = {p["id"] for p in areas.premises(area.id) if "has_3d" in p}
-        assert flagged == baked & {p["id"] for p in areas.premises(area.id)}
+        assert flagged == {p["id"] for p in areas.premises(area.id) if p.get("section") in baked}
         assert all(p["has_3d"] is True for p in areas.premises(area.id) if "has_3d" in p)
+
+
+@pytest.fixture
+def bundles(tmp_path, monkeypatch):
+    """An empty folder of 3D bundles in place of the app's, with every cached premise forgotten before and after."""
+    monkeypatch.setattr(areas, "FLOOD3D_DIR", tmp_path)
+    sections.clear_caches()
+    yield tmp_path
+    sections.clear_caches()
+
+
+def test_has_3d_follows_the_bundle_of_the_business_s_own_section(bundles):
+    one = next(p for p in areas.premises(CITY) if p["section"] == "seksyen-7")
+    assert not any("has_3d" in p for area in areas.load_all() for p in areas.premises(area.id))
+    (bundles / CITY).mkdir()
+    (bundles / CITY / "seksyen-7.json").write_text("{}")
+    (bundles / "seksyen-7.json").write_text("{}")             # a bundle outside an area's folder counts for none
+    sections.clear_caches()
+    flagged = {p["id"] for p in areas.premises(CITY) if p.get("has_3d") is True}
+    assert one["id"] in flagged
+    assert flagged == {p["id"] for p in areas.premises(CITY) if p["section"] == "seksyen-7"}
+    assert not any("has_3d" in p for p in areas.premises(KOTA_TINGGI))   # an area with no folder of bundles

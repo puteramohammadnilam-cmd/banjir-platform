@@ -1,12 +1,16 @@
 /* global maplibregl */
-// The 3D flood mock-up (3d.html): one shop's buildings and the flood model's water on a tilted map, the way a
-// property site shows a condo in 3D. Data from tools/build_flood3d.py, one JSON per shop in flood3d/.
-// ponytail: one shop baked, new words in English only (the depth words are the app's own, so BM follows ?lang=).
-// Upgrade path: a "See in 3D" link on the shop card with ?place=, once more shops are baked or an API bakes them.
+// The 3D flood mock-up (3d.html): the buildings around one shop and the flood model's water on a tilted map, the way a
+// property site shows a condo in 3D. Any shop whose section has a bundle (tools/build_flood3d.py, has_3d in
+// app/areas.py) opens from the "See in 3D" link on its card, ?area=&section=&place=&rp=; the shop's own words come from
+// the section's data. Reading the link and the bundle is in flood3d-data.js.
+// ponytail: new words in English only (the depth words are the app's own, so BM follows ?lang=).
+import * as api from "./api.js";
 import { SCENARIOS, band, depthText, depthWords, h, scenarioLabel } from "./dom.js";
+import { findShop, isBundle, readLink, scene } from "./flood3d-data.js";
+import { writeUrl } from "./place.js";
 
-const DEFAULT_PLACE = "node-5565878632";   // a 7-Eleven, the one shop baked so far
-const PLACE_ID = /^(node|way|relation)-\d{1,15}$/;
+const NO_PICTURE = "There is no 3D picture for this shop yet.";
+const NO_WEBGL = "This browser cannot draw the 3D map (it needs WebGL).";
 const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const WATER = "#2b77a7";     // --band-3
 const WET = "#b42318";       // --risk-danger: the shop's walls under water
@@ -28,12 +32,6 @@ const $ = (id) => document.getElementById(id);
 const padding = () => (window.matchMedia(WIDE).matches ? { right: PANEL_PX } : {});
 const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** The shop the link asks for (?place=node-123), else the one baked for the mock-up. */
-export function placeFromLink(search) {
-  const asked = new URLSearchParams(search).get("place");
-  return PLACE_ID.test(asked ?? "") ? asked : DEFAULT_PLACE;
-}
-
 /** A flood size's water depth on each square, or 0 before any water (rp null). */
 const level = (rp) => (rp ? ["get", `d${rp}`] : 0);
 
@@ -53,15 +51,16 @@ function baseMap(satellite) {
   };
 }
 
-function style(data, satellite) {
+/** The map's style for a scene (flood3d-data.js): its buildings and water squares, as GeoJSON. */
+function style(view, satellite) {
   const shopOnly = ["==", ["get", "shop"], true];
   const base = baseMap(satellite);
   return {
     version: 8,
     sources: {
       ...base.sources,
-      buildings: { type: "geojson", data: data.buildings },
-      water: { type: "geojson", data: data.water },   // its credit, with the buildings', is in the panel
+      buildings: { type: "geojson", data: view.buildings },
+      water: { type: "geojson", data: view.water },   // its credit, with the buildings', is in the panel
     },
     layers: [
       ...base.layers,
@@ -129,24 +128,40 @@ function sizeButtons(onPick) {
   return (picked) => buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rp === picked)));
 }
 
-function openMap(data, satellite) {
+function openMap(view, shop, satellite) {
   maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");
-  const { lon, lat } = data.place;
-  const map = new maplibregl.Map({ container: "f3d-map", style: style(data, satellite), center: [lon, lat], ...START,
-    maxPitch: 75, attributionControl: false });
+  const map = new maplibregl.Map({ container: "f3d-map", style: style(view, satellite), center: [shop.lon, shop.lat],
+    ...START, maxPitch: 75, attributionControl: false });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-left");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");   // clear of the panel
   return map;
 }
 
-/** The shop's baked 3D data, or null when there is none (or it cannot be read). */
-async function loadShop(id) {
+/** A section's bundle, or null when there is none (or it cannot be read). The ids are checked ones (flood3d-data.js). */
+async function loadBundle(areaId, sectionId) {
   try {
-    const response = await fetch(`flood3d/${id}.json`);
-    return response.ok ? await response.json() : null;
+    const response = await fetch(`flood3d/${areaId}/${sectionId}.json`);
+    const bundle = response.ok ? await response.json() : null;
+    return isBundle(bundle) ? bundle : null;
   } catch {
     return null;
   }
+}
+
+/** The link's shop and its section's bundle, {found, bundle} (found as findShop gives it), else {problem} in words to
+ *  show. A link that names its area and section (the card's) has the bundle asked for beside the shop's data. */
+async function loadShop(link) {
+  const early = link.area && link.section ? loadBundle(link.area, link.section) : null;   // never rejects
+  let found;
+  try {
+    found = await findShop(link, api);
+  } catch (error) {
+    return { problem: error.message };   // api.js words: the server's own, or that it could not be reached
+  }
+  if (!found) return { problem: NO_PICTURE };
+  const isAsked = found.areaId === link.area && found.sectionId === link.section;
+  const bundle = await (isAsked ? early : loadBundle(found.areaId, found.sectionId));
+  return bundle ? { found, bundle } : { problem: NO_PICTURE };
 }
 
 /** The satellite tiles the server hands out ({tiles, attribution}), or null: no imagery key on the server, or any
@@ -178,56 +193,27 @@ function satelliteSwitch(map) {
   });
 }
 
-async function start() {
-  const id = placeFromLink(window.location.search);
-  const [data, satellite] = await Promise.all([loadShop(id), satelliteTiles()]);
-  if (!data) {
-    showProblem("There is no 3D picture for this shop yet.");
-    return;
-  }
-  const { place } = data;
-  $("f3d-name").textContent = place.name;
-  $("f3d-section").textContent = place.section_name;
-  document.querySelector(".f3d-back").href = `./?place=${encodeURIComponent(place.id)}`;   // back to this shop's card
-  $("f3d-credit").textContent = `${data.credit} · buildings fetched ${data.fetched_on}`;
+/** The panel's words for the shop, and the back link to its card (at the flood size on show: the returned function). */
+function showShop({ shop, areaId, sectionId, sectionName }, bundle) {
+  $("f3d-name").textContent = shop.name ?? "";
+  $("f3d-section").textContent = sectionName ?? "";
+  $("f3d-credit").textContent = `${bundle.credit} · buildings fetched ${bundle.fetched_on}`;
+  const back = document.querySelector(".f3d-back");
+  return (rp) => back.setAttribute("href", `./${writeUrl({ area: areaId, section: sectionId, place: shop.id, rp })}`);
+}
 
-  let map;
-  try {
-    map = openMap(data, satellite);
-  } catch {
-    showProblem("This browser cannot draw the 3D map (it needs WebGL).");
-    return;
-  }
-
+/** The shop's name and depth on a stem over its roof (so it does not hide its walls); returns the depth's slot. */
+function addPin(map, shop) {
   const pinDepth = h("span", { class: "f3d-pin-depth" });
-  // the label stands on a stem, so it floats over the shop's roof instead of hiding its walls
-  const pin = h("div", { class: "f3d-pin" }, h("p", { class: "f3d-pin-label" }, h("strong", {}, place.name), pinDepth),
+  const pin = h("div", { class: "f3d-pin" }, h("p", { class: "f3d-pin-label" }, h("strong", {}, shop.name), pinDepth),
     h("span", { class: "f3d-pin-stem", "aria-hidden": "true" }));
-  new maplibregl.Marker({ element: pin, anchor: "bottom" })
-    .setLngLat([place.lon, place.lat]).addTo(map);
+  new maplibregl.Marker({ element: pin, anchor: "bottom" }).setLngLat([shop.lon, shop.lat]).addTo(map);
+  return pinDepth;
+}
 
-  let shown = null;
-  let stop = () => {};
-  const press = sizeButtons((rp) => {
-    if (rp === shown) return;
-    stop();
-    stop = rise(map, shown, rp);
-    shown = rp;
-    press(rp);
-    showReading(place, rp, pinDepth);
-  });
-  const first = SCENARIOS[0];
-  press(first);
-  showReading(place, first, pinDepth);
-
-  if (satellite) satelliteSwitch(map);
-
+/** Flies in from above to the view from the road, then floods to the first size (unless one was picked meanwhile). */
+function flyIn(map, flood) {
   map.on("load", () => {
-    const flood = () => {
-      if (shown) return;   // a size was picked during the fly-in, and its water is already rising
-      stop = rise(map, null, first);
-      shown = first;
-    };
     if (!motionAllowed()) {
       map.jumpTo({ ...VIEW, padding: padding() });
       flood();
@@ -235,6 +221,48 @@ async function start() {
     }
     map.easeTo({ ...VIEW, padding: padding(), duration: FLY_MS });
     map.once("moveend", flood);
+  });
+}
+
+async function start() {
+  const link = readLink(window.location.search);
+  const [loaded, satellite] = await Promise.all([loadShop(link), satelliteTiles()]);
+  if (loaded.problem) {
+    showProblem(loaded.problem);
+    return;
+  }
+  const { shop } = loaded.found;
+  const backTo = showShop(loaded.found, loaded.bundle);
+  let map;
+  try {
+    map = openMap(scene(loaded.bundle, shop), shop, satellite);
+  } catch {
+    showProblem(NO_WEBGL);
+    return;
+  }
+  const pinDepth = addPin(map, shop);
+
+  let shown = null;
+  let stop = () => {};
+  const show = (rp) => {
+    press(rp);
+    showReading(shop, rp, pinDepth);
+    backTo(rp);
+  };
+  const press = sizeButtons((rp) => {
+    if (rp === shown) return;
+    stop();
+    stop = rise(map, shown, rp);
+    shown = rp;
+    show(rp);
+  });
+  const first = link.rp ?? SCENARIOS[0];
+  show(first);
+  if (satellite) satelliteSwitch(map);
+  flyIn(map, () => {
+    if (shown) return;   // a size was picked during the fly-in, and its water is already rising
+    stop = rise(map, null, first);
+    shown = first;
   });
 }
 

@@ -13,6 +13,11 @@ edge with `padding`.
 Two layouts. By default the tile data comes first and the image directory last. With `ifd_first` the directory is at
 byte 8, its out-of-line values follow, then the tile data, and the last tile ends at the last byte of the file: the
 layout of the JRC files.
+
+    with_overview(tiff_bytes(values, ...), smaller, tile=256, padding=-9999.0)
+
+chains a second image after a file of the default layout, as GDAL writes an internal overview: NewSubfileType 1
+(reduced resolution) and no geotags of its own, so a reader takes the first image's grid scaled to its size.
 """
 from __future__ import annotations
 
@@ -25,6 +30,7 @@ GEO_KEYS = {1024: 2, 1025: 1, 2048: 4326}   # geographic, pixel is area, WGS 84:
 ASCII, SHORT, LONG, RATIONAL, DOUBLE = 2, 3, 4, 5, 12
 FORMATS = {SHORT: "H", LONG: "I", RATIONAL: "I", DOUBLE: "d"}
 HEADER_BYTES = 8              # the magic number and the offset of the first image directory
+GEO_TAGS = (33550, 33922, 34735)   # pixel scale, tie point, GeoKeys: an overview has none of its own
 NODATA_TEXT = b"-9999\0"
 
 
@@ -124,6 +130,23 @@ def tiff_bytes(values: list[list[float]], *, tile: int, origin, pixel, padding: 
         return {tag: value for tag, value in merged.items() if value is not None}
 
     return (ifd_first_file if ifd_first else ifd_last_file)(header, stored, tags_at)
+
+
+def with_overview(first: bytes, values: list[list[float]], *, tile: int, padding: float, tags: dict | None = None,
+                  level: int = -1) -> bytes:
+    """`first` (a tiff_bytes file of the default layout, its directory last) with `values` chained after it as an
+    overview: its tiles, then its directory (NewSubfileType 1, no geotags; `tags` replaces or removes tags), then the
+    directory's out-of-line values. The first directory's last 4 bytes, its link to the next, are pointed at it."""
+    rows, cols = len(values), len(values[0])
+    count = ceil_div(rows, tile) * ceil_div(cols, tile)
+    stored = [zlib.compress(tile_bytes(values, i, tile, padding), level) for i in range(count)]
+    offsets, data = place_tiles(stored, len(first), pad_last=True)
+    own = {**base_tags(rows, cols, tile, (0.0, 0.0), (1.0, 1.0), stored, offsets), 254: (LONG, (1,)), **(tags or {})}
+    own = {tag: value for tag, value in own.items() if value is not None and tag not in GEO_TAGS}
+    at = len(first) + len(data)
+    ifd, _ = directory(own, 0)
+    ifd, outside = directory(own, at + len(ifd))
+    return first[:-4] + struct.pack("<I", at) + data + ifd + outside
 
 
 def write_tiff(path, values: list[list[float]], **options) -> Path:

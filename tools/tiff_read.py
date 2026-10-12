@@ -6,6 +6,7 @@ anything else naming the tag, because a misread file gives values that look righ
     source = PieceSource(folder)                    # byte ranges of a remote file saved by tools/fetch_indexes.py
     image = open_image(source)
     values = read_window(source, image, top, left, rows, cols, band=0)   # an array, row by row
+    overview = open_image(source, index=2)          # the file's third image, e.g. an internal overview
 
 Read: little-endian classic TIFF; 8 bit unsigned, 16 bit signed or unsigned, 32 bit float samples; one or more samples
 per pixel, interleaved (PlanarConfiguration 1) or one plane each (2); tiles or strips; no compression, LZW (5) or deflate
@@ -15,6 +16,10 @@ undone here); a pixel scale with one tie point on WGS 84 lat/lon (GeoKeys 1024 =
 point. Big-endian files, BigTIFF, JPEG and a ModelTransformation are refused. With open_image(source, utm=True) a file
 on WGS 84 / UTM (GeoKeys 1024 = 1, 3072 = 32601 to 32660 north or 32701 to 32760 south) is read too: Image.crs says
 which, and its edges and pixel sizes are then metres east and north, not degrees.
+
+open_image(source, index=N) opens the file's image N (0 is the first; image_starts lists them). An internal overview, as
+GDAL writes them (a reduced-resolution image, NewSubfileType bit 1, with no geotags of its own), takes the first image's
+edges and grid, its squares as many times larger as it is smaller.
 
 PieceSource keeps a remote file as the byte ranges actually fetched (HTTP Range), one file per range plus pieces.json
 (url, size, and each range's offset, length and SHA-256), so a build runs offline from exactly the bytes downloaded:
@@ -34,12 +39,12 @@ from dataclasses import dataclass, field
 from itertools import accumulate
 from pathlib import Path
 
-WIDTH, HEIGHT, BITS, COMPRESSION, PHOTOMETRIC, STRIP_OFFSETS = 256, 257, 258, 259, 262, 273
+NEW_SUBFILE, WIDTH, HEIGHT, BITS, COMPRESSION, PHOTOMETRIC, STRIP_OFFSETS = 254, 256, 257, 258, 259, 262, 273
 SAMPLES, ROWS_PER_STRIP, STRIP_BYTES, PLANAR, PREDICTOR = 277, 278, 279, 284, 317
 TILE_WIDTH, TILE_LENGTH, TILE_OFFSETS, TILE_BYTES, SAMPLE_FORMAT = 322, 323, 324, 325, 339
 PIXEL_SCALE, TIE_POINT, TRANSFORM, GEO_KEYS, GDAL_METADATA, NODATA = 33550, 33922, 34264, 34735, 42112, 42113
 TAG_NAMES = {
-    GDAL_METADATA: "GDAL_METADATA",
+    GDAL_METADATA: "GDAL_METADATA", NEW_SUBFILE: "NewSubfileType",
     WIDTH: "ImageWidth", HEIGHT: "ImageLength", BITS: "BitsPerSample", COMPRESSION: "Compression",
     PHOTOMETRIC: "PhotometricInterpretation", STRIP_OFFSETS: "StripOffsets", SAMPLES: "SamplesPerPixel",
     ROWS_PER_STRIP: "RowsPerStrip", STRIP_BYTES: "StripByteCounts", PLANAR: "PlanarConfiguration",
@@ -56,6 +61,8 @@ AREA, POINT = 1, 2            # GTRasterType
 WGS84 = 4326
 UTM_CODES = (*range(32601, 32661), *range(32701, 32761))   # WGS 84 / UTM zone 1 to 60, north then south
 LZW_CLEAR, LZW_END = 256, 257
+REDUCED = 1                   # NewSubfileType bit: a reduced-resolution copy of another image (an overview)
+MAX_IMAGES = 64               # image directories followed before the chain is taken to loop
 
 
 class TiffError(Exception):
@@ -162,15 +169,35 @@ def _entry_values(source, tag: int, kind: int, count: int, inline: bytes) -> tup
     return struct.unpack(f"<{count}{code}", data)
 
 
-def read_tags(source) -> dict[int, tuple]:
-    """Every tag of the first image directory whose values this module can decode; others are left out."""
+def _head(source) -> bytes:
+    """The file's first 8 bytes, refused unless they open a little-endian classic TIFF."""
     head = source.read(0, 8)
     if head[:4] != b"II*\x00":
         kind = "BigTIFF" if head[:4] in (b"II+\x00", b"MM\x00+") else "big-endian" if head[:2] == b"MM" else repr(head[:4])
         raise TiffError(f"{source.name}: header is {kind}; need a little-endian classic TIFF (II, 42)")
-    start = struct.unpack_from("<I", head, 4)[0]
-    count = struct.unpack("<H", source.read(start, 2))[0]
-    table = source.read(start + 2, 12 * count)
+    return head
+
+
+def image_starts(source) -> list[int]:
+    """Byte offsets of the file's image directories, in the order the file chains them."""
+    starts = [struct.unpack_from("<I", _head(source), 4)[0]]
+    while len(starts) <= MAX_IMAGES:
+        count = struct.unpack("<H", source.read(starts[-1], 2))[0]
+        following = struct.unpack("<I", source.read(starts[-1] + 2 + 12 * count, 4))[0]
+        if not following:
+            return starts
+        starts.append(following)
+    raise TiffError(f"{source.name}: more than {MAX_IMAGES} image directories; the chain loops or is damaged")
+
+
+def read_tags(source, index: int = 0) -> dict[int, tuple]:
+    """Every tag of image directory `index` (the first by default) whose values this module can decode; others are
+    left out."""
+    starts = image_starts(source) if index else [struct.unpack_from("<I", _head(source), 4)[0]]
+    if not 0 <= index < len(starts):
+        raise TiffError(f"{source.name}: no image {index}; the file has {len(starts)}")
+    count = struct.unpack("<H", source.read(starts[index], 2))[0]
+    table = source.read(starts[index] + 2, 12 * count)
     tags = {}
     for i in range(count):
         tag, kind, n, inline = struct.unpack_from("<HHI4s", table, 12 * i)
@@ -207,7 +234,7 @@ def _geo_keys(source, tags: dict, utm: bool = False) -> tuple[dict[int, int], in
 
 @dataclass(frozen=True)
 class Image:
-    """The first image of a file: its size, sample layout, blocks and where its squares are."""
+    """One image of a file: its size, sample layout, blocks and where its squares are."""
 
     name: str
     width: int
@@ -267,9 +294,28 @@ def _blocks(source, tags: dict, width: int, height: int) -> tuple[int, int, tupl
         _need(source, tags, STRIP_BYTES, bool, "strip byte counts")
 
 
-def open_image(source, utm: bool = False) -> Image:
-    """The first image of the file, checked (see the module docstring). `utm` lets in a WGS 84 / UTM grid too."""
-    tags = read_tags(source)
+def _grid(source, tags: dict, utm: bool) -> tuple[float, float, float, float, int]:
+    """(west, north, px, py, EPSG code) from an image's own geotags: its outer edges (pixel is area) and square
+    sizes."""
+    if TRANSFORM in tags:
+        raise TiffError(f"{source.name}: tag {TRANSFORM} {TAG_NAMES[TRANSFORM]} is set; need a scale and tie point")
+    px, py, _ = _need(source, tags, PIXEL_SCALE, lambda v: len(v) == 3 and v[0] > 0 and v[1] > 0, "pixel sizes")
+    tie = _need(source, tags, TIE_POINT, lambda v: len(v) == 6 and v[:2] == (0, 0), "one tie point at pixel (0, 0)")
+    keys, crs = _geo_keys(source, tags, utm)
+    point = keys.get(1025, AREA) == POINT
+    west, north = (tie[3] - px / 2, tie[4] + py / 2) if point else (tie[3], tie[4])
+    return west, north, px, py, crs
+
+
+def _nodata(tags: dict) -> float | None:
+    nodata = tags.get(NODATA, (None,))[0]
+    return float(nodata) if nodata not in (None, "") else None
+
+
+def open_image(source, utm: bool = False, index: int = 0) -> Image:
+    """Image `index` of the file (the first by default), checked (see the module docstring). `utm` lets in a WGS 84 /
+    UTM grid too. An overview without geotags of its own takes the first image's grid, scaled to its size."""
+    tags = read_tags(source, index)
     width = _need(source, tags, WIDTH, lambda v: v[0] > 0, "a width")[0]
     height = _need(source, tags, HEIGHT, lambda v: v[0] > 0, "a height")[0]
     code, samples, compression, predictor = _layout(source, tags)
@@ -282,16 +328,16 @@ def open_image(source, utm: bool = False) -> Image:
     blocks = -(-width // block_w) * -(-height // block_h) * planes
     if len(offsets) != blocks or len(counts) != blocks:
         raise TiffError(f"{source.name}: {len(offsets)} block offsets and {len(counts)} byte counts; need {blocks}")
-    if TRANSFORM in tags:
-        raise TiffError(f"{source.name}: tag {TRANSFORM} {TAG_NAMES[TRANSFORM]} is set; need a scale and tie point")
-    px, py, _ = _need(source, tags, PIXEL_SCALE, lambda v: len(v) == 3 and v[0] > 0 and v[1] > 0, "pixel sizes")
-    tie = _need(source, tags, TIE_POINT, lambda v: len(v) == 6 and v[:2] == (0, 0), "one tie point at pixel (0, 0)")
-    keys, crs = _geo_keys(source, tags, utm)
-    point = keys.get(1025, AREA) == POINT
-    west, north = (tie[3] - px / 2, tie[4] + py / 2) if point else (tie[3], tie[4])
-    nodata = tags.get(NODATA, (None,))[0]
+    nodata = _nodata(tags)
+    if index and PIXEL_SCALE not in tags and tags.get(NEW_SUBFILE, (0,))[0] & REDUCED:
+        first = open_image(source, utm)
+        west, north, crs = first.west, first.north, first.crs
+        px, py = first.px * first.width / width, first.py * first.height / height
+        nodata = first.nodata if nodata is None else nodata
+    else:
+        west, north, px, py, crs = _grid(source, tags, utm)
     return Image(source.name, width, height, samples, code, compression, predictor, planar, block_w, block_h,
-                 offsets, counts, west, north, px, py, float(nodata) if nodata not in (None, "") else None, crs)
+                 offsets, counts, west, north, px, py, nodata, crs)
 
 
 # --- decoding ---

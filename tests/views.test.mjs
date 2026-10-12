@@ -32,15 +32,20 @@ const head = (panel) => panel.querySelector("header");
 const buttonNamed = (panel, text) => panel.querySelectorAll("button").find((button) => button.textContent === text);
 const headButtons = (panel) => head(panel).querySelectorAll("button").map((button) => button.textContent);
 
-test("a business with a 3D picture links to it beside See on map, and one without has no link", () => {
+test("a business with a 3D picture links to its section's at the size on show, and one without has no link", () => {
   const { panel, card } = mountCard();
-  show(card, { ...shop, has_3d: true });
-  const links = head(panel).querySelectorAll("a").filter((link) => link.textContent === "See in 3D");
-  assert.equal(links.length, 1);
-  assert.equal(links[0].getAttribute("href"), "3d.html?place=node-1");
+  const in3d = () => head(panel).querySelectorAll("a").filter((link) => link.textContent === "See in 3D");
+  const baked = { ...shop, section: "s-7", has_3d: true };
+  show(card, baked);
+  assert.equal(in3d().length, 1);
+  assert.equal(in3d()[0].getAttribute("href"), "3d.html?area=home&section=s-7&place=node-1&rp=20");
   assert.deepEqual(headButtons(panel), ["See on map"]);
+  const link = in3d()[0];
+  show(card, baked, { rp: "50" });   // another size: the same head, its link moved on
+  assert.equal(in3d()[0], link);
+  assert.equal(link.getAttribute("href"), "3d.html?area=home&section=s-7&place=node-1&rp=50");
   show(card, shop);
-  assert.ok(!head(panel).querySelectorAll("a").some((link) => link.textContent === "See in 3D"));
+  assert.equal(in3d().length, 0);
 });
 
 test("a business shows its road, its Google Maps listing, its floor and the page's flood record", () => {

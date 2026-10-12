@@ -270,3 +270,30 @@ def test_a_utm_file_is_read_only_when_asked_and_says_its_zone(tmp_path):
     with pytest.raises(tr.TiffError, match="ProjectedCSType is 3857"):
         tr.open_image(tr.FileSource(gw.write_tiff(tmp_path / "m.tif", floats(4, 4), tile=16, origin=(0.0, 0.0),
                                                   pixel=(1.0, 1.0), padding=-9999.0, tags=other)), utm=True)
+
+
+def with_overview(tmp_path, base, small, tags=None) -> Path:
+    first = gw.tiff_bytes(base, tile=16, origin=ORIGIN, pixel=(PX, PX), padding=0.0)
+    path = tmp_path / "ov.tif"
+    path.write_bytes(gw.with_overview(first, small, tile=16, padding=0.0, tags=tags))
+    return path
+
+
+def test_an_overview_opens_by_index_on_the_first_images_grid_with_larger_squares(tmp_path):
+    base, small = floats(40, 48), [[-(r * 10 + c) - 0.5 for c in range(24)] for r in range(20)]
+    source = tr.FileSource(with_overview(tmp_path, base, small))
+    assert len(tr.image_starts(source)) == 2
+    first, overview = tr.open_image(source), tr.open_image(source, index=1)
+    assert list(tr.read_window(source, first, 0, 0, 40, 48)) == [v for row in base for v in row]   # still read
+    assert (overview.width, overview.height, overview.west, overview.north) == (24, 20, *ORIGIN)
+    assert (overview.px, overview.py, overview.nodata, overview.crs) == (2 * PX, 2 * PX, -9999.0, 4326)
+    got = tr.read_window(source, overview, 3, 14, 5, 6)
+    assert list(got) == [small[r][c] for r in range(3, 8) for c in range(14, 20)]
+    with pytest.raises(tr.TiffError, match="no image 2; the file has 2"):
+        tr.open_image(source, index=2)
+
+
+def test_a_second_image_that_is_no_overview_needs_geotags_of_its_own(tmp_path):
+    path = with_overview(tmp_path, floats(32, 32), floats(16, 16), tags={254: (gw.LONG, (0,))})
+    with pytest.raises(tr.TiffError, match="tag 33550 ModelPixelScale is missing"):
+        tr.open_image(tr.FileSource(path), index=1)

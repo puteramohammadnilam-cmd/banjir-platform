@@ -53,7 +53,7 @@ from types import MappingProxyType
 from . import elevation, gauges, indexes
 
 AREAS_DIR = Path(__file__).parent / "data" / "areas"
-FLOOD3D_DIR = Path(__file__).parent / "static" / "flood3d"   # the 3D page's baked shops, <id>.json (tools/build_flood3d.py)
+FLOOD3D_DIR = Path(__file__).parent / "static" / "flood3d"   # the 3D page's bundles, <area id>/<section id>.json (tools/build_flood3d.py)
 AREA_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MAX_ID_CHARS = 40
 MAX_ZOOM = 19
@@ -304,14 +304,15 @@ def default() -> Area:
 def premises(area_id: str) -> tuple[dict, ...]:
     """The area's mapped businesses, each with its `elevation` (app/elevation.py), `flash_flood` ({score, class},
     app/indexes.py) and nearest river `gauge` (app/gauges.py): null where none is loaded or near, looked up once here at
-    its own point. One with a 3D picture (app/static/flood3d/) also has `has_3d`: true. Raises KeyError for an unknown
-    id."""
-    baked = {path.stem for path in FLOOD3D_DIR.glob("*.json")}
+    its own point. One whose section has a 3D bundle (app/static/flood3d/<area id>/<section id>.json, for 3d.html) also
+    has `has_3d`: true. Raises KeyError for an unknown id."""
+    listed = _read(area_id, "premises.json")   # first: it checks the id before the id names a folder
+    baked = {path.stem for path in (FLOOD3D_DIR / area_id).glob("*.json")}   # the area's folder, listed once
     return tuple({**premise, "elevation": elevation.at(premise["lat"], premise["lon"]),
                   "flash_flood": indexes.flash_at(premise["lat"], premise["lon"]),
                   "gauge": gauges.nearest(premise["lat"], premise["lon"]),
-                  **({"has_3d": True} if premise["id"] in baked else {})}
-                 for premise in _read(area_id, "premises.json"))
+                  **({"has_3d": True} if premise.get("section") in baked else {})}
+                 for premise in listed)
 
 
 @lru_cache(maxsize=MAX_CACHED_AREAS)

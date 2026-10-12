@@ -328,7 +328,7 @@ Only sources with clear terms, so the repo can be public.
 - Consumer price index for Malaysia: World Bank, CC BY 4.0. It gives one factor, 1.65, in `app/costs.py`.
 - `app/static/vendor/leaflet.js` and `leaflet.css`: Leaflet 1.9.4, BSD 2-Clause, see `app/static/vendor/LICENSE-leaflet.txt`.
 - `app/static/vendor/maplibre-gl-csp.js`, `maplibre-gl-csp-worker.js` and `maplibre-gl.css` (the 3D page): MapLibre GL JS 5.6.0, BSD 3-Clause, see `app/static/vendor/LICENSE-maplibre.txt`.
-- The 3D page's building heights (`app/static/flood3d/*.json`, baked by `tools/build_flood3d.py`): Google Open Buildings 2.5D Temporal, 2023 layer, CC BY 4.0, where OpenStreetMap gives no height. Model estimates, not surveyed.
+- The 3D page's building heights (`app/static/flood3d/<area>/<section>.json`, baked by `tools/build_flood3d.py`): Google Open Buildings 2.5D Temporal, 2023 layer, CC BY 4.0, read at its 2 m overview, where OpenStreetMap gives no height. Model estimates, not surveyed.
 - Google Weather, Places, Search and Gemini results are fetched live when someone uses the page. They are not stored in the repo and fall under Google's terms.
 - The 3D page's satellite photo: Esri World Imagery through ArcGIS Location Platform, whose subscription comes with a commercial deployment licence. Fetched live by the browser, not stored, and credited on the map as "Powered by Esri | Source: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community" (the sources as Esri's attribution page gave them on 11 October 2026).
 

@@ -142,12 +142,16 @@ const spoken = (premise, rp) => {
 const seeOnMap = (showOnMap) =>
   h("button", { type: "button", class: "btn btn-secondary", onclick: showOnMap }, icon("pin"), t("business.seeOnMap"));
 
-/** A link to the business's 3D picture (3d.html), for one that has one (`has_3d`, app/areas.py). */
-const seeIn3d = (premise) => premise.has_3d &&
-  h("a", { class: "btn btn-secondary", href: `3d.html?place=${encodeURIComponent(premise.id)}` }, icon("wave"), t("business.see3d"));
+/** The address of a business's 3D picture (3d.html: its section's bundle, app/areas.py `has_3d`) at a flood size. */
+export const link3d = (premise, rp) =>
+  `3d.html?${new URLSearchParams({ area: premise.area_id, section: premise.section, place: premise.id, rp })}`;
+
+/** A link to the business's 3D picture, for one that has one. render() keeps its flood size the one on show. */
+const seeIn3d = (premise, rp) => premise.has_3d &&
+  h("a", { class: "btn btn-secondary see-3d", href: link3d(premise, rp) }, icon("wave"), t("business.see3d"));
 
 /** A business's name, kind and tags, and the ways to see it on the map and, where there is one, in 3D. */
-function businessHead(premise, showOnMap) {
+function businessHead(premise, showOnMap, rp) {
   return [
     h("div", {},
       h("p", { class: "kicker" }, kindText(premise)),
@@ -156,7 +160,7 @@ function businessHead(premise, showOnMap) {
         h("li", { class: "tag" }, t("business.tagPublic")),
         h("li", { class: "tag" }, t("business.tagUnchecked")),
         premise.is_chain && h("li", { class: "tag" }, t("business.tagChain")))),
-    h("div", { class: "biz-actions" }, seeOnMap(showOnMap), seeIn3d(premise)),
+    h("div", { class: "biz-actions" }, seeOnMap(showOnMap), seeIn3d(premise, rp)),
   ];
 }
 
@@ -183,7 +187,7 @@ function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea, onOpe
   ];
 }
 
-const header = (place, options) => (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap));
+const header = (place, options) => (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap, options.rp));
 
 /** The facts beside the drawing, in three groups: the water at this place, getting out, and what makes it more exact.
  *  A point has no road or Google Maps listing: it is not a business. Its relief centre is the server's, for a point in
@@ -244,6 +248,7 @@ export function createBusiness(panel, { area, areas = [], onWarning = null, onPh
       // state objects are replaced, never changed, so the same objects mean nothing here changed
       if (premise === shown.premise && rp === shown.rp && photo === shown.photo && listing === shown.listing && dry === shown.dry) return;
       const isNewBusiness = premise !== shown.premise;
+      const isNewSize = rp !== shown.rp;
       shown = { premise, rp, photo, listing, dry };
       if (!premise) return showEmpty();
       empty.replaceChildren();
@@ -251,7 +256,8 @@ export function createBusiness(panel, { area, areas = [], onWarning = null, onPh
       grid.hidden = false;
       const photoFloorM = photo?.estimate?.is_shop_front ? photo.estimate.floor_height_cm / 100 : 0;
       const floorM = Math.min(photoFloorM, MAX_DRAWN_FLOOR_M);
-      if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea, onOpenSection }));
+      if (isNewBusiness) head.replaceChildren(...header(premise, { area, areas, showOnMap, onMovePin, onOpenArea, onOpenSection, rp }));
+      else if (isNewSize) head.querySelector(".see-3d")?.setAttribute("href", link3d(premise, rp));   // the head stays; the size moves
       const key = `${premise.id}|${premise.area_id}|${rp}|${photoFloorM}`;
       if (key !== drawnKey) {
         drawnKey = key;
