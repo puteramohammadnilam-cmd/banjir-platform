@@ -189,6 +189,14 @@ h2 { font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 600
   .tabs [role="tab"] { padding-inline: 2px; font-size: 0.625rem; }
 }
 
+/* touch screens: a field under 16 px makes iOS Safari zoom the page when it is tapped (the cost form's were 14 px),
+   and a tap needs about 44 px of height (the flood size rows were 34, a fold's line 22) */
+@media (pointer: coarse) {
+  input, select, textarea { font-size: max(1rem, 1em); }
+  .scenario button { min-height: 44px; }
+  summary { padding-block: var(--space-2); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
