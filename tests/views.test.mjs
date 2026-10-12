@@ -48,6 +48,20 @@ test("a business with a 3D picture links to its section's at the size on show, a
   assert.equal(in3d().length, 0);
 });
 
+test("a business with no 3D view says which areas have one, and only then", () => {
+  const ready = [AREAS[0], { ...AREAS[1], has_3d: true }];
+  const note = (panel) => head(panel).querySelectorAll("p").map((p) => p.textContent).find((text) => text.startsWith("3D view"));
+  let { panel, card } = mountCard({ areas: ready });
+  show(card, shop);
+  assert.equal(note(panel), "3D view: only for shops in Far Town, for now.");
+  ({ panel, card } = mountCard({ areas: ready }));
+  show(card, { ...shop, has_3d: true });
+  assert.equal(note(panel), undefined, "a shop with the view needs no note");
+  ({ panel, card } = mountCard());
+  show(card, shop);
+  assert.equal(note(panel), undefined, "no area has the view yet: nothing to point to");
+});
+
 test("a business shows its road, its Google Maps listing, its floor and the page's flood record", () => {
   const { panel, card } = mountCard();
   show(card, shop, { listing: LISTING });

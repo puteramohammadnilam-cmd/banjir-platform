@@ -241,7 +241,7 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     listed = {area["id"]: area for area in body["data"]["areas"]}
     first = body["data"]["areas"][0]
     assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters",
-                          "has_sections", "aliases"}
+                          "has_sections", "aliases", "has_3d"}
     assert all((area["has_sections"], area["aliases"]) == (False, []) for area in body["data"]["areas"][1:])
     assert (first["has_sections"], [alias["id"] for alias in first["aliases"]]) == (True, ["sri-muda"])
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
@@ -533,3 +533,9 @@ def test_has_3d_follows_the_bundle_of_the_business_s_own_section(bundles):
     assert one["id"] in flagged
     assert flagged == {p["id"] for p in areas.premises(CITY) if p["section"] == "seksyen-7"}
     assert not any("has_3d" in p for p in areas.premises(KOTA_TINGGI))   # an area with no folder of bundles
+
+
+def test_an_area_says_whether_its_shops_have_the_3d_view():
+    flags = {area.id: areas.summary(area)["has_3d"] for area in areas.load_all()}
+    assert flags == {area.id: any((areas.FLOOD3D_DIR / area.id).glob("*.json")) for area in areas.load_all()}
+    assert True in flags.values() and False in flags.values()   # some areas have it, some not yet

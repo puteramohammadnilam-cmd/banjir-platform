@@ -71,6 +71,13 @@ body.f3d {
 .f3d-swatch-guess { background: var(--canvas); }
 
 .f3d-note { font-size: var(--text-xs); color: var(--ink-3); }
+.f3d-note:empty { display: none; }
+
+/* how to use the map: a fold, open at first */
+.f3d-how { font-size: var(--text-sm); color: var(--ink-2); border-top: 1px solid var(--line); padding-top: var(--space-3); }
+.f3d-how summary { font-weight: 600; color: var(--ink); cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.f3d-how summary:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
+.f3d-how ul { margin: 0; padding-left: var(--space-5); display: grid; gap: var(--space-2); }
 .f3d-credit { margin-top: auto !important; font-size: var(--text-xs); color: var(--ink-3); }
 
 .f3d-failed .f3d-reading, .f3d-failed .f3d-sizes, .f3d-failed .f3d-toggle, .f3d-failed .f3d-legend { display: none; }

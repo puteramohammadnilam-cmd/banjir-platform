@@ -150,8 +150,14 @@ export const link3d = (premise, rp) =>
 const seeIn3d = (premise, rp) => premise.has_3d &&
   h("a", { class: "btn btn-secondary see-3d", href: link3d(premise, rp) }, icon("wave"), t("business.see3d"));
 
+/** For a business with no 3D view: which listed areas have one (`has_3d` in GET /api/areas), else nothing. */
+function no3dNote(premise, areas) {
+  const ready = areas.filter((listed) => listed.has_3d).map((listed) => listed.name);
+  return !premise.has_3d && ready.length > 0 && h("p", { class: "muted small" }, t("business.no3d", { areas: ready.join(", ") }));
+}
+
 /** A business's name, kind and tags, and the ways to see it on the map and, where there is one, in 3D. */
-function businessHead(premise, showOnMap, rp) {
+function businessHead(premise, showOnMap, rp, areas) {
   return [
     h("div", {},
       h("p", { class: "kicker" }, kindText(premise)),
@@ -159,7 +165,8 @@ function businessHead(premise, showOnMap, rp) {
       h("ul", { class: "tags" },
         h("li", { class: "tag" }, t("business.tagPublic")),
         h("li", { class: "tag" }, t("business.tagUnchecked")),
-        premise.is_chain && h("li", { class: "tag" }, t("business.tagChain")))),
+        premise.is_chain && h("li", { class: "tag" }, t("business.tagChain"))),
+      no3dNote(premise, areas)),
     h("div", { class: "biz-actions" }, seeOnMap(showOnMap), seeIn3d(premise, rp)),
   ];
 }
@@ -187,7 +194,8 @@ function pointHead(place, { area, areas, showOnMap, onMovePin, onOpenArea, onOpe
   ];
 }
 
-const header = (place, options) => (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap, options.rp));
+const header = (place, options) =>
+  (place.is_point ? pointHead(place, options) : businessHead(place, options.showOnMap, options.rp, options.areas));
 
 /** The facts beside the drawing, in three groups: the water at this place, getting out, and what makes it more exact.
  *  A point has no road or Google Maps listing: it is not a business. Its relief centre is the server's, for a point in

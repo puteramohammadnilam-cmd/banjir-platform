@@ -68,9 +68,9 @@ function fakeApi(answers) {
   return { calls, getAreas: answer("getAreas"), getAreaData: answer("getAreaData"),
     getDefaultData: answer("getDefaultData"), getSectionData: answer("getSectionData") };
 }
-const SECTION_DATA = { area: { id: "home" }, section: { id: "s-7", name: "Section 7" }, premises: [{ id: "node-1" }, SHOP] };
+const SECTION_DATA = { area: { id: "home", name: "Home Town" }, section: { id: "s-7", name: "Section 7" }, premises: [{ id: "node-1" }, SHOP] };
 const CITY_DATA = { area: { id: "home" }, index: [{ id: "node-1", section: "s-1" }, { id: "node-7", section: "s-7" }], premises: [] };
-const FOUND = { areaId: "home", sectionId: "s-7", sectionName: "Section 7", shop: SHOP };
+const FOUND = { areaId: "home", areaName: "Home Town", sectionId: "s-7", sectionName: "Section 7", shop: SHOP };
 
 test("a card's link asks for its section's data alone", async () => {
   const api = fakeApi({ getSectionData: SECTION_DATA });

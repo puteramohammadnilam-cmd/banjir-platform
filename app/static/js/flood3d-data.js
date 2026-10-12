@@ -58,7 +58,7 @@ export async function findShop(link, api) {
   const data = await sectionData(link, api);
   const shop = data?.premises?.find((premise) => premise.id === link.place);
   if (!shop || !isScopeId(data.area?.id) || !isScopeId(data.section?.id)) return null;
-  return { areaId: data.area.id, sectionId: data.section.id, sectionName: data.section.name, shop };
+  return { areaId: data.area.id, areaName: data.area.name, sectionId: data.section.id, sectionName: data.section.name, shop };
 }
 
 /** Whether a fetched bundle has the parts the page reads (it is the server's own file, but a half-written one or an

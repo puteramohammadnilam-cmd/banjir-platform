@@ -446,12 +446,17 @@ def counts(area: Area) -> dict[str, int]:
     return {"businesses": len(premises(area.id)), "squares": len(built["cells"]), "shelters": len(built["shelters"])}
 
 
+def has_3d(area_id: str) -> bool:
+    """Whether the 3D page has any bundle for the area (app/static/flood3d/<area id>/)."""
+    return any((FLOOD3D_DIR / area_id).glob("*.json"))
+
+
 def summary(area: Area) -> dict:
-    """One entry of GET /api/areas."""
+    """One entry of GET /api/areas; `has_3d` says whether its shops have the 3D view."""
     found = counts(area)
     return {"id": area.id, "name": area.name, "display_name": area.display_name, "view": list(area.view),
             "zoom": area.zoom, "counts": found, "has_history": area.history is not None,
-            "has_shelters": found["shelters"] > 0}
+            "has_shelters": found["shelters"] > 0, "has_3d": has_3d(area.id)}
 
 
 def details(area: Area) -> dict:

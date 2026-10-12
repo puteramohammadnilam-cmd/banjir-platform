@@ -314,6 +314,7 @@ export default Object.freeze({
   "business.spoken": "{where}: {depth}, dalam banjir yang dijangka {label}.",
   "business.seeOnMap": "Lihat di peta",
   "business.see3d": "Lihat dalam 3D",
+  "business.no3d": "Paparan 3D: hanya untuk kedai di {areas} buat masa ini.",
   "business.tagPublic": "Daripada peta awam",
   "business.tagUnchecked": "Belum disemak di lapangan",
   "business.tagChain": "Kedai rangkaian",

@@ -194,9 +194,10 @@ function satelliteSwitch(map) {
 }
 
 /** The panel's words for the shop, and the back link to its card (at the flood size on show: the returned function). */
-function showShop({ shop, areaId, sectionId, sectionName }, bundle) {
+function showShop({ shop, areaId, areaName, sectionId, sectionName }, bundle) {
   $("f3d-name").textContent = shop.name ?? "";
   $("f3d-section").textContent = sectionName ?? "";
+  $("f3d-scope").textContent = areaName ? `The 3D view is ready for shops in ${areaName} only, for now.` : "";
   $("f3d-credit").textContent = `${bundle.credit} · buildings fetched ${bundle.fetched_on}`;
   const back = document.querySelector(".f3d-back");
   return (rp) => back.setAttribute("href", `./${writeUrl({ area: areaId, section: sectionId, place: shop.id, rp })}`);

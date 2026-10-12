@@ -313,6 +313,7 @@ export default Object.freeze({
   "business.spoken": "{where}: {depth}, in a flood expected {label}.",
   "business.seeOnMap": "See on map",
   "business.see3d": "See in 3D",
+  "business.no3d": "3D view: only for shops in {areas}, for now.",
   "business.tagPublic": "From a public map",
   "business.tagUnchecked": "Not checked on the ground",
   "business.tagChain": "Chain outlet",
