@@ -239,6 +239,7 @@ export default Object.freeze({
   "map.inFlood": " dalam banjir yang dijangka {label}",
   "map.openDetails": "Buka butiran",
   "map.checkPoint": "Semak satu titik",
+  "map.twoFingers": "Guna dua jari untuk mengalihkan peta",
 
   // ---------- history.js ----------
   "history.heading": "Banjir yang direkodkan di sini",

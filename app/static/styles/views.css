@@ -54,6 +54,8 @@
 .map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
 #map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
 .leaflet-container { font-family: var(--font); }
+.map-hint { position: absolute; z-index: 1000; inset: 0; display: grid; place-items: center; margin: 0; padding: var(--space-4); background: rgba(13, 27, 42, 0.55); color: #fff; font-size: var(--text-md); font-weight: 700; text-align: center; pointer-events: none; opacity: 0; transition: opacity var(--duration-normal); }   /* a touch screen's "two fingers" (map.js), for a moment */
+.map-hint.is-shown { opacity: 1; }
 .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }   /* zoom buttons: 44 px touch targets */
 .leaflet-tile-pane { filter: grayscale(1) sepia(0.06) contrast(0.85) brightness(1.06); }   /* quiet base, so the water reads */
 /* a thin dark hairline outside the white ring, so a shop dot shows on both pale and dark squares */

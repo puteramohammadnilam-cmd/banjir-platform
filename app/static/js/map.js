@@ -20,14 +20,38 @@ const label = (text) => document.createTextNode(text);
 /** Whether the person asks the page not to move things about: then the map jumps instead of gliding. */
 const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// A touch screen: one finger scrolls the page past the map and two move it (Leaflet's pinch pans as it zooms), so a
+// phone is never stuck on a map that fills its screen. Aim mode gives one finger back: the cross is aimed by dragging.
+const IS_TOUCH = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;   // false in node, where the tests run
+const HINT_MS = 1500;
+
+/** On a touch screen a one-finger drag on the map scrolls the page, so it says for a moment how to move the map.
+ *  Hidden from screen readers: it answers a gesture, and the map's keys work as before. */
+function addTwoFingerHint(map) {
+  const container = map.getContainer();
+  const hint = h("p", { class: "map-hint", "aria-hidden": "true" }, t("map.twoFingers"));
+  container.append(hint);
+  let timer = 0;
+  container.addEventListener("touchmove", (event) => {
+    if (event.touches.length !== 1 || map.dragging.enabled()) return;
+    hint.classList.add("is-shown");
+    clearTimeout(timer);
+    timer = setTimeout(() => hint.classList.remove("is-shown"), HINT_MS);
+  }, { passive: true });
+  container.addEventListener("touchstart", (event) => {
+    if (event.touches.length > 1) hint.classList.remove("is-shown");   // two fingers down: they are doing it
+  }, { passive: true });
+}
+
 /** The Leaflet map on the page's own view and zoom (the area's config, or a section's box), with the base tiles. It can be
  *  moved over all of Malaysia. */
 function openMap(element, { view: [west, south, east, north], zoom, fit = false }) {
   const glide = motionAllowed();   // with reduced motion asked for, zooms and fades are jumps
   const map = L.map(element, {
-    scrollWheelZoom: false, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM, zoomSnap: fit ? FIT_SNAP : 1,
+    scrollWheelZoom: false, dragging: !IS_TOUCH, maxBounds: MALAYSIA_BOUNDS, minZoom: MIN_ZOOM, zoomSnap: fit ? FIT_SNAP : 1,
     zoomAnimation: glide, fadeAnimation: glide, markerZoomAnimation: glide,
   });
+  if (IS_TOUCH) addTwoFingerHint(map);
   // a whole city fills the map, once the map has a size to measure (followResize shows the view again as that changes)
   const showView = () => (fit && element.clientHeight > 0
     ? map.fitBounds([[south, west], [north, east]], { animate: false })
@@ -252,6 +276,7 @@ function createAim(map, setButtonHidden, renderer) {
       if (active) return;
       const onMoved = () => { if (!isQuiet) onMove(); };
       map.doubleClickZoom.disable();   // a tap moves the map, so a double tap is two moves, not a zoom
+      map.dragging.enable();   // on a touch screen too: the help says to move the map under the cross
       map.on("click", recentre).on("moveend", onMoved);
       active = { cross: showCross(map, describedBy), onMoved, ring: null };
       setDotsTabbable(map, false);
@@ -261,6 +286,7 @@ function createAim(map, setButtonHidden, renderer) {
       if (!active) return;
       map.off("click", recentre).off("moveend", active.onMoved);
       map.doubleClickZoom.enable();
+      if (IS_TOUCH) map.dragging.disable();   // one finger scrolls the page again
       hideCross(map, active.cross);
       active.ring?.remove();
       active = null;

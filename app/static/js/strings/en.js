@@ -238,6 +238,7 @@ export default Object.freeze({
   "map.inFlood": " in a flood expected {label}",
   "map.openDetails": "Open details",
   "map.checkPoint": "Check a point",
+  "map.twoFingers": "Use two fingers to move the map",
 
   // ---------- history.js ----------
   "history.heading": "Floods recorded here",

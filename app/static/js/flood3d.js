@@ -22,6 +22,7 @@ const WATER_OPACITY = 0.55;
 const RISE_MS = 1100;
 const FLY_MS = 2600;
 const START = { zoom: 16.2, pitch: 0, bearing: 0 };
+const STACKED = window.matchMedia("(max-width: 700px)");   // flood3d.css's phone layout: the map on top, the panel under it
 const VIEW = { zoom: 18, pitch: 62, bearing: 160 };   // from the road, facing the shop fronts
 
 const PANEL_PX = 400;           // the panel over the map's right side on a wide screen (flood3d/flood3d.css)
@@ -131,7 +132,9 @@ function sizeButtons(onPick) {
 function openMap(view, shop, satellite) {
   maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");
   const map = new maplibregl.Map({ container: "f3d-map", style: style(view, satellite), center: [shop.lon, shop.lat],
-    ...START, maxPitch: 75, attributionControl: false });
+    ...START, maxPitch: 75, attributionControl: false, cooperativeGestures: STACKED.matches });
+  // the phone layout scrolls under the map: one finger scrolls the page, two move the map (MapLibre says so over it)
+  STACKED.addEventListener("change", (event) => (event.matches ? map.cooperativeGestures.enable() : map.cooperativeGestures.disable()));
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-left");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");   // clear of the panel
   return map;
