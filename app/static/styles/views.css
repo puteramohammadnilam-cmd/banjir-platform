@@ -286,7 +286,8 @@
   .stage-panel .kpi { padding: 0 var(--space-3); }
   .stage-panel .kpi-hero + .kpi, .stage-panel .kpi:nth-child(4) { padding-left: 0; border-left: 0; }
   .stage-panel .kpi:nth-child(4) { margin-top: var(--space-4); }
-  .kpis:empty { min-height: 390px; }   /* with the rain tile, as on a build with Google Weather */
+  .kpis:empty { min-height: clamp(352px, 520px - 16vw, 407px); }   /* four tiles (with the rain forecast) at this width: 407 px at 768 wide, 352 at 1024 */
+  .stage-panel .kpi:nth-child(4) { min-height: 5.5rem; }   /* the rain tile keeps its height while "Checking…" turns into the forecast */
 }
 
 /* a laptop or wider: the map fills the stage, and the search with the figures floats over its left as a glass panel;
