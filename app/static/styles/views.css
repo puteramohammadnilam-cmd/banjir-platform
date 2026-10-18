@@ -286,7 +286,7 @@
   .stage-panel .kpi { padding: 0 var(--space-3); }
   .stage-panel .kpi-hero + .kpi, .stage-panel .kpi:nth-child(4) { padding-left: 0; border-left: 0; }
   .stage-panel .kpi:nth-child(4) { margin-top: var(--space-4); }
-  .kpis:empty { min-height: 272px; }
+  .kpis:empty { min-height: 390px; }   /* with the rain tile, as on a build with Google Weather */
 }
 
 /* a laptop or wider: the map fills the stage, and the search with the figures floats over its left as a glass panel;
