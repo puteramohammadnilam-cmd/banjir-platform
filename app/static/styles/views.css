@@ -47,9 +47,14 @@
 .scenario-slot:empty { min-height: 84px; }   /* the flood size picker's room, kept until overview.js draws it (84 px from 521 px wide) */
 @media (max-width: 520px) { .scenario-slot:empty { min-height: 190px; } .scenario-sentence:empty { min-height: 4.35em; } }   /* three rows, and three lines, on a phone */
 
-.overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
+/* under the map, in the order they are read: what is happening now (relief centres open, the tide, the flood record)
+   side by side as the width allows, then the sections table with the map's switches and the area summary beside it.
+   auto-fit: three across on a laptop, two on a tablet, one on a phone, and a card that is not shown leaves no hole */
+.overview-live, .overview-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: var(--space-4); }
+.overview-tools { align-items: start; }
+@media (min-width: 640px) and (max-width: 1039px) { .overview-live > #history { grid-column: 1 / -1; } }   /* a tablet: two cards across, the flood record and its timeline under them at full width */
 /* phones and tablets: one column, in the page's order (index.html) */
-.map-surface, .map-extras, .overview-side { margin-bottom: var(--space-4); }
+.map-surface, .overview-live, .overview-tools { margin-bottom: var(--space-4); }
 .map-extras { display: grid; gap: var(--space-3); align-content: start; }
 .map-extras > .map-controls { margin-top: 0; }
 .map-extras:not(:has(> :not(h2):not([hidden]))) { display: none; }   /* nothing to say about this map: no empty card */
@@ -295,19 +300,20 @@
 
 /* a laptop or wider: the map fills the stage, and the search with the figures floats over its left as a glass panel;
    the flood size and the key float over its right. The leaflet zoom and "check a point" buttons move clear of the
-   panel. Under the stage: the area chooser and the map's notes, beside the live cards, then the table and the list */
+   panel. Under the stage: the area chooser and the source, the live cards across, the sections table with the map's
+   switches and the area summary beside it, then the list */
 @media (min-width: 1040px) {
   #panel-overview {
     display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
-    grid-template-areas: "stage stage" "scope side" "stamp side" "extras side" "sections sections" "dir dir";
+    grid-template-areas: "stage stage" "scope scope" "stamp stamp" "live live" "sections tools" "dir dir";
   }
-  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "stage stage" "scope side" "stamp side" "extras side" "dir dir"; }
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "stage stage" "scope scope" "stamp stamp" "live live" "tools tools" "dir dir"; }
   #panel-overview > * { margin: 0; }   /* the grid's gap spaces them */
   .stage { grid-area: stage; }
   .scope-bar { grid-area: scope; }
   .stamp { grid-area: stamp; }
-  .map-extras { grid-area: extras; }
-  .overview-side { grid-area: side; }
+  .overview-live { grid-area: live; }
+  .overview-tools { grid-area: tools; }
   .sections-surface { grid-area: sections; }
   .directory { grid-area: dir; }
 }

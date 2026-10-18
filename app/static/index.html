@@ -167,26 +167,28 @@
       </div>
       <div class="scope-bar" id="scope"></div>
       <div class="stamp" id="stamp"></div>
-      <section class="surface map-extras" aria-labelledby="map-extras-heading">
-        <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
-        <div class="map-controls" id="map-controls" hidden></div>
-        <p class="small"><button type="button" class="btn btn-link" data-goto="reference" data-i18n="overview.mapReference">Where the map's data comes from and how it is worked out</button></p>
-      </section>
-      <div class="overview-side">
+      <div class="overview-live">
         <section class="surface evac" id="evacuation" aria-labelledby="evacuation-heading" hidden></section>
         <section class="surface tide" id="tide" aria-labelledby="tide-heading" hidden></section>
         <section class="surface" id="history" aria-labelledby="history-heading"></section>
-        <section class="surface area-print" aria-labelledby="area-print-heading">
-          <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
-          <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
-          <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
-        </section>
       </div>
       <section class="surface sections-surface" id="sections-surface" aria-labelledby="sections-heading" hidden>
         <h2 id="sections-heading"></h2>
         <p class="muted small" id="sections-lead"></p>
         <div class="table-scroll sections-scroll" id="sections-table"></div>
       </section>
+      <div class="overview-tools">
+        <section class="surface map-extras" aria-labelledby="map-extras-heading">
+          <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
+          <div class="map-controls" id="map-controls" hidden></div>
+          <p class="small"><button type="button" class="btn btn-link" data-goto="reference" data-i18n="overview.mapReference">Where the map's data comes from and how it is worked out</button></p>
+        </section>
+        <section class="surface area-print" aria-labelledby="area-print-heading">
+          <h2 id="area-print-heading" class="small-heading" data-i18n="overview.printHeading">Area summary for associations and councils</h2>
+          <p class="muted small" data-i18n="overview.printLead">One page: how many businesses get water in each flood size, the streets most affected, past floods and the limits of the data.</p>
+          <button type="button" class="btn btn-secondary" id="print-area" data-i18n="overview.printButton">Print or save the area summary</button>
+        </section>
+      </div>
       <section class="surface directory" aria-labelledby="directory-heading">
         <div class="surface-head">
           <h2 id="directory-heading" data-i18n="overview.businesses">Businesses</h2>
