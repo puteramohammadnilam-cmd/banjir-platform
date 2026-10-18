@@ -50,7 +50,7 @@ export function initialState(url, start, linked) {
     stocks: {},    // by place id: { busy, photos, off, reject, error }: the photos of the stock (POST /api/stock)
     plans: {},     // by place id: { busy, result, error }: the flood plan (POST /api/plan)
     planLanguage: lang,   // the plan is written in the page's language unless the owner picks the other
-    compare: [],   // ids of the places side by side on My business, oldest first (compare.js)
+    compare: [],   // the places side by side on My business, oldest first; main.js reads this tab's (compare.js)
     listings: {},  // by business id: { busy } | { configured, place } | { error }
     drySpots: {},  // by place id: { busy } | { spots } | { error }: where to move the car (POST /api/dry-spot)
     estimates: {}, // by place id: cost.js estimateState, { busy, result, assumed } | { result, assumed } | { error, result, assumed }

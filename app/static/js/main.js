@@ -14,7 +14,7 @@ import { MAX_PHOTOS } from "./stock.js";
 import { createFloodMode } from "./floodmode.js";
 import { current } from "./tide.js";
 import { buildAreaReport } from "./area-report.js";
-import { addCompared, createCompareCard } from "./compare.js";
+import { addCompared, createCompareCard, readCompared, saveCompared } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
 import { isPoint, pageLink, readUrl, writeUrl } from "./place.js";
 import { isCityView, linkedPlace, loadCityIndex, loadStart, missedWords, openLink, sectionOf } from "./start.js";
@@ -363,6 +363,24 @@ function linkFollower(app) {
   return follow;
 }
 
+/** The page a place is on, for the compare card to go back to: another section of the city is another page. */
+const pageOf = (app) => ({ areaId: app.start.area.id, sectionId: app.start.section?.id ?? null });
+
+/** The compared places, kept in this tab too (compare.js), so they are still there on another section's page. */
+function setCompared(app, compare) {
+  saveCompared(compare);
+  app.store.update({ compare });
+}
+
+/** A compared place's name opens it: here when it was added on this page, else on its own page, by its link. */
+function openCompared(app, place) {
+  const { areaId, sectionId } = place.page;
+  const isHere = areaId === app.start.area.id && sectionId === pageOf(app).sectionId;
+  if (!isHere) location.assign(otherPageLink(app, { ...app.store.state, areaId, placeKey: place.id }, { sectionId }));
+  else if (place.is_point) openPoint(app, place, null);
+  else open(app, place.id);
+}
+
 /** The flood plan and the compare card under My business, and the area summary's print button. */
 function createExtras(app) {
   const { start, store } = app;
@@ -377,9 +395,9 @@ function createExtras(app) {
     date: new Date().toLocaleDateString(dateLocale(), { day: "numeric", month: "short", year: "numeric" }),
   })));
   const compare = createCompareCard({
-    onAdd: (id) => store.update({ compare: addCompared(store.state.compare, id) }),
-    onRemove: (id) => store.update({ compare: store.state.compare.filter((kept) => kept !== id) }),
-    onOpen: (place) => (place.is_point ? openPoint(app, place, null) : open(app, place.id)),
+    onAdd: (id) => setCompared(app, addCompared(store.state.compare, { ...placeOf(app, { ...store.state, placeKey: id }), page: pageOf(app) })),
+    onRemove: (id) => setCompared(app, store.state.compare.filter((kept) => kept.id !== id)),
+    onOpen: (place) => openCompared(app, place),
     onFind: () => findShop(app),
   });
   $("panel-business").append(plan.node, compare.node);
@@ -504,7 +522,7 @@ function renderExtras(app, views, state, place) {
   views.plan.node.hidden = !place;
   views.compare.node.hidden = !place;
   views.plan.render(state.plans[state.placeKey], state.planLanguage);
-  views.compare.render({ current: place, compared: state.compare.map((id) => placeOf(app, { ...state, placeKey: id })).filter(Boolean) });
+  views.compare.render({ current: place, compared: state.compare });
 }
 
 /** The Reference tab's "On this page" buttons, each with the id of the heading it jumps to. */
@@ -598,7 +616,7 @@ async function main() {
     if (url.pointInQuery) history.replaceState(null, "", writeUrl(url));   // before any request can send it as Referer
     const start = await loadStart(url);
     const { linked, note, isFailed } = await openLink(url, start);
-    const follow = startApp(start, initialState(url, start, linked), url);
+    const follow = startApp(start, { ...initialState(url, start, linked), compare: readCompared() }, url);
     showNote(note, isFailed ? () => follow(url.place) : null);
   } catch (error) {
     showStartError(error);

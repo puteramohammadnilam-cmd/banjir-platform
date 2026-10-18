@@ -1,5 +1,7 @@
 // "Compare places" on My business: for someone choosing between shop lots, up to three places (businesses or points)
-// side by side, with the same modelled figures each one's own page shows. Kept for this visit only, in the page.
+// side by side, with the same modelled figures each one's own page shows. Kept in this tab until it closes
+// (sessionStorage), whole and with the page each was added on: a business of another section is on that section's own
+// page, which the browser loads afresh, so a list kept only in the page, or by id, was lost on the way there.
 // It walks the owner through it: a step line says what to do next, "Find another place" goes to the search, and once
 // two are in, one line says which gets the least and the most water, and the least in each column is marked.
 import { SCENARIOS, band, h } from "./dom.js";
@@ -7,9 +9,37 @@ import { formatNumber, t } from "./i18n.js";
 import { DEFAULT_RP } from "./pick.js";
 
 export const MAX_COMPARED = 3;
+const STORE_KEY = "myflood-compare";   // [place, with page: {areaId, sectionId}], oldest first: this tab's compared places
 
-/** The ids after adding one: no repeats, the newest last, the oldest dropped past MAX_COMPARED. */
-export const addCompared = (ids, id) => (ids.includes(id) ? ids : [...ids, id].slice(-MAX_COMPARED));
+/** The places after adding one: no repeats, the newest last, the oldest dropped past MAX_COMPARED. */
+export const addCompared = (places, place) => (places.some((kept) => kept.id === place.id) ? places
+  : [...places, place].slice(-MAX_COMPARED));
+
+const isDepths = (depths) => Boolean(depths) && typeof depths === "object" && Object.values(depths).every((m) => m === null || Number.isFinite(m));
+/** Whether something read back is a whole place the card can show, and knows the page of. */
+const isWhole = (place) => typeof place?.id === "string" && typeof place.page?.areaId === "string" && isDepths(place.depth_m)
+  && (place.is_point ? Number.isFinite(place.lat) && Number.isFinite(place.lon) : typeof place.name === "string")
+  && (!place.road || isDepths(place.road.depth_m))
+  && (!place.shelter || (typeof place.shelter.name === "string" && Number.isFinite(place.shelter.distance_m)));
+
+/** The places compared earlier in this tab. Storage can be missing, blocked or hold anything: what is not a whole place
+ *  is left out. */
+export function readCompared() {
+  try {
+    const places = JSON.parse(globalThis.sessionStorage?.getItem(STORE_KEY) ?? "[]");
+    return Array.isArray(places) ? places.filter(isWhole).slice(-MAX_COMPARED) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCompared(places) {
+  try {
+    globalThis.sessionStorage?.setItem(STORE_KEY, JSON.stringify(places));
+  } catch {
+    // kept in the page only: the list is lost when another page opens, as before
+  }
+}
 
 const water = (value) => (band(value) ? value : 0);   // the build stores a dry square as null (raster.depth_value)
 const depth = (value) => (band(value) ? t("common.metres", { m: value.toFixed(2) }) : t("compare.noWater"));

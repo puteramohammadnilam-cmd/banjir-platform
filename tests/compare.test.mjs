@@ -4,17 +4,55 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { MAX_COMPARED, addCompared, createCompareCard, verdict } from "../app/static/js/compare.js";
+import { MAX_COMPARED, addCompared, createCompareCard, readCompared, saveCompared, verdict } from "../app/static/js/compare.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { point, shop } from "./point_fixtures.mjs";
 
 beforeEach(() => installFakeDom());
 
 test("adding keeps at most three places, newest last, and never the same place twice", () => {
+  const [a, b, c, d] = ["a", "b", "c", "d"].map((id) => ({ id }));
   assert.equal(MAX_COMPARED, 3);
-  assert.deepEqual(addCompared([], "a"), ["a"]);
-  assert.deepEqual(addCompared(["a", "b"], "a"), ["a", "b"]);
-  assert.deepEqual(addCompared(["a", "b", "c"], "d"), ["b", "c", "d"]);
+  assert.deepEqual(addCompared([], a), [a]);
+  assert.deepEqual(addCompared([a, b], { id: "a" }), [a, b]);
+  assert.deepEqual(addCompared([a, b, c], d), [b, c, d]);
+});
+
+/** sessionStorage as a browser gives it: strings by key. */
+const fakeStorage = (entries = {}) => {
+  const kept = new Map(Object.entries(entries));
+  return { getItem: (key) => kept.get(key) ?? null, setItem: (key, value) => kept.set(key, String(value)) };
+};
+
+test("the compared places outlast the page: another section's page reads them back, with the page each was added on", () => {
+  globalThis.sessionStorage = fakeStorage();
+  try {
+    const here = { areaId: "home", sectionId: "seksyen-25" };
+    const places = [{ ...shop, page: here }, { ...point(), page: { areaId: "home", sectionId: null } }];
+    assert.deepEqual(readCompared(), [], "nothing kept yet");
+    saveCompared(places);
+    assert.deepEqual(readCompared(), places);
+  } finally {
+    delete globalThis.sessionStorage;
+  }
+});
+
+test("storage that is missing, blocked or holds anything else reads as no places, and saving to it never throws", () => {
+  assert.deepEqual(readCompared(), [], "no sessionStorage at all");
+  const page = { areaId: "home", sectionId: null };
+  try {
+    globalThis.sessionStorage = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("full"); } };
+    assert.deepEqual(readCompared(), []);
+    assert.doesNotThrow(() => saveCompared([{ ...shop, page }]));
+    globalThis.sessionStorage = fakeStorage({ "myflood-compare": "{not json" });
+    assert.deepEqual(readCompared(), []);
+    const bad = [{ ...shop, page }, { ...shop, id: 7, page }, { ...shop, id: "x", page: null }, { ...shop, id: "y", depth_m: { 50: "1" }, page },
+      { ...shop, id: "z", road: { depth_m: null }, page }, { ...point(), id: "pt", lat: "3", page }, null];
+    globalThis.sessionStorage = fakeStorage({ "myflood-compare": JSON.stringify(bad) });
+    assert.deepEqual(readCompared().map((place) => place.id), ["node-1"], "only a whole place is kept");
+  } finally {
+    delete globalThis.sessionStorage;
+  }
 });
 
 function mount() {
