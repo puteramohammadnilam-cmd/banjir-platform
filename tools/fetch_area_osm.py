@@ -44,7 +44,7 @@ OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 CITY_RELATION = 8347577
 AREA_OFFSET = 3_600_000_000          # Overpass area id = this + the relation id
 VERSION = "0.2"
-USER_AGENT = f"BanjirCheck/{VERSION} (flood research)"
+USER_AGENT = f"MyFlood/{VERSION} (flood research)"
 QUERY_TIMEOUT_S = 300                # what Overpass is told it may take
 READ_TIMEOUT_S = 400                 # how long we wait for the answer
 PAUSE_SECONDS = 2.0

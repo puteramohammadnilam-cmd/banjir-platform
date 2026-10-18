@@ -17,7 +17,7 @@ set -euo pipefail
 
 PROJECT=${PROJECT:?Set PROJECT to your Google Cloud project id}
 REGION=${REGION:-asia-southeast1}
-SERVICE=${SERVICE:-banjir-check}
+SERVICE=${SERVICE:-myflood}
 DOMAIN=${DOMAIN:-}   # optional: a domain you own, to map to the service
 
 # The flood depth rasters are not in git (9 files, about 73 MB), but the service needs all of them: three grids
@@ -116,7 +116,7 @@ fi
 # account often holds project Editor).
 RUNNER="${SERVICE}-run@${PROJECT}.iam.gserviceaccount.com"
 gcloud iam service-accounts describe "$RUNNER" >/dev/null 2>&1 \
-  || gcloud iam service-accounts create "${SERVICE}-run" --display-name="Banjir Check on Cloud Run"
+  || gcloud iam service-accounts create "${SERVICE}-run" --display-name="MyFlood on Cloud Run"
 # A new account can take a few seconds to be visible to IAM, so the first binding may be refused. Retry a few times.
 IAM_RETRY_SLEEP=${IAM_RETRY_SLEEP:-5}
 bind_secret() {

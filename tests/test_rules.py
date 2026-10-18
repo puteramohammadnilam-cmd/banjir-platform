@@ -125,7 +125,7 @@ def test_the_page_names_no_place(path):
 def test_the_place_name_scan_matches_any_case_and_leaves_other_words_alone():
     assert place_names_in("Map of TAMAN SRI MUDA") == ["Sri Muda", "Taman Sri Muda"]
     assert place_names_in("seksyen 25, mbsa and shah alam") == ["Shah Alam", "Seksyen", "MBSA"]
-    assert place_names_in("Kota Tinggi town centre, Johor. Malaysia, Selangor, Banjir Check") == []
+    assert place_names_in("Kota Tinggi town centre, Johor. Malaysia, Selangor, MyFlood") == []
 
 
 def function_source(statements: int) -> str:

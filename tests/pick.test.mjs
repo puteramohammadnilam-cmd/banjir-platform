@@ -15,7 +15,7 @@ import { ALIASES, INDEX, SECTIONS, SECTION_WORD } from "./fixtures/city_data.mjs
 import { installFakeDom } from "./fake_dom.mjs";
 import { AREAS, HOME, point, shop } from "./point_fixtures.mjs";
 
-const STORE_KEY = "banjir-check-place";
+const STORE_KEY = "myflood-place";
 const other = { ...shop, id: "node-2", name: "B Shop" };
 const START = { area: HOME, premises: [shop, other], status: { maps_ready: false } };
 const NO_LINK = { tab: null, rp: null };

@@ -37,7 +37,7 @@ ACCOUNT = "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/ArcGIS/rest/services"
 ITEM_URL = "https://www.arcgis.com/sharing/rest/content/items/{item_id}?f=json"
 LAYERS = ("2021", "2022")
 PAGE_SIZE = 1000   # the services' maxRecordCount
-USER_AGENT = "banjir-check-research/0.1 (flood risk research prototype; one-off data fetch)"
+USER_AGENT = "myflood-research/0.1 (flood risk research prototype; one-off data fetch)"
 PAUSE_SECONDS = 1.0
 SHAH_ALAM_BOX = {"south": 2.95, "north": 3.23, "west": 101.43, "east": 101.59}   # as plan WS-B
 

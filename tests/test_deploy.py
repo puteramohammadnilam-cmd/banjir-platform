@@ -15,7 +15,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 GRIDS = ("ID211_N10_E100", "ID220_N10_E110", "ID202_N10_E90")   # Peninsula, Sabah and Sarawak, Langkawi
 RASTER_NAMES = tuple(f"{grid}_RP{rp}_depth.tif" for grid in GRIDS for rp in (10, 20, 50))
-FAKE_URL = "https://banjir-check-test.a.run.app"
+FAKE_URL = "https://myflood-test.a.run.app"
 POINT_BODY = '{"lat":3.0297599,"lon":101.5364982,"source":"pin"}'
 POINT_ID = "pt:3.02998,101.53667"
 DOMAIN = "banjir.example.org"
@@ -167,8 +167,8 @@ def test_the_service_url_is_read_from_cloud_run_for_this_service_and_region(tmp_
 def test_the_existing_deploy_flags_are_kept(tmp_path):
     run = run_deploy(tmp_path)
     deploy = run.calls[run.index("gcloud run deploy")]
-    for flag in ("banjir-check", "--source .", "--region asia-southeast1", "--allow-unauthenticated",
-                 "--service-account banjir-check-run@test-project.iam.gserviceaccount.com",
+    for flag in ("myflood", "--source .", "--region asia-southeast1", "--allow-unauthenticated",
+                 "--service-account myflood-run@test-project.iam.gserviceaccount.com",
                  "GOOGLE_API_KEY=gemini-api-key:latest,GOOGLE_MAPS_API_KEY=maps-api-key:latest",
                  "--max-instances 2", "--memory 512Mi", "--timeout 300", "--quiet", "--cpu-boost"):
         assert flag in deploy, f"{flag!r} missing from {deploy!r}"
@@ -299,7 +299,7 @@ def test_a_domain_that_is_not_mapped_yet_is_created_after_the_smoke_checks(tmp_p
     assert run.proc.returncode == 0, run.output
     assert run.count("domain-mappings create") == 1
     create = run.calls[run.index("gcloud beta run domain-mappings create")]
-    assert f"--service banjir-check --domain {DOMAIN} --region asia-southeast1" in create
+    assert f"--service myflood --domain {DOMAIN} --region asia-southeast1" in create
     assert run.index("curl") < run.index("gcloud beta run domain-mappings create")
     assert "ghs.googlehosted.com." in run.output   # the DNS records are printed for the owner to add
 

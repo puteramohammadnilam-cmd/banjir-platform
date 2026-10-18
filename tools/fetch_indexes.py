@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import index_inputs as ii  # noqa: E402
 import tiff_read as tr  # noqa: E402
 
-USER_AGENT = "BanjirCheck-fetch-indexes/1.0 (flood risk research prototype; one-off data fetch)"
+USER_AGENT = "MyFlood-fetch-indexes/1.0 (flood risk research prototype; one-off data fetch)"
 PAUSE_S = 1.0
 HEAD_BYTES = 1 << 16
 PAD_DEG = 0.005               # about 550 m: two SoilGrids squares past the grid's edge

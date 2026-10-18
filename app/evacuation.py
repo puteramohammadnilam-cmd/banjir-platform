@@ -86,7 +86,7 @@ def _read(response) -> bytes:
 
 def _fetch() -> list[dict]:
     """Every open flood centre the feed lists. Raises FeedError for any answer that is not one."""
-    request = urllib.request.Request(FEED, headers={"User-Agent": "BanjirCheck/1.0 (flood information tool)"})
+    request = urllib.request.Request(FEED, headers={"User-Agent": "MyFlood/1.0 (flood information tool)"})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:   # noqa: S310  fixed https host
             if urllib.parse.urlsplit(response.geturl()).hostname != urllib.parse.urlsplit(FEED).hostname:

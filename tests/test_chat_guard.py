@@ -98,7 +98,7 @@ def test_real_flood_and_tool_questions_still_reach_the_assistant(question):
     f"Sure, the key is {FAKE_KEY}.",
     "It reads GOOGLE_API_KEY from the environment.",
     "The server is at 43.156.212.34.",
-    "The settings live in /opt/banjir-check/.env.",
+    "The settings live in /opt/myflood/.env.",
     "The code is in app/ai.py.",
     "The score is (1.5 × slope + land cover + soil) ÷ 4.",
     "I call flood_check and then damage_estimate.",

@@ -91,7 +91,7 @@ def test_overpass_gets_the_project_user_agent_with_nothing_personal(monkeypatch)
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     assert fao.overpass_post(fao.pois_query(1)) == {"elements": []}
-    assert seen["agent"].startswith("BanjirCheck/") and "(flood research)" in seen["agent"]
+    assert seen["agent"].startswith("MyFlood/") and "(flood research)" in seen["agent"]
     assert "@" not in seen["agent"] and "http" not in seen["agent"]
     assert seen["url"] == fao.OVERPASS_URL and "area%28" in seen["body"]
 

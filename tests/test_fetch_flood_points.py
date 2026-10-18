@@ -115,7 +115,7 @@ def test_requests_carry_a_descriptive_user_agent_and_pause(monkeypatch):
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(ffp.time, "sleep", slept.append)
     assert ffp.http_get_json("https://example.test/x") == {"features": []}
-    assert "banjir-check-research" in seen["agent"] and "@" not in seen["agent"], "descriptive, with no personal address"
+    assert "myflood-research" in seen["agent"] and "@" not in seen["agent"], "descriptive, with no personal address"
     assert slept == [ffp.PAUSE_SECONDS] and ffp.PAUSE_SECONDS >= 1.0
 
 

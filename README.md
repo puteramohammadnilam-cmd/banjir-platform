@@ -1,6 +1,6 @@
 # MyFlood
 
-MyFlood (entered in the AI Builder Cup as Banjir Check) shows a small business how much river flood water a place could get in the model, and what that could roughly cost. It is an entry for the AI Builder Cup 2026.
+MyFlood shows a small business how much river flood water a place could get in the model, and what that could roughly cost. It is an entry for the AI Builder Cup 2026.
 
 You pick a business on the map, or check any point in Malaysia by dropping a pin or using GPS. You see the modelled water depth for a 1 in 10, 20 and 50 years flood; floods bigger than 1 in 50 years are not shown. A form turns that into a rough ringgit loss. An assistant powered by Gemini answers questions about it in Bahasa Melayu or English. It reads its numbers from the data through tools, and never does the sums itself.
 
@@ -274,7 +274,7 @@ It does these things, in order:
 1. Stops if any of the nine flood files is missing, before it touches Google Cloud.
 2. Enables the APIs and stores both keys in Secret Manager. It asks you to paste each key once. If a secret `arcgis-api-key` exists it is used too (see "Satellite photo on the 3D page").
 3. Creates a service account that can read only those secrets. A new account can take a few seconds to show up in IAM, so it retries the secret access grant up to 5 times, 5 seconds apart.
-4. Deploys the service `banjir-check` in `asia-southeast1` (override with `SERVICE` and `REGION`), with 2 instances at most, 512 MiB, a 60 second request timeout and startup CPU boost. It passes `--quiet`, so a first run does not stop to ask questions (for example about creating the Artifact Registry repository).
+4. Deploys the service `myflood` in `asia-southeast1` (override with `SERVICE` and `REGION`), with 2 instances at most, 512 MiB, a 60 second request timeout and startup CPU boost. It passes `--quiet`, so a first run does not stop to ask questions (for example about creating the Artifact Registry repository).
 5. Reads the service URL and runs a smoke test: `/api/status` and `/api/coverage` must answer with success, and a point check at the Taman Sri Muda spot above must come back `covered` in square `pt:3.02998,101.53667`. If a check fails, it says which one and exits non-zero.
 
 The smoke test has been run against stubs only.
@@ -308,7 +308,7 @@ The 3D mock-up (`/3d.html`) draws Esri World Imagery under the buildings when th
    - Copy the key when it is shown. Esri shows it only once.
 3. Give it to the server as `ARCGIS_API_KEY`:
    - Local: add `ARCGIS_API_KEY=` and the key to `.env`, then restart uvicorn.
-   - The VPS demo: add the same line to `/opt/banjir-check/.env` on the server, then `sudo systemctl restart banjir-check`.
+   - The VPS demo: add the same line to `/opt/myflood/.env` on the server, then `sudo systemctl restart myflood`.
    - Cloud Run: once, run `gcloud secrets create arcgis-api-key --data-file=-`, paste the key, press Enter and then Ctrl-D (the line break is ignored). Then run `./deploy.sh`: it gives the service account access to the secret and passes it as `ARCGIS_API_KEY`. Without the secret it deploys as before and says so. A new key later: `gcloud secrets versions add arcgis-api-key --data-file=-`, then deploy again.
 4. Open `/3d.html`: the photo should be on, with "Powered by Esri | Source: Esri, Vantor, …" in the map's credits (the (i) button). Check usage on the Location Platform dashboard after a few visits; a tilted map loads more tiles than a flat one.
 

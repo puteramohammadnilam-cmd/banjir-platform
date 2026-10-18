@@ -9,7 +9,7 @@ import ms from "./strings/ms.js";
 export const LANGS = Object.freeze(["en", "ms"]);
 export const DEFAULT_LANG = "en";
 const TABLES = Object.freeze({ en, ms });
-const STORE_KEY = "banjir-check-lang";
+const STORE_KEY = "myflood-lang";
 const NUMBER_LOCALE = Object.freeze({ en: "en-MY", ms: "ms-MY" });
 const DATE_LOCALE = Object.freeze({ en: "en-GB", ms: "ms-MY" });
 const isLang = (value) => LANGS.includes(value);

@@ -26,7 +26,7 @@ def fetch() -> list[dict]:
     # The site serves an incomplete certificate chain, so it cannot be verified: every id and name kept is checked
     # against strict patterns below (and again by app/gauges.py), and the run is by hand, once.
     context.check_hostname, context.verify_mode = False, ssl.CERT_NONE
-    request = urllib.request.Request(FEED, headers={"User-Agent": "BanjirCheck (station list, once)"})
+    request = urllib.request.Request(FEED, headers={"User-Agent": "MyFlood (station list, once)"})
     with urllib.request.urlopen(request, timeout=120, context=context) as response:   # noqa: S310  fixed https host
         return json.loads(response.read().decode("utf-8", "replace"))
 
