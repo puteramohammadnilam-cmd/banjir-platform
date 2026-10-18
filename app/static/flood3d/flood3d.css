@@ -95,13 +95,21 @@ body.f3d {
 }
 .f3d-pin-depth { color: var(--water-deep); font-weight: 700; }   /* on the pale label */
 
-/* a phone: the map on top, the panel as a sheet under it */
-@media (max-width: 700px) {
+/* a phone, or a tablet held upright: the map on top at full width, the panel as a sheet under it (STACKED in
+   js/flood3d.js is the same query) */
+@media (max-width: 700px), (max-width: 900px) and (orientation: portrait) {
   .f3d-stage { display: flex; flex-direction: column; height: auto; min-height: 100dvh; overflow: visible; }
   .f3d-map { position: relative; height: 62dvh; flex: none; }
   .f3d-panel { position: relative; inset: auto; width: auto; margin-top: calc(-1 * var(--space-4));
     border-radius: var(--radius-md) var(--radius-md) 0 0; overflow: visible; }
   .f3d-credit { margin-top: 0 !important; }
+}
+
+/* a phone on its side: a narrower, tighter panel, so the 3D view keeps more than half the screen */
+@media (max-height: 500px) and (orientation: landscape) {
+  .f3d-panel { top: var(--space-2); right: var(--space-2); bottom: var(--space-2); width: min(19rem, 46%); padding: var(--space-4); gap: var(--space-3); }
+  .f3d-name { font-size: var(--text-xl); }
+  .f3d-depth { font-size: 2.2rem; }
 }
 
 /* touch screens: the map's 29 px buttons at 44, and the back link moved clear of them and as tall */

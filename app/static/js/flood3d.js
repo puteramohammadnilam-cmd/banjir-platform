@@ -24,15 +24,16 @@ const WATER_OPACITY = 0.55;
 const RISE_MS = 1100;
 const FLY_MS = 2600;
 const START = { zoom: 16.2, pitch: 0, bearing: 0 };
-const STACKED = window.matchMedia("(max-width: 700px)");   // flood3d.css's phone layout: the map on top, the panel under it
+// flood3d.css's stacked layout, the map on top and the panel under it: phones, and tablets held upright (a tall screen
+// gives the map its full width rather than half of it beside the panel)
+const STACKED = window.matchMedia("(max-width: 700px), (max-width: 900px) and (orientation: portrait)");
 const VIEW = { zoom: 18, pitch: 62, bearing: 160 };   // from the road, facing the shop fronts
 
-const PANEL_PX = 400;           // the panel over the map's right side on a wide screen (flood3d/flood3d.css)
-const WIDE = "(min-width: 701px)";
+const PANEL_GAP_PX = 16;        // the floating panel's margin from the map's edge (flood3d/flood3d.css)
 
 const $ = (id) => document.getElementById(id);
-/** The shop in the middle of the map's open part: left of the panel on a wide screen. */
-const padding = () => (window.matchMedia(WIDE).matches ? { right: PANEL_PX } : {});
+/** The shop in the middle of the map's open part: left of the panel where it floats over the map, as wide as it is. */
+const padding = () => (STACKED.matches ? {} : { right: document.querySelector(".f3d-panel").offsetWidth + PANEL_GAP_PX });
 const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** A flood size's water depth on each square, or 0 before any water (rp null). */
@@ -135,7 +136,7 @@ function openMap(view, shop, satellite) {
   maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");
   const map = new maplibregl.Map({ container: "f3d-map", style: style(view, satellite), center: [shop.lon, shop.lat],
     ...START, maxPitch: 75, attributionControl: false, cooperativeGestures: STACKED.matches });
-  // the phone layout scrolls under the map: one finger scrolls the page, two move the map (MapLibre says so over it)
+  // the stacked layout scrolls under the map: one finger scrolls the page, two move the map (MapLibre says so over it)
   STACKED.addEventListener("change", (event) => (event.matches ? map.cooperativeGestures.enable() : map.cooperativeGestures.disable()));
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-left");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");   // clear of the panel
