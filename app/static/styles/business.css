@@ -8,7 +8,7 @@
 .biz-actions .see-3d { background: var(--brand); border-color: var(--brand); color: var(--on-action); box-shadow: var(--glow); }   /* the 3D street view: the way on that the page most wants seen */
 .biz-actions .see-3d:hover { background: var(--action-hover); }
 .biz-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
-.risk .scenario { margin-bottom: var(--space-5); }
+.risk .scenario { margin: var(--space-2) 0 var(--space-4); }   /* under the street scene it changes */
 .headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
 .headline strong { font-size: var(--text-figure); font-stretch: 66%; font-weight: 800; letter-spacing: 0; line-height: 0.95; color: var(--brand); text-shadow: 0 0 28px rgb(70 211 255 / 0.45); font-variant-numeric: tabular-nums; }
 .headline span { font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 700; }
@@ -63,10 +63,10 @@
 .fact-value { margin-top: var(--space-1); font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 700; line-height: 1.2; color: var(--ink); font-variant-numeric: tabular-nums; }
 .fact-note { margin-top: 2px; font-size: var(--text-sm); color: var(--ink-2); }
 .fact .btn { margin-top: var(--space-2); }
-.fact .fact-link { margin-top: var(--space-1); padding: 0; min-height: 2.25rem; }
+.fact .fact-link { margin-top: var(--space-1); padding: 0; min-height: 44px; }
 .fact-more { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .fact-more > p { margin-top: var(--space-2); }
-.fact-more summary, .area-note summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 2.25rem; font-size: var(--text-sm); font-weight: 700; color: var(--brand); cursor: pointer; list-style: none; }
+.fact-more summary, .area-note summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 44px; font-size: var(--text-sm); font-weight: 700; color: var(--brand); cursor: pointer; list-style: none; }
 .fact-more summary::-webkit-details-marker, .area-note summary::-webkit-details-marker { display: none; }
 .fact-more summary::after, .area-note summary::after { content: "›" / ""; font-size: var(--text-lg); line-height: 1; transition: transform var(--duration-fast) var(--ease-out); }
 .fact-more[open] summary::after, .area-note[open] summary::after { transform: rotate(90deg); }

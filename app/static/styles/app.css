@@ -37,14 +37,14 @@ a { color: var(--brand); }
 }
 /* the site's one signature: the five depth bands as a ruler under the header, as in the chat and the printed sheets */
 .topbar::after, .band-ruler { content: ""; position: absolute; inset: auto 0 0 0; height: 3px; background: linear-gradient(90deg, var(--band-1) 0 20%, var(--band-2) 20% 40%, var(--band-3) 40% 60%, var(--band-4) 60% 80%, var(--band-5) 80%); }
-.brand { display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; color: inherit; text-decoration: none; font-weight: 800; font-stretch: var(--narrow); letter-spacing: 0.01em; font-size: var(--text-xl); line-height: 1; }   /* "MyFlood" in its own case: the My is part of the name */
+.brand { display: flex; align-items: center; min-height: 44px; gap: var(--space-2); white-space: nowrap; color: inherit; text-decoration: none; font-weight: 800; font-stretch: var(--narrow); letter-spacing: 0.01em; font-size: var(--text-xl); line-height: 1; }   /* "MyFlood" in its own case: the My is part of the name */
 /* the mark is a flood post: red and white bands, as on a JPS depth gauge, with the brand's cyan for its edge */
 .brand-mark { width: 12px; height: 32px; border-radius: 2px; background: repeating-linear-gradient(var(--risk-danger) 0 8px, var(--ink) 8px 16px); box-shadow: 0 0 0 1.5px var(--brand-deep), 0 0 0 3px var(--brand), 0 0 18px rgb(70 211 255 / 0.5); }
 .brand-mark .icon { display: none; }
 .place { padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font: 400 var(--text-label) var(--font-mono); letter-spacing: 0.04em; color: var(--ink-2); white-space: nowrap; }
 .finder { position: relative; margin-left: auto; width: min(22rem, 100%); }
 .finder .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
-.finder input { width: 100%; height: 42px; padding: 0 var(--space-3) 0 38px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-sunk); color: var(--ink); }
+.finder input { width: 100%; height: 44px; padding: 0 var(--space-3) 0 38px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-sunk); color: var(--ink); }
 .finder input:hover { border-color: var(--field-border); }
 .badge { padding: 3px 8px; border: 1px solid rgb(255 177 74 / 0.6); border-radius: var(--radius-sm); background: none; color: var(--marker); font: 400 var(--text-label) var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
 /* BM | EN: two 44 px buttons, the page's language pressed */
@@ -99,7 +99,7 @@ h2 { font-family: var(--font); font-stretch: var(--narrow); font-size: var(--tex
 /* ---------- controls ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
-  min-height: 42px; padding: 0 var(--space-4); border-radius: var(--radius-sm); border: 1px solid transparent;
+  min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-sm); border: 1px solid transparent;
   font-weight: 700; font-size: var(--text-sm); cursor: pointer; text-decoration: none;
   transition: background-color var(--duration-fast), border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast);
 }
@@ -113,7 +113,7 @@ h2 { font-family: var(--font); font-stretch: var(--narrow); font-size: var(--tex
 .btn-secondary:hover { background: var(--surface-raised); border-color: var(--brand); }
 .btn-link { min-height: 0; padding: 0; background: none; color: var(--brand); font-weight: 600; }
 .btn-link:hover { text-decoration: underline; }
-.field { width: 100%; min-height: 42px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface-sunk); color: var(--ink); }
+.field { width: 100%; min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface-sunk); color: var(--ink); }
 .field::placeholder, .finder input::placeholder { color: var(--ink-3); }
 .field:hover { border-color: var(--ink-2); }
 .field:focus-visible { border-color: var(--action); }
@@ -184,13 +184,13 @@ h2 { font-family: var(--font); font-stretch: var(--narrow); font-size: var(--tex
     border-top: 1px solid var(--line); border-bottom: 0;
   }
   /* min-width 0 and wrapping: Bahasa Melayu labels run longer, and four tabs must still fit 320 px */
-  .tabs [role="tab"] { flex: 1; min-width: 0; flex-direction: column; gap: 2px; padding: var(--space-2) var(--space-1); border-bottom: 0; border-top: 2px solid transparent; font-size: 0.6875rem; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+  .tabs [role="tab"] { flex: 1; min-width: 0; flex-direction: column; gap: 2px; padding: var(--space-2) var(--space-1); border-bottom: 0; border-top: 2px solid transparent; font-size: 0.75rem; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
   .tabs [role="tab"][aria-selected="true"] { border-top-color: var(--accent); box-shadow: inset 0 10px 12px -12px rgb(70 211 255 / 0.9); }
   .tabs .icon { width: 22px; height: 22px; }
   main, .about { padding-bottom: calc(var(--space-10) + 64px + 60px + env(safe-area-inset-bottom)); }   /* tab bar, then the chat button */
 }
 /* five tabs on the narrowest phones: a smaller label, so a whole Bahasa Melayu word such as "Perniagaan" fits */
-@media (max-width: 380px) {
+@media (max-width: 359px) {
   .tabs [role="tab"] { padding-inline: 2px; font-size: 0.625rem; }
 }
 
@@ -199,7 +199,7 @@ h2 { font-family: var(--font); font-stretch: var(--narrow); font-size: var(--tex
 @media (pointer: coarse) {
   input, select, textarea { font-size: max(1rem, 1em); }
   .scenario button { min-height: 44px; }
-  summary { padding-block: var(--space-2); }
+  summary { padding-block: 11px; }   /* with its line, 44 px */
 }
 
 @media (prefers-reduced-motion: reduce) {

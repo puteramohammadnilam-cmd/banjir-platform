@@ -91,7 +91,7 @@
   --text-2xl: clamp(1.9rem, 1.4rem + 1.8vw, 2.6rem);
   --text-figure: clamp(2.4rem, 1.6rem + 2.6vw, 3.4rem);
   --text-hero: clamp(2.3rem, 1.3rem + 3.2vw, 3.9rem);
-  --text-label: 0.6875rem;     /* the mono labels */
+  --text-label: 0.75rem;       /* the mono labels: 12 px, the smallest text on the page */
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

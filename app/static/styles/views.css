@@ -42,6 +42,7 @@
 .stamp-cite p { max-width: 60rem; margin-top: var(--space-1); overflow-wrap: anywhere; user-select: all; }
 /* the flood size on show, as a sentence above the map */
 .scenario-sentence { margin: var(--space-1) 0; font-size: var(--text-md); line-height: 1.45; max-width: 40rem; color: var(--ink); }
+.scenario-sentence:empty { min-height: 2.9em; }   /* two lines kept until overview.js writes it, so the map does not jump */
 
 .overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
 /* phones and tablets: one column, in the page's order (index.html) */
@@ -234,7 +235,7 @@
 .section-table tbody tr { transition: background-color var(--duration-fast); }
 .section-table tbody tr:hover, .section-table tbody tr:focus-within { background: var(--surface-sunk); }
 .section-table tbody th { font-weight: 600; white-space: nowrap; }
-.section-table tbody th a { display: inline-block; padding: var(--space-1) 0; color: var(--ink); text-decoration: none; }
+.section-table tbody th a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: none; }
 .section-table tbody th a:hover { color: var(--brand); text-decoration: underline; }
 .share-cell { display: flex; align-items: center; gap: var(--space-3); }
 .share-track { flex: 1 1 auto; max-width: 11rem; height: 10px; border-radius: 2px; background: var(--map-night); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
@@ -257,6 +258,10 @@
 .stage { display: grid; gap: var(--space-4); margin-bottom: var(--space-4); }
 .stage-panel { display: grid; gap: var(--space-5); }
 .stage .map-surface { margin: 0; }
+/* the room the figures and "Check any point" take once the area's data is in, kept from the start, so the map under
+   them does not jump down as the page loads (the audit of 18 Oct measured a shift of up to 0.5 on tablets) */
+.kpis:empty { min-height: 255px; }
+.finder-hero-point[hidden] { display: flex !important; visibility: hidden; }
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -270,6 +275,18 @@
   .kpi-hero { margin-bottom: 0; border-bottom: 0; }
   .kpi-flood { display: none; }
   .kpi-art { width: 5.5rem; }
+}
+
+/* a tablet or wider: the search and the figures side by side over the map, so the map starts higher; the figures in
+   two columns, the lead across both (the floating panel of a laptop keeps the same figures, in one column) */
+@media (min-width: 768px) {
+  .stage-panel { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: var(--space-8); align-items: start; }
+  .stage-panel .kpis, .stage-panel .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage-panel .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-4); margin-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .stage-panel .kpi { padding: 0 var(--space-3); }
+  .stage-panel .kpi-hero + .kpi, .stage-panel .kpi:nth-child(4) { padding-left: 0; border-left: 0; }
+  .stage-panel .kpi:nth-child(4) { margin-top: var(--space-4); }
+  .kpis:empty { min-height: 272px; }
 }
 
 /* a laptop or wider: the map fills the stage, and the search with the figures floats over its left as a glass panel;
@@ -312,11 +329,7 @@
   .stage .leaflet-top.leaflet-right { right: calc(min(23rem, 30%) + 2 * var(--space-4)); }   /* "Check a point" beside the flood size, not under it */
   .stage .aim-panel { position: absolute; top: var(--space-4); right: var(--space-4); width: min(21rem, 32%); max-height: calc(100% - 2 * var(--space-4)); overflow-y: auto; }
   .stage .map-surface:has(.aim-panel:not([hidden])) .surface-head { display: none; }   /* aiming: the panel says what to do */
-  .stage .kpis, .stage .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stage .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-4); margin-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
-  .stage .kpi { padding: 0 var(--space-3); }
-  .stage .kpi-hero + .kpi, .stage .kpi:nth-child(4) { padding-left: 0; border-left: 0; }
-  .stage .kpi:nth-child(4) { margin-top: var(--space-4); }
+  .stage-panel { grid-template-columns: minmax(0, 1fr); }   /* one column in the floating panel */
 }
 
 /* ---- ux-fixes: hero, empty state ---- */
@@ -325,7 +338,7 @@ body[data-tab="overview"] .finder { display: none; }
 
 /* the way in: a big search box, the primary action, with the way to any point beside it as the second */
 .finder-hero { display: grid; gap: var(--space-3); }   /* the page's question, big and narrow, as a flood notice would put it */
-.finder-hero-title { font-stretch: 66%; font-size: var(--text-hero); font-weight: 800; letter-spacing: 0.005em; line-height: 0.9; text-transform: uppercase; color: var(--ink); }
+.finder-hero-title { min-height: 1.8em; font-stretch: 66%; font-size: var(--text-hero); font-weight: 800; letter-spacing: 0.005em; line-height: 0.9; text-transform: uppercase; color: var(--ink); }   /* two lines kept: the city's name joins it once the data is in */
 .finder-hero-title label { cursor: pointer; }
 .finder-hero-lead { color: var(--ink-2); max-width: 40rem; }
 .finder-hero-form { position: relative; display: flex; gap: var(--space-2); max-width: 42rem; margin-top: var(--space-2); }
@@ -373,7 +386,7 @@ body[data-tab="overview"] .finder { display: none; }
 .layer-toggle { font-weight: 700; }
 .metric-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-2); }
 .metric-choice legend { float: left; margin-right: var(--space-2); font-weight: 700; }
-.metric-choice label { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); transition: border-color var(--duration-fast), background-color var(--duration-fast); }
+.metric-choice label { min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); transition: border-color var(--duration-fast), background-color var(--duration-fast); }
 .metric-choice label:hover { border-color: var(--brand); }
 .metric-choice label:has(:checked) { border-color: var(--brand); background: var(--brand-wash); color: var(--brand-ink); font-weight: 600; }
 .map-controls .alert { flex-basis: 100%; margin: 0 0 var(--space-2); }

@@ -237,7 +237,7 @@ export function createBusiness(panel, { area, areas = [], onWarning = null, onPh
   const side = h("aside", { class: "biz-side", "aria-label": t("business.sideLabel") });
   const announcer = h("p", { class: "visually-hidden", "aria-live": "polite" });
   const grid = h("div", { class: "biz-grid" }, risk, side);
-  risk.append(picker, drawing);
+  risk.append(drawing);   // the flood size picker goes in the drawing, under the street scene it changes
   panel.replaceChildren(empty, head, grid, announcer);
   let drawnKey = null;
   let shown = {};
@@ -272,7 +272,7 @@ export function createBusiness(panel, { area, areas = [], onWarning = null, onPh
         const isPageArea = !premise.is_point || premise.area_id === area.id;   // the example is this area's flood
         renderPicker(picker, rp, onPick, isPageArea ? area.bigger_flood_example : null);
         const [figure, sentence, ...notes] = headline(premise, rp);   // the street scene comes straight after the figure, the caveats under it
-        drawing.replaceChildren(figure, sentence, gauge(premise, rp, floorM), ...notes, caption(photoFloorM, floorM),
+        drawing.replaceChildren(figure, sentence, gauge(premise, rp, floorM), caption(photoFloorM, floorM), picker, ...notes,
           shareButton(premise, rp, isPageArea ? area.display_name : null));
         announcer.textContent = spoken(premise, rp);
       }

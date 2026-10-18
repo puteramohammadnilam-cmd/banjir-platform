@@ -10,7 +10,7 @@
 .ref-short-item strong { display: block; margin-bottom: 2px; font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 700; color: var(--ink); }
 .ref-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .ref-nav ol { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }   /* every link in sight on a phone */
-.ref-jump { min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; transition: border-color var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast); }
+.ref-jump { min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; transition: border-color var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast); }
 .ref-jump:hover { border-color: var(--brand); color: var(--brand); }
 .ref-jump:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 .ref-body { display: grid; gap: var(--space-8); }
@@ -40,7 +40,7 @@
   .ref-short-item strong { position: absolute; left: 0; top: 0; width: 15rem; margin: 0; }
   .ref-nav { position: sticky; top: 5rem; }
   .ref-nav ol { flex-direction: column; flex-wrap: nowrap; gap: 0; border-left: 2px solid var(--line); }
-  .ref-jump { width: 100%; min-height: 40px; border: 0; border-radius: 0; margin-left: -2px; border-left: 2px solid transparent; background: none; text-align: left; white-space: normal; }
+  .ref-jump { width: 100%; min-height: 44px; border: 0; border-radius: 0; margin-left: -2px; border-left: 2px solid transparent; background: none; text-align: left; white-space: normal; }
   .ref-jump:hover { border-left-color: var(--brand); background: var(--brand-wash); }
   .ref-source { grid-template-columns: 12rem minmax(0, 1fr); gap: var(--space-4); }
 }
