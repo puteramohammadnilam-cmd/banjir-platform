@@ -54,8 +54,8 @@ a { color: var(--brand); }
 .lang-switch button[aria-pressed="true"] { background: var(--ink); color: var(--canvas); }
 
 /* ---------- tabs: a bar under the header on wide screens, a bottom bar on phones ---------- */
+.tabs-bar { position: sticky; top: 0; z-index: 1000; }   /* the nav landmark holds the tab list, and sticks */
 .tabs {
-  position: sticky; top: 0; z-index: 1000;
   display: flex; gap: var(--space-1);
   padding: 0 var(--edge);
   background: rgb(6 10 15 / 0.86); backdrop-filter: blur(10px);
@@ -184,7 +184,7 @@ body.load-failed :is(.tabs, main > .panel, .chat-fab, .finder) { display: none !
   .finder { order: 3; width: 100%; margin-left: 0; }
   .lang-switch { margin-left: auto; }
   .tabs {
-    position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+    position: fixed; z-index: 1000; top: auto; bottom: 0; left: 0; right: 0;
     justify-content: space-around; gap: 0; padding: 0 0 env(safe-area-inset-bottom);
     border-top: 1px solid var(--line); border-bottom: 0;
   }
