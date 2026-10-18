@@ -63,6 +63,17 @@
 .leaflet-container { font-family: var(--font); background: var(--map-night); }
 .map-hint { position: absolute; z-index: 1000; inset: 0; display: grid; place-items: center; margin: 0; padding: var(--space-4); background: rgb(2 5 8 / 0.62); color: var(--ink); font-size: var(--text-md); font-weight: 700; text-align: center; pointer-events: none; opacity: 0; transition: opacity var(--duration-normal); }   /* a touch screen's "two fingers" (map.js), for a moment */
 .map-hint.is-shown { opacity: 1; }
+/* while the area's data is on its way: the map says so, softly pulsing, and the figures' room shimmers (both still
+   with reduced motion asked for) */
+#map { position: relative; }
+#map:empty::before { content: attr(data-loading); position: absolute; inset: 0; display: grid; place-items: center; font: 400 var(--text-sm) var(--font-mono); letter-spacing: 0.04em; color: var(--ink-3); animation: pulse 1.4s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 0.35; } }
+.kpis:empty { position: relative; overflow: hidden; background: linear-gradient(var(--surface-raised) 0 0) 0 var(--space-4) / 62% 2.6rem no-repeat, linear-gradient(var(--surface-raised) 0 0) 0 4.6rem / 85% 1.1rem no-repeat, linear-gradient(var(--surface-raised) 0 0) 0 6.4rem / 45% 0.8rem no-repeat; }
+.kpis:empty::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent); transform: translateX(-100%); animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { #map:empty::before, .kpis:empty::after { animation: none; } }
+/* the street map's tiles did not load (map.js watchTiles): a note at the foot of the map */
+.map-tiles-note { position: absolute; z-index: 800; left: 50%; bottom: 2.25rem; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2 * var(--space-4)); margin: 0; padding: var(--space-2) var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--glass); color: var(--ink-2); font-size: var(--text-sm); text-align: center; }
 .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }   /* zoom buttons: 44 px touch targets */
 /* the night map: the street map's tiles, turned dark, so the water glows on it. Under the flash flood and low ground
    pictures (made for a pale map) the day comes back: map.js sets is-day while one is on */
@@ -337,6 +348,7 @@
   .stage .legend-items li { white-space: nowrap; }
   .stage .leaflet-top.leaflet-left { left: calc(var(--float) + 2 * var(--space-4)); }
   .stage .leaflet-top.leaflet-right { right: calc(min(23rem, 30%) + 2 * var(--space-4)); }   /* "Check a point" beside the flood size, not under it */
+  .stage .map-tiles-note { left: calc(var(--float) + 2 * var(--space-4)); right: calc(min(23rem, 30%) + 2 * var(--space-4)); width: auto; transform: none; }   /* between the panels */
   .stage .aim-panel { position: absolute; top: var(--space-4); right: var(--space-4); width: min(21rem, 32%); max-height: calc(100% - 2 * var(--space-4)); overflow-y: auto; }
   .stage .map-surface:has(.aim-panel:not([hidden])) .surface-head { display: none; }   /* aiming: the panel says what to do */
   .stage-panel { grid-template-columns: minmax(0, 1fr); }   /* one column in the floating panel */
@@ -358,6 +370,10 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 .finder-hero-form .field { flex: 1 1 auto; min-width: 0; min-height: 56px; padding-left: 48px; font-size: var(--text-lg); border-color: var(--field-border); box-shadow: var(--shadow-sm); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
 .finder-hero-form .field:focus-visible { border-color: var(--brand); box-shadow: var(--glow); }
 .finder-hero-form .btn { flex: none; min-height: 56px; padding: 0 var(--space-6); font-size: var(--text-md); box-shadow: var(--shadow-sm); }
+/* the three steps of the page, under the search: a sequence, so numbered */
+.how-steps { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-4); margin: 0; padding: 0; list-style: none; counter-reset: step; font: 400 var(--text-label)/1.5 var(--font-mono); letter-spacing: 0.02em; color: var(--ink-2); }
+.how-steps li { display: inline-flex; align-items: center; counter-increment: step; }
+.how-steps li::before { content: counter(step); display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; margin-right: var(--space-2); border: 1px solid rgb(70 211 255 / 0.5); border-radius: 50%; color: var(--brand); }
 .finder-hero-point { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
 .finder-hero-point .btn { min-height: 44px; }
 .finder-hero-point .icon { color: var(--marker); }

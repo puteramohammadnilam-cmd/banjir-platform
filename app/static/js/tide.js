@@ -1,7 +1,7 @@
 // "Tide at <station>" on the Area overview, for an area whose river is tidal (GET /api/tide; the server keeps a table of
 // predicted highs and lows built from a public tide-gauge record). Today's high tides, whether today is a big (spring)
 // tide, and why it matters: heavy rain near high tide drains more slowly. The card stays out until the server answers,
-// and for an area with no tide table.
+// and for an area with no tide table; when the answer fails it says so.
 import { h } from "./dom.js";
 import { dateLocale, t } from "./i18n.js";
 
@@ -43,8 +43,8 @@ function body(found) {
   ].filter(Boolean);
 }
 
-/** The card in `section`; set(state) draws it from {data} (the answer's `tide`), or hides it for {busy}, {error} or
- *  an area without a tide table (data null). */
+/** The card in `section`; set(state) draws it from {data} (the answer's `tide`), says it could not load for {error},
+ *  and hides it for {busy} or an area without a tide table (data null). */
 export function createTide(section) {
   section.hidden = true;
   let shown;
@@ -53,7 +53,8 @@ export function createTide(section) {
       if (state === shown) return;
       shown = state;
       const found = current(state?.data);
-      section.hidden = !found;
+      section.hidden = !found && !state?.error;
+      if (!found && state?.error) section.replaceChildren(h("h2", { class: "small-heading", id: "tide-heading" }, t("tide.headingPlain")), h("p", {}, t("tide.failed")));
       if (!found) return;
       section.replaceChildren(h("h2", { class: "small-heading", id: "tide-heading" }, t("tide.heading", { station: found.station })), ...body(found));
     },

@@ -11,4 +11,15 @@ export default Object.freeze({
   "drawing.cover": "Drawing made with Google Gemini: a shop cut open, the building drawn plain and its contents shaded, to tell the two apart.",
   "drawing.street": "Drawing made with Google Gemini: a row of shophouses by a river, with lines marking three flood heights.",
   "drawing.ready": "Drawing made with Google Gemini: a shop owner lifting boxes onto a high shelf, with sandbags at the door and water outside.",
+  // ---------- how to use, loading and failing (18 Oct 2026) ----------
+  "hero.stepsLabel": "How it works",
+  "hero.step1": "Find your shop",
+  "hero.step2": "See the water at your door",
+  "hero.step3": "Check the cost and what to do",
+  "map.tilesFailed": "The street map did not load. The flood squares and shops are still right.",
+  "main.loadingMap": "Loading the flood map…",
+  "main.failHeading": "The flood map could not load",
+  "main.failHelp": "Check your connection, then try again. If it keeps happening the server may be busy: wait a minute.",
+  "main.failMeanwhile": "For official flood warnings meanwhile:",
+  "main.failEmergency": "In an emergency call 999.",
 });

@@ -95,6 +95,11 @@ h2 { font-family: var(--font); font-stretch: var(--narrow); font-size: var(--tex
 .alert-info { background: var(--brand-wash); color: var(--brand-ink); font-weight: 500; }   /* a state of this build, not an error */
 .alert .btn { margin-left: var(--space-2); }
 .status-line:not(:empty) { margin-bottom: var(--space-4); }   /* empty, it takes no room, so a quick start looks unchanged */
+/* the page could not start: one card where the map would be, with Retry and the official warnings; the empty map, the
+   tabs, the header's search and the chat button make way for it (main.js showStartError) */
+.load-error { display: grid; gap: var(--space-3); justify-items: start; max-width: 40rem; margin: var(--space-8) auto; padding: var(--space-6); border: 1px solid var(--risk-danger); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font-size: var(--text-md); font-weight: 400; }
+.load-error-title { font-size: var(--text-2xl); font-weight: 800; text-transform: uppercase; line-height: 1; color: var(--risk-danger); }
+body.load-failed :is(.tabs, main > .panel, .chat-fab, .finder) { display: none !important; }
 
 /* ---------- controls ---------- */
 .btn {

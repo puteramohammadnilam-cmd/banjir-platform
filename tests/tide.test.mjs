@@ -25,10 +25,18 @@ test("high tide times read as a list", () => {
 test("the card stays hidden until the server answers, and for an area with no tide table", () => {
   const section = document.createElement("section");
   const card = createTide(section);
-  for (const state of [{ busy: true }, { error: true }, { data: null }]) {
+  for (const state of [{ busy: true }, { data: null }]) {
     card.set(state);
     assert.equal(section.hidden, true, JSON.stringify(state));
   }
+});
+
+test("when the tide cannot be loaded, the card says so instead of going away", () => {
+  const section = document.createElement("section");
+  createTide(section).set({ error: true });
+  assert.equal(section.hidden, false);
+  assert.match(section.textContent, /Tide today/);
+  assert.match(section.textContent, /could not be loaded just now/);
 });
 
 test("an ordinary day gives the station, today's highs, the next high and why it matters", () => {

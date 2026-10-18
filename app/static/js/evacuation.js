@@ -1,10 +1,12 @@
 // "Flood evacuation centres open now" on the Area overview: the flood centres JKM lists as open within a few km of the
 // area or section on show (GET /api/evacuation; the server asks JKM's public feed at most every 5 minutes). Counts per centre,
-// never a person's details. The card stays out of the page until the server has answered, and while the feed fails.
+// never a person's details. The card stays out of the page until the server has answered; when the feed fails it says so,
+// with JKM's own page, rather than leaving a visitor to wonder where it went.
 import { h } from "./dom.js";
 import { dateLocale, formatNumber, t } from "./i18n.js";
 
 const MAX_DISTRICT = 40;
+const JKM_PORTAL = "https://infobencanajkmv2.jkm.gov.my/landing/";   // PORTAL in app/evacuation.py
 
 /** When the feed was checked, as a Malaysian clock time ("21:05"). */
 export function checkedTime(iso, locale = "en-MY") {
@@ -35,8 +37,11 @@ function body(found) {
   ].filter(Boolean);
 }
 
-/** The card in `section`; set(state) draws it from {data} (the answer's `centres`), or hides it for {busy}, {error},
- *  or a feed that is failing (data null). */
+const failedBody = () => [h("p", {}, t("evac.failed")),
+  h("p", { class: "small" }, h("a", { href: JKM_PORTAL, target: "_blank", rel: "noopener noreferrer" }, t("evac.link")))];
+
+/** The card in `section`; set(state) draws it from {data} (the answer's `centres`), hides it while {busy}, and says it
+ *  could not check for {error} (the page could not ask) or a failing feed (data null). */
 export function createEvacuation(section) {
   section.hidden = true;
   let shown;
@@ -45,9 +50,10 @@ export function createEvacuation(section) {
       if (state === shown) return;
       shown = state;
       const found = state?.data;
-      section.hidden = !found;
-      if (!found) return;
-      section.replaceChildren(h("h2", { class: "small-heading", id: "evacuation-heading" }, t("evac.heading")), ...body(found));
+      const isFailed = Boolean(state?.error) || (Boolean(state) && "data" in state && state.data === null);
+      section.hidden = !found && !isFailed;
+      if (section.hidden) return;
+      section.replaceChildren(h("h2", { class: "small-heading", id: "evacuation-heading" }, t("evac.heading")), ...(found ? body(found) : failedBody()));
     },
   };
 }

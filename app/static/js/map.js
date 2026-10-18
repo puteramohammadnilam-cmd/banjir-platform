@@ -64,6 +64,18 @@ function sidePadding(element) {
   return { left: left && left + SIDE_GAP, right: right && right + SIDE_GAP };
 }
 
+const TILE_FAILS = 4;   // this many failed street-map tiles, and none loaded, and the map says so
+/** When the street map's tiles do not load (a blocked or busy tile server), says so on the map, so a dark map with only
+ *  the flood squares is not taken for a fault in them; a tile that loads takes the note away. */
+function watchTiles(map, tiles) {
+  const note = h("p", { class: "map-tiles-note", role: "status", hidden: true }, t("map.tilesFailed"));
+  map.getContainer().append(note);
+  let loaded = 0;
+  let failed = 0;
+  tiles.on("tileload", () => { loaded += 1; note.hidden = true; });
+  tiles.on("tileerror", () => { failed += 1; if (failed >= TILE_FAILS && loaded === 0) note.hidden = false; });
+}
+
 /** The Leaflet map on the page's own view and zoom (the area's config, or a section's box), with the base tiles. It can be
  *  moved over all of Malaysia. */
 function openMap(element, { view: [west, south, east, north], zoom, fit = false }) {
@@ -81,7 +93,7 @@ function openMap(element, { view: [west, south, east, north], zoom, fit = false 
   };
   showView();
   followResize(map, element, showView);
-  L.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
+  watchTiles(map, L.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map));
   return map;
 }
 

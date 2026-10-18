@@ -11,4 +11,15 @@ export default Object.freeze({
   "drawing.cover": "Lukisan dibuat dengan Google Gemini: keratan rentas kedai, bangunannya dilukis dengan garis ringkas dan isinya berlorek, untuk membezakan kedua-duanya.",
   "drawing.street": "Lukisan dibuat dengan Google Gemini: sederet rumah kedai di tepi sungai, dengan garisan yang menandakan tiga paras banjir.",
   "drawing.ready": "Lukisan dibuat dengan Google Gemini: pemilik kedai mengangkat kotak ke rak tinggi, dengan beg pasir di pintu dan air di luar.",
+  // ---------- how to use, loading and failing (18 Oct 2026) ----------
+  "hero.stepsLabel": "Cara guna",
+  "hero.step1": "Cari kedai anda",
+  "hero.step2": "Lihat paras air di pintu kedai",
+  "hero.step3": "Semak kos dan apa perlu dibuat",
+  "map.tilesFailed": "Peta jalan tidak dapat dimuatkan. Petak banjir dan kedai masih betul.",
+  "main.loadingMap": "Memuatkan peta banjir…",
+  "main.failHeading": "Peta banjir tidak dapat dimuatkan",
+  "main.failHelp": "Semak sambungan anda, kemudian cuba lagi. Jika masih berlaku, pelayan mungkin sibuk: tunggu seminit.",
+  "main.failMeanwhile": "Untuk amaran banjir rasmi sementara itu:",
+  "main.failEmergency": "Dalam kecemasan, hubungi 999.",
 });

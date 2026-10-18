@@ -129,7 +129,7 @@
 
   <main>
     <p class="status-line muted small" id="loading" role="status"></p>
-    <p class="alert" id="load-error" role="alert" hidden></p>
+    <div class="alert load-error" id="load-error" role="alert" hidden></div>
     <p class="alert" id="link-note" role="alert" hidden></p>
 
     <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
@@ -143,6 +143,11 @@
               <input id="finder-hero-input" class="field" type="search" list="business-names" data-i18n-attr="placeholder:hero.placeholder" placeholder="Your shop's name" autocomplete="off" enterkeyhint="search">
               <button type="submit" class="btn btn-primary" data-i18n="hero.search">Search</button>
             </form>
+            <ol class="how-steps" data-i18n-attr="aria-label:hero.stepsLabel" aria-label="How it works">
+              <li data-i18n="hero.step1">Find your shop</li>
+              <li data-i18n="hero.step2">See the water at your door</li>
+              <li data-i18n="hero.step3">Check the cost and what to do</li>
+            </ol>
             <p class="finder-hero-point" id="hero-point" hidden>
               <span data-i18n="hero.notListed">Not on the list?</span>
               <button type="button" class="btn btn-secondary" id="hero-check"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="hero.check">Check any point in Malaysia</span></button>
@@ -160,7 +165,7 @@
             <div class="scenario-slot" data-scenario></div>
           </div>
           <div class="map-stage">
-            <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
+            <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic;data-loading:main.loadingMap" aria-label="Map with modelled flood depth at each business" data-loading="Loading the flood map…"></div>
             <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
           </div>
         </section>

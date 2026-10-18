@@ -572,10 +572,20 @@ function showNote(text, onRetry = null) {
   $("link-note").hidden = !text;
 }
 
+const OFFICIAL_WARNINGS = "https://publicinfobanjir.water.gov.my/";
+
+/** The page could not start: one card in place of the empty map and the tabs, with what went wrong, a way to try again,
+ *  and where official flood warnings are meanwhile. */
 function showStartError(error) {
-  $("load-error").replaceChildren(`${t("main.loadFailed")} ${error.message}`,
-    h("button", { type: "button", class: "btn btn-secondary", onclick: () => location.reload() }, t("common.retry")));
+  const official = h("a", { href: OFFICIAL_WARNINGS, target: "_blank", rel: "noopener noreferrer", translate: "no" }, "JPS Public Infobanjir");
+  $("load-error").replaceChildren(
+    h("h2", { class: "load-error-title" }, t("main.failHeading")),
+    h("p", {}, `${t("main.loadFailed")} ${error.message}`),
+    h("p", {}, t("main.failHelp")),
+    h("button", { type: "button", class: "btn btn-primary", onclick: () => location.reload() }, t("common.retry")),
+    h("p", { class: "small" }, t("main.failMeanwhile"), " ", official, ". ", t("main.failEmergency")));
   $("load-error").hidden = false;
+  document.body.classList.add("load-failed");   // views.css: the empty map and the tabs make way for this card
 }
 
 /** Read the link, load what it needs and start the page. A slow start says so; a failed one says why, with Retry. */

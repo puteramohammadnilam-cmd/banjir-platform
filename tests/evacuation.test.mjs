@@ -25,12 +25,23 @@ test("a centre's line has its counts, how full it is, and its district as JKM na
   assert.equal(centreLine({ ...CENTRE, evacuees: 1, families: 1 }), "People: 1 · Families: 1 · 35% full · Petaling", "no '1 families'");
 });
 
-test("the card stays hidden until the server answers, and while the feed fails", () => {
+test("the card stays hidden until the server answers", () => {
   const section = document.createElement("section");
   const card = createEvacuation(section);
-  for (const state of [{ busy: true }, { error: true }, { data: null }]) {
+  for (const state of [undefined, { busy: true }]) {
     card.set(state);
     assert.equal(section.hidden, true, JSON.stringify(state));
+  }
+});
+
+test("when JKM's feed fails, the card says it could not check, with JKM's own page", () => {
+  for (const state of [{ error: true }, { data: null }]) {   // the page could not ask; the server could not reach JKM
+    const section = document.createElement("section");
+    createEvacuation(section).set(state);
+    assert.equal(section.hidden, false, JSON.stringify(state));
+    assert.match(section.textContent, /Flood evacuation centres open now/);
+    assert.match(section.textContent, /did not answer just now/);
+    assert.equal(section.querySelector("a").getAttribute("href"), "https://infobencanajkmv2.jkm.gov.my/landing/");
   }
 });
 
