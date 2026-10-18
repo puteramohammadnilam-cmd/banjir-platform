@@ -1,39 +1,53 @@
 :root {
-  /* The look of a public-interest flood almanac (6 Oct 2026 revamp): paper and ink, one action colour (navy), a risk
-     ladder in the order Malaysians know from JPS river levels (green, yellow, orange, red), and the depth bands for
-     water. Each colour has one job; every risk colour also comes with words. */
+  /* Night water (18 Oct 2026, for the finale): the page is the night and the water glows. A dark, map-first look: one
+     action colour (cyan), the picked place in amber, the JPS risk ladder (green, yellow, orange, red) lifted to read on
+     dark, and the depth bands unchanged, as they are the shop dots' colours. Each colour has one job; every risk colour
+     also comes with words. Print turns it all back to ink on paper (the end of this file). */
+  color-scheme: dark;
 
-  /* surfaces: paper, white panels, sunk wells */
-  --canvas: #f6f7f9;
-  --surface: #ffffff;
-  --surface-sunk: #eef1f5;
-  --line: #dde2e9;          /* rules and decorative borders */
-  --line-strong: #c3ccd7;
-  --field-border: #7b8798;  /* inputs and controls: 3.65:1 on white, so their edge is seen */
+  /* surfaces: the night, panels a step up, glass over the map, sunk wells */
+  --canvas: #060a0f;
+  --surface: #0c131b;
+  --surface-raised: #121c27;
+  --surface-sunk: #080e14;
+  --glass: rgb(9 15 22 / 0.88);
+  --glass-edge: rgb(150 205 240 / 0.16);
+  --line: #1b2834;          /* rules and decorative borders */
+  --line-strong: #2c3d4d;
+  --field-border: #6d8597;  /* inputs and controls: 4.8:1 on --surface, so their edge is seen */
 
   /* ink */
-  --ink: #0d1b2a;
-  --ink-2: #3d4f63;
-  --ink-3: #56677b;   /* 5.1:1 on --surface-sunk */
+  --ink: #e7eff5;
+  --ink-2: #aebfcc;
+  --ink-3: #8ea2b3;   /* 7:1 on --surface */
+  --ink-on-light: #0d1b2a;   /* text on the pale depth chips and on printed paper */
 
-  /* action: navy and nothing else (buttons, the tab on show, focus, links) */
-  --brand: #0c447c;
-  --brand-deep: #08304f;
-  --brand-wash: #e8f0f8;
+  /* action: cyan and nothing else (buttons, the tab on show, focus, links) */
+  --brand: #46d3ff;
+  --brand-ink: #a3e8ff;     /* cyan words on a cyan wash */
+  --brand-deep: #0a1824;    /* the bars: header and the chat's head */
+  --brand-wash: rgb(70 211 255 / 0.12);
   --action: var(--brand);
-  --action-hover: var(--brand-deep);
-  --marker: #0d1b2a;   /* the place picked on the map: an ink ring, apart from the water and risk colours */
+  --action-hover: #8be3ff;
+  --on-action: #03121b;     /* words on a cyan button */
+  --glow: 0 0 0 1px rgb(70 211 255 / 0.4), 0 0 22px -4px rgb(70 211 255 / 0.6);
+  --marker: #ffb14a;        /* the place picked on the map: amber, apart from the water and risk colours */
+
+  /* the water in the shop's street scene (gauge.js): glass that is lit from the surface down */
+  --water-top: #6fdcff;
+  --water-deep: #0f4c80;
+  --waterline: #9beaff;
 
   /* risk, low to high, in JPS order. The dot colours mark; the -ink colours carry text (4.5:1 or more on their wash) */
-  --risk-normal: #2f7a3d;
-  --risk-normal-wash: #e9f3eb;
-  --risk-alert: #e0b100;
-  --risk-alert-ink: #7a5c00;
-  --risk-alert-wash: #fbf3d0;
-  --risk-warning: #a14a00;
-  --risk-warning-wash: #fdeedd;
-  --risk-danger: #b42318;
-  --risk-danger-wash: #fdecea;
+  --risk-normal: #4cc38a;
+  --risk-normal-wash: rgb(76 195 138 / 0.14);
+  --risk-alert: #f2c230;
+  --risk-alert-ink: #f6d466;
+  --risk-alert-wash: rgb(242 194 48 / 0.14);
+  --risk-warning: #ff9440;
+  --risk-warning-wash: rgb(255 148 64 / 0.14);
+  --risk-danger: #ff6a5f;
+  --risk-danger-wash: rgb(255 106 95 / 0.14);
 
   /* SDG 13 green (UN SDG guidelines, p.68): the rule over the SDG section only */
   --sdg-13: #3f7e44;
@@ -52,26 +66,32 @@
   --band-5: #5a1170;
   --dry-dot: #fbf8f1;   /* a shop with no water: DRY_COLOR in js/dom.js */
 
-  /* the model's squares: one blue that darkens with depth, each at its opacity. Same values as SQUARE_RAMP in js/cells.js.
-     --map-ground is what they lie on: the map's own colour, so a legend swatch looks as the square does on the map */
-  --square-1: rgb(171 207 240 / 0.3);
-  --square-2: rgb(104 152 192 / 0.4);
-  --square-3: rgb(59 113 156 / 0.48);
-  --square-4: rgb(28 84 126 / 0.55);
-  --square-5: rgb(0 48 83 / 0.58);
+  /* the model's squares on the night map: one blue that brightens with depth, each at its opacity. Same values as
+     SQUARE_RAMP in js/cells.js. --map-night is the dark map they lie on, so a legend swatch looks as the square does
+     there; --map-ground is the day map, which comes back under the flash flood and low ground pictures */
+  --square-1: rgb(36 90 140 / 0.42);
+  --square-2: rgb(48 122 190 / 0.58);
+  --square-3: rgb(72 156 230 / 0.66);
+  --square-4: rgb(122 190 255 / 0.74);
+  --square-5: rgb(196 226 255 / 0.84);
+  --map-night: #2f363c;   /* the night map's land, as the tile filter in views.css leaves it */
   --map-ground: #f2efe9;
 
-  /* type: a serif for headings and figures (Source Serif 4, optical sizes, tabular figures), the sans for everything
-     else. Steps of 1.2 from 1rem up; the two small sizes stay readable at arm's length */
-  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  /* type: Archivo for everything, narrowed (its width axis) for headings and figures; Martian Mono for the small
+     labels and units that read like instruments. Steps of 1.2 from 1rem up */
+  --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font);   /* ponytail: old name for the heading face, as above */
+  --font-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --narrow: 72%;               /* font-stretch for headings and figures */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
   --text-lg: 1.2rem;
   --text-xl: 1.44rem;
-  --text-2xl: clamp(1.728rem, 1.4rem + 1.3vw, 2.074rem);
-  --text-figure: clamp(2.074rem, 1.6rem + 2vw, 2.488rem);
+  --text-2xl: clamp(1.9rem, 1.4rem + 1.8vw, 2.6rem);
+  --text-figure: clamp(2.4rem, 1.6rem + 2.6vw, 3.4rem);
+  --text-hero: clamp(2.3rem, 1.3rem + 3.2vw, 3.9rem);
+  --text-label: 0.6875rem;     /* the mono labels */
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -84,17 +104,29 @@
   --gutter: clamp(1rem, 0.6rem + 1.6vw, 2rem);
   --content-max: 100rem;   /* 1600 px: the page uses a wide screen, the map-first overview most of all */
 
-  /* square-ish corners, one scale; panels sit on rules, not shadows. Only floating things (popups, dialogs, the aim
-     panel) get a shadow */
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  /* two radii: small for controls, larger for the glass panels that float over the map */
+  --radius-sm: 6px;
+  --radius-md: 12px;
   --radius-lg: var(--radius-md);   /* ponytail: old name, as above */
-  --shadow-float: 0 1px 2px rgba(13, 27, 42, 0.05), 0 12px 28px -14px rgba(13, 27, 42, 0.22);
+  --shadow-float: 0 0 0 1px var(--glass-edge), 0 24px 48px -24px rgb(0 0 0 / 0.9);
   --shadow-sm: none;
   --shadow-md: var(--shadow-float);
 
   --duration-fast: 150ms;
   --duration-normal: 240ms;
+  --duration-rise: 1600ms;   /* the water rising in the street scene, and the map's water coming in */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* paper: the printed flood plan and area summary are ink on white, whatever the screen shows */
+@media print {
+  :root {
+    color-scheme: light;
+    --canvas: #fff; --surface: #fff; --surface-raised: #fff; --surface-sunk: #f2f4f7; --glass: #fff;
+    --line: #dde2e9; --line-strong: #c3ccd7;
+    --ink: #0d1b2a; --ink-2: #3d4f63; --ink-3: #56677b;
+    --brand: #0c447c; --brand-ink: #08304f; --brand-deep: #08304f; --brand-wash: #e8f0f8;
+    --risk-alert-ink: #7a5c00; --risk-danger: #b42318; --risk-normal: #2f7a3d;
+  }
 }

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { BANDS, DOOR_M } from "../app/static/js/dom.js";
-import { gauge, miniGauge } from "../app/static/js/gauge.js";
+import { TOP_M, gauge, miniGauge } from "../app/static/js/gauge.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
 // The water is one watery blue (the third band's) whatever the depth: deeper bands are indigo and plum, which do not read as water.
@@ -52,7 +52,7 @@ test("drawing the small gauge does not disturb the animated gauge", () => {
   gauge(premise, "20", 0);   // the water now stands at 1.5 m
   miniGauge(2.5);
   const next = gauge(premise, "10", 0);
-  assert.equal(next.querySelector(".water").style.transform, `scaleY(${1.5 / 3})`);   // it falls from 1.5 m, not from the mini's 2.5 m
+  assert.equal(next.querySelector(".water").style.transform, `scaleY(${1.5 / TOP_M})`);   // it falls from 1.5 m, not from the mini's 2.5 m
 });
 
 test("water and waterline stop short of the right-hand labels", () => {

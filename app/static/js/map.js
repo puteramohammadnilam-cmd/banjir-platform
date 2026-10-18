@@ -4,9 +4,9 @@ import { DRY_COLOR, SCENARIOS, band, bandColor, depthText, depthWords, h, icon, 
 import { t } from "./i18n.js";
 import { overlapsView } from "./place.js";
 
-const INK = "#0d1b2a";
-const SELECTED = "#0d1b2a";   // --marker in tokens.css: an ink ring, apart from the water and risk colours
-const BRAND = "#0c447c";      // --brand: a section's outline
+const INK = "#0d1b2a";        // --ink-on-light: a shop dot's ring, which shows on the brightest squares
+const SELECTED = "#ffb14a";   // --marker in tokens.css: an amber ring, apart from the water and risk colours
+const BRAND = "#46d3ff";      // --brand: a section's outline
 const FOCUS_ZOOM = 17;
 const MIN_ZOOM = 6;   // far enough out to see about all of Malaysia on a wide screen
 const FIT_SNAP = 0.25;   // a city or a section fills the map more closely than whole zoom steps allow
@@ -43,6 +43,27 @@ function addTwoFingerHint(map) {
   }, { passive: true });
 }
 
+const SIDE_GAP = 16;   // px between a floating panel and what the map fits beside it
+
+/** How far a floating panel reaches over the map from one side (views.css .stage on a wide, tall screen): 0 when it
+ *  lies above or below the map, as in the stacked layout, or when the page has none. */
+function coveredBy(element, selector, side) {
+  const panel = element.closest?.(".stage")?.querySelector(selector);
+  if (!panel) return 0;
+  const map = element.getBoundingClientRect();
+  const over = panel.getBoundingClientRect();
+  if (over.bottom <= map.top || over.top >= map.bottom) return 0;
+  return Math.max(0, side === "left" ? over.right - map.left : map.right - over.left);
+}
+
+/** Leaflet padding that keeps a fitted view, and an opened popup, in the part of the map between the search panel on
+ *  the left and the flood size on the right. */
+function sidePadding(element) {
+  const left = coveredBy(element, ".stage-panel", "left");
+  const right = coveredBy(element, ".surface-head", "right");
+  return { left: left && left + SIDE_GAP, right: right && right + SIDE_GAP };
+}
+
 /** The Leaflet map on the page's own view and zoom (the area's config, or a section's box), with the base tiles. It can be
  *  moved over all of Malaysia. */
 function openMap(element, { view: [west, south, east, north], zoom, fit = false }) {
@@ -53,9 +74,11 @@ function openMap(element, { view: [west, south, east, north], zoom, fit = false 
   });
   if (IS_TOUCH) addTwoFingerHint(map);
   // a whole city fills the map, once the map has a size to measure (followResize shows the view again as that changes)
-  const showView = () => (fit && element.clientHeight > 0
-    ? map.fitBounds([[south, west], [north, east]], { animate: false })
-    : map.setView([(south + north) / 2, (west + east) / 2], zoom, { animate: false }));
+  const showView = () => {
+    if (!fit || element.clientHeight === 0) return map.setView([(south + north) / 2, (west + east) / 2], zoom, { animate: false });
+    const { left, right } = sidePadding(element);
+    return map.fitBounds([[south, west], [north, east]], { animate: false, paddingTopLeft: [left, 0], paddingBottomRight: [right, 0] });
+  };
   showView();
   followResize(map, element, showView);
   L.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
@@ -115,17 +138,38 @@ function popupBody(map, p, rp, onOpen) {
 
 /** One dot per business, with its name on hover and a popup for the flood size on show (getRp gives it). */
 function addMarkers(map, premises, getRp, { onSelect, onOpen }) {
+  const { left, right } = sidePadding(map.getContainer());
+  const room = { autoPanPaddingTopLeft: [Math.max(5, left), 5], autoPanPaddingBottomRight: [Math.max(5, right), 5] };   // a popup pans clear of the panels
   return new Map(premises.map((p) => [p.id, {
     p,
     marker: L.circleMarker([p.lat, p.lon], { fillOpacity: 1, className: "biz-dot" })
       .bindTooltip(label(p.name))
-      .bindPopup(() => popupBody(map, p, getRp(), onOpen))
+      .bindPopup(() => popupBody(map, p, getRp(), onOpen), room)
       .on("click", () => onSelect(p.id))
       .addTo(map),
   }]));
 }
 
 const paintSquares = (squares, index) => { for (const { depths, layer } of squares) layer.setStyle(squareStyle(depths, index)); };
+
+const REVEAL_MS = 1600;   // --duration-rise in tokens.css
+/** The water comes in deepest first: the squares are painted in order of depth, more of them each frame, so the map
+ *  fills as a flood would, from the deepest ground out. Gives back what stops it (a new flood size paints them all). */
+function revealSquares(squares, index) {
+  const order = [...squares].sort((a, b) => (b.depths[index] ?? 0) - (a.depths[index] ?? 0));
+  for (const { layer } of order) layer.setStyle({ fillOpacity: 0 });
+  let painted = 0;
+  let frame = 0;
+  const start = performance.now();
+  const step = (now) => {
+    const k = Math.min(1, (now - start) / REVEAL_MS);
+    const upTo = Math.ceil(order.length * (1 - (1 - k) ** 3));
+    for (; painted < upTo; painted += 1) order[painted].layer.setStyle(squareStyle(order[painted].depths, index));
+    if (k < 1) frame = requestAnimationFrame(step);
+  };
+  frame = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(frame);
+}
 
 /** How one shop dot looks: a thick ink ring and bigger when selected, small and pale when the model has no water there. */
 function dotStyle(depth, selected) {
@@ -330,6 +374,7 @@ export function createMap(element, { view, zoom, ownedBox = view, outline = null
   addOutline(map, outline, renderer);
   addShelters(map, town.shelters);
   let shownRp = null;
+  let stopReveal = () => {};
   const markers = addMarkers(map, premises, () => shownRp, { onSelect, onOpen });
   const isOwned = ownedBox ? (grid, south, west) => overlapsView(ownedBox, south, west, grid) : () => false;
   const cells = createCellLayer(map, () => SCENARIOS.indexOf(shownRp), isOwned, renderer);
@@ -340,7 +385,9 @@ export function createMap(element, { view, zoom, ownedBox = view, outline = null
     /** Colour the squares and the shop dots for one flood size, and ring the selected shop. */
     show(rp, selectedId) {
       if (rp !== shownRp) {
-        paintSquares(squares, SCENARIOS.indexOf(rp));
+        stopReveal();
+        if (shownRp === null && motionAllowed()) stopReveal = revealSquares(squares, SCENARIOS.indexOf(rp));   // the page's first paint
+        else paintSquares(squares, SCENARIOS.indexOf(rp));
         shownRp = rp;
         cells.restyle();
       }

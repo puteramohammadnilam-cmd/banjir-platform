@@ -54,16 +54,18 @@ test("the shallowest colour is not mistaken for the no-water dot", () => {
 
 test("depth chip text reaches 4.5:1: dark ink on the two palest bands, white on the three deepest", () => {
   const chips = css("views.css");
+  assert.ok(css("tokens.css").includes(`--ink-on-light: ${INK};`));
   colours.forEach((color, i) => {
     const text = i < 2 ? INK : "#ffffff";
-    assert.ok(chips.includes(`.depth-chip.band-${i + 1} { background: var(--band-${i + 1}); color: ${i < 2 ? "var(--ink)" : "#fff"}; }`));
+    assert.ok(chips.includes(`.depth-chip.band-${i + 1} { background: var(--band-${i + 1}); color: ${i < 2 ? "var(--ink-on-light)" : "#fff"}; }`));
     assert.ok(contrast(color, text) >= 4.5, `band ${i + 1} text is ${contrast(color, text).toFixed(2)}:1`);
   });
 });
 
 // ---------- the squares' ramp ----------
 
-const MAP_GROUND = "#f2efe9";   // --map-ground: the colour of the base map under the squares
+const MAP_GROUND = "#f2efe9";   // --map-ground: the day map, under the flash flood, score and low ground pictures
+const NIGHT_GROUND = "#2f363c"; // --map-night: the night map's land, under the squares
 const hex = (channels) => `#${channels.map((c) => Math.round(c).toString(16).padStart(2, "0")).join("")}`;
 /** The colour a square shows once laid at its opacity over `ground`. */
 const laid = ({ color, opacity }, ground = MAP_GROUND) => hex(rgb(color).map((c, i) => opacity * c + (1 - opacity) * rgb(ground)[i]));
@@ -72,7 +74,7 @@ const hueDegrees = (color) => {
   return ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360;
 };
 
-test("tokens.css holds the squares' ramp: each colour at its opacity, on the map's ground", () => {
+test("tokens.css holds the squares' ramp: each colour at its opacity, on the night map's ground", () => {
   const tokens = css("tokens.css");
   SQUARE_RAMP.forEach(({ color, opacity }, i) => {
     const token = new RegExp(`--square-${i + 1}: rgb\\((\\d+) (\\d+) (\\d+) / ([\\d.]+)\\);`).exec(tokens);
@@ -81,21 +83,22 @@ test("tokens.css holds the squares' ramp: each colour at its opacity, on the map
     assert.equal(Number(token[4]), opacity, `--square-${i + 1} opacity`);
   });
   assert.ok(tokens.includes(`--map-ground: ${MAP_GROUND};`));
+  assert.ok(tokens.includes(`--map-night: ${NIGHT_GROUND};`));
 });
 
-test("the squares are one hue (within 10 degrees), clearly blue, and darker with depth", () => {
+test("the squares are one hue (within 10 degrees), clearly blue, and brighter with depth, so the deepest glows on the night map", () => {
   const hues = SQUARE_RAMP.map(({ color }) => hueDegrees(color));
   assert.ok(Math.max(...hues) - Math.min(...hues) <= 10, `hues run ${hues.map((x) => x.toFixed(0)).join(", ")}`);
   hues.forEach((hue) => assert.ok(hue > 230 && hue < 260, `hue ${hue.toFixed(0)} is blue`));
-  SQUARE_RAMP.slice(1).forEach(({ color }, i) => assert.ok(oklab(color)[0] < oklab(SQUARE_RAMP[i].color)[0], `step ${i + 2} is darker than step ${i + 1}`));
+  SQUARE_RAMP.slice(1).forEach(({ color }, i) => assert.ok(oklab(color)[0] > oklab(SQUARE_RAMP[i].color)[0], `step ${i + 2} is brighter than step ${i + 1}`));
 });
 
-test("each square step, laid on the map, is at least 8 apart from the next, and the shallowest shows against the ground", () => {
+test("each square step, laid on the night map, is at least 8 apart from the next, and the shallowest shows against the ground", () => {
   SQUARE_RAMP.slice(1).forEach((step, i) => {
-    const gap = deltaE(laid(SQUARE_RAMP[i]), laid(step));
+    const gap = deltaE(laid(SQUARE_RAMP[i], NIGHT_GROUND), laid(step, NIGHT_GROUND));
     assert.ok(gap >= 8, `step ${i + 1} and ${i + 2} are only ${gap.toFixed(1)} apart`);
   });
-  assert.ok(deltaE(laid(SQUARE_RAMP[0]), MAP_GROUND) >= 3.5, "the shallowest square can be seen on the map");
+  assert.ok(deltaE(laid(SQUARE_RAMP[0], NIGHT_GROUND), NIGHT_GROUND) >= 3.5, "the shallowest square can be seen on the map");
 });
 
 test("the squares do not reuse any of the dots' colours", () => {

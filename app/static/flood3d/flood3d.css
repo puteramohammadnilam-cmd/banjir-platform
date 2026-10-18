@@ -15,8 +15,8 @@ body.f3d {
 .f3d-back {
   position: absolute; top: var(--space-4); left: 56px; z-index: 2;
   padding: var(--space-2) var(--space-4);
-  background: var(--surface); color: var(--ink); border-radius: 999px;
-  box-shadow: var(--shadow-float);
+  background: var(--glass); color: var(--ink); border-radius: 999px;
+  box-shadow: var(--shadow-float); backdrop-filter: blur(12px);
   font-weight: 600; font-size: var(--text-sm); text-decoration: none;
 }
 .f3d-back:hover { color: var(--action); }
@@ -29,20 +29,19 @@ body.f3d {
   width: min(23rem, calc(100% - 2 * var(--space-4)));
   overflow-y: auto;
   padding: var(--space-6);
-  background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+  background: var(--glass); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   display: flex; flex-direction: column; gap: var(--space-4);
 }
 .f3d-panel > * { margin: 0; }
 
-.f3d-eyebrow { font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
-.f3d-name { font: 600 var(--text-2xl)/1.15 var(--font-serif); }
+.f3d-eyebrow { font: 400 var(--text-label)/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.f3d-name { font: 800 var(--text-2xl)/1 var(--font); font-stretch: var(--narrow); text-transform: uppercase; }
 
 /* the answer: one big figure, its words under it */
-.f3d-reading { border-left: 4px solid var(--band-3); padding-left: var(--space-4); }
+.f3d-reading { border-left: 3px solid var(--brand); padding-left: var(--space-4); }
 .f3d-reading > p { margin: 0; }
-.f3d-depth { font: 600 var(--text-figure)/1 var(--font-serif); font-variant-numeric: tabular-nums; color: var(--band-3); }
-.f3d-depth[data-band="4"] { color: var(--band-4); }
-.f3d-depth[data-band="5"] { color: var(--band-5); }
+.f3d-depth { font: 800 var(--text-figure)/0.95 var(--font); font-stretch: 66%; font-variant-numeric: tabular-nums; color: var(--brand); text-shadow: 0 0 28px rgb(70 211 255 / 0.45); }   /* lit, as on My business, whatever the band: the words say how deep */
 .f3d-words { margin-top: var(--space-2) !important; color: var(--ink-2); font-size: var(--text-sm); }
 
 .f3d-sizes { border: 0; padding: 0; margin: 0; }
@@ -55,7 +54,7 @@ body.f3d {
   transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 .f3d-size:hover { color: var(--action); }
-.f3d-size[aria-pressed="true"] { background: var(--action); color: var(--surface); }
+.f3d-size[aria-pressed="true"] { background: var(--action); color: var(--on-action); box-shadow: var(--glow); }
 
 .f3d-toggle { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
 .f3d-toggle input { width: 1.1rem; height: 1.1rem; accent-color: var(--action); }
@@ -64,11 +63,11 @@ body.f3d {
 .f3d-legend { list-style: none; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
 .f3d-legend li { display: flex; align-items: center; gap: var(--space-2); }
 .f3d-swatch { flex: none; width: 1.1rem; height: 1.1rem; border-radius: 3px; border: 1px solid var(--line-strong); }
-.f3d-swatch-water { background: rgb(43 119 167 / 0.6); }
+.f3d-swatch-water { background: rgb(58 166 232 / 0.6); }   /* WATER in js/flood3d.js */
 .f3d-swatch-wet { background: linear-gradient(to top, var(--risk-danger) 50%, var(--brand) 50%); }
-.f3d-swatch-walls { background: #5b84a8; }   /* WALL_WET in js/flood3d.js */
-.f3d-swatch-known { background: var(--line-strong); }
-.f3d-swatch-guess { background: var(--canvas); }
+.f3d-swatch-walls { background: #2a5f8f; }   /* WALL_WET in js/flood3d.js */
+.f3d-swatch-known { background: #8ea2b3; }   /* KNOWN */
+.f3d-swatch-guess { background: #c9d6e0; }   /* GUESSED */
 
 .f3d-note { font-size: var(--text-xs); color: var(--ink-3); }
 .f3d-note:empty { display: none; }
@@ -94,7 +93,7 @@ body.f3d {
   content: ""; display: block; width: 8px; height: 8px; margin: 70px 0 0 -3px;
   border-radius: 50%; background: var(--ink); border: 2px solid var(--surface);
 }
-.f3d-pin-depth { color: var(--band-1); font-weight: 600; }
+.f3d-pin-depth { color: var(--water-deep); font-weight: 700; }   /* on the pale label */
 
 /* a phone: the map on top, the panel as a sheet under it */
 @media (max-width: 700px) {
@@ -110,3 +109,11 @@ body.f3d {
   .maplibregl-ctrl-group button { width: 44px; height: 44px; }
   .f3d-back { top: 10px; left: 66px; display: inline-flex; align-items: center; min-height: 44px; }
 }
+
+/* MapLibre's own buttons and credit, on the night look */
+.maplibregl-ctrl-group:not(:empty) { background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line-strong); }
+.maplibregl-ctrl-group button + button { border-top-color: var(--line-strong); }
+.maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1) brightness(0.9); }   /* its icons are drawn dark */
+.maplibregl-ctrl.maplibregl-ctrl-attrib, .maplibregl-ctrl-attrib.maplibregl-compact { background: rgb(6 10 15 / 0.8); color: var(--ink-3); }
+.maplibregl-ctrl-attrib a { color: var(--brand-ink); }
+.maplibregl-ctrl-attrib-button { filter: invert(1); }

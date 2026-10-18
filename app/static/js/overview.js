@@ -45,11 +45,11 @@ const flashKey = (credit) => legendGroup(t("flash.legend"), [h("ul", { class: "l
 /** The map's key. On the whole city's map (`city` given, with the area's `word` for a section) the sections' shading
  *  by `metric` takes the dots' place, as no business is drawn there. With the flash flood layer on, its classes and the
  *  layer's data `credit` too; `lowKey` is the low ground layer's group (lowground.js), while that is on. */
-export function renderLegend(element, hasShelters, city = null, { metric = DEPTH_METRIC, isFlashOn = false, credit = null, lowKey = null } = {}) {
+export function renderLegend(element, hasShelters, city = null, { metric = DEPTH_METRIC, isFlashOn = false, credit = null, lowKey = null, isDay = false } = {}) {
   const first = city
     ? choroplethKey(city.word, hasShelters ? h("li", {}, h("span", { class: "shelter-pin" }), t("common.relief")) : null, metric)
     : legendGroup(t("legend.dots"), dotKey(hasShelters));
-  element.replaceChildren(...[first, legendGroup(t("legend.squares"), squareKey()), isFlashOn && flashKey(credit), lowKey].filter(Boolean));
+  element.replaceChildren(...[first, legendGroup(t(isDay ? "legend.squaresDay" : "legend.squares"), squareKey()), isFlashOn && flashKey(credit), lowKey].filter(Boolean));
 }
 
 const METRICS = { depth: DEPTH_METRIC, flash: FLASH_METRIC, score: SCORE_METRIC };
@@ -293,9 +293,12 @@ function createCityParts(map, city, showScore) {
   const table = createSectionTable($("sections-table"), {
     sections: city.sections, word: city.word, hrefOf: city.hrefOf, onHighlight: choropleth.highlight, showScore,
   });
+  let isFirst = true;
   return {
     show(rp) {
       choropleth.show(rp);
+      if (isFirst && globalThis.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) choropleth.reveal();
+      isFirst = false;
       table.show(rp);
       $("sections-lead").textContent = t("sections.lead", { rp, word });
     },
@@ -314,7 +317,11 @@ function createIndexParts(map, area, { city, cityParts, hasShelters }) {
   let shown = { isFlashOn: false, metric: "depth", lowKey: null };
   const paint = (change) => {
     shown = { ...shown, ...change };
-    renderLegend($("legend"), hasShelters, keyCity, { metric: METRICS[shown.metric], isFlashOn: shown.isFlashOn, credit: layer?.credit, lowKey: shown.lowKey });
+    // the flash flood, score and low ground ramps were made for a pale map: while one is on, the map turns to day
+    const isDay = Boolean(shown.isFlashOn || shown.lowKey || shown.metric !== "depth");
+    $("map").classList.toggle("is-day", isDay);
+    $("map").classList.toggle("is-day-water", isDay && shown.metric === "depth");   // views.css turns the squares back to darker = deeper
+    renderLegend($("legend"), hasShelters, keyCity, { metric: METRICS[shown.metric], isFlashOn: shown.isFlashOn, credit: layer?.credit, lowKey: shown.lowKey, isDay });
   };
   const low = createLowGround(map, area.layers?.low_ground ?? null, { onChange: (lowKey) => paint({ lowKey }) });
   createIndexControls($("map-controls"), {

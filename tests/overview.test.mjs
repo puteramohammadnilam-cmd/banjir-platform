@@ -113,7 +113,7 @@ test("the key has two groups: the dots' five classes with no water and the relie
   renderLegend(legend, true);
   const [dots, squares] = legend.querySelectorAll(".legend-group");
   assert.deepEqual(legend.children.map((group) => group.querySelector(".legend-heading").textContent),
-    ["Dots: water at each business", "Squares: the model's 90 m squares, darker = deeper"]);
+    ["Dots: water at each business", "Squares: the model's 90 m squares, brighter = deeper"]);
   assert.deepEqual(dots.querySelectorAll(".swatch").map((swatch) => swatch.getAttribute("class")),
     [...BANDS.map((_, i) => `swatch band-${i + 1}`), "swatch swatch-dry"]);
   assert.ok(dots.querySelector(".shelter-pin"), "the relief centre is a dot's kind of mark");
@@ -237,7 +237,7 @@ test("the city's key: the sections' shading in the area's word, the squares' ram
   const legend = h("ul");
   renderLegend(legend, true, { word: SECTION_WORD });
   assert.deepEqual(legend.children.map((group) => group.querySelector(".legend-heading").textContent),
-    ["Shading: share of each section's 90 m squares with water", "Squares: the model's 90 m squares, darker = deeper"]);
+    ["Shading: share of each section's 90 m squares with water", "Squares: the model's 90 m squares, brighter = deeper"]);
   assert.equal(legend.querySelectorAll(".choro-swatch").length, 6);
   assert.ok(legend.querySelector(".shelter-pin"));
   assert.equal(legend.querySelectorAll(".swatch").length, 0, "no business dots on the whole city's map");

@@ -71,7 +71,8 @@ test("the typical-depth tile gets a picture of the median depth when businesses 
   assert.ok(picture, "the slot holds a drawing");
   assert.equal(picture.getAttribute("aria-hidden"), "true");
   assert.equal(art(depth).hidden, false);
-  assert.ok(Math.abs(Number(picture.querySelector(".water").getAttribute("height")) / 62 - 1.0) < 1e-9);
+  const unitsPerMetre = Number(picture.querySelector(".door").getAttribute("height")) / 2.1;   // the door is 2.1 m tall
+  assert.ok(Math.abs(Number(picture.querySelector(".water").getAttribute("height")) / unitsPerMetre - 1.0) < 1e-9);
 });
 
 test("the picture follows the flood size and is cleared when no business is wet", () => {

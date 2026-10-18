@@ -12,34 +12,32 @@
 .scope-hint { flex: 1 1 100%; margin: calc(-1 * var(--space-2)) 0 0; }
 @media (max-width: 520px) { .scope-area { flex: 1 1 100%; max-width: none; } }
 
-/* The area's figures as one ruled band, read like a report's first line: the lead sentence ("132 of 143 businesses in
-   X get water"), then the typical depth, the floods on record and the rain, each beside a thin rule. No boxes, no
-   inverted tile. data-tiles is set by kpis.js: 4 with the rain forecast, 3 without it. */
-.kpis { display: grid; grid-template-columns: 2.2fr 1.3fr repeat(2, minmax(0, 1fr)); gap: 0; margin-bottom: var(--space-2); padding: var(--space-4) 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line-strong); }
+/* The area's figures, read like an instrument panel: the lead in big narrow figures that glow ("571 of 2445"), its
+   sentence, then the typical depth, the floods on record and the rain, each beside a hairline. data-tiles is set by
+   kpis.js: 4 with the rain forecast, 3 without it. */
+.kpis { display: grid; grid-template-columns: 2.2fr 1.3fr repeat(2, minmax(0, 1fr)); gap: 0; padding: var(--space-4) 0 0; border-top: 1px solid var(--line-strong); }
 .kpis[data-tiles="3"] { grid-template-columns: 2.2fr 1.3fr minmax(0, 1fr); }
 .kpi { display: grid; align-content: start; gap: 2px; padding: 0 var(--space-5); border-left: 1px solid var(--line); }
 .kpi:first-child { padding-left: 0; border-left: 0; }
-.kpi-figure { font-size: var(--text-figure); font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1.05; font-variant-numeric: tabular-nums lining-nums; }
-.kpi-label { font-size: var(--text-sm); font-weight: 600; }
+.kpi-figure { font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums lining-nums; }
+.kpi-label { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
 .kpi-note { font-size: var(--text-xs); color: var(--ink-3); }
 .kpi .icon { display: none; }   /* the words say what each figure is */
-/* the lead: figure and words run on as one serif sentence */
-.kpi-hero { display: block; }
-.kpi-hero .kpi-figure, .kpi-hero .kpi-label { display: inline; }
-.kpi-hero .kpi-label { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 400; line-height: 1.3; }
-.kpi-hero .kpi-label::before { content: " "; }
+/* the lead: its figure big and lit, the sentence under it */
+.kpi-hero .kpi-figure { font-size: var(--text-figure); line-height: 0.95; color: var(--brand); text-shadow: 0 0 28px rgb(70 211 255 / 0.45); }
+.kpi-hero .kpi-label { margin-top: var(--space-1); font-stretch: var(--narrow); font-size: var(--text-lg); font-weight: 600; line-height: 1.2; color: var(--ink); }
 .kpi-hero .kpi-note { margin-top: var(--space-1); }
-.kpi-bar { max-width: 22rem; height: 6px; margin-top: var(--space-3); border-radius: 2px; background: var(--surface-sunk); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.kpi-bar { max-width: 22rem; height: 6px; margin-top: var(--space-3); border-radius: 3px; background: var(--surface-sunk); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
 /* the typical-depth figure: its little drawing sits right of the figure */
 .kpi-has-art { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); }
 .kpi-has-art > .kpi-figure { grid-area: 1 / 1; align-self: end; }
 .kpi-has-art > .kpi-label, .kpi-has-art > .kpi-note { grid-column: 1 / -1; }
 .kpi-art { grid-area: 1 / 2 / 2 / 3; align-self: end; width: 5.5rem; }
 .kpi-art .gauge.gauge-mini { margin: 0; max-width: none; }
-.kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--band-3); transform-origin: left; transition: transform 600ms var(--ease-out-expo); }
+.kpi-bar span { display: block; height: 100%; border-radius: inherit; background: var(--brand); box-shadow: 0 0 10px var(--brand); transform-origin: left; transition: transform var(--duration-rise) var(--ease-out-expo); }
 /* where the figures come from, right under them */
 .stamp { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-4); margin-bottom: var(--space-5); font-size: var(--text-xs); color: var(--ink-3); }
-.stamp-cite summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.stamp-cite summary { cursor: pointer; color: var(--brand); font-weight: 600; padding-block: 13px; }   /* a 44 px target, and its marker kept */
 .stamp-cite[open] { flex-basis: 100%; }
 .stamp-cite p { max-width: 60rem; margin-top: var(--space-1); overflow-wrap: anywhere; user-select: all; }
 /* the flood size on show, as a sentence above the map */
@@ -52,46 +50,67 @@
 .map-extras > .map-controls { margin-top: 0; }
 .map-extras:not(:has(> :not(h2):not([hidden]))) { display: none; }   /* nothing to say about this map: no empty card */
 .map-stage { --map-h: clamp(320px, 58vh, 600px); position: relative; }   /* the map, and what sits under it; the panel of aim mode floats over the map on a short landscape screen */
-#map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-sunk); }
-.leaflet-container { font-family: var(--font); }
-.map-hint { position: absolute; z-index: 1000; inset: 0; display: grid; place-items: center; margin: 0; padding: var(--space-4); background: rgba(13, 27, 42, 0.55); color: #fff; font-size: var(--text-md); font-weight: 700; text-align: center; pointer-events: none; opacity: 0; transition: opacity var(--duration-normal); }   /* a touch screen's "two fingers" (map.js), for a moment */
+#map { height: var(--map-h); border-radius: var(--radius-md); border: 1px solid var(--line-strong); background: var(--map-night); }
+.leaflet-container { font-family: var(--font); background: var(--map-night); }
+.map-hint { position: absolute; z-index: 1000; inset: 0; display: grid; place-items: center; margin: 0; padding: var(--space-4); background: rgb(2 5 8 / 0.62); color: var(--ink); font-size: var(--text-md); font-weight: 700; text-align: center; pointer-events: none; opacity: 0; transition: opacity var(--duration-normal); }   /* a touch screen's "two fingers" (map.js), for a moment */
 .map-hint.is-shown { opacity: 1; }
 .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }   /* zoom buttons: 44 px touch targets */
-.leaflet-tile-pane { filter: grayscale(1) sepia(0.06) contrast(0.85) brightness(1.06); }   /* quiet base, so the water reads */
+/* the night map: the street map's tiles, turned dark, so the water glows on it. Under the flash flood and low ground
+   pictures (made for a pale map) the day comes back: map.js sets is-day while one is on */
+.leaflet-tile-pane { filter: grayscale(1) invert(1) contrast(0.82) brightness(0.7) sepia(0.35) hue-rotate(170deg) saturate(1.8); }
+#map.is-day { background: var(--map-ground); }
+#map.is-day .leaflet-tile-pane { filter: grayscale(1) sepia(0.06) contrast(0.85) brightness(1.06); }
+/* on the day map the squares' night ramp (brighter = deeper) would fade the deepest into the pale ground, so while the
+   river model is on show there the canvas, and the key's swatches with it, are inverted back to darker = deeper */
+#map.is-day-water .leaflet-overlay-pane canvas, .map-stage:has(#map.is-day-water) .legend :is(.square-strip, .choro-swatch) { filter: invert(1) hue-rotate(180deg); }
+.leaflet-bar { border: 1px solid var(--line-strong) !important; box-shadow: none !important; }   /* Leaflet's own rules carry !important-strength borders via .leaflet-touch */
+.leaflet-bar a, .leaflet-bar a:hover, .leaflet-bar a:focus { background: var(--surface-raised); color: var(--ink); border-bottom-color: var(--line-strong); }   /* Leaflet paints :focus pale */
+.leaflet-bar a:hover { background: var(--surface-sunk); color: var(--brand); }
+.leaflet-bar a.leaflet-disabled { background: var(--surface-sunk); color: var(--ink-3); }
+.leaflet-container .leaflet-control-attribution { background: rgb(6 10 15 / 0.78); color: var(--ink-3); }
+.leaflet-control-attribution a { color: var(--brand-ink); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface-raised); color: var(--ink); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--ink-2); }
+.leaflet-container a.leaflet-popup-close-button:hover, .leaflet-container a.leaflet-popup-close-button:focus { color: var(--ink); }
+.leaflet-tooltip { background: var(--surface-raised); color: var(--ink); border-color: var(--line-strong); box-shadow: var(--shadow-float); }
+.leaflet-tooltip-top::before { border-top-color: var(--surface-raised); }
+.leaflet-tooltip-bottom::before { border-bottom-color: var(--surface-raised); }
+.leaflet-tooltip-left::before { border-left-color: var(--surface-raised); }
+.leaflet-tooltip-right::before { border-right-color: var(--surface-raised); }
 /* a thin dark hairline outside the white ring, so a shop dot shows on both pale and dark squares */
 .biz-dot { filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.9)); }   /* a faint white glow round the ink ring, so it reads on the darkest squares */
 .leaflet-popup-content-wrapper { border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 .leaflet-popup-content { margin: var(--space-3) var(--space-4); min-width: 12rem; }
 .pop-name { font-weight: 700; font-size: var(--text-sm); line-height: 1.3; }
 .pop-depth { margin: var(--space-1) 0 var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
-.pop-depth strong { color: var(--brand); }
+.pop-depth strong { color: var(--brand-ink); }
 .shelter-pin { display: inline-block; flex: none; width: 16px; height: 14px; background: var(--dry); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.leaflet-tooltip.shelter-label { border: 0; box-shadow: none; background: none; color: var(--dry); font-weight: 700; font-size: var(--text-xs); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+.leaflet-tooltip.shelter-label { border: 0; box-shadow: none; background: none; color: var(--dry); font-weight: 700; font-size: var(--text-xs); text-shadow: 0 0 3px var(--canvas), 0 0 3px var(--canvas); }
 .leaflet-tooltip.shelter-label::before { display: none; }
 
 /* ---------- checking any point: the cross, the panel, the pin ---------- */
 #map { scroll-margin-top: 4.5rem; }   /* aim mode scrolls the map clear of the sticky tab bar */
 .aim-cross { position: absolute; z-index: 640; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; pointer-events: none; }
 .aim-cross svg { display: block; overflow: visible; }
-.aim-cross .halo { stroke: #fff; stroke-width: 6; stroke-linecap: round; }
+.aim-cross .halo { stroke: var(--canvas); stroke-width: 6; stroke-linecap: round; }
 .aim-cross .core { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
-.aim-cross .dot { fill: var(--marker); stroke: #fff; stroke-width: 2; }
+.aim-cross .dot { fill: var(--marker); stroke: var(--canvas); stroke-width: 2; }
 @media (forced-colors: active) {
   .aim-cross .halo { stroke: Canvas; }
   .aim-cross .core { stroke: CanvasText; }
   .aim-cross .dot { fill: Highlight; stroke: Canvas; }
 }
-.point-pin svg { display: block; filter: drop-shadow(0 2px 2px rgba(13, 27, 42, 0.35)); }
-.point-pin path { fill: var(--marker); stroke: #fff; stroke-width: 1.5; }
-.point-pin circle { fill: #fff; }
-.map-aim-button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 2px solid rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); background: var(--surface); background-clip: padding-box; color: var(--ink); font-weight: 700; font-size: var(--text-sm); cursor: pointer; }
+.point-pin svg { display: block; filter: drop-shadow(0 0 8px rgb(255 177 74 / 0.6)); }
+.point-pin path { fill: var(--marker); stroke: var(--canvas); stroke-width: 1.5; }
+.point-pin circle { fill: var(--canvas); }
+.map-aim-button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-raised); background-clip: padding-box; color: var(--ink); font-weight: 700; font-size: var(--text-sm); cursor: pointer; }
 .map-aim-button:hover { background: var(--surface-sunk); }
 .map-aim-button .icon { color: var(--accent); }
 
 /* the panel sits under the map; on a phone it sticks to the bottom of the screen, as a sheet above the tab bar (pin.js
    measures it into --tab-bar-h; 64 px and the safe area when it cannot). Sticky, not fixed: the tab panel's entrance
    animation would make a fixed sheet's box the panel */
-.aim-panel { margin-top: var(--space-3); padding: var(--space-4); background: var(--surface); border: 1px solid var(--field-border); border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
+.aim-panel { margin-top: var(--space-3); padding: var(--space-4); background: var(--glass); backdrop-filter: blur(14px); border: 1px solid var(--line-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
 .aim-heading { font-size: var(--text-md); font-weight: 700; }
 .aim-help { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .aim-status, .aim-panel [role="alert"] { margin-top: var(--space-2); }
@@ -103,7 +122,7 @@
 .aim-panel .btn:disabled { cursor: not-allowed; }
 .aim-panel .btn.is-busy { opacity: 0.6; cursor: progress; }
 @media (max-width: 720px) {
-  .aim-panel { position: sticky; z-index: 1100; bottom: var(--tab-bar-h, calc(64px + env(safe-area-inset-bottom))); max-height: 60vh; overflow-y: auto; box-shadow: 0 -10px 28px -12px rgba(13, 27, 42, 0.4), var(--shadow-md); }
+  .aim-panel { position: sticky; z-index: 1100; bottom: var(--tab-bar-h, calc(64px + env(safe-area-inset-bottom))); max-height: 60vh; overflow-y: auto; background: var(--surface-raised); box-shadow: 0 -10px 28px -12px rgb(0 0 0 / 0.8), var(--shadow-md); }
   .aim-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aim-actions .btn-primary { grid-column: 1 / -1; }
   #map { scroll-margin-top: var(--space-4); }
@@ -136,7 +155,7 @@
 /* past floods strip */
 .history-none { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 .history-lead { margin-top: var(--space-1); font-size: var(--text-sm); }
-.history-lead strong { color: var(--brand); }
+.history-lead strong { color: var(--brand-ink); }
 .history-hotspots { margin-top: var(--space-2); font-size: var(--text-sm); }   /* an official list, kept apart from the dated floods */
 .flood-strip { display: block; width: 100%; margin: var(--space-3) 0 var(--space-2); overflow: visible; }
 .flood-strip .axis { stroke: var(--line-strong); stroke-width: 1; }
@@ -169,8 +188,8 @@
 .directory .meta { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-xs); color: var(--ink-3); }
 .depth-chip { padding: 3px 0; border-radius: 6px; text-align: center; font-size: var(--text-xs); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); background: var(--surface-sunk); }
 /* two classes, so the band colour beats the chip's neutral background */
-.depth-chip.band-1 { background: var(--band-1); color: var(--ink); }
-.depth-chip.band-2 { background: var(--band-2); color: var(--ink); }
+.depth-chip.band-1 { background: var(--band-1); color: var(--ink-on-light); }
+.depth-chip.band-2 { background: var(--band-2); color: var(--ink-on-light); }
 .depth-chip.band-3 { background: var(--band-3); color: #fff; }
 .depth-chip.band-4 { background: var(--band-4); color: #fff; }
 .depth-chip.band-5 { background: var(--band-5); color: #fff; }
@@ -191,12 +210,12 @@
 .choro-tip strong { font-size: var(--text-sm); color: var(--ink); }
 .choro-tip .choro-tip-open { margin-top: var(--space-1); font-weight: 700; color: var(--accent); }
 .choro-key { grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); }
-.choro-swatch { flex: none; width: 22px; height: 14px; border: 1px solid rgb(12 68 124 / 0.55); border-radius: 3px; background: var(--map-ground); }
-.choro-swatch.sq-1 { background: linear-gradient(var(--square-1), var(--square-1)), var(--map-ground); }
-.choro-swatch.sq-2 { background: linear-gradient(var(--square-2), var(--square-2)), var(--map-ground); }
-.choro-swatch.sq-3 { background: linear-gradient(var(--square-3), var(--square-3)), var(--map-ground); }
-.choro-swatch.sq-4 { background: linear-gradient(var(--square-4), var(--square-4)), var(--map-ground); }
-.choro-swatch.sq-5 { background: linear-gradient(var(--square-5), var(--square-5)), var(--map-ground); }
+.choro-swatch { flex: none; width: 22px; height: 14px; border: 1px solid rgb(70 211 255 / 0.45); border-radius: 3px; background: var(--map-night); }
+.choro-swatch.sq-1 { background: linear-gradient(var(--square-1), var(--square-1)), var(--map-night); }
+.choro-swatch.sq-2 { background: linear-gradient(var(--square-2), var(--square-2)), var(--map-night); }
+.choro-swatch.sq-3 { background: linear-gradient(var(--square-3), var(--square-3)), var(--map-night); }
+.choro-swatch.sq-4 { background: linear-gradient(var(--square-4), var(--square-4)), var(--map-night); }
+.choro-swatch.sq-5 { background: linear-gradient(var(--square-5), var(--square-5)), var(--map-night); }
 .river-note { margin-top: var(--space-2); font-size: var(--text-sm); }
 .sections-surface { margin-bottom: var(--space-4); }
 .sections-surface > .muted { margin: var(--space-1) 0 var(--space-4); }
@@ -218,7 +237,7 @@
 .section-table tbody th a { display: inline-block; padding: var(--space-1) 0; color: var(--ink); text-decoration: none; }
 .section-table tbody th a:hover { color: var(--brand); text-decoration: underline; }
 .share-cell { display: flex; align-items: center; gap: var(--space-3); }
-.share-track { flex: 1 1 auto; max-width: 11rem; height: 10px; border-radius: 2px; background: var(--map-ground); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.share-track { flex: 1 1 auto; max-width: 11rem; height: 10px; border-radius: 2px; background: var(--map-night); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
 .share-bar { display: block; height: 100%; border-radius: inherit; transform: scaleX(var(--share)); transform-origin: left; transition: transform 500ms var(--ease-out-expo); }
 .share-figure { flex: none; min-width: 3.5rem; font-weight: 700; color: var(--ink); }
 .wet-cell { color: var(--ink-2); white-space: nowrap; }
@@ -233,54 +252,11 @@
 }
 @media (max-width: 360px) { .section-table tbody th { white-space: normal; } }   /* 320 px: a long name wraps, not the table */
 
-/* a laptop: the map card, its notes under it, beside the past floods and the area summary */
-@media (min-width: 1040px) {
-  #panel-overview {
-    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
-    grid-template-areas: "hero hero" "scope scope" "kpis kpis" "stamp stamp" "map side" "extras side" "sections sections" "dir dir";
-  }
-  #panel-overview > * { margin: 0; }   /* the grid's gap spaces them */
-  .finder-hero { grid-area: hero; }
-  .scope-bar { grid-area: scope; }
-  .kpis { grid-area: kpis; }
-  .stamp { grid-area: stamp; }
-  .map-surface { grid-area: map; }
-  .map-extras { grid-area: extras; }
-  .overview-side { grid-area: side; }
-  .sections-surface { grid-area: sections; }
-  .directory { grid-area: dir; }
-  /* the sections table is only on a whole city's page: elsewhere its row goes, so there is no double gap */
-  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "hero hero" "scope scope" "kpis kpis" "stamp stamp" "map side" "extras side" "dir dir"; }
-}
-/* a wide screen, tall enough for a big map (a desktop monitor, a projector, a larger laptop): map first. The map card
-   fills the left of the page and stays in view under the tab bar while the search, the figures, the map's notes and
-   switches, the records and the lists scroll beside it. It is as tall as the window below the tab bar, so at the very
-   top of the page the foot of its key starts just below the fold. Its key is compact (a long one scrolls inside the
-   card), and the panel of aim mode floats over the map, as on a phone on its side. A narrower or shorter screen keeps
-   the laptop layout: the right-hand column needs about 620 px for the figures and the sections table, and below
-   860 px tall the laptop's map is the bigger one. The page's order is the phone's, so here the keyboard goes from the
-   search and the area choice on the right to the map on the left, and back to the right for the rest */
-@media (min-width: 1480px) and (min-height: 860px) {
-  #panel-overview {
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: var(--space-5);
-    grid-template-areas: "map hero" "map scope" "map kpis" "map stamp" "map extras" "map side" "map sections" "map dir";
-  }
-  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "map hero" "map scope" "map kpis" "map stamp" "map extras" "map side" "map dir"; }
-  .map-surface { position: sticky; top: 4rem; display: flex; flex-direction: column; height: calc(100vh - 5rem); height: calc(100dvh - 5rem); }
-  .map-surface .surface-head { flex: none; }
-  .map-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
-  .map-stage #map { flex: 1 1 auto; height: auto; min-height: 18rem; }
-  .map-stage .squares-status { flex: none; }
-  .map-stage .legend { flex: 0 1 auto; min-height: 0; overflow-y: auto; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-top: var(--space-3); }
-  .map-stage .legend-heading { margin-bottom: var(--space-1); }
-  .map-stage .legend-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
-  .map-stage .legend-items li { white-space: nowrap; }   /* a depth's words never break across lines */
-  .map-stage .aim-panel { position: absolute; z-index: 900; top: var(--space-2); right: var(--space-2); width: min(20rem, 45%); max-height: calc(100% - 2 * var(--space-2)); margin: 0; overflow-y: auto; box-shadow: var(--shadow-md); }
-  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }   /* the lead on its own line, the others under it */
-  .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-3); margin-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
-  .kpi-hero + .kpi { padding-left: 0; border-left: 0; }
-}
+/* ---------- the stage: the search and the area's figures, over the night map ---------- */
+/* phones and tablets: one column in the page's order, the search and figures, then the map */
+.stage { display: grid; gap: var(--space-4); margin-bottom: var(--space-4); }
+.stage-panel { display: grid; gap: var(--space-5); }
+.stage .map-surface { margin: 0; }
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -288,7 +264,7 @@
   .kpi-hero + .kpi { padding-left: 0; border-left: 0; }
 }
 @media (max-width: 720px) {   /* phones: one column, the tiles tighter, and no "Floods recorded" (the timeline under the map says it), so the map comes sooner */
-  .kpis, .kpis[data-tiles="3"] { grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-2); }
+  .kpis, .kpis[data-tiles="3"] { grid-template-columns: minmax(0, 1fr); }
   .kpi, .kpi-hero + .kpi { padding: var(--space-3) 0; border-left: 0; border-top: 1px solid var(--line); }
   .kpi:first-child { padding-top: 0; border-top: 0; }
   .kpi-hero { margin-bottom: 0; border-bottom: 0; }
@@ -296,26 +272,72 @@
   .kpi-art { width: 5.5rem; }
 }
 
+/* a laptop or wider: the map fills the stage, and the search with the figures floats over its left as a glass panel;
+   the flood size and the key float over its right. The leaflet zoom and "check a point" buttons move clear of the
+   panel. Under the stage: the area chooser and the map's notes, beside the live cards, then the table and the list */
+@media (min-width: 1040px) {
+  #panel-overview {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start;
+    grid-template-areas: "stage stage" "scope side" "stamp side" "extras side" "sections sections" "dir dir";
+  }
+  #panel-overview:has(> #sections-surface[hidden]) { grid-template-areas: "stage stage" "scope side" "stamp side" "extras side" "dir dir"; }
+  #panel-overview > * { margin: 0; }   /* the grid's gap spaces them */
+  .stage { grid-area: stage; }
+  .scope-bar { grid-area: scope; }
+  .stamp { grid-area: stamp; }
+  .map-extras { grid-area: extras; }
+  .overview-side { grid-area: side; }
+  .sections-surface { grid-area: sections; }
+  .directory { grid-area: dir; }
+}
+/* the overlay needs the height for the panel (the search, the lead and the figures): a shorter laptop keeps the stack */
+@media (min-width: 1040px) and (min-height: 760px) {
+  .stage { --stage-h: clamp(560px, calc(100dvh - 8rem), 940px); --float: min(26rem, 33%); position: relative; grid-template-columns: minmax(0, 1fr); margin: 0; }
+  .stage > * { grid-area: 1 / 1; }
+  .stage-panel, .stage .surface-head, .stage .legend, .stage .aim-panel {
+    z-index: 950; margin: 0; background: var(--glass); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  }
+  .stage .finder-hero-title { font-size: clamp(2.2rem, 1.2rem + 2.4vw, 3.4rem); }
+  .stage-panel { position: relative; align-self: start; justify-self: start; width: var(--float); max-height: calc(var(--stage-h) - 2 * var(--space-4)); margin: var(--space-4); padding: var(--space-5); overflow-y: auto; }
+  .stage .map-surface { position: relative; padding: 0; border: 0; background: none; box-shadow: none; }
+  .stage .map-stage { --map-h: var(--stage-h); }
+  .stage .surface-head { position: absolute; top: var(--space-4); right: var(--space-4); width: min(23rem, 30%); flex-direction: column; align-items: stretch; flex-wrap: nowrap; padding: var(--space-4); }
+  .stage .scenario { min-width: 0; }
+  .stage .scenario-sentence { font-size: var(--text-sm); }
+  .stage .legend { position: absolute; right: var(--space-4); bottom: 5.5rem; width: min(23rem, 30%); max-height: 36%; overflow-y: auto; padding: var(--space-3) var(--space-4); grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .stage .legend-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+  .stage .legend-items li { white-space: nowrap; }
+  .stage .leaflet-top.leaflet-left { left: calc(var(--float) + 2 * var(--space-4)); }
+  .stage .leaflet-top.leaflet-right { right: calc(min(23rem, 30%) + 2 * var(--space-4)); }   /* "Check a point" beside the flood size, not under it */
+  .stage .aim-panel { position: absolute; top: var(--space-4); right: var(--space-4); width: min(21rem, 32%); max-height: calc(100% - 2 * var(--space-4)); overflow-y: auto; }
+  .stage .map-surface:has(.aim-panel:not([hidden])) .surface-head { display: none; }   /* aiming: the panel says what to do */
+  .stage .kpis, .stage .kpis[data-tiles="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage .kpi-hero { grid-column: 1 / -1; padding-bottom: var(--space-4); margin-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .stage .kpi { padding: 0 var(--space-3); }
+  .stage .kpi-hero + .kpi, .stage .kpi:nth-child(4) { padding-left: 0; border-left: 0; }
+  .stage .kpi:nth-child(4) { margin-top: var(--space-4); }
+}
+
 /* ---- ux-fixes: hero, empty state ---- */
 /* the Area overview has its own search at the top, so the header's steps aside there: one search box per screen */
 body[data-tab="overview"] .finder { display: none; }
 
 /* the way in: a big search box, the primary action, with the way to any point beside it as the second */
-.finder-hero { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); padding: var(--space-2) 0 var(--space-5); border-bottom: 1px solid var(--line); }   /* the page's question, on the paper itself */
-.finder-hero-title { font-family: var(--font-serif); font-size: var(--text-2xl); font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; color: var(--brand-deep); }
+.finder-hero { display: grid; gap: var(--space-3); }   /* the page's question, big and narrow, as a flood notice would put it */
+.finder-hero-title { font-stretch: 66%; font-size: var(--text-hero); font-weight: 800; letter-spacing: 0.005em; line-height: 0.9; text-transform: uppercase; color: var(--ink); }
 .finder-hero-title label { cursor: pointer; }
 .finder-hero-lead { color: var(--ink-2); max-width: 40rem; }
 .finder-hero-form { position: relative; display: flex; gap: var(--space-2); max-width: 42rem; margin-top: var(--space-2); }
 .finder-hero-form .icon { position: absolute; left: 16px; top: 50%; width: 22px; height: 22px; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
 /* 18 px text: big enough to read at arm's length, and iOS does not zoom into a field of 16 px or more */
 .finder-hero-form .field { flex: 1 1 auto; min-width: 0; min-height: 56px; padding-left: 48px; font-size: var(--text-lg); border-color: var(--field-border); box-shadow: var(--shadow-sm); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
-.finder-hero-form .field:focus-visible { box-shadow: 0 0 0 4px var(--accent-wash); }
+.finder-hero-form .field:focus-visible { border-color: var(--brand); box-shadow: var(--glow); }
 .finder-hero-form .btn { flex: none; min-height: 56px; padding: 0 var(--space-6); font-size: var(--text-md); box-shadow: var(--shadow-sm); }
 .finder-hero-point { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-2); }
 .finder-hero-point .btn { min-height: 44px; }
-.finder-hero-point .icon { color: var(--accent); }
+.finder-hero-point .icon { color: var(--marker); }
 @media (max-width: 520px) {
-  .finder-hero { padding: 0 0 var(--space-4); }
   .finder-hero-form { flex-wrap: wrap; }   /* the button under the box, so the placeholder is not cut off */
   .finder-hero-form .btn { flex: 1 1 100%; min-height: 48px; }
   .finder-hero-form .icon { top: 28px; }   /* the middle of the 56px box, not of box and button */
@@ -323,12 +345,12 @@ body[data-tab="overview"] .finder { display: none; }
 }
 
 /* My business and Flood cost before a place is picked: what to do, and the two ways to do it */
-.pick-empty { display: grid; justify-items: start; gap: var(--space-2); max-width: 38rem; padding: var(--space-6) 0; border: 0; border-top: 2px solid var(--ink); border-radius: 0; background: none; }
+.pick-empty { display: grid; justify-items: start; gap: var(--space-2); max-width: 38rem; padding: var(--space-6); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
 .pick-empty .view-title { margin: 0; }
 .pick-empty-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 .pick-empty-actions .btn { min-height: 44px; }
 @media (max-width: 520px) {
-  .pick-empty { padding: var(--space-5) 0; }
+  .pick-empty { padding: var(--space-5) var(--space-4); }
   .pick-empty-actions .btn { flex: 1 1 100%; }
 }
 
@@ -353,7 +375,7 @@ body[data-tab="overview"] .finder { display: none; }
 .metric-choice legend { float: left; margin-right: var(--space-2); font-weight: 700; }
 .metric-choice label { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); transition: border-color var(--duration-fast), background-color var(--duration-fast); }
 .metric-choice label:hover { border-color: var(--brand); }
-.metric-choice label:has(:checked) { border-color: var(--brand); background: var(--brand-wash); color: var(--brand-deep); font-weight: 600; }
+.metric-choice label:has(:checked) { border-color: var(--brand); background: var(--brand-wash); color: var(--brand-ink); font-weight: 600; }
 .map-controls .alert { flex-basis: 100%; margin: 0 0 var(--space-2); }
 .ramp-swatch, .choro-swatch[style] { background: linear-gradient(var(--sw), var(--sw)), var(--map-ground); }
 .ramp-swatch { flex: none; display: inline-block; width: 22px; height: 14px; border: 1px solid var(--line-strong); border-radius: 3px; }

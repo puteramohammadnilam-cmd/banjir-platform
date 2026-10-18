@@ -10,10 +10,12 @@ import { h } from "./dom.js";
 import { dataWord, t } from "./i18n.js";
 import { FLASH_RAMP, SCORE_RAMP, highShare, oneDecimal, scoreClass, scoreOf, swatchStyle } from "./susceptibility.js";
 
-const OUTLINE = "#0c447c";   // --brand in tokens.css
-const LIFTED = "#0d1b2a";    // --ink
+const OUTLINE = "#46d3ff";   // --brand in tokens.css
+const LIFTED = "#ffb14a";    // --marker: the section under the pointer, as a picked place is
 const STREET_ZOOM = 15;     // from here in, a point's own squares show: the shading steps back to a wash
 const STREET_WASH = 0.25;
+const REVEAL_STAGGER_MS = 18;   // the wettest section first, the next a moment later: about a second for a city of 56
+const REVEAL_FADE_MS = 520;
 const NO_SHARE = Object.freeze({ upTo: 0, color: OUTLINE, opacity: 0, words: () => t("choropleth.none") });
 const BOUNDS = [0.05, 0.15, 0.3, 0.5, Infinity];   // each class's top: under 5%, 5-15, 15-30, 30-50 (50 included), over 50
 const WORDS = [
@@ -128,7 +130,29 @@ export function createChoropleth(map, renderer, sections, { onOpen, isAiming = (
     paths.get(lifted)?.path.setStyle(outline(true)).bringToFront();
   }
 
-  const repaint = () => { for (const { section, path } of paths.values()) path.setStyle(paint(metric, section, rp, wash())); };
+  let frame = 0;
+  const repaint = () => {
+    globalThis.cancelAnimationFrame?.(frame);
+    for (const { section, path } of paths.values()) path.setStyle(paint(metric, section, rp, wash()));
+  };
+
+  /** The water comes in: each section's shading fades up, the wettest first. Once, as the page opens; a new flood size
+   *  or metric repaints them all at once. */
+  function reveal() {
+    const order = [...paths.values()].sort((a, b) => (metric.value(b.section, rp) ?? 0) - (metric.value(a.section, rp) ?? 0));
+    for (const { section, path } of order) path.setStyle(paint(metric, section, rp, 0));   // so no frame shows them full first
+    const start = performance.now();
+    const step = (now) => {
+      let isDone = true;
+      order.forEach(({ section, path }, i) => {
+        const k = Math.min(1, Math.max(0, (now - start - i * REVEAL_STAGGER_MS) / REVEAL_FADE_MS));
+        if (k < 1) isDone = false;
+        path.setStyle(paint(metric, section, rp, wash() * k));
+      });
+      if (!isDone) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+  }
   map.on?.("zoomend", repaint);
 
   return {
@@ -141,5 +165,6 @@ export function createChoropleth(map, renderer, sections, { onOpen, isAiming = (
       repaint();
     },
     highlight,
+    reveal,
   };
 }

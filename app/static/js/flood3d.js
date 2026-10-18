@@ -12,12 +12,14 @@ import { writeUrl } from "./place.js";
 const NO_PICTURE = "There is no 3D picture for this shop yet.";
 const NO_WEBGL = "This browser cannot draw the 3D map (it needs WebGL).";
 const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const WATER = "#2b77a7";     // --band-3
-const WET = "#b42318";       // --risk-danger: the shop's walls under water
-const SHOP = "#0c447c";      // --brand: the shop's walls above it
-const KNOWN = "#c3ccd7";     // --line-strong: a building with its height on the map
-const GUESSED = "#f6f7f9";   // --canvas: a building whose height is guessed
-const WALL_WET = "#5b84a8";  // any other building's walls under water: a flood mark, darker than the water over it
+// the night look (tokens.css): pale buildings standing on a dark street map, lit water, the shop in cyan
+const WATER = "#3aa6e8";     // a lit --band-3, so the water reads on the dark street map
+const WET = "#ff6a5f";       // --risk-danger: the shop's walls under water
+const SHOP = "#46d3ff";      // --brand: the shop's walls above it
+const KNOWN = "#8ea2b3";     // --ink-3: a building with its height on the map
+const GUESSED = "#c9d6e0";   // paler: a building whose height is guessed
+const WALL_WET = "#2a5f8f";  // any other building's walls under water: a flood mark, darker than the water over it
+const NIGHT_STREETS = { "raster-saturation": -1, "raster-brightness-min": 0.34, "raster-brightness-max": 0.1 };   // the street map turned to night: min above max inverts it
 const WATER_OPACITY = 0.55;
 const RISE_MS = 1100;
 const FLY_MS = 2600;
@@ -44,7 +46,7 @@ export const waterHeight = (from, to, k) => ["+", ["*", level(from), 1 - k], ["*
 function baseMap(satellite) {
   const raster = (tiles, attribution) => ({ type: "raster", tiles: [tiles], tileSize: 256, maxzoom: 19, attribution });
   const osm = raster(OSM_TILES, "© OpenStreetMap contributors");
-  const streets = { id: "osm", type: "raster", source: "osm", layout: { visibility: satellite ? "none" : "visible" } };
+  const streets = { id: "osm", type: "raster", source: "osm", layout: { visibility: satellite ? "none" : "visible" }, paint: NIGHT_STREETS };
   if (!satellite) return { sources: { osm }, layers: [streets] };
   return {
     sources: { osm, satellite: raster(satellite.tiles, satellite.attribution) },

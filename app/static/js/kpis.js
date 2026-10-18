@@ -6,6 +6,8 @@ import { miniGauge } from "./gauge.js";
 import { t } from "./i18n.js";
 
 const RAIN_HOURS = 12;   // what GET /api/rain sums, said while it is asked
+const COUNT_MS = 1600;   // as long as the map's water takes to come in (--duration-rise in tokens.css)
+const motionOk = () => globalThis.matchMedia?.("(prefers-reduced-motion: no-preference)").matches ?? false;
 
 function median(values) {
   const sorted = [...values].sort((a, b) => a - b);
@@ -31,6 +33,9 @@ function kpiTile(iconName, { hero = false, bar = false, art = false, name = "" }
       label.textContent = labelText;
       note.textContent = noteText;
       if (fill) fill.style.transform = `scaleX(${share})`;
+    },
+    setFigure(figureText) {
+      figure.textContent = figureText;
     },
     setArt(picture) {
       slot.replaceChildren(...(picture ? [picture] : []));
@@ -62,6 +67,21 @@ function floodTileText(history) {
   return [String(counts.recent), t("overview.floodsSince", { year: counts.recentFrom }), t("overview.floodsNote", { dated: counts.dated, since: counts.since })];
 }
 
+/** Counts the lead figure up from 0 on its first showing, as the map's water comes in: `show(n)` writes it. The live
+ *  region waits (aria-busy), so it is read once, at the end. `isCurrent()` stops it when the flood size changes. */
+function countUp(container, show, to, isCurrent) {
+  container.setAttribute("aria-busy", "true");
+  const start = performance.now();
+  const step = (now) => {
+    if (!isCurrent()) return container.removeAttribute("aria-busy");
+    const k = Math.min(1, (now - start) / COUNT_MS);
+    show(Math.round(to * (1 - (1 - k) ** 3)));
+    if (k < 1) requestAnimationFrame(step);
+    else container.removeAttribute("aria-busy");
+  };
+  requestAnimationFrame(step);
+}
+
 /** Builds the tiles into `container`. `data-tiles` says how many are in the grid (the CSS lays them out by it). */
 export function createKpis(container, { history, areaName, premises }) {
   const tiles = { wet: kpiTile("wave", { hero: true, bar: true }), depth: kpiTile("store", { art: true }), flood: kpiTile("clock", { name: "flood" }), rain: kpiTile("rain") };
@@ -72,6 +92,7 @@ export function createKpis(container, { history, areaName, premises }) {
     container.dataset.tiles = tiles.rain.node.hidden ? "3" : "4";
   };
   showRain(undefined);
+  let shownRp = null;
   return {
     /** How many businesses get water at this flood size, and how deep it typically is (the median over the wet ones). */
     setScenario(rp) {
@@ -79,6 +100,10 @@ export function createKpis(container, { history, areaName, premises }) {
       const typical = wet.length ? median(wet.map((p) => p.depth_m[rp])) : null;
       if (!premises.length) tiles.wet.set("–", t("overview.wetLabel", { area: areaName }), t("city.noneMappedTile"), 0);   // a section with none mapped
       else tiles.wet.set(t("overview.wetFigure", { wet: wet.length, total: premises.length }), t("overview.wetLabel", { area: areaName }), t("overview.wetNote", { rp }), wet.length / premises.length);
+      if (shownRp === null && wet.length && motionOk()) {
+        countUp(container, (n) => tiles.wet.setFigure(t("overview.wetFigure", { wet: n, total: premises.length })), wet.length, () => shownRp === rp);
+      }
+      shownRp = rp;
       tiles.depth.set(typical === null ? "–" : t("common.metres", { m: typical.toFixed(1) }), t("overview.typical"), t("overview.typicalNote"), 0);
       tiles.depth.setArt(typical === null ? null : miniGauge(typical));
     },

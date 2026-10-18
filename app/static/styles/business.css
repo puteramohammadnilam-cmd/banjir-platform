@@ -5,26 +5,44 @@
 .biz-head .tags { margin-top: var(--space-2); }
 .biz-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .biz-actions .btn, .biz-head .fact-note .btn-link { min-height: 44px; }   /* touch targets */
+.biz-actions .see-3d { background: var(--brand); border-color: var(--brand); color: var(--on-action); box-shadow: var(--glow); }   /* the 3D street view: the way on that the page most wants seen */
+.biz-actions .see-3d:hover { background: var(--action-hover); }
 .biz-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
 .risk .scenario { margin-bottom: var(--space-5); }
 .headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
-.headline strong { font-size: var(--text-figure); font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums; }
-.headline span { font-size: var(--text-xl); font-weight: 700; }
+.headline strong { font-size: var(--text-figure); font-stretch: 66%; font-weight: 800; letter-spacing: 0; line-height: 0.95; color: var(--brand); text-shadow: 0 0 28px rgb(70 211 255 / 0.45); font-variant-numeric: tabular-nums; }
+.headline span { font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 700; }
 .headline.is-dry strong { color: var(--dry); }
 .subhead { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 
-.gauge { display: block; width: 100%; max-width: 34rem; height: auto; margin: var(--space-5) 0 var(--space-2); }
-.gauge text { font: 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }   /* a light outline keeps labels readable over water */
-.gauge .figure, .gauge .knob { fill: var(--ink-3); }
-.gauge .door { fill: none; stroke: var(--ink); stroke-width: 1.5; }
-.gauge .counter { fill: var(--surface-sunk); stroke: var(--ink); stroke-width: 1.5; }
-.gauge .floor { fill: var(--line); }
-.gauge .water { fill-opacity: 0.6; transform-box: fill-box; transform-origin: bottom; transition: transform 700ms var(--ease-out-expo); }
-.gauge .waterline { stroke: var(--brand); stroke-width: 2; transition: transform 700ms var(--ease-out-expo); }
-.gauge .other-level { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.55; }
+/* the street scene (gauge.js): a shophouse at night, drawn in lines a step above the dark, and the water as lit glass */
+.gauge { display: block; width: 100%; max-width: 40rem; height: auto; margin: var(--space-5) 0 var(--space-2); overflow: visible; }
+.gauge text { font: 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--canvas); stroke-width: 4px; stroke-linejoin: round; }   /* a dark outline keeps labels readable over the water */
+.gauge .wall { fill: var(--surface-raised); stroke: var(--line-strong); stroke-width: 1; }
+.gauge .slab, .gauge .pillar { fill: var(--line-strong); }
+.gauge .window { fill: var(--surface-sunk); stroke: var(--line-strong); stroke-width: 1; }
+.gauge .window.is-lit { fill: rgb(255 177 74 / 0.22); stroke: rgb(255 177 74 / 0.45); }
+.gauge .sign { fill: var(--surface-sunk); stroke: rgb(70 211 255 / 0.45); stroke-width: 1; }
+.gauge .sign-text { font: 800 13px var(--font); font-stretch: 70%; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--brand-ink); stroke: none; }
+.gauge .shutter { fill: var(--line-strong); }
+.gauge .glass { fill: rgb(70 211 255 / 0.05); stroke: var(--line-strong); stroke-width: 1; }
+.gauge .post-red { fill: var(--risk-danger); }
+.gauge .post-white { fill: var(--ink); }
+.gauge .post-label { font: 9px var(--font-mono); fill: var(--ink-3); }
+.gauge .figure { fill: var(--ink-2); }
+.gauge .door { fill: var(--canvas); stroke: var(--ink-2); stroke-width: 1.5; }
+.gauge .counter { fill: var(--surface-raised); stroke: var(--ink-2); stroke-width: 1.5; }
+.gauge .floor { fill: var(--line-strong); }
+.gauge .water { fill: url(#water-glass); transform-box: fill-box; transform-origin: bottom; transition: transform var(--duration-rise) var(--ease-out-expo); }
+.gauge .waterline { stroke: var(--waterline); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--brand)); transition: transform var(--duration-rise) var(--ease-out-expo); }
+.gauge .readout { transition: transform var(--duration-rise) var(--ease-out-expo); }
+.gauge .readout text { font: 800 30px var(--font); font-stretch: 66%; fill: var(--ink); stroke: var(--canvas); stroke-width: 5px; font-variant-numeric: tabular-nums; }
+.gauge .other-level { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.6; }
+.gauge .level { font-family: var(--font-mono); font-size: 10px; }
 .gauge .level.is-active, .gauge .object-label { font-weight: 700; fill: var(--ink); }
-.gauge .street { stroke: var(--ink); stroke-width: 2; }
+.gauge .street { stroke: var(--ink-2); stroke-width: 2; }
 .gauge.gauge-mini { max-width: 12rem; margin: var(--space-2) 0 0; }   /* the first-screen picture: no text in it, so it can be small */
+.gauge.gauge-mini .water { fill: url(#water-glass); }
 .gauge .storey { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 1 3; }
 
 .biz-side { display: grid; gap: var(--space-3); }
@@ -33,7 +51,7 @@
    read this". No boxes, no coloured edges. */
 .facts { display: grid; gap: var(--space-5); }
 .fact-group { display: grid; gap: 0; }
-.fact-group-heading { margin: 0 0 var(--space-1); padding-bottom: var(--space-2); font-size: var(--text-lg); border-bottom: 2px solid var(--ink); }
+.fact-group-heading { margin: 0 0 var(--space-1); padding-bottom: var(--space-2); font: 400 var(--text-label)/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line-strong); }
 .fact { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
 .fact[data-tone="high"] { --tone-dot: var(--risk-danger); --tone-ink: var(--risk-danger); }
 .fact[data-tone="some"] { --tone-dot: var(--risk-alert); --tone-ink: var(--risk-alert-ink); }
@@ -41,8 +59,8 @@
 .fact-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-3); }
 .fact-label { margin: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
 .fact-chip { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 700; color: var(--tone-ink, var(--ink-2)); }
-.fact-chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--tone-dot, var(--line-strong)); box-shadow: inset 0 0 0 1px rgba(13, 27, 42, 0.25); }
-.fact-value { margin-top: var(--space-1); font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 600; line-height: 1.25; letter-spacing: -0.005em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fact-chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--tone-dot, var(--line-strong)); box-shadow: 0 0 8px var(--tone-dot, transparent); }
+.fact-value { margin-top: var(--space-1); font-size: var(--text-xl); font-stretch: var(--narrow); font-weight: 700; line-height: 1.2; color: var(--ink); font-variant-numeric: tabular-nums; }
 .fact-note { margin-top: 2px; font-size: var(--text-sm); color: var(--ink-2); }
 .fact .btn { margin-top: var(--space-2); }
 .fact .fact-link { margin-top: var(--space-1); padding: 0; min-height: 2.25rem; }
@@ -59,15 +77,20 @@
 .photo-button[aria-disabled="true"] { opacity: 0.6; pointer-events: none; }
 
 .next { display: grid; gap: var(--space-2); }
-.next-step { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); text-align: left; cursor: pointer; transition: border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast); }
+.next-step { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; transition: border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast); }
 .next-step:hover { border-color: var(--action); background: var(--surface-sunk); }
 .next-step strong { display: block; font-size: var(--text-md); color: var(--ink); }
 .next-step span { font-size: var(--text-sm); color: var(--ink-2); }
 .next-step .icon { width: 20px; height: 20px; color: var(--ink-2); }
-.next-step.is-primary { border: 2px solid var(--action); }
+.next-step.is-primary { border: 1px solid var(--action); box-shadow: var(--glow); }
 .next-step.is-primary .icon { color: var(--action); }
 
 @media (max-width: 900px) { .biz-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) {   /* a phone shows the scene at about 70%: the labels stay near 10 px, the flood sizes still clear of the water */
+  .gauge > text { font-size: 15px; }
+  .gauge .level { font-size: 13px; }
+  .gauge .post-label { font-size: 12px; }
+}
 @media (min-width: 901px) { .gauge text { font-size: 10.5px; } }   /* the drawing scales up on wide screens; its labels should not */
 /* a laptop or wider, with a place on show: the drawing, then the flood plan and the compare card (main.js puts those after
    the grid) on the left, the facts and next steps on the right. So neither column ends far above the other, and no card
@@ -88,8 +111,8 @@
 }
 /* a wide screen: the drawing fills its card, its labels the same size on screen as at 34rem */
 @media (min-width: 1280px) {
-  .risk .gauge { max-width: 44rem; }
-  .risk .gauge text { font-size: 8.2px; }
+  .risk .gauge { max-width: 42rem; }
+  .risk .gauge > text { font-size: 9px; }   /* the labels; the post, the sign and the depth riding the water keep their own sizes */
 }
 
 /* ---------- the flood plan ---------- */
@@ -101,10 +124,10 @@
 .compare-table .btn-link { min-height: 44px; text-align: left; }
 .compare-step { font-weight: 600; color: var(--ink); }
 .compare-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.compare-verdict { padding: var(--space-2) 0; border-top: 2px solid var(--ink); font-family: var(--font-serif); font-size: var(--text-lg); color: var(--ink); }
+.compare-verdict { padding: var(--space-2) 0; border-top: 1px solid var(--line-strong); font-stretch: var(--narrow); font-weight: 700; font-size: var(--text-xl); color: var(--ink); }
 /* the least water in a column: a word tag, and a tint, so colour is not the only cue */
 .compare-table td.is-least { background: var(--brand-wash); font-weight: 700; }
-.least-tag, .here-tag { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--brand-deep); }
+.least-tag, .here-tag { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--brand-ink); }
 .here-tag { color: var(--ink-3); }
 .compare-table thead th.is-current { box-shadow: inset 0 3px 0 var(--brand); }
 .loss-table.compare-table { min-width: 0; }   /* places across, at most three: fits a phone */
@@ -117,7 +140,7 @@
 .plan-language legend { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); margin-bottom: var(--space-1); }
 .plan-sheet { display: grid; gap: var(--space-2); width: 100%; max-width: 48rem; padding: var(--space-5); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); }
 .plan-sheet h3 { font-size: var(--text-xl); }
-.plan-sheet h4 { margin-top: var(--space-3); color: var(--brand-deep); }
+.plan-sheet h4 { margin-top: var(--space-3); color: var(--brand-ink); }
 .plan-sheet ol, .plan-sheet ul { margin: 0; padding-left: 1.4rem; display: grid; gap: var(--space-1); }
 .plan-sheet ol { list-style: decimal; }
 .plan-sheet ul { list-style: disc; }

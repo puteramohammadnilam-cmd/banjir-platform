@@ -271,7 +271,8 @@ export function createBusiness(panel, { area, areas = [], onWarning = null, onPh
         drawnKey = key;
         const isPageArea = !premise.is_point || premise.area_id === area.id;   // the example is this area's flood
         renderPicker(picker, rp, onPick, isPageArea ? area.bigger_flood_example : null);
-        drawing.replaceChildren(...headline(premise, rp), gauge(premise, rp, floorM), caption(photoFloorM, floorM),
+        const [figure, sentence, ...notes] = headline(premise, rp);   // the street scene comes straight after the figure, the caveats under it
+        drawing.replaceChildren(figure, sentence, gauge(premise, rp, floorM), ...notes, caption(photoFloorM, floorM),
           shareButton(premise, rp, isPageArea ? area.display_name : null));
         announcer.textContent = spoken(premise, rp);
       }

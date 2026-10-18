@@ -3,9 +3,10 @@
 /* where to move the car: the warning not to drive through water is in words and weight, not colour alone */
 .car-warning { font-weight: 600; color: var(--risk-danger); }
 /* "Flood is coming": the button at the top of the facts, and the checklist in a modal dialog */
-.mode-open { width: 100%; margin-bottom: var(--space-3); }
+.mode-open { width: 100%; min-height: 52px; margin-bottom: var(--space-3); background: var(--marker); color: var(--on-action); font-size: var(--text-md); }   /* amber: the one warning-coloured control on the page */
+.mode-open:hover { background: #ffc677; box-shadow: 0 0 0 1px rgb(255 177 74 / 0.5), 0 0 22px -4px rgb(255 177 74 / 0.7); }
 .flood-mode { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); padding: var(--space-5); border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-md); overflow-y: auto; }
-.flood-mode::backdrop { background: rgba(13, 27, 42, 0.55); }
+.flood-mode::backdrop { background: rgb(2 5 8 / 0.7); }
 .flood-mode:focus-visible { outline: none; }   /* it takes focus itself, so its heading is read first */
 body:has(.flood-mode[open]) { overflow: hidden; }
 /* the heading and Close stay in sight as the steps scroll, Close beside the heading, never over it */
@@ -14,15 +15,15 @@ body:has(.flood-mode[open]) { overflow: hidden; }
 .mode-urgent { padding: var(--space-3) var(--space-4); border: 1px solid var(--risk-danger); border-radius: var(--radius-sm); background: var(--risk-danger-wash); color: var(--ink); font-weight: 700; }
 .mode-close-end { margin-top: var(--space-4); }
 .mode-content { display: grid; gap: var(--space-3); }
-.mode-steps { display: grid; border-top: 2px solid var(--ink); }
+.mode-steps { display: grid; border-top: 1px solid var(--line-strong); }
 .mode-step { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
 .mode-step:has(:checked) .mode-tick strong { color: var(--risk-normal); }
 .mode-tick { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; cursor: pointer; font-size: var(--text-md); }
 .mode-tick input { width: 1.4rem; height: 1.4rem; flex: none; accent-color: var(--risk-normal); }
-.mode-num { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--ink); color: #fff; font-size: var(--text-sm); font-weight: 700; flex: none; }
+.mode-num { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--ink); color: var(--canvas); font-size: var(--text-sm); font-weight: 700; flex: none; }
 .mode-step:has(:checked) .mode-num { background: var(--risk-normal); }
 .mode-body { display: grid; gap: var(--space-1); font-size: var(--text-sm); color: var(--ink-2); }
 @media (min-width: 600px) { .mode-body { padding-left: calc(1.4rem + 1.6rem + 2 * var(--space-2)); } }   /* under the step's words */
-.step-answer { font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 600; color: var(--ink); }
+.step-answer { font-size: var(--text-lg); font-stretch: var(--narrow); font-weight: 700; color: var(--ink); }
 .share { display: grid; gap: var(--space-1); justify-items: start; margin-top: var(--space-3); }
 

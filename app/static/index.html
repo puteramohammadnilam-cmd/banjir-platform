@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#08304f">
+  <meta name="theme-color" content="#060a0f">
+  <!-- the mark: a flood post with water at its foot -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23060a0f'/%3E%3Crect x='12' y='3' width='8' height='26' fill='%23e7eff5'/%3E%3Crect x='12' y='3' width='8' height='6' fill='%23ff6a5f'/%3E%3Crect x='12' y='15' width='8' height='6' fill='%23ff6a5f'/%3E%3Crect y='21' width='32' height='11' fill='%2346d3ff' fill-opacity='0.75'/%3E%3C/svg%3E">
   <title data-i18n="meta.title">Banjir Check · modelled flood depth for shops and businesses</title>
   <meta name="description" data-i18n-attr="content:meta.description" content="See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..900&family=Martian+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="vendor/leaflet.css">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/app.css">
@@ -95,6 +97,7 @@
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
+    <linearGradient id="water-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fdcff" stop-opacity="0.78"/><stop offset="0.35" stop-color="#2a8fd0" stop-opacity="0.72"/><stop offset="1" stop-color="#0f4c80" stop-opacity="0.9"/></linearGradient>
   </svg>
 
   <header class="topbar">
@@ -130,36 +133,40 @@
     <p class="alert" id="link-note" role="alert" hidden></p>
 
     <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
-      <section class="finder-hero" aria-labelledby="finder-hero-heading">
-        <h1 class="finder-hero-title" id="finder-hero-heading"><label id="finder-hero-label" for="finder-hero-input" data-i18n="hero.heading">Find your shop</label></h1>
-        <p class="finder-hero-lead" data-i18n="hero.lead">See how deep a modelled flood gets there, and what it could cost.</p>
-        <form class="finder-hero-form" id="finder-hero" role="search" aria-labelledby="finder-hero-heading">
-          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
-          <input id="finder-hero-input" class="field" type="search" list="business-names" data-i18n-attr="placeholder:hero.placeholder" placeholder="Your shop's name" autocomplete="off" enterkeyhint="search">
-          <button type="submit" class="btn btn-primary" data-i18n="hero.search">Search</button>
-        </form>
-        <p class="finder-hero-point" id="hero-point" hidden>
-          <span data-i18n="hero.notListed">Not on the list?</span>
-          <button type="button" class="btn btn-secondary" id="hero-check"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="hero.check">Check any point in Malaysia</span></button>
-        </p>
-      </section>
-      <div class="scope-bar" id="scope"></div>
-      <div class="kpis" id="kpis" aria-live="polite"></div>
-      <div class="stamp" id="stamp"></div>
-      <section class="surface map-surface" aria-labelledby="map-heading">
-        <div class="surface-head">
-          <div>
-            <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
-            <p class="scenario-sentence" id="scenario-sentence"></p>
-            <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
+      <div class="stage">
+        <div class="stage-panel">
+          <section class="finder-hero" aria-labelledby="finder-hero-heading">
+            <h1 class="finder-hero-title" id="finder-hero-heading"><label id="finder-hero-label" for="finder-hero-input" data-i18n="hero.heading">Find your shop</label></h1>
+            <p class="finder-hero-lead" data-i18n="hero.lead">See how deep a modelled flood gets there, and what it could cost.</p>
+            <form class="finder-hero-form" id="finder-hero" role="search" aria-labelledby="finder-hero-heading">
+              <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+              <input id="finder-hero-input" class="field" type="search" list="business-names" data-i18n-attr="placeholder:hero.placeholder" placeholder="Your shop's name" autocomplete="off" enterkeyhint="search">
+              <button type="submit" class="btn btn-primary" data-i18n="hero.search">Search</button>
+            </form>
+            <p class="finder-hero-point" id="hero-point" hidden>
+              <span data-i18n="hero.notListed">Not on the list?</span>
+              <button type="button" class="btn btn-secondary" id="hero-check"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="hero.check">Check any point in Malaysia</span></button>
+            </p>
+          </section>
+          <div class="kpis" id="kpis" aria-live="polite"></div>
+        </div>
+        <section class="surface map-surface" aria-labelledby="map-heading">
+          <div class="surface-head">
+            <div>
+              <h2 id="map-heading" data-i18n="overview.mapHeading">Flood model</h2>
+              <p class="scenario-sentence" id="scenario-sentence"></p>
+              <p class="muted small" id="map-lead" data-i18n="overview.mapLead">Modelled water depth at each business. Tap a dot for details.</p>
+            </div>
+            <div class="scenario-slot" data-scenario></div>
           </div>
-          <div class="scenario-slot" data-scenario></div>
-        </div>
-        <div class="map-stage">
-          <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
-          <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
-        </div>
-      </section>
+          <div class="map-stage">
+            <div id="map" role="application" data-i18n-attr="aria-label:overview.mapLabelStatic" aria-label="Map with modelled flood depth at each business"></div>
+            <ul class="legend" id="legend" data-i18n-attr="aria-label:legend.label" aria-label="Map key"></ul>
+          </div>
+        </section>
+      </div>
+      <div class="scope-bar" id="scope"></div>
+      <div class="stamp" id="stamp"></div>
       <section class="surface map-extras" aria-labelledby="map-extras-heading">
         <h2 id="map-extras-heading" class="small-heading" data-i18n="overview.mapExtrasHeading">About this map</h2>
         <div class="map-controls" id="map-controls" hidden></div>

@@ -10,11 +10,12 @@ export const MAX_NEIGHBOURHOODS = 4;
 const CELL_FIELDS = 5;       // [south, west, depth at 1 in 10, 1 in 20, 1 in 50], as in town.json `cells`
 
 // The squares are background: the shop dots carry the depth. So they get a ramp of their own, one hue (OKLCH hue about
-// 245, low chroma) that darkens and thickens with depth, where the dots run through five colours. They share the dots'
-// depth thresholds (BANDS), so a square and a dot of the same depth are the same step. Same values as --square-1..5 in
-// tokens.css, which are the colour at its opacity. tests/palette.test.mjs holds the ramp to hue, lightness and spacing:
-// each step, laid over the map's ground (#f2efe9), stays at least 8 apart from the next.
-const SQUARE_STEPS = [["#abcff0", 0.30], ["#6898c0", 0.40], ["#3b719c", 0.48], ["#1c547e", 0.55], ["#003053", 0.58]];
+// 250) that brightens and thickens with depth on the night map, so the deepest water glows, where the dots run through
+// five colours. They share the dots' depth thresholds (BANDS), so a square and a dot of the same depth are the same
+// step. Same values as --square-1..5 in tokens.css, which are the colour at its opacity. tests/palette.test.mjs holds
+// the ramp to hue, lightness and spacing: each step, laid over the night map's ground (--map-night), stays at least 8
+// apart from the next.
+const SQUARE_STEPS = [["#245a8c", 0.42], ["#307abe", 0.58], ["#489ce6", 0.66], ["#7abeff", 0.74], ["#c4e2ff", 0.84]];
 export const SQUARE_RAMP = Object.freeze(BANDS.map(({ below }, i) => Object.freeze({ below, color: SQUARE_STEPS[i][0], opacity: SQUARE_STEPS[i][1] })));
 
 /** The paint of one square: its step of the ramp for the depth at `index` of its depths, or none when dry. */
