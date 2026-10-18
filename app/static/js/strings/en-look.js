@@ -4,7 +4,7 @@ export default Object.freeze({
   "stamp.source": "Source: European Commission JRC global river flood model v2.1 (CC BY 4.0) · businesses © OpenStreetMap contributors (ODbL)",
   "stamp.checked": " · flood record checked {date}",
   "stamp.cite": "How to cite",
-  "stamp.citeText": "Banjir Check ({year}). Modelled flood depth for businesses in {area}. {link}. Accessed {date}. Data: European Commission JRC (CC BY 4.0); OpenStreetMap contributors (ODbL).",
+  "stamp.citeText": "MyFlood ({year}). Modelled flood depth for businesses in {area}. {link}. Accessed {date}. Data: European Commission JRC (CC BY 4.0); OpenStreetMap contributors (ODbL).",
   "overview.scenarioSentence": "Showing a flood expected once in {rp} years. Chance of at least one this big in the next {years} years: {pct}%.",
   "drawing.shop": "Drawing made with Google Gemini: a two-storey shophouse cut open, with flood water at knee height in the street and on the shop floor.",
   "drawing.contents": "Drawing made with Google Gemini: a shop cut open, with stock, a drinks fridge and shelves standing in flood water, and a car outside in the same water.",

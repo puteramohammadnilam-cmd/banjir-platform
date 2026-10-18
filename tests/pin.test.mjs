@@ -75,7 +75,7 @@ test("a spot that is not a number is outside, and a page with no coverage cannot
 // ---------- the words ----------
 
 test("each coverage answer has the plan's one sentence", () => {
-  assert.equal(coverageWords({ coverage: "outside", region: null }), "This spot is outside Malaysia. Banjir Check covers Malaysia only.");
+  assert.equal(coverageWords({ coverage: "outside", region: null }), "This spot is outside Malaysia. MyFlood covers Malaysia only.");
   assert.equal(coverageWords({ coverage: "not_loaded", region: "borneo" }), "Sabah and Sarawak are not in this build yet.");
   assert.equal(coverageWords({ coverage: "not_loaded", region: "langkawi" }), "Langkawi is not covered yet.");
   assert.equal(coverageWords({ coverage: "not_loaded", region: "peninsula" }), "This spot is outside the flood model files in this build.");
@@ -174,7 +174,7 @@ test("an error is an alert and a result is a status, and a note comes before the
 });
 
 test("a note that blocks turns the check off, in its own words, until the note is cleared", () => {
-  const blocking = { text: "This spot is outside Malaysia. Banjir Check covers Malaysia only.", tone: "status", blocks: true };
+  const blocking = { text: "This spot is outside Malaysia. MyFlood covers Malaysia only.", tone: "status", blocks: true };
   assert.deepEqual(describe({ ...AIM, note: blocking }), { text: blocking.text, tone: "status", check: "blocked", locate: "ready" });
   assert.deepEqual(describe({ ...AIM, note: { ...blocking, blocks: false } }).check, "ready");
   assert.deepEqual(describe({ ...AIM, note: null }).check, "ready");

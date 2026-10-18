@@ -16,7 +16,7 @@ export default Object.freeze({
   ...cover,
   ...social,
   // ---------- index.html: head, header, tabs ----------
-  "meta.title": "Banjir Check · modelled flood depth for shops and businesses",
+  "meta.title": "MyFlood · modelled flood depth for shops and businesses",
   "meta.description": "See how deep a modelled flood gets at each business in a mapped area, what it could cost, and ask an AI assistant in Bahasa Melayu or English.",
   "header.find": "Find your shop",
   "header.badge": "Test build",
@@ -484,7 +484,7 @@ export default Object.freeze({
   "stock.save": "Save this list",
   "stock.saveHint": "A text file of the ticked items, kept on your device. Keep it with your photos: an insurer may ask for both after a flood.",
   "stock.fileName": "shop-stock-list.txt",
-  "stock.fileTitle": "Stock and equipment list, {date} (Banjir Check)",
+  "stock.fileTitle": "Stock and equipment list, {date} (MyFlood)",
   "stock.fileTotal": "Total, by Gemini's rough guess: {range}",
   "stock.fileNote": "Gemini's rough guess from {n} photo(s), not a valuation. Keep the photos with this list.",
   "stock.status": "{count} of {all} items counted, worth {range} by Gemini's guess.",
@@ -505,7 +505,7 @@ export default Object.freeze({
   "report.floods": "Floods recorded here, in the sources we checked",
   "report.notes": "Notes on the data",
   "report.council": "Local council: {council}.",
-  "report.footer": "Banjir Check, {date}. Depths are from a global computer model, not an official flood map, not a forecast and not a record of real floods. Flood depth: European Commission JRC, CC BY 4.0. Businesses and roads: © OpenStreetMap contributors, ODbL. For warnings use JPS Public Infobanjir; in an emergency call 999.",
+  "report.footer": "MyFlood, {date}. Depths are from a global computer model, not an official flood map, not a forecast and not a record of real floods. Flood depth: European Commission JRC, CC BY 4.0. Businesses and roads: © OpenStreetMap contributors, ODbL. For warnings use JPS Public Infobanjir; in an emergency call 999.",
 
   // ---------- Ask AI: index.html ----------
   "ask.lead": "Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.",
@@ -576,7 +576,7 @@ export default Object.freeze({
   "pin.notNow": "Not now",
   "pin.squaresNone": "No flood squares near this point in the model",
   "pin.squaresFailed": "Flood squares could not load.",
-  "pin.outside": "This spot is outside Malaysia. Banjir Check covers Malaysia only.",
+  "pin.outside": "This spot is outside Malaysia. MyFlood covers Malaysia only.",
   "pin.borneo": "Sabah and Sarawak are not in this build yet.",
   "pin.langkawi": "Langkawi is not covered yet.",
   "pin.files": "This spot is outside the flood model files in this build.",

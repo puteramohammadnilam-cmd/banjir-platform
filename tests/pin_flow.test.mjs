@@ -157,7 +157,7 @@ test("a spot the server will not check says why, and stays off until the cross m
   page.map.moveTo(...KL);
   page.check.click();
   await flush();
-  assert.equal(page.status(), "This spot is outside Malaysia. Banjir Check covers Malaysia only.");
+  assert.equal(page.status(), "This spot is outside Malaysia. MyFlood covers Malaysia only.");
   assert.equal(page.alert(), "");
   assert.equal(page.check.disabled, true, "the same square would get the same answer");
   assert.equal(asked.length, 1);
@@ -167,7 +167,7 @@ test("a spot the server will not check says why, and stays off until the cross m
   assert.equal(page.check.disabled, false);
   page.map.moveTo(...KL);
   assert.equal(page.check.disabled, true, "the refusal is remembered");
-  assert.equal(page.status(), "This spot is outside Malaysia. Banjir Check covers Malaysia only.");
+  assert.equal(page.status(), "This spot is outside Malaysia. MyFlood covers Malaysia only.");
 });
 
 test("a server that cannot be reached says so in an alert, aim mode stays, and the next try can work", async () => {
@@ -509,7 +509,7 @@ test("a fix in a place the map cannot show says it is outside Malaysia and moves
   choose(page, "Share my location");
   await flush();
   deliver({ coords: { latitude: 35.68, longitude: 139.69, accuracy: 10 } });
-  assert.equal(page.status(), "This spot is outside Malaysia. Banjir Check covers Malaysia only.");
+  assert.equal(page.status(), "This spot is outside Malaysia. MyFlood covers Malaysia only.");
   assert.deepEqual(page.map.calls.findLast(([name]) => name === "showAccuracy"), ["showAccuracy", null]);
   assert.equal(page.check.disabled, true, "the check would be of the cross, not of the fix the words are about");
   page.map.moveTo(...KL);

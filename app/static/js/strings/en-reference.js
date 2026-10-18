@@ -54,7 +54,7 @@ export default Object.freeze({
   "reference.contents": "On this page",
   "reference.navSdg": "SDGs",
   "reference.sdgHeading": "How this serves the SDGs",
-  "reference.sdgLead": "Banjir Check is a free, public-interest tool. It contributes to these targets of the United Nations Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction; it does not measure them.",
+  "reference.sdgLead": "MyFlood is a free, public-interest tool. It contributes to these targets of the United Nations Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction; it does not measure them.",
   "reference.sdg11Alt": "Sustainable Development Goal 11: Sustainable Cities and Communities",
   "reference.sdg13Alt": "Sustainable Development Goal 13: Climate Action",
   "reference.sdg115Label": "Target 11.5",

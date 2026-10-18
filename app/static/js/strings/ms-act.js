@@ -28,7 +28,7 @@ export default Object.freeze({
   "share.saved": "Gambar disimpan, dan teks bersama pautan disalin: tampalkannya bersama gambar dalam WhatsApp.",
   "share.savedOnly": "Gambar disimpan. Teks tidak dapat disalin di sini: pautan untuk dihantar bersamanya ialah alamat halaman ini.",
   "share.failed": "Gambar tidak dapat dibuat dalam pelayar ini.",
-  "share.fileName": "banjir-check.png",
+  "share.fileName": "myflood.png",
   "share.pointName": "Titik yang saya semak",
   "share.inFlood": "Air dalam model, dalam banjir 1 dalam {rp} tahun",
   "share.footer": "Kedalaman daripada model komputer global dalam petak 90 m: bukan peta banjir rasmi, bukan ramalan.",

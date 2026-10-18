@@ -28,7 +28,7 @@ export default Object.freeze({
   "share.saved": "Picture saved, and the text with the link copied: paste it with the picture in WhatsApp.",
   "share.savedOnly": "Picture saved. The text could not be copied here: the link to send with it is the address of this page.",
   "share.failed": "The picture could not be made in this browser.",
-  "share.fileName": "banjir-check.png",
+  "share.fileName": "myflood.png",
   "share.pointName": "A spot I checked",
   "share.inFlood": "Water in the model, in a 1 in {rp} years flood",
   "share.footer": "Depths from a global computer model in 90 m squares: not an official flood map, not a forecast.",

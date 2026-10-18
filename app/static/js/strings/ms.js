@@ -17,7 +17,7 @@ export default Object.freeze({
   ...cover,
   ...social,
   // ---------- index.html: head, header, tabs ----------
-  "meta.title": "Banjir Check · kedalaman banjir dalam model untuk kedai dan perniagaan",
+  "meta.title": "MyFlood · kedalaman banjir dalam model untuk kedai dan perniagaan",
   "meta.description": "Lihat sedalam mana air banjir dalam model di setiap perniagaan di kawasan yang dipetakan, anggaran kosnya, dan tanya pembantu AI dalam Bahasa Melayu atau bahasa Inggeris.",
   "header.find": "Cari kedai anda",
   "header.badge": "Versi ujian",
@@ -485,7 +485,7 @@ export default Object.freeze({
   "stock.save": "Simpan senarai ini",
   "stock.saveHint": "Fail teks bagi barang yang bertanda, disimpan dalam peranti anda. Simpan bersama foto anda: syarikat insurans mungkin meminta kedua-duanya selepas banjir.",
   "stock.fileName": "senarai-barang-kedai.txt",
-  "stock.fileTitle": "Senarai barang dan peralatan, {date} (Banjir Check)",
+  "stock.fileTitle": "Senarai barang dan peralatan, {date} (MyFlood)",
   "stock.fileTotal": "Jumlah, mengikut tekaan kasar Gemini: {range}",
   "stock.fileNote": "Tekaan kasar Gemini daripada {n} foto, bukan penilaian. Simpan foto bersama senarai ini.",
   "stock.status": "{count} daripada {all} barang dikira, bernilai {range} mengikut tekaan Gemini.",
@@ -506,7 +506,7 @@ export default Object.freeze({
   "report.floods": "Banjir yang direkodkan di sini, dalam sumber yang kami semak",
   "report.notes": "Nota tentang data",
   "report.council": "Majlis tempatan: {council}.",
-  "report.footer": "Banjir Check, {date}. Kedalaman air diambil daripada model komputer global, bukan peta banjir rasmi, bukan ramalan dan bukan rekod banjir sebenar. Kedalaman banjir: JRC Suruhanjaya Eropah, CC BY 4.0. Perniagaan dan jalan: © penyumbang OpenStreetMap, ODbL. Untuk amaran, guna JPS Public Infobanjir; dalam kecemasan, hubungi 999.",
+  "report.footer": "MyFlood, {date}. Kedalaman air diambil daripada model komputer global, bukan peta banjir rasmi, bukan ramalan dan bukan rekod banjir sebenar. Kedalaman banjir: JRC Suruhanjaya Eropah, CC BY 4.0. Perniagaan dan jalan: © penyumbang OpenStreetMap, ODbL. Untuk amaran, guna JPS Public Infobanjir; dalam kecemasan, hubungi 999.",
 
   // ---------- Ask AI: index.html ----------
   "ask.lead": "Gemini membaca data banjir alat ini, Google Weather dan Google Maps. Ia menjawab dalam Bahasa Melayu atau bahasa Inggeris.",
@@ -577,7 +577,7 @@ export default Object.freeze({
   "pin.notNow": "Bukan sekarang",
   "pin.squaresNone": "Tiada petak banjir berhampiran titik ini dalam model",
   "pin.squaresFailed": "Petak banjir tidak dapat dimuatkan.",
-  "pin.outside": "Tempat ini di luar Malaysia. Banjir Check meliputi Malaysia sahaja.",
+  "pin.outside": "Tempat ini di luar Malaysia. MyFlood meliputi Malaysia sahaja.",
   "pin.borneo": "Sabah dan Sarawak belum ada dalam versi ini.",
   "pin.langkawi": "Langkawi belum diliputi.",
   "pin.files": "Tempat ini di luar fail model banjir dalam versi ini.",

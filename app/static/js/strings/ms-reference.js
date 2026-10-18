@@ -54,7 +54,7 @@ export default Object.freeze({
   "reference.contents": "Dalam halaman ini",
   "reference.navSdg": "SDG",
   "reference.sdgHeading": "Bagaimana ini menyokong SDG",
-  "reference.sdgLead": "Banjir Check ialah alat percuma untuk kepentingan awam. Ia menyumbang kepada sasaran Matlamat Pembangunan Mampan Pertubuhan Bangsa-Bangsa Bersatu dan Rangka Kerja Sendai untuk Pengurangan Risiko Bencana ini; ia tidak mengukurnya.",
+  "reference.sdgLead": "MyFlood ialah alat percuma untuk kepentingan awam. Ia menyumbang kepada sasaran Matlamat Pembangunan Mampan Pertubuhan Bangsa-Bangsa Bersatu dan Rangka Kerja Sendai untuk Pengurangan Risiko Bencana ini; ia tidak mengukurnya.",
   "reference.sdg11Alt": "Matlamat Pembangunan Mampan 11: Bandar dan Komuniti Mampan",
   "reference.sdg13Alt": "Matlamat Pembangunan Mampan 13: Tindakan Iklim",
   "reference.sdg115Label": "Sasaran 11.5",

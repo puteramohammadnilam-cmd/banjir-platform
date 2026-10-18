@@ -21,7 +21,7 @@ test("the source line names the model, the map and their licences, and the day t
 
 test("the citation names the area and the page, never what follows #", () => {
   const text = citation("Home Town", "https://example.test/?area=home#place=pt:3.1,101.5", new Date(2026, 9, 6, 12));
-  assert.equal(text, "Banjir Check (2026). Modelled flood depth for businesses in Home Town. https://example.test/?area=home. Accessed 6 Oct 2026. Data: European Commission JRC (CC BY 4.0); OpenStreetMap contributors (ODbL).");
+  assert.equal(text, "MyFlood (2026). Modelled flood depth for businesses in Home Town. https://example.test/?area=home. Accessed 6 Oct 2026. Data: European Commission JRC (CC BY 4.0); OpenStreetMap contributors (ODbL).");
 });
 
 test("the flood size on show reads as a sentence with its chance, in both languages", () => {

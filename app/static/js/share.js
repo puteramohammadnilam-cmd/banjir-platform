@@ -62,7 +62,7 @@ function text(ctx, value, x, y, { size, weight = 400, color = COLORS.ink, align 
 function drawTop(ctx, areaName) {
   ctx.fillStyle = COLORS.brand;
   ctx.fillRect(0, 0, W, 200);
-  text(ctx, "Banjir Check", PAD, 105, { size: 56, weight: 700, color: COLORS.white });
+  text(ctx, "MyFlood", PAD, 105, { size: 56, weight: 700, color: COLORS.white });
   text(ctx, areaName ?? "", PAD, 160, { size: 32, color: COLORS.wash });
 }
 

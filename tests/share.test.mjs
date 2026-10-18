@@ -12,7 +12,7 @@ import { point, shop } from "./point_fixtures.mjs";
 
 beforeEach(() => installFakeDom());
 
-const FILE = new File(["png"], "banjir-check.png", { type: "image/png" });
+const FILE = new File(["png"], "myflood.png", { type: "image/png" });
 const withBlobUrl = async (run) => {
   const real = URL.createObjectURL;
   URL.createObjectURL = () => "blob:x";
@@ -43,7 +43,7 @@ test("where the browser can share a picture, it goes to the share sheet with the
   const sent = [];
   const nav = { canShare: () => true, share: async (data) => { sent.push(data); } };
   assert.equal(await sharePlace(shop, "50", FILE, { nav, link: "L" }), "shared");
-  assert.equal(sent[0].files[0].name, "banjir-check.png");
+  assert.equal(sent[0].files[0].name, "myflood.png");
   assert.match(sent[0].text, /A Shop: 1\.00 m/);
 });
 

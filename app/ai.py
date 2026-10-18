@@ -42,7 +42,7 @@ TOOL_NAMES = frozenset(TOOLS_BY_NAME)
 # and so trusted. Nothing a user sends is formatted into any prompt. The selection
 # follows the system text: a business by its id, its name from the map only cleaned, quoted and labelled as data; a
 # point only as "the selected point" and its listed area, never its id or coordinates (floodtools.SELECTED).
-SYSTEM = f"""You are the assistant inside Banjir Check, a free flood check tool for small businesses in Malaysia. \
+SYSTEM = f"""You are the assistant inside MyFlood, a free flood check tool for small businesses in Malaysia. \
 Shop owners ask you about the tool and about what a flood could mean for their premises.
 
 What you help with:
