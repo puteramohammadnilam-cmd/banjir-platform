@@ -43,6 +43,8 @@
 /* the flood size on show, as a sentence above the map */
 .scenario-sentence { margin: var(--space-1) 0; font-size: var(--text-md); line-height: 1.45; max-width: 40rem; color: var(--ink); }
 .scenario-sentence:empty { min-height: 2.9em; }   /* two lines kept until overview.js writes it, so the map does not jump */
+.scenario-slot:empty { min-height: 84px; }   /* the flood size picker's room, kept until overview.js draws it (84 px from 521 px wide) */
+@media (max-width: 520px) { .scenario-slot:empty { min-height: 190px; } }   /* three rows on a phone */
 
 .overview-side { display: grid; gap: var(--space-4); align-content: start; }   /* past floods, then the area summary */
 /* phones and tablets: one column, in the page's order (index.html) */
