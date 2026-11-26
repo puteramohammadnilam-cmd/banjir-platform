@@ -64,4 +64,4 @@ def test_arus_is_credited_with_its_licence():
 def test_the_main_page_links_to_the_preview():
     page = (STATIC / "index.html").read_text(encoding="utf-8")
     assert 'id="map-link" href="map.html"' in page
-    assert "map.html${location.search}" in (STATIC / "js" / "main.js").read_text(encoding="utf-8")
+    assert "map.html${location.search}${location.hash}" in (STATIC / "js" / "main.js").read_text(encoding="utf-8")

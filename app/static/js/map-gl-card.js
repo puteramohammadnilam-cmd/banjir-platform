@@ -90,6 +90,29 @@ export function shopCard(shop, { rp, sectionName, shelters, links, onClose, onSh
   ];
 }
 
+/** A checked point's card, as a shop's: where it is (point.js pointHeader gives the title and the line under it), its
+ *  badge and sentence for the square, the water there for each flood size, the server's nearest relief centre, and the
+ *  ways on: the main page's details and cost, share, move the pin, directions. */
+export function pointCard(place, { rp, title, subline, links, onClose, onShare, onMove }) {
+  const depth = place.depth_m?.[rp];
+  const mark = badge(depth);
+  const near = shelterOf(place, []);   // only the server's: a point can be far from this area's own list
+  const isWet = typeof depth === "number" && depth > 0;
+  return [
+    ...head(title, onClose),
+    subline && h("p", { class: "mg-sub" }, subline),
+    h("span", { class: `mg-badge mg-${mark.tone}` }, t(mark.key)),
+    h("p", { class: "mg-say" }, isWet ? t("mg.say.pointWet", { rp, m: depth.toFixed(1), words: depthWords(depth) }) : t("mg.say.pointDry", { rp })),
+    h("div", { class: "mg-stats" }, SCENARIOS.map((size) => tile(t("scenario.label", { rp: size }), metres(place.depth_m?.[size]), null, size === rp)),
+      tile(t("mg.shelter"), near ? t("mg.km", { km: formatNumber(near.km, { maximumFractionDigits: 1 }) }) : "–", near?.shelter.name)),
+    h("div", { class: "mg-acts" }, link(t("mg.details"), links.details, true), link(t("mg.cost"), links.cost),
+      h("button", { type: "button", class: "mg-btn", onclick: onShare }, t("mg.share")),
+      h("button", { type: "button", class: "mg-btn", onclick: onMove }, t("mg.movePin")),
+      link(t("mg.directions"), links.directions, false, true)),
+    h("p", { class: "mg-fine" }, t("mg.fine"), near ? ` ${t("business.shelterLine")}` : null, isWet ? null : ` ${t("point.noWaterNote")}`),
+  ].filter(Boolean);
+}
+
 /** A section's card: its share of wet squares, its wet businesses, and the way to it on the main page. */
 export function sectionCard(section, { rp, link: href, onClose }) {
   const exact = section[`s${rp}`] * 100;

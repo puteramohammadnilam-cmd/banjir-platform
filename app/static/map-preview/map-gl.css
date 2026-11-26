@@ -108,8 +108,14 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 .mg-acts > * { flex: 1 1 auto; }
 .mg-fine { margin: 0; padding: 0 16px 14px; color: var(--mg-ink3); font-size: 11.5px; }
 
-/* the layers card */
-.mg-layers { position: fixed; top: 74px; right: 14px; z-index: 3; width: 240px; padding: 12px 14px; }
+/* the right column: the tools, the layers card and engineer mode's panel, clear of the zoom buttons */
+.mg-right { position: fixed; top: 74px; right: 14px; bottom: 150px; z-index: 3; width: 280px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.mg-right > * { pointer-events: auto; }
+.mg-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; pointer-events: none; }
+.mg-tools > * { pointer-events: auto; }
+.mg-tool { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; background: var(--mg-hud); backdrop-filter: blur(10px); box-shadow: var(--mg-shadow); }
+.mg-tool svg { color: var(--mg-accent); }
+.mg-layers { padding: 12px 14px; }
 .mg-layers label { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-weight: 500; }
 .mg-layers input { accent-color: var(--mg-accent); }
 .mg-ramp { height: 9px; margin: 10px 0 4px; border-radius: 5px; background: linear-gradient(90deg, #a9d8ff, #6cb8f0, #2f86d6, #1d5fae, #0b3478); }
@@ -120,6 +126,65 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
   box-shadow: 0 0 0 1px rgb(15 23 42 / 0.2); vertical-align: -1px; }
 .mg-dot-dry { background: #94a3b8; } .mg-dot-watch { background: #eab308; } .mg-dot-high { background: #f97316; } .mg-dot-deep { background: #e11d48; }
 .mg-note { margin-top: 10px !important; }
+
+/* "Check a point": the cross over the map's centre (js/map-gl-pin.js moves it), and the main page's aim panel and
+   location dialog (pin-panel.js) in this map's look */
+.mg-cross { position: fixed; left: 0; top: 0; z-index: 2; width: 0; height: 0; pointer-events: none; }
+.mg-cross::before, .mg-cross::after { content: ""; position: absolute; background: #e11d48; box-shadow: 0 0 0 1.5px #fff; }
+.mg-cross::before { left: -15px; top: -1.5px; width: 30px; height: 3px; }
+.mg-cross::after { left: -1.5px; top: -15px; width: 3px; height: 30px; }
+.mg .aim-panel { display: grid; gap: 8px; padding: 6px 16px 16px; }
+.mg .aim-heading { margin: 8px 0 0; font: 700 18px/1.2 var(--mg-font); }
+.mg .aim-help, .mg .aim-status { margin: 0; color: var(--mg-ink2); }
+.mg .aim-status:empty { display: none; }
+.mg .aim-actions, .mg .dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.mg .btn { padding: 8px 14px; border: 1px solid var(--mg-line); border-radius: 10px; background: var(--mg-solid); font-weight: 600; }
+.mg .btn:hover { border-color: var(--mg-line-hi); }
+.mg .btn-primary { border-color: var(--mg-accent); background: var(--mg-accent); color: var(--mg-accent-ink); }
+.mg .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mg .btn.is-busy { opacity: 0.7; cursor: progress; }
+.mg .btn-link { padding: 0; border: 0; background: none; color: var(--mg-accent); text-decoration: underline; }
+.mg .alert-inline { margin: 0; color: var(--mg-deep); font-weight: 600; }
+.mg dialog.dialog { max-width: min(26rem, calc(100vw - 32px)); padding: 18px 20px; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
+  background: var(--mg-solid); color: var(--mg-ink); box-shadow: var(--mg-shadow); }
+.mg dialog.dialog::backdrop { background: rgb(15 23 42 / 0.45); }
+.mg dialog h2 { margin: 0 0 8px; font: 700 18px/1.25 var(--mg-font); }
+.mg dialog p { margin: 0 0 14px; color: var(--mg-ink2); }
+
+/* engineer mode's panel (engineer.js), in this map's look */
+.mg-eng { min-height: 0; overflow: auto; display: grid; align-content: start; gap: 10px; font-size: 13px; }
+.mg-eng h2 { margin: 0; font: 700 16px/1.2 var(--mg-font); }
+.mg-eng h3 { margin: 4px 0 0; font: 700 13px/1.3 var(--mg-font); }
+.mg-eng p, .mg-eng ul, .mg-eng dl { margin: 0; }
+.mg-eng .eng-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px; }
+.mg-eng .eng-layer { display: grid; gap: 6px; }
+.mg-eng .muted { color: var(--mg-ink2); }
+.mg-eng .small, .mg-eng .fineprint { color: var(--mg-ink3); font-size: 11.5px; }
+.mg-eng label { display: inline-flex; align-items: center; gap: 6px; }
+.mg-eng input { accent-color: var(--mg-accent); }
+.mg-eng select { padding: 3px 6px; border: 1px solid var(--mg-line); border-radius: 6px; background: var(--mg-solid); color: var(--mg-ink); font: inherit; }
+.mg-eng fieldset { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 0; border: 0; }
+.mg-eng legend { margin-bottom: 4px; padding: 0; font-weight: 700; }
+.mg-eng .eng-key { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 0; list-style: none; }
+.mg-eng .eng-key li { display: flex; align-items: center; gap: 6px; }
+.mg-eng .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.mg-eng .eng-values { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+.mg-eng dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.mg-eng .eng-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.mg-eng .eng-table th, .mg-eng .eng-table td { padding: 3px 6px; border-bottom: 1px solid var(--mg-line); text-align: left; }
+.mg-eng .eng-chart { width: 100%; height: auto; border: 1px solid var(--mg-line); border-radius: var(--mg-r-sm); background: var(--mg-well); }
+.mg-eng .eng-line { fill: none; stroke-width: 2; }
+.mg-eng .eng-line.ground { stroke: var(--mg-ink2); }
+.mg-eng .eng-line.pool { stroke: #6c6ff0; stroke-width: 3; }
+.mg-eng .eng-line.river { stroke: var(--mg-accent); stroke-dasharray: 4 3; }
+.mg-eng .eng-axis { fill: var(--mg-ink2); font-size: 11px; }
+.mg-eng .eng-axis.end { text-anchor: end; }
+.mg-eng .eng-upload-picture { max-width: 100%; image-rendering: pixelated; }
+.mg-eng .eng-downloads { display: grid; gap: 4px; padding-left: 18px; }
+.mg-eng label.btn:focus-within { outline: 2px solid var(--mg-accent); outline-offset: 2px; }
+.mg .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mg .badge-new { display: inline-block; margin-inline-start: 6px; padding: 1px 6px; border-radius: 999px; background: #ffb14a; color: #1a1100;
+  font: 800 10px/1.5 var(--mg-font); letter-spacing: 0.06em; vertical-align: middle; }
 
 /* the strip at the foot, problems, map pieces */
 .mg-status { position: fixed; left: 14px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px;
@@ -137,7 +202,7 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 @media (max-width: 700px) {
   .mg-top { top: 10px; left: 10px; right: 10px; flex-wrap: wrap; gap: 6px; padding: 6px 8px; }
   .mg-area, .mg-spacer, .mg-tag, .mg-tabs, .mg-layers, .mg-status { display: none; }
-  .mg-status.mg-alert { display: flex; top: 112px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows */
+  .mg-status.mg-alert { display: flex; top: 160px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows */
   .mg-search input { font-size: 16px; }   /* under 16px, iOS zooms the page into the box */
   .mg-seg button, .mg-seg a { padding: 6px 9px; }
   .mg-x { width: 44px; height: 44px; }
@@ -149,7 +214,13 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
   .mg-summary .mg-k, .mg-summary .mg-wet-sub { display: none; }
   .mg-big { font-size: 24px; }
   .mg-side:has(.mg-place:not([hidden])) .mg-summary { display: none; }
-  .mg-place { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
+  .mg-place { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 62vh; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
+  /* the tools under the bar, on the right; engineer mode's panel a sheet like the place card, which covers it */
+  .mg-right { top: 108px; right: 10px; bottom: auto; width: auto; }
+  .mg-tool { min-height: 44px; padding: 7px 10px; }
+  .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
+  .mg:has(.mg-eng:not([hidden])) .mg-summary { display: none; }
+  .mg .btn { min-height: 44px; }
   .mg-handle { display: block; width: 40px; height: 4px; margin: 8px auto 0; border-radius: 2px; background: var(--mg-line); }
   .mg .maplibregl-ctrl-bottom-right { bottom: 120px; }
 }

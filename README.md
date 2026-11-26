@@ -315,7 +315,9 @@ A switch in the footer ("Engineer mode", or `?engineer=1`, remembered in the bro
 - MapLibre (already vendored for the 3D page) on OpenFreeMap's free vector maps: light (Positron) and dark, plus Esri's satellite photo through our key. The styles are copies in `app/static/vendor/openfreemap/`, so the flood water always goes under the streets and names; see its README.txt.
 - Floating cards: search, the main page's tabs, the flood size, the layers, and a place card (a bottom sheet on phones) for a shop or a section, with links back to the main page's details, cost and 3D. English and Bahasa Melayu (`strings/*-map.js`).
 - Sections are shaded at once; a section's squares and shops load when it is opened, one request each. A link holds the view: `map.html?area=shah-alam&section=seksyen-25&place=node-13414432501&rp=50`, plus `&base=dark` or `&base=sat` and `&tilt=1`.
-- Not yet: the pin (check any point), engineer mode, keyboard access to single shops on the map (the search reaches every shop).
+- Check a point: the pin button (or Move the pin on a point's card) puts a cross over the map; tap a spot, or move the map and press Check this spot. As on the main page, only the 90 m square's centre is sent, in the body of `POST /api/point`, and a point stays in the link's fragment (`#place=pt:…`). The main page's New map link carries it too.
+- Engineer mode: the main page's panel (`engineer.js`), drawn on this map by `map-gl-eng.js` (the main page's by `engineer-leaflet.js`). The switch is remembered in the same browser for both pages.
+- Not yet: keyboard access to single shops on the map (the search reaches every shop).
 
 ## Satellite photo on the 3D page
 

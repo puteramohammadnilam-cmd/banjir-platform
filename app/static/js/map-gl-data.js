@@ -24,6 +24,15 @@ export function readMapLink(search = "", hash = "") {
   return { ...link, rp: link.rp ?? "50", base: BASEMAPS.includes(base) ? base : "map", tilt: query.get("tilt") === "1" };
 }
 
+/** This map's own link: the main page's (place.js writeUrl), then the base map and the tilt. A point stays in the
+ *  fragment, last, where the browser never sends it to the server. */
+export function withMapView(link, base, tilt) {
+  const [query, fragment] = link.split("#");
+  const more = [base === "map" ? null : `base=${base}`, tilt ? "tilt=1" : null].filter(Boolean).join("&");
+  const full = more ? `${query}${query.length > 1 ? "&" : ""}${more}` : query;
+  return fragment ? `${full}#${fragment}` : full;
+}
+
 const depthOrNone = (value) => (typeof value === "number" && Number.isFinite(value) ? value : NO_DEPTH);
 const byFloodSize = (prefix, values) => Object.fromEntries(SCENARIOS.map((rp) => [`${prefix}${rp}`, values(rp)]));
 
@@ -41,18 +50,23 @@ export function sectionsGeo(sections) {
   };
 }
 
-/** The flood model's squares, [south, west, depth 1 in 10, 1 in 20, 1 in 50] each, as square polygons. */
-export function squaresGeo(cells, size) {
+const box = (west, south, east, north) => ({ type: "Polygon", coordinates: [[[west, south], [east, south], [east, north], [west, north], [west, south]]] });
+
+/** The flood model's squares, [south, west, depth 1 in 10, 1 in 20, 1 in 50] each, as polygons `size` degrees across
+ *  and `tall` degrees high (the same, for the areas' own grids). */
+export function squaresGeo(cells, size, tall = size) {
   return {
     type: "FeatureCollection",
     features: cells.map(([south, west, ...depths]) => ({
       type: "Feature",
       properties: byFloodSize("d", (rp) => depthOrNone(depths[SCENARIOS.indexOf(rp)])),
-      geometry: { type: "Polygon", coordinates: [[[west, south], [west + size, south], [west + size, south + size],
-        [west, south + size], [west, south]]] },
+      geometry: box(west, south, west + size, south + tall),
     })),
   };
 }
+
+/** A checked point's own square, its outline from the Place's `cell.bounds` ([west, south, east, north]). */
+export const squareOutline = (bounds) => ({ type: "Feature", properties: {}, geometry: box(...bounds) });
 
 /** The shops, each a point with its door's depth for each flood size. */
 export function shopsGeo(premises) {

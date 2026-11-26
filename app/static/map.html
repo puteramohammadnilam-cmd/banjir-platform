@@ -43,7 +43,16 @@
     <section class="mg-hud mg-place" id="mg-place" aria-live="polite" hidden></section>
   </div>
 
-  <aside class="mg-hud mg-card mg-layers" id="mg-layers"></aside>
+  <!-- the right column: the pin and engineer mode's buttons, the layers card, and engineer mode's panel when it is on -->
+  <div class="mg-right">
+    <div class="mg-tools">
+      <button type="button" class="mg-btn mg-tool" id="mg-pin" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span>Check a point</span></button>
+      <button type="button" class="mg-btn mg-tool" id="mg-eng-btn" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2m1-5 2 2m1-5 2 2"/></svg><span>Engineer mode</span></button>
+    </div>
+    <aside class="mg-hud mg-card mg-layers" id="mg-layers"></aside>
+    <section class="mg-hud mg-card mg-eng" id="mg-eng" aria-labelledby="engineer-heading" hidden></section>
+  </div>
+  <div class="mg-cross" id="mg-cross" aria-hidden="true" hidden></div>
 
   <p class="mg-status mg-hud"><b aria-hidden="true"></b><span id="mg-status">River flood model · 90 m squares</span> · <span id="mg-hint">Loading the map…</span></p>
   <p class="mg-problem mg-hud" id="mg-problem" role="alert" hidden></p>

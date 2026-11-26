@@ -3,16 +3,20 @@
 // vendor/openfreemap, so a change there cannot move our water over the names), Esri's satellite photo through our key
 // (app/satellite.py), floating cards, and a place card for a shop or a section. A city split into sections is shaded at
 // once and a section's squares and shops load when it is opened (one GET each, as the main page does); an area with no
-// sections shows all its squares and shops at once. No pin, no engineer tools yet: the main page keeps those, and
-// Leaflet, until this map has them. Look adapted from Arus by Farhan Syah (MIT, vendor/LICENSE-arus.txt). The words are
-// in strings/*-map.js.
+// sections shows all its squares and shops at once. "Check a point" (map-gl-pin.js) drops a pin anywhere in Malaysia,
+// and engineer mode (engineer.js, drawn by map-gl-eng.js) is the main page's panel over this map. Look adapted from Arus
+// by Farhan Syah (MIT, vendor/LICENSE-arus.txt). The words are in strings/*-map.js.
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
+import { createEngineer } from "./engineer.js";
 import { lang, t } from "./i18n.js";
-import { layersCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
-import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squaresGeo,
-  underRoads, wetShops, wetTotals } from "./map-gl-data.js";
-import { writeUrl } from "./place.js";
+import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
+import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
+  squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
+import { glDrawer } from "./map-gl-eng.js";
+import { createPinMode } from "./map-gl-pin.js";
+import { isWithinView, parseRef, writeUrl } from "./place.js";
+import { pointHeader } from "./point.js";
 
 const $ = (id) => document.getElementById(id);
 const PHONE = window.matchMedia("(max-width: 700px)");
@@ -25,12 +29,14 @@ const FIT_PAD = { top: 120, bottom: 60, left: 380, right: 280 };   // the cards 
 const PHONE_PAD = { top: 80, bottom: 120, left: 20, right: 20 };
 const NO_PAD = { top: 0, bottom: 0, left: 0, right: 0 };
 const TILT = { pitch: 55, bearing: -18 };
+const PIN_COLOUR = "#e11d48";
 
 const st = {
   link: readMapLink(window.location.search, window.location.hash),
   area: null, sections: [], index: [], shelters: [], satellite: null, styles: {},
   shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
   visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
+  point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false,
 };
 st.rp = st.link.rp;
 st.base = st.link.base;
@@ -104,8 +110,19 @@ function addOurLayers(map) {
     "circle-stroke-color": isDark() ? "#0b1520" : "#ffffff", "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11, 0.8, 15, 2] } });
   map.addLayer({ id: "mg-picked", type: "circle", source: "mg-shops", filter: ["==", ["get", "id"], st.picked ?? ""],
     paint: { "circle-radius": 13, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#ffb14a", "circle-stroke-width": 3 } });
+  addPointLayers(map, before);
   if (st.tilt) addBuildings(map);
   showLayers(map);
+  st.eng?.redraw(map);
+}
+
+/** A checked point's square outlined, and the squares that came with it where the area has none of its own. */
+function addPointLayers(map, before) {
+  map.addSource("mg-point-squares", { type: "geojson", data: pointSquaresData() });
+  map.addSource("mg-point-square", { type: "geojson", data: st.point ? squareOutline(st.point.place.cell.bounds) : EMPTY });
+  map.addLayer({ id: "mg-point-squares", type: "fill", source: "mg-point-squares",
+    paint: { "fill-color": depthRamp(st.rp, isDark()), "fill-opacity": 0.6 } }, before);
+  map.addLayer({ id: "mg-point-square", type: "line", source: "mg-point-square", paint: { "line-color": PIN_COLOUR, "line-width": 2.5 } });
 }
 
 /** Buildings standing up, for the tilted view, where the base map has them (not on the satellite photo). */
@@ -130,6 +147,7 @@ function showLayers(map) {
 function paintFloodSize(map) {
   if (!map?.getLayer("mg-squares")) return;
   map.setPaintProperty("mg-squares", "fill-color", depthRamp(st.rp, isDark()));
+  map.setPaintProperty("mg-point-squares", "fill-color", depthRamp(st.rp, isDark()));
   map.setPaintProperty("mg-shops", "circle-color", shopColour(st.rp));
   map.setPaintProperty("mg-section-fill", "fill-color", sectionFill(st.rp));
 }
@@ -172,6 +190,8 @@ function showCard(nodes, { focus = true } = {}) {
 
 function closeCard() {
   const wasOpen = !$("mg-place").hidden;
+  st.pin?.stop();
+  clearPoint();
   st.picked = null;
   st.card = null;
   $("mg-place").hidden = true;
@@ -200,6 +220,8 @@ async function share() {
 }
 
 function showShop(shop, { fly = false, focus = true, move = true } = {}) {
+  st.pin?.stop();
+  clearPoint();
   st.picked = shop.id;
   st.card = { kind: "shop", id: shop.id };
   st.section = shop.section ?? st.section;
@@ -211,15 +233,83 @@ function showShop(shop, { fly = false, focus = true, move = true } = {}) {
   if (!move) return;
   // on a phone the card is a sheet over the map's lower part, so the shop goes in the part still showing
   const padding = PHONE.matches ? { ...NO_PAD, bottom: $("mg-place").offsetHeight } : undefined;
-  if (fly) st.map.flyTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), padding, duration: duration() });
+  if (fly) st.map.flyTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), ...(padding && { padding }), duration: duration() });
   else if (padding) st.map.easeTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM - 1), padding, duration: duration() });
 }
 
 function showSection(sectionId, { focus = true } = {}) {
   const props = sectionsGeo(st.sections).features.find((f) => f.properties.id === sectionId)?.properties;
   if (!props) return;
+  st.pin?.stop();
+  clearPoint();
   st.card = { kind: "section", id: sectionId };
   showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
+}
+
+/* ---- a checked point ---- */
+
+function pointSquaresData() {
+  const { place, squares } = st.point ?? {};
+  if (!place || !squares?.cells?.length || isWithinView(place.lat, place.lon, st.area.view)) return EMPTY;   // the area's own
+  const [west, south, east, north] = place.cell.bounds;
+  return squaresGeo(squares.cells, east - west, north - south);
+}
+
+/** The pin, its square and the squares that came with it, for the point on show (none when st.point is null). */
+function drawPoint() {
+  const place = st.point?.place;
+  st.pinMarker?.remove();
+  st.pinMarker = place ? new maplibregl.Marker({ color: PIN_COLOUR }).setLngLat([place.lon, place.lat]).addTo(st.map) : null;
+  st.map?.getSource("mg-point-square")?.setData(place ? squareOutline(place.cell.bounds) : EMPTY);
+  st.map?.getSource("mg-point-squares")?.setData(pointSquaresData());
+}
+
+function clearPoint() {
+  if (!st.point) return;
+  st.point = null;
+  drawPoint();
+}
+
+function pointLinks(place) {
+  const at = { section: place.section?.id ?? null, place: place.id };   // writeUrl puts a point in the fragment, never the query
+  return { details: mainLink({ ...at, tab: "business" }), cost: mainLink({ ...at, tab: "cost" }),
+    directions: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}` };
+}
+
+/** A point the server has checked: its pin and card. Its section's squares and shops load, as when a shop is opened. */
+function showPoint(place, squares, { focus = true, move = true } = {}) {
+  st.point = { place, squares };
+  st.picked = place.id;
+  st.card = { kind: "point" };
+  markPicked(null);
+  drawPoint();
+  const { title, subline } = pointHeader(place, st.area, null);
+  const sectionId = place.section?.id;
+  if (sectionId && st.sections.some((section) => section.id === sectionId)) {
+    st.section = sectionId;
+    loadSection(sectionId).then(() => st.point?.place === place && say(title), (error) => say(t("mg.failed", { why: error.message }), true));
+  }
+  showCard(pointCard(place, { rp: st.rp, title, subline, links: pointLinks(place), onClose: closeCard, onShare: share,
+    onMove: () => startPin({ at: place }) }), { focus });
+  writeLink();
+  say(title);
+  if (!move) return;
+  const padding = PHONE.matches ? { padding: { ...NO_PAD, bottom: $("mg-place").offsetHeight } } : {};   // easeTo throws on padding: undefined
+  const go = () => st.map.easeTo({ center: [place.lon, place.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), ...padding, duration: duration() });
+  if (st.isReady) go();
+  else st.map.once("load", go);   // a linked point: a move before the first load is lost to the map's opening view
+}
+
+/** Pin mode, from the pin button or a point's "Move the pin": any card goes, and the aim panel takes its place. */
+function startPin(options = {}) {
+  closeCard();
+  st.pin.start(options);
+}
+
+/** The aim panel in the place card; on a phone the map's centre, and so the cross, moves up clear of that sheet. */
+function showAim(node) {
+  showCard([h("div", { class: "mg-handle", "aria-hidden": "true" }), node], { focus: false });
+  if (PHONE.matches) st.map.easeTo({ padding: { ...NO_PAD, bottom: $("mg-place").offsetHeight }, duration: duration() });
 }
 
 async function openSection(sectionId, { fit = true } = {}) {
@@ -243,11 +333,8 @@ async function openShop(entry) {
 /* ---- this page's link, and the links that carry it ---- */
 
 /** The query for what is on show: the main page's fields, then the base map and the tilt. */
-function mapQuery(extra = {}) {
-  const query = writeUrl({ area: st.area?.id, section: st.section, place: st.picked, rp: st.rp, lang: langParam(), ...extra });
-  const more = [st.base === "map" ? null : `base=${st.base}`, st.tilt ? "tilt=1" : null].filter(Boolean).join("&");
-  return more ? `${query}${query.length > 1 ? "&" : ""}${more}` : query;
-}
+const mapQuery = (extra = {}) =>
+  withMapView(writeUrl({ area: st.area?.id, section: st.section, place: st.picked, rp: st.rp, lang: langParam(), ...extra }), st.base, st.tilt);
 
 /** This page's own address for what is on show, so a shared link opens the same view; the language, home and tab
  *  links follow it. */
@@ -282,6 +369,7 @@ function pickFloodSize(rp) {
   const shop = st.card?.kind === "shop" && st.shops.get(st.card.id);
   if (shop) showShop(shop, { focus: false, move: false });
   else if (st.card?.kind === "section") showSection(st.card.id, { focus: false });
+  else if (st.card?.kind === "point" && st.point) showPoint(st.point.place, st.point.squares, { focus: false, move: false });
   writeLink();
 }
 
@@ -375,6 +463,8 @@ function onMapClick(event) {
   const map = st.map;
   $("mg-results").hidden = true;
   st.want = null;
+  if (st.pin?.isOn()) return st.pin.tap(event.lngLat);
+  if (st.eng?.click(event.lngLat)) return undefined;
   const { x, y } = event.point;
   const shop = map.queryRenderedFeatures([[x - HIT_PX, y - HIT_PX], [x + HIT_PX, y + HIT_PX]], { layers: ["mg-shops"] })[0];
   const found = shop && st.shops.get(shop.properties.id);
@@ -394,11 +484,34 @@ function openMap(style) {
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
   map.on("style.load", () => addOurLayers(map));
+  map.once("load", () => { st.isReady = true; });
   map.on("click", onMapClick);
   map.on("mouseenter", "mg-shops", () => { map.getCanvas().style.cursor = "pointer"; });
   map.on("mouseleave", "mg-shops", () => { map.getCanvas().style.cursor = ""; });
   if (st.tilt) map.once("load", () => map.easeTo({ ...TILT, duration: 0 }));
   return map;
+}
+
+/** The pin and engineer mode: their buttons, and engineer mode's panel in the right column (a sheet on a phone). */
+function wireTools() {
+  st.pin = createPinMode({ map: () => st.map, cross: $("mg-cross"), show: showAim, hide: closeCard, onPlace: (place, squares) => showPoint(place, squares) });
+  const pinButton = $("mg-pin");
+  pinButton.hidden = !st.canPin;
+  pinButton.querySelector("span").textContent = t("pin.heading");
+  pinButton.addEventListener("click", () => startPin());
+  $("mg-eng-btn").querySelector("span").textContent = t("eng.switch");
+  st.eng = glDrawer({ getMap: () => st.map, beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line", isAiming: () => st.pin.isOn() });
+  createEngineer({ section: $("mg-eng"), button: $("mg-eng-btn"), area: st.area, drawer: st.eng });
+  st.map.getCanvas().addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && st.pin.isOn()) st.pin.checkCentre();
+  });
+}
+
+/** Escape: pin mode ends first, then the card closes; the location dialog has its own. */
+function onKey(event) {
+  if (event.key !== "Escape" || event.defaultPrevented || st.pin?.isAsking()) return;
+  if (st.pin?.isOn()) st.pin.cancel();
+  else closeCard();
 }
 
 function showProblem(words) {
@@ -409,16 +522,31 @@ function showProblem(words) {
 
 async function startFromLink() {
   const { section, place } = st.link;
+  if (parseRef(place)?.kind === "point") return openLinkedPoint(place);
   if (section && st.sections.some((known) => known.id === section)) await openSection(section);
   const shop = place && st.shops.get(place);
   if (shop) showShop(shop);
+  return undefined;
+}
+
+/** A point the link names, checked again; a failure is said, and the map stays as it is. */
+async function openLinkedPoint(ref) {
+  if (!st.canPin) return say(t("mg.pointMissed"), true);
+  say(t("mg.pointLoading"));
+  try {
+    const found = await st.pin.linked(ref);
+    if (found) return showPoint(found.place, found.squares);
+  } catch { /* said below */ }
+  return say(t("mg.pointMissed"), true);
 }
 
 /** The area's data and its base map; false, with the problem shown, when either cannot be had. */
 async function load() {
   try {
+    const status = api.getStatus().catch(() => null);   // the pin needs the points' files (points_ready)
     const [data, satellite] = await Promise.all([st.link.area ? api.getAreaData(st.link.area) : api.getDefaultData(), satelliteTiles()]);
-    Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite });
+    Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite,
+      canPin: (await status)?.points_ready === true });
     if (!st.sections.length) keep({ cells: data.town?.cells, premises: data.premises, cellDeg: data.town?.cell_deg });
     if (st.base === "sat" && !satellite) st.base = "map";
     return await baseStyle(st.base);
@@ -445,7 +573,8 @@ async function start() {
     return showProblem(t("mg.noWebgl"));
   }
   addShelters(st.map);
-  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCard(); });
+  wireTools();
+  document.addEventListener("keydown", onKey);
   say(hint());
   return startFromLink();
 }

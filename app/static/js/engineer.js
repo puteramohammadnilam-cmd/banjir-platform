@@ -1,11 +1,11 @@
 // Engineer mode: a switch in the footer (or ?engineer=1), remembered in this browser, that opens a panel under the map
 // with the "Rain pools" layer (where heavy rain collects, app/engineer.py) and tools on the app's own data: inspect a
 // spot, a height profile, the basin draining through a spot, a bund or pond what-if, a grid of your own, and downloads.
-// Nothing here calls Google. Off by default: it is for engineers and planners, not shop owners.
+// Nothing here calls Google. Off by default: it is for engineers and planners, not shop owners. It draws through a
+// "drawer", so the same panel works over the main page's map (engineer-leaflet.js) and the new map (map-gl-eng.js).
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { lang, t } from "./i18n.js";
-import { toolClaim } from "./map.js";
 import { newBadge } from "./news.js";
 
 const STORE = "myflood-engineer";
@@ -33,7 +33,12 @@ function remember(isOn) {
 
 const metres = (v) => (v == null ? t("eng.none") : t("eng.m", { m: Number(v).toFixed(2) }));
 const triple = (values, keys) => keys.map((k) => (values?.[k] == null ? t("eng.none") : Number(values[k]).toFixed(2))).join(" / ");
-const corners = (b) => [[b[1], b[0]], [b[3], b[2]]];
+
+/** What engineer mode draws on. picture(key, url, bounds, opacity) lays an image over bounds [west, south, east, north],
+ *  drop(key) takes it off, marks(points) draws the clicked points ({lat, lng}) joined by a line, setTool(isOn, onClick)
+ *  says whether a tool wants the map's clicks (each passed on as {latlng: {lat, lng}}), and isAiming() whether the pin
+ *  has them now. This one draws nothing: the panel alone, as in the tests. */
+export const NO_DRAWER = Object.freeze({ picture() {}, drop() {}, marks() {}, setTool() {}, isAiming: () => false });
 
 /** A small SVG chart of a profile: bare ground, standing water for the storm and the river model's 1 in 50 years water. */
 export function profileChart(points, storm) {
@@ -86,31 +91,19 @@ function layerKey(layer) {
     h("p", { class: "fineprint" }, layer.credit)];
 }
 
-/** The switch and the panel. `mapApi` is the overview map (map.js); `area` the page's area with its `layers`. */
-export function createEngineer({ section, button, mapApi, area, sectionId = null, wanted = isWanted() }) {
+/** The switch and the panel. `drawer` is the map's (NO_DRAWER above says what it does); `area` the page's area with its
+ *  `layers`. */
+export function createEngineer({ section, button, area, sectionId = null, wanted = isWanted(), drawer = NO_DRAWER }) {
   if (!section || !button) return null;
-  let leaflet = null;
-  let isAiming = () => false;   // while the pin is being placed (pin.js), the map's clicks are the pin's
-  mapApi?.addOverlay?.(({ map, isAiming: aiming }) => { leaflet = map; isAiming = aiming ?? isAiming; });
   const layer = area?.layers?.rain_pools ?? null;
   const st = { isOn: wanted, storm: layer?.storms?.includes(70) ? 70 : layer?.storms?.[0], isLayerOn: false, tool: "off", points: [] };
-  const overlays = { pools: null, result: null, marks: null };
   const result = h("div", { class: "eng-result", "aria-live": "polite" });
   const say = (...nodes) => result.replaceChildren(...nodes.flat().filter(Boolean));
   const fail = (error) => say(h("p", { class: "alert alert-inline", role: "alert" }, t("eng.failed", { why: error.message })));
-  const drop = (key) => { overlays[key]?.remove(); overlays[key] = null; };
-  const picture = (key, url, bounds, opacity = POOL_OPACITY) => {
-    drop(key);
-    if (leaflet && globalThis.L) overlays[key] = globalThis.L.imageOverlay(url, corners(bounds), { opacity, interactive: false }).addTo(leaflet);
-  };
+  const drop = (key) => drawer.drop(key);
+  const picture = (key, url, bounds, opacity = POOL_OPACITY) => drawer.picture(key, url, bounds, opacity);
   const showPools = () => (st.isOn && st.isLayerOn && layer ? picture("pools", layer.url.replace("{mm}", st.storm), layer.bounds) : drop("pools"));
-  const markPoints = () => {
-    drop("marks");
-    if (!leaflet || !globalThis.L || !st.points.length) return;
-    const latlngs = st.points.map((p) => [p.lat, p.lng]);
-    overlays.marks = globalThis.L.layerGroup([globalThis.L.polyline(latlngs, { color: "#f59e0b", weight: 3 }),
-      ...latlngs.map((ll) => globalThis.L.circleMarker(ll, { radius: 4, color: "#f59e0b" }))]).addTo(leaflet);
-  };
+  const markPoints = () => drawer.marks(st.points);
   let latest = 0;   // a slower, older answer must not replace a newer one
   const run = async (work, show) => {
     const mine = ++latest;
@@ -123,7 +116,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     }
   };
   const onClick = (event) => {
-    if (!st.isOn || st.tool === "off" || isAiming()) return;
+    if (!st.isOn || st.tool === "off" || drawer.isAiming()) return;
     const at = event.latlng;
     if (st.tool === "inspect") return run(() => api.engInspect(area.id, at.lat, at.lng), inspectView);
     if (st.tool === "basin") {
@@ -169,9 +162,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
       (layer?.storms ?? [40, 70, 100]).map((mm) => h("option", { value: mm, selected: mm === st.storm }, t("eng.stormMm", { mm })))));
   const params = `area=${encodeURIComponent(area.id)}`;
   const draw = () => {
-    toolClaim.active = st.isOn && st.tool !== "off";
-    toolClaim.onClick = onClick;
-    leaflet?.getContainer().classList.toggle("eng-tool-on", toolClaim.active);
+    drawer.setTool(st.isOn && st.tool !== "off", onClick);
     section.hidden = !st.isOn;
     button.setAttribute("aria-pressed", String(st.isOn));
     if (!st.isOn) return;
@@ -205,7 +196,6 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
   button.addEventListener("click", () => toggle(!st.isOn));
   const badge = newBadge();
   if (badge && button.parentNode) button.after(badge);
-  mapApi?.addOverlay?.(({ map }) => map.on("click", onClick));
   draw();
   return { toggle, state: st, lang };
 }

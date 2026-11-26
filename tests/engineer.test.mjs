@@ -19,7 +19,7 @@ beforeEach(() => {
 function mount(wanted) {
   const section = document.createElement("section");
   const button = document.createElement("button");
-  createEngineer({ section, button, mapApi: null, area: { id: "shah-alam", layers: { rain_pools: LAYER } }, wanted });
+  createEngineer({ section, button, area: { id: "shah-alam", layers: { rain_pools: LAYER } }, wanted });
   return { section, button };
 }
 
@@ -49,9 +49,10 @@ test("a profile chart draws ground, standing water and river water", () => {
 
 test("while a tool is on, the map's clicks are the tool's, and turning the mode off gives them back", async () => {
   const { toolClaim } = await import("../app/static/js/map.js");
+  const { leafletDrawer } = await import("../app/static/js/engineer-leaflet.js");
   const section = document.createElement("section");
   const button = document.createElement("button");
-  const panel = createEngineer({ section, button, mapApi: null, area: { id: "shah-alam", layers: { rain_pools: LAYER } }, wanted: true });
+  const panel = createEngineer({ section, button, drawer: leafletDrawer(null), area: { id: "shah-alam", layers: { rain_pools: LAYER } }, wanted: true });
   assert.equal(toolClaim.active, false, "no tool picked yet");
   panel.state.tool = "inspect";
   panel.toggle(true);
