@@ -482,3 +482,5 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 .whats-new-title .badge-new { margin: 0; }
 .whats-new-list { flex: 1 1 24rem; display: grid; gap: var(--space-1); margin: 0; }
 .whats-new-close { margin-inline-start: auto; }
+.eng-tool-on { cursor: crosshair; }
+label.btn:focus-within { outline: 3px solid var(--action); outline-offset: 2px; }

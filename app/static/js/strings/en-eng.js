@@ -51,7 +51,7 @@ export default Object.freeze({
   "eng.deepest": "Deepest",
   "eng.volume": "Water standing",
   "eng.m3": "{v} m³",
-  "eng.whatifKey": "Blue: more water than before. Orange: less.",
+  "eng.whatifKey": "Blue: more water than before. Orange: less. Before and after are both worked out on the window around your change, so they can differ a little from the map layer.",
   "eng.upload": "Your own grid",
   "eng.uploadLead": "An ESRI ASCII grid (.asc) of heights in metres, up to 500 x 500 squares. It is run through the same model and not kept.",
   "eng.uploadFile": "Choose a .asc file",
@@ -71,4 +71,5 @@ export default Object.freeze({
   "news.show": "Show me",
   "news.open": "Open",
   "news.gotIt": "Got it",
+  "eng.snapped": "Moved {m} m to the nearest line where more water flows.",
 });

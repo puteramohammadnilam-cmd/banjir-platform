@@ -6,6 +6,7 @@
 // is the same information for the keyboard and screen readers, and the map's description points to it. The shading
 // shows a metric {value, class, classes, tooltip, heading}: the river model's squares (DEPTH_METRIC) by default.
 import { SQUARE_RAMP } from "./cells.js";
+import { toolClaim } from "./map.js";
 import { h } from "./dom.js";
 import { dataWord, t } from "./i18n.js";
 import { FLASH_RAMP, SCORE_RAMP, highShare, oneDecimal, scoreClass, scoreOf, swatchStyle } from "./susceptibility.js";
@@ -116,7 +117,7 @@ export function createChoropleth(map, renderer, sections, { onOpen, isAiming = (
     const path = L.geoJSON(section.outline, { renderer, interactive: true, bubblingMouseEvents: false });
     path.setStyle({ ...outline(false), ...paint(metric, section, rp) })
       .bindTooltip(() => tooltipNode(metric.tooltip(section, rp)), { sticky: true, direction: "top", className: "choro-tooltip", opacity: 1 })
-      .on("click", () => { if (!isAiming()) onOpen(section.id); })
+      .on("click", (event) => { if (toolClaim.active) toolClaim.onClick?.(event); else if (!isAiming()) onOpen(section.id); })
       .on("mouseover", () => highlight(section.id))
       .on("mouseout", () => highlight(null))
       .addTo(map);

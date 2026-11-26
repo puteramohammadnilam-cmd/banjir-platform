@@ -5,6 +5,7 @@
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { lang, t } from "./i18n.js";
+import { toolClaim } from "./map.js";
 import { newBadge } from "./news.js";
 
 const STORE = "myflood-engineer";
@@ -109,12 +110,15 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     overlays.marks = globalThis.L.layerGroup([globalThis.L.polyline(latlngs, { color: "#f59e0b", weight: 3 }),
       ...latlngs.map((ll) => globalThis.L.circleMarker(ll, { radius: 4, color: "#f59e0b" }))]).addTo(leaflet);
   };
+  let latest = 0;   // a slower, older answer must not replace a newer one
   const run = async (work, show) => {
+    const mine = ++latest;
     say(h("p", { class: "muted" }, t("eng.working")));
     try {
-      say(show(await work()));
+      const found = await work();
+      if (mine === latest) say(show(found));
     } catch (error) {
-      fail(error);
+      if (mine === latest) fail(error);
     }
   };
   const onClick = (event) => {
@@ -124,7 +128,8 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     if (st.tool === "basin") {
       return run(() => api.engBasin(area.id, at.lat, at.lng), (found) => {
         picture("result", found.png, found.bounds, 0.6);
-        return h("h3", { class: "small-heading" }, t("eng.basinTitle", { km2: found.area_km2, squares: found.squares }));
+        return [h("h3", { class: "small-heading" }, t("eng.basinTitle", { km2: found.area_km2, squares: found.squares })),
+          found.snapped_m > 0 && h("p", { class: "fineprint" }, t("eng.snapped", { m: found.snapped_m }))];
       });
     }
     st.points = st.tool === "profile" && st.points.length >= 2 ? [at] : [...st.points, at];
@@ -158,10 +163,13 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     TOOLS.map((tool) => h("label", {}, h("input", { type: "radio", name: "eng-tool", value: tool, checked: st.tool === tool,
       onchange: () => { st.tool = tool; clear(); draw(); } }), t(`eng.tool.${tool}`, { m: CHANGE_M }))));
   const stormChoice = () => h("label", { class: "eng-storm" }, t("eng.storm"), " ",
-    h("select", { onchange: (e) => { st.storm = Number(e.target.value); showPools(); draw(); } },
+    h("select", { onchange: (e) => { st.storm = Number(e.target.value); drop("result"); say(); showPools(); draw(); } },
       (layer?.storms ?? [40, 70, 100]).map((mm) => h("option", { value: mm, selected: mm === st.storm }, t("eng.stormMm", { mm })))));
   const params = `area=${encodeURIComponent(area.id)}`;
   const draw = () => {
+    toolClaim.active = st.isOn && st.tool !== "off";
+    toolClaim.onClick = onClick;
+    leaflet?.getContainer().classList.toggle("eng-tool-on", toolClaim.active);
     section.hidden = !st.isOn;
     button.setAttribute("aria-pressed", String(st.isOn));
     if (!st.isOn) return;

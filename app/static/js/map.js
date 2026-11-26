@@ -101,6 +101,10 @@ function openMap(element, { view: [west, south, east, north], zoom, fit = false 
  *  card later, a wide screen's map fills the window's height, and a map on a tab that is not on show has no size. So
  *  Leaflet is told of each change, and until someone (or the page, going to a shop) moves the map, the area's view is
  *  shown again. Leaflet fires movestart at once for a move without animation, and none for invalidateSize. */
+/** While an engineer mode tool is on (engineer.js), a click on the map is the tool's: shop dots do not open the shop,
+ *  and section shapes, which do not pass their clicks to the map, hand them to `onClick`. */
+export const toolClaim = { active: false, onClick: null };
+
 export function followResize(map, element, showView) {
   if (typeof ResizeObserver !== "function") return;
   let isUntouched = true;
@@ -157,7 +161,7 @@ function addMarkers(map, premises, getRp, { onSelect, onOpen }) {
     marker: L.circleMarker([p.lat, p.lon], { fillOpacity: 1, className: "biz-dot" })
       .bindTooltip(label(p.name))
       .bindPopup(() => popupBody(map, p, getRp(), onOpen), room)
-      .on("click", () => onSelect(p.id))
+      .on("click", (event) => (toolClaim.active ? event.target.closePopup() : onSelect(p.id)))
       .addTo(map),
   }]));
 }

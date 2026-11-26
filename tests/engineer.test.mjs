@@ -46,3 +46,17 @@ test("a profile chart draws ground, standing water and river water", () => {
   assert.equal(svg.querySelectorAll("path").length, 3);
   assert.match(svg.textContent, /0\.50 km/);
 });
+
+test("while a tool is on, the map's clicks are the tool's, and turning the mode off gives them back", async () => {
+  const { toolClaim } = await import("../app/static/js/map.js");
+  const section = document.createElement("section");
+  const button = document.createElement("button");
+  const panel = createEngineer({ section, button, mapApi: null, area: { id: "shah-alam", layers: { rain_pools: LAYER } }, wanted: true });
+  assert.equal(toolClaim.active, false, "no tool picked yet");
+  panel.state.tool = "inspect";
+  panel.toggle(true);
+  assert.equal(toolClaim.active, true);
+  assert.equal(typeof toolClaim.onClick, "function");
+  panel.toggle(false);
+  assert.equal(toolClaim.active, false);
+});

@@ -32,7 +32,7 @@ export default Object.freeze({
   "eng.working": "Sedang dikira…",
   "eng.inspectTitle": "Di {lat}, {lon}",
   "eng.river": "Kedalaman model sungai (1 dalam 10 / 20 / 50 tahun)",
-  "eng.bare": "Tanah asal (FABDEM)",
+  "eng.bare": "Aras tanah tanpa bangunan (FABDEM)",
   "eng.surface": "Permukaan dengan bumbung dan pokok (GLO-30)",
   "eng.aboveRiver": "Ketinggian atas sungai terdekat yang dipetakan",
   "eng.pools": "Air bertakung (40 / 70 / 100 mm)",
@@ -51,7 +51,7 @@ export default Object.freeze({
   "eng.deepest": "Paling dalam",
   "eng.volume": "Air bertakung",
   "eng.m3": "{v} m³",
-  "eng.whatifKey": "Biru: lebih banyak air daripada sebelum. Jingga: kurang.",
+  "eng.whatifKey": "Biru: lebih banyak air daripada sebelum. Jingga: kurang. Sebelum dan selepas dikira pada tingkap di sekitar perubahan anda, jadi boleh berbeza sedikit daripada lapisan peta.",
   "eng.upload": "Grid anda sendiri",
   "eng.uploadLead": "Grid ESRI ASCII (.asc) ketinggian dalam meter, sehingga 500 x 500 petak. Ia dijalankan melalui model yang sama dan tidak disimpan.",
   "eng.uploadFile": "Pilih fail .asc",
@@ -71,4 +71,5 @@ export default Object.freeze({
   "news.show": "Tunjukkan",
   "news.open": "Buka",
   "news.gotIt": "Faham",
+  "eng.snapped": "Dialihkan {m} m ke garisan terdekat yang lebih banyak air mengalir.",
 });

@@ -54,7 +54,7 @@ def eng_run_limit(request: Request) -> None:
 
 def rain_pools_layer(area_id: str, mm: str, request: Request) -> Response:
     """The rain pools layer of an area for one storm, 40, 70 or 100 mm in an hour; any other is a 404."""
-    return _main["png_answer"](engineer.png_path(area_id, mm), request)
+    return _main["png_answer"](engineer.png_path(_main["known_area"](area_id).id, mm), request)
 
 
 def inspect(lat: Lat, lon: Lon, area: str | None = None) -> dict:

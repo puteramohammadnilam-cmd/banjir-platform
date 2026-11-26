@@ -78,3 +78,43 @@ def test_nan_squares_are_an_outlet_not_a_dip():
     ground[4, 4] = np.nan          # a hole in the data in the middle of the dip: water leaves there
     depth = pm.ponding(ground, storm_mm=200, spacing=SPACING, drains_mm=30, runoff=1.0)
     assert np.all(np.isnan(depth[3:6, 3:6]))
+
+
+def valley(with_upper_dip=True):
+    """A valley sloping east between high walls, water leaving only at its low east end; a deep dip across the floor
+    downhill, and (optionally) a dip uphill whose outlet's steepest slope runs back into it (Fable's case)."""
+    ground = np.tile(20.0 - np.arange(15, dtype=float), (7, 1))
+    ground[0, :] = ground[6, :] = ground[:, 0] = 30.0
+    if with_upper_dip:
+        ground[2:5, 4] = 13.0
+    ground[1:6, 10:12] -= 3.0
+    return ground
+
+
+def test_what_a_full_dip_spills_reaches_the_dip_downhill_even_when_its_outlet_slopes_back():
+    ground = valley()
+    filled, down, dips, ends, reach = prepared = pm.prepare(ground, SPACING)
+    upper, lower = dips.label[3, 4], dips.label[3, 11]
+    outlet = dips.outlet[upper]
+    assert dips.label.ravel()[ends[outlet]] == upper, "the outlet's steepest slope runs back into the dip"
+    assert reach[outlet] == lower, "but its overflow path reaches the dip downhill"
+    # 150 mm: the upper dip overflows, the lower is not full, so no water is lost: what both hold together equals what
+    # the lower one holds with no upper dip at all
+    with_upper = pm.ponding(ground, 150, SPACING, drains_mm=0, runoff=1.0, prepared=prepared)
+    without = pm.ponding(valley(False), 150, SPACING, drains_mm=0, runoff=1.0)
+    assert np.nansum(with_upper) == pytest.approx(np.nansum(without), abs=0.01)
+    assert np.nanmax(with_upper[2:5, 4]) == pytest.approx(2.0), "the upper dip is full"
+
+
+def test_rain_ending_in_a_pit_too_shallow_to_count_goes_on_to_the_next_dip():
+    ground = valley(False)
+    ground[3, 3] -= 0.05              # a pit under MIN_DIP_M up the valley: its rain must not vanish
+    shallow = pm.ponding(ground, 100, SPACING, drains_mm=0, runoff=1.0)
+    plain = pm.ponding(valley(False), 100, SPACING, drains_mm=0, runoff=1.0)
+    assert np.nansum(shallow) == pytest.approx(np.nansum(plain), abs=0.01)
+
+
+def test_first_dip_follows_the_overflow_path_and_ends_at_the_edge():
+    label = np.array([-1, -1, 7, -1, -1])
+    down = np.array([1, 2, 3, pm.NO_DOWN, 3])     # 0 -> 1 -> 2 (dip 7) -> 3 (edge); 4 -> 3
+    assert pm.first_dip(label, down).tolist() == [7, 7, 7, -1, -1]

@@ -39,6 +39,9 @@ PROFILE_STEP_M = 30
 WHATIF_MARGIN_M = 800
 WHATIF_MAX_SIDE_M = 4000
 CHANGE_M = 0.8                # a bund's height, or a pond's depth
+SNAP = 2                      # basin: the click moves to the square with most land draining through it, this many
+                              # squares around (most squares drain only a few others; the flow lines carry the rest)
+CSV_RISKY = ("=", "+", "-", "@", "\t", "\r")   # a spreadsheet would run a cell starting so as a formula
 MAX_ASC_BYTES = 3_000_000
 MAX_ASC_CELLS = 250_000       # 500 x 500
 COMPUTE = threading.Semaphore(1)
@@ -57,6 +60,7 @@ class Pools:
     name: str
     meta: dict
     ground: raster.DepthFile
+    drains: raster.DepthFile
     down: raster.DepthFile
     storms: dict[int, raster.DepthFile]
     pngs: dict[int, Path]
@@ -76,6 +80,7 @@ def pools(area_id: str) -> Pools | None:
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         storms = {int(mm): raster.DepthFile.open(POOL_DIR / f"{area_id}_pool_{mm}.tif") for mm in meta["storms_mm"]}
         return Pools(area_id, meta, raster.DepthFile.open(POOL_DIR / f"{area_id}_ground.tif"),
+                     raster.DepthFile.open(POOL_DIR / f"{area_id}_drains.tif"),
                      raster.DepthFile.open(POOL_DIR / f"{area_id}_down.tif"), storms,
                      {mm: POOL_DIR / f"{area_id}_pool_{mm}.png" for mm in storms})
     except (OSError, ValueError, KeyError, raster.RasterError) as error:
@@ -190,27 +195,50 @@ def _bounds(file: raster.DepthFile, rows: range, cols: range) -> list[float]:
             round(g.x0 + cols.stop * g.px, 6), round(g.y0 - rows.start * g.py, 6)]
 
 
+@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
+def _flow(area_id: str) -> tuple[np.ndarray, np.ndarray]:
+    """(down, through) of the area's grid: each square's overflow neighbour as a flat index (NO_DOWN at the box's edge)
+    and how many squares' water passes through it, itself included. Worked out once per area."""
+    found = pools(area_id)
+    code = _array(found.down)
+    n_rows, n_cols = code.shape
+    flat = np.where(np.isnan(code), -1, code).astype(int).ravel()
+    r, c = np.divmod(np.arange(flat.size), n_cols)
+    moves = np.array(pooling_model.NEIGHBOURS)
+    safe = np.clip(flat, 0, 7)
+    down = np.where(flat >= 0, (r + moves[safe, 0]) * n_cols + c + moves[safe, 1], pooling_model.NO_DOWN)
+    through = np.ones(flat.size, dtype=np.int64)
+    waiting = np.zeros(flat.size, dtype=np.int64)
+    np.add.at(waiting, down[down >= 0], 1)
+    ready = np.flatnonzero(waiting == 0)
+    while ready.size:   # leaves first: each square adds its count to its overflow neighbour once all of its own are in
+        onward = ready[down[ready] >= 0]
+        np.add.at(through, down[onward], through[onward])
+        np.add.at(waiting, down[onward], -1)
+        targets = np.unique(down[onward])
+        ready = targets[waiting[targets] == 0]
+    return down, through
+
+
 def basin(area_id: str, lat: float, lon: float) -> dict:
-    """The land whose water flows through the spot (overflow paths over the filled ground), as a picture."""
+    """The land whose water flows through the spot (overflow paths over the filled ground, inside the area's box), as
+    a picture. The spot moves to the strongest flow line within SNAP squares; snapped_m says how far."""
     found = pools(area_id)
     if not found:
         raise ToolError("This area has no rain pools grid.")
     row, col = _cell(found, lat, lon)
-    code = _array(found.down)
-    n_rows, n_cols = code.shape
-    flat = np.where(np.isnan(code), -1, code).astype(int).ravel()
-    idx = np.arange(flat.size)
-    r, c = np.divmod(idx, n_cols)
-    moves = np.array(pooling_model.NEIGHBOURS)
-    safe = np.clip(flat, 0, 7)
-    to = (r + moves[safe, 0]) * n_cols + c + moves[safe, 1]
-    down = np.where(flat >= 0, to, pooling_model.NO_DOWN)
-    inside = pooling_model.upstream(down, (n_rows, n_cols), row * n_cols + col)
+    down, through = _flow(area_id)
+    n_rows, n_cols = found.down.grid.rows, found.down.grid.cols
+    near = [(r, c) for r in range(max(0, row - SNAP), min(n_rows, row + SNAP + 1))
+            for c in range(max(0, col - SNAP), min(n_cols, col + SNAP + 1))]
+    best = max(near, key=lambda rc: (through[rc[0] * n_cols + rc[1]], -abs(rc[0] - row) - abs(rc[1] - col)))
+    inside = pooling_model.upstream(down, (n_rows, n_cols), best[0] * n_cols + best[1])
     rs, cs = np.flatnonzero(inside.any(axis=1)), np.flatnonzero(inside.any(axis=0))
     rows, cols = range(rs[0], rs[-1] + 1), range(cs[0], cs[-1] + 1)
-    lat_mid = found.ground.grid.y0 - n_rows * found.ground.grid.py / 2
-    cell_m2 = (found.ground.grid.py * M_PER_DEG_LAT) * (found.ground.grid.px * M_PER_DEG_LON * math.cos(math.radians(lat_mid)))
-    return {"area_km2": round(float(inside.sum()) * cell_m2 / 1e6, 3), "squares": int(inside.sum()),
+    grid = found.ground.grid
+    dy, dx = _spacing(grid, lat)
+    return {"area_km2": round(float(inside.sum()) * dy * dx / 1e6, 3), "squares": int(inside.sum()),
+            "snapped_m": round(math.hypot((best[0] - row) * dy, (best[1] - col) * dx)),
             "bounds": _bounds(found.down, rows, cols),
             "png": _png(inside[rows.start:rows.stop, cols.start:cols.stop].astype(int), {1: (14, 165, 233)})}
 
@@ -272,7 +300,8 @@ def whatif(area_id: str, storm_mm: int, kind: str, points: list[tuple[float, flo
     if (r1 - r0) * spacing[0] > WHATIF_MAX_SIDE_M or (c1 - c0) * spacing[1] > WHATIF_MAX_SIDE_M:
         raise ToolError(f"Keep the bund or pond within about {(WHATIF_MAX_SIDE_M - 2 * WHATIF_MARGIN_M) // 1000} km.")
     rows, cols = range(r0, r1), range(c0, c1)
-    ground = _array(found.ground, rows, cols)
+    # the ground the layer was worked out on: FABDEM with the mapped waterways lowered as tools/build_pooling.py did
+    ground = _array(found.ground, rows, cols) - found.meta["burn_m"] * np.nan_to_num(_array(found.drains, rows, cols))
     local = [(r - r0, c - c0) for r, c in cells]
     shape = ground.shape
     edit = _line_cells(local, shape) if kind == "bund" or len(local) == 2 else _polygon_cells(local, shape)
@@ -300,13 +329,19 @@ def parse_asc(text: str) -> tuple[np.ndarray, float]:
     head: dict[str, float] = {}
     while lines and lines[0].split() and lines[0].split()[0].lower() in (
             "ncols", "nrows", "xllcorner", "yllcorner", "xllcenter", "yllcenter", "cellsize", "nodata_value"):
-        key, value = lines.pop(0).split()[:2]
+        parts = lines.pop(0).split()
+        if len(parts) < 2:
+            raise ToolError(f"The header line {parts[0]} has no value.")
         try:
-            head[key.lower()] = float(value)
+            head[parts[0].lower()] = float(parts[1])
         except ValueError:
-            raise ToolError(f"The header value for {key} is not a number.") from None
+            raise ToolError(f"The header value for {parts[0]} is not a number.") from None
+        if not math.isfinite(head[parts[0].lower()]):
+            raise ToolError(f"The header value for {parts[0]} is not a finite number.")
     try:
         n_cols, n_rows, size = int(head["ncols"]), int(head["nrows"]), head["cellsize"]
+        if n_cols != head["ncols"] or n_rows != head["nrows"]:
+            raise ToolError("ncols and nrows must be whole numbers.")
     except KeyError as missing:
         raise ToolError(f"The file has no {missing.args[0]} line: is it an ESRI ASCII grid (.asc)?") from None
     if not (0 < n_cols * n_rows <= MAX_ASC_CELLS and n_rows >= 3 and n_cols >= 3 and size > 0):
@@ -326,10 +361,10 @@ def parse_asc(text: str) -> tuple[np.ndarray, float]:
 
 
 def upload(text: str, storm_mm: int) -> dict:
-    """The standing water on a visitor's own grid. Cell sizes under 1 are taken as degrees, else as metres. Never
-    stored."""
+    """The standing water on a visitor's own grid. Cell sizes under 0.01 are taken as degrees (about 1 km and less),
+    else as metres. Never stored."""
     grid, size = parse_asc(text)
-    metres = size * M_PER_DEG_LAT if size < 1 else size
+    metres = size * M_PER_DEG_LAT if size < 0.01 else size
     depth = _run(lambda: pooling_model.ponding(grid, storm_mm, (metres, metres)))
     index = np.zeros(depth.shape, dtype=int)
     for k, upto in ((3, None), (2, 1.0), (1, 0.3)):
@@ -337,6 +372,12 @@ def upload(text: str, storm_mm: int) -> dict:
     palette = {1: (169, 180, 255), 2: (108, 111, 240), 3: (58, 42, 168)}
     return {"rows": grid.shape[0], "cols": grid.shape[1], "cell_m": round(metres, 2), "storm_mm": storm_mm,
             **_summary(depth, metres * metres), "png": _png(index, palette)}
+
+
+def _cell_text(value) -> str:
+    """Text for a CSV cell that a spreadsheet will not run as a formula."""
+    text = "" if value is None else str(value)
+    return "'" + text if text.startswith(CSV_RISKY) else text
 
 
 def export_csv(area_id: str, section_id: str | None = None) -> str:
@@ -356,7 +397,7 @@ def export_csv(area_id: str, section_id: str | None = None) -> str:
         cell = found.ground.grid.cell(p["lon"], p["lat"]) if found else None
         pool = _at(found, *cell) if cell else {"ground_m": None, "pool_m": {}}
         depth = p.get("depth_m", {})
-        writer.writerow([p["id"], p.get("name", ""), p["lat"], p["lon"], p.get("section", ""),
+        writer.writerow([p["id"], _cell_text(p.get("name", "")), p["lat"], p["lon"], _cell_text(p.get("section", "")),
                          depth.get("10"), depth.get("20"), depth.get("50"), surface.get("ground_m"),
                          surface.get("above_river_m"), pool["ground_m"], *[pool["pool_m"].get(str(mm)) for mm in storms]])
     return out.getvalue()

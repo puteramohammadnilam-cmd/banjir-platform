@@ -39,19 +39,19 @@
  ],
  "summary": {
   "40mm": {
-   "squares": 7159,
-   "share": 0.0123,
-   "deepest_m": 2.7
+   "squares": 10602,
+   "share": 0.0183,
+   "deepest_m": 4.36
   },
   "70mm": {
-   "squares": 16686,
-   "share": 0.0287,
-   "deepest_m": 10.36
+   "squares": 20533,
+   "share": 0.0354,
+   "deepest_m": 13.77
   },
   "100mm": {
-   "squares": 20497,
-   "share": 0.0353,
-   "deepest_m": 14.38
+   "squares": 22969,
+   "share": 0.0396,
+   "deepest_m": 19.68
   }
  },
  "licence": "CC BY-NC-SA 4.0",
@@ -60,12 +60,12 @@
   "storm_mm": 70,
   "sections_with_rain_floods": 29,
   "sections_without": 25,
-  "auc": 0.53,
-  "p": 0.358,
+  "auc": 0.52,
+  "p": 0.389,
   "baseline_low_ground_auc": 0.62,
   "baseline_low_ground_p": 0.078,
   "hotspots": 21,
-  "hotspot_percentile": 36.4,
+  "hotspot_percentile": 36.9,
   "baseline_low_ground_hotspot_percentile": 60.1
  }
 }

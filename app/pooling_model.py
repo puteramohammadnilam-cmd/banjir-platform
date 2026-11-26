@@ -8,10 +8,11 @@ Method ("blue spot" screening: Balstrom and Crawford 2018; fill-spill after Barn
      path to the edge.
   2. Dips: connected squares where `filled` stands at least MIN_DIP_M above the ground. Each has a capacity (the
      water it holds when full) and an outlet (where it overflows).
-  3. Catchment: every square sends its rain down the steepest slope of the ground itself, to a low point; the rain
-     of the squares whose low point lies in a dip falls into that dip.
+  3. Catchment: every square sends its rain down the steepest slope of the ground itself, to a low point. Where that
+     low point is not in a dip (a pit too shallow to count), the rain goes on along the overflow path (`down`) to the
+     first dip on it, or off the grid.
   4. Rain: each dip receives RUNOFF x (storm - drains) over its catchment. It fills from its lowest square up; what
-     it cannot hold spills from its outlet into the dip downhill of it, highest dips first.
+     it cannot hold spills from its outlet along the overflow path into the first dip on it, highest dips first.
   5. The depth of water standing at each square, where at least MIN_DEPTH_M.
 It knows nothing of pipes, pumps, gates, kerbs or buildings, and the grid's heights are good to a metre or two in a
 town at best, so it shows where water tends to collect, not how deep it will be. numpy only.
@@ -136,6 +137,23 @@ def find_dips(ground: np.ndarray, filled: np.ndarray, down: np.ndarray, cell_m2:
     return Dips(label.reshape(rows, cols), cells, np.array(capacity), np.array(outlet, dtype=np.int64), np.array(level))
 
 
+def first_dip(label: np.ndarray, down: np.ndarray) -> np.ndarray:
+    """For every square, the first dip on its overflow path, itself included (-1: the path leaves the grid first).
+    Pointer doubling: each square looks at the square its pointer reaches; a settled one gives its answer, an unsettled
+    one is jumped over (none of the squares in between is in a dip)."""
+    index = np.arange(down.size)
+    found = label.copy()
+    pointer = np.where(down >= 0, down, index)
+    done = (found >= 0) | (pointer == index)
+    while not done.all():
+        ahead, ahead_done = found[pointer], done[pointer]
+        settle = ~done & ahead_done
+        found = np.where(settle, ahead, found)
+        pointer = np.where(~done & ~ahead_done, pointer[pointer], pointer)
+        done = done | settle
+    return found
+
+
 def fill_level(heights: np.ndarray, volume: float, cell_m2: float, top: float) -> float:
     """The water level in a dip whose squares (heights sorted low to high) hold `volume` m3, at most `top`."""
     if volume <= 0:
@@ -152,18 +170,18 @@ def fill_level(heights: np.ndarray, volume: float, cell_m2: float, top: float) -
 def ponding(ground: np.ndarray, storm_mm: float, spacing: tuple[float, float], drains_mm: float = DRAINS_MM,
             runoff: float = RUNOFF, prepared: tuple | None = None) -> np.ndarray:
     """Depth of standing water (m) at each square after `storm_mm` of rain in an hour; NaN where none is shown.
-    `prepared` is (filled, down, dips, ends) from prepare(), to share between storms."""
-    filled, down, dips, ends = prepared or prepare(ground, spacing)
+    `prepared` is (filled, down, dips, ends, reach) from prepare(), to share between storms."""
+    filled, down, dips, ends, reach = prepared or prepare(ground, spacing)
     cell_m2 = spacing[0] * spacing[1]
     rain_m = runoff * max(0.0, storm_mm - drains_mm) / 1000
     inflow = np.zeros(len(dips.cells))
-    which = dips.label.ravel()[ends]   # the dip each square's rain ends in (-1: none, it runs off)
+    which = reach[ends]   # the dip each square's rain reaches (-1: none, it leaves the grid)
     np.add.at(inflow, which[which >= 0], rain_m * cell_m2)
     depth = np.full(ground.size, np.nan)
     for k in np.argsort(-dips.level, kind="stable"):   # highest first, so what spills reaches the lower dips in time
         members, volume = dips.cells[k], inflow[k]
         if volume > dips.capacity[k] and dips.outlet[k] >= 0:
-            target = dips.label.ravel()[ends[dips.outlet[k]]]
+            target = reach[dips.outlet[k]]
             if target >= 0 and target != k:
                 inflow[target] += volume - dips.capacity[k]
         level = fill_level(ground.flat[members], min(volume, dips.capacity[k]), cell_m2, dips.level[k])
@@ -173,11 +191,11 @@ def ponding(ground: np.ndarray, storm_mm: float, spacing: tuple[float, float], d
 
 
 def prepare(ground: np.ndarray, spacing: tuple[float, float]) -> tuple:
-    """What every storm on the same grid shares: (filled, down, dips, ends)."""
+    """What every storm on the same grid shares: (filled, down, dips, ends, reach)."""
     filled, down = priority_flood(ground)
     dips = find_dips(ground, filled, down, spacing[0] * spacing[1])
     ends = sinks(steepest(ground, spacing))
-    return filled, down, dips, ends
+    return filled, down, dips, ends, first_dip(dips.label.ravel(), down)
 
 
 def upstream(down: np.ndarray, shape: tuple[int, int], at: int) -> np.ndarray:

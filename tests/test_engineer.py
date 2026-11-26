@@ -94,3 +94,33 @@ def test_model_runs_share_one_slot(monkeypatch):
             engineer._run(lambda: None)
     finally:
         engineer.COMPUTE.release()
+
+
+def test_basin_snaps_to_the_nearest_strong_flow_line_and_says_how_far(client):
+    found = client.get("/api/eng/basin", params={"lat": 3.0239, "lon": 101.5409}).json()["data"]
+    assert found["squares"] > 20 and 0 <= found["snapped_m"] <= 100
+
+
+def test_bad_grids_get_a_reason_not_a_server_error(client):
+    for bad, words in (("ncols\nnrows 3\ncellsize 1\n1 2 3", "has no value"),
+                       ("ncols nan\nnrows 3\ncellsize 1\n1", "not a finite number"),
+                       ("ncols 3.5\nnrows 3\ncellsize 1\n1", "whole numbers")):
+        answer = client.post("/api/eng/upload", json={"asc": bad, "storm_mm": 70})
+        assert answer.status_code == 400 and words in answer.json()["error"], bad
+
+
+def test_fine_cells_are_metres_and_only_tiny_ones_degrees():
+    grid = "\n".join(" ".join(["10"] * 5) for _ in range(5))
+    assert engineer.upload(f"ncols 5\nnrows 5\ncellsize 0.5\n{grid}", 70)["cell_m"] == 0.5
+    assert engineer.upload(f"ncols 5\nnrows 5\ncellsize 0.000277\n{grid}", 70)["cell_m"] > 25
+
+
+def test_csv_cells_cannot_run_as_formulas_and_unknown_areas_never_reach_the_cache(client):
+    assert engineer._cell_text("=HYPERLINK(1)") == "'=HYPERLINK(1)" and engineer._cell_text("Kedai Ali") == "Kedai Ali"
+    assert engineer._cell_text(None) == ""
+    assert client.get("/api/areas/nowhere/layers/rain-pools-70.png").status_code == 404
+
+
+def test_bare_ground_is_fabdem_as_given_and_the_drains_are_kept_apart():
+    found = engineer.pools("shah-alam")
+    assert found.meta["burn_m"] == 1.0 and found.drains.grid.rows == found.ground.grid.rows

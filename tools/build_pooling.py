@@ -8,7 +8,8 @@ heights (buildings and trees removed) and the OpenStreetMap drains, with the mod
 Run from 11_Platform_Draft; needs numpy and tifffile (requirements-dev.txt). It works on the box plus MARGIN_KM on each
 side, so water from just outside the box is counted, and writes the box only, into app/data/pooling/ (CC BY-NC-SA 4.0,
 as FABDEM is; README there):
-  {name}_ground.tif         FABDEM height (m above the EGM2008 geoid), the drains lowered by BURN_M
+  {name}_ground.tif         FABDEM height (m above the EGM2008 geoid), as FABDEM gives it
+  {name}_drains.tif         1 where the model lowered the ground by BURN_M (a mapped waterway), else 0
   {name}_down.tif           the neighbour (0-7, NEIGHBOURS order) each square overflows to; -1 where it leaves the box
   {name}_pool_{mm}.tif      standing water (m) after {mm} of rain in an hour; no data where none is shown
   {name}_pool_{mm}.png      the same in three classes (CLASSES), for the map
@@ -102,8 +103,8 @@ def window(box, west0: float, north0: float, px: float, py: float) -> tuple[int,
     return top, left, bottom - top + 1, right - left + 1
 
 
-def burn(ground: np.ndarray, drains_path: Path, west: float, north: float, px: float, py: float) -> int:
-    """Lower the squares under every mapped waterway by BURN_M; the count lowered."""
+def burn(ground: np.ndarray, drains_path: Path, west: float, north: float, px: float, py: float) -> np.ndarray:
+    """Lower the squares under every mapped waterway by BURN_M; the mask of those squares."""
     answer = json.loads(drains_path.read_text(encoding="utf-8"))
     rows, cols = ground.shape
     mask = np.zeros_like(ground, dtype=bool)
@@ -117,7 +118,7 @@ def burn(ground: np.ndarray, drains_path: Path, west: float, north: float, px: f
                 if 0 <= r < rows and 0 <= c < cols:
                     mask[r, c] = True
     ground[mask] -= BURN_M
-    return int(mask.sum())
+    return mask
 
 
 def codes(down: np.ndarray, shape: tuple[int, int], inner: tuple[int, int, int, int]) -> np.ndarray:
@@ -166,8 +167,10 @@ def main() -> None:
         heights, west0, north0, px, py = mosaic(archive, wide)
     top, left, rows, cols = window(wide, west0, north0, px, py)
     ground = heights[top:top + rows, left:left + cols].copy()
+    bare = ground.copy()
     gwest, gnorth = west0 + left * px, north0 - top * py
-    burned = burn(ground, args.drains, gwest, gnorth, px, py) if args.drains else 0
+    mask = burn(ground, args.drains, gwest, gnorth, px, py) if args.drains else np.zeros_like(ground, dtype=bool)
+    burned = int(mask.sum())
     lat_mid = gnorth - rows * py / 2
     spacing = (py * M_PER_DEG_LAT, px * M_PER_DEG_LON * math.cos(math.radians(lat_mid)))
     print(f"grid {rows} x {cols} squares of {spacing[0]:.1f} x {spacing[1]:.1f} m; {burned} squares under drains lowered")
@@ -178,7 +181,8 @@ def main() -> None:
     origin, pixel = (gwest + ileft * px, gnorth - itop * py), (px, py)
     cut = lambda a: a[itop:itop + irows, ileft:ileft + icols]
     OUT.mkdir(parents=True, exist_ok=True)
-    write(f"{args.name}_ground.tif", cut(ground), origin, pixel)
+    write(f"{args.name}_ground.tif", cut(bare), origin, pixel)
+    write(f"{args.name}_drains.tif", cut(mask.astype(float)), origin, pixel)
     write(f"{args.name}_down.tif", codes(prepared[1], ground.shape, inner), origin, pixel)
     palette = [(0, 0, 0)] + [hex_rgb(colour) for _, _, colour in CLASSES]
     summary = {}
