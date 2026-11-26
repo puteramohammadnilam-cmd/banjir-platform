@@ -103,6 +103,9 @@ def test_rain_days_converts_inches_and_skips_a_day_without_a_date(monkeypatch):
     (STATE_WIDE["text_en"], False),         # other states
     ("Continuous rain is expected over the states of Selangor until Sunday, 29 November 2026.", True),   # the whole state
     ("Heavy rain is expected over the states of Selangor (Hulu Langat) • Klang Valley", False),
+    ("Continuous rain is expected over the states of Selangor and Johor until Sunday.", True),   # whole state, "and"
+    ("Continuous rain is expected over the states of Johor and Selangor until Sunday.", True),
+    ("Thunderstorms are expected over the states of Selangor (Hulu Selangor and Sepang) and Johor until 5 PM.", False),
 ])
 def test_a_warning_covers_the_area_only_for_its_state_whole_or_one_of_its_districts(text, covered):
     assert outlook.covers(text, "Selangor", ("Petaling", "Klang", "Shah Alam")) is covered
@@ -110,14 +113,35 @@ def test_a_warning_covers_the_area_only_for_its_state_whole_or_one_of_its_distri
 
 def test_only_rain_and_thunderstorm_warnings_on_land_are_kept(monkeypatch):
     met(monkeypatch)
-    kept = outlook.warnings_for("shah-alam")
+    kept = outlook.warnings_for("shah-alam", NOW)
     assert [w["title_en"] for w in kept] == ["Thunderstorms Warning"] and kept[0]["valid_from"] == "2026-11-28T15:00:00"
-    assert outlook.warnings_for("kuala-terengganu")[0]["heading_en"] == "CONTINUOUS RAIN WARNING (ALERT)"
+    assert kept[0]["kind"] == "thunderstorm"
+    found = outlook.warnings_for("kuala-terengganu", NOW)[0]
+    assert found["heading_en"] == "CONTINUOUS RAIN WARNING (ALERT)" and found["kind"] == "rain"
+
+
+def test_ended_warnings_are_dropped_before_the_list_is_cut(monkeypatch):
+    old = [warning("Thunderstorms Warning", "Amaran Ribut Petir", "Thunderstorms over the states of Selangor (Petaling).",
+                   f"2026-11-2{d}T14:00:00", f"2026-11-2{d}T17:00:00") for d in (3, 4, 5)]
+    met(monkeypatch, warnings=(*old, PETALING))
+    assert [w["valid_from"] for w in outlook.warnings_for("shah-alam", NOW)] == ["2026-11-28T15:00:00"]
+    met(monkeypatch, warnings=(PETALING,))
+    assert outlook.warnings_for("shah-alam", datetime(2026, 11, 28, 21, 0, tzinfo=MYT)) == [], "ended at 9 pm"
+
+
+def test_a_warning_ending_at_midnight_does_not_mark_the_next_day():
+    ends = [{"valid_from": "2026-11-28T15:00:00", "valid_to": "2026-11-29T00:00:00"}]
+    assert outlook._covers_day("2026-11-28", ends) and not outlook._covers_day("2026-11-29", ends)
+
+
+def test_no_metmalaysia_answer_is_none_not_an_empty_list(monkeypatch):
+    monkeypatch.setattr(outlook, "_cached", lambda key, fetch, clock: None)
+    assert outlook.warnings_for("shah-alam", NOW) is None and outlook.forecast_for("shah-alam") is None
 
 
 # ---------- the rules
 
-@pytest.mark.parametrize("mm, warned, level", [
+@pytest.mark.parametrize("mm, warned, level", [   # warned: a continuous-rain warning covers the day
     (0, False, "low"), (19.9, False, "low"), (20, False, "watch"), (29.9, False, "watch"), (30, False, "high"),
     (5, True, "high"), (None, True, "high"), (None, False, None),
 ])
@@ -135,6 +159,8 @@ def test_the_trend_compares_today_with_the_days_ahead(levels, trend):
 
 def test_the_thresholds_are_the_ones_the_past_floods_gave():
     assert (outlook.WATCH_MM, outlook.HIGH_MM, outlook.DAYS) == (20, 30, 5)
+    assert outlook.CALIBRATION == {"since": 2024, "floods": 10, "watch_days": 79, "watch_floods": 8, "high_days": 28,
+                                   "high_floods": 5}
 
 
 # ---------- the whole answer
@@ -149,12 +175,14 @@ def test_build_gives_five_days_with_rain_words_warnings_and_tides(monkeypatch):
     found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda lat, lon, days: RAIN)
     days = found["days"]
     assert [d["date"] for d in days] == DATES
-    assert [d["level"] for d in days] == ["low", "high", "high", "low", "low"]   # the 28th: a warning for Petaling
+    # the 28th: a thunderstorm warning for Petaling is shown on the day but does not set its level (not calibrated)
+    assert [d["level"] for d in days] == ["low", "high", "watch", "low", "low"]
     assert days[2]["warned"] and not days[3]["warned"] and days[1]["rain_mm"] == 48.1 and days[1]["chance_pct"] == 75
     assert days[0]["met"] == {"text": "Ribut petir", "when": "Petang dan Malam"} and days[4]["met"] is None
     assert [d["big_tide"] for d in days] == [d["date"] in big_tide_day() for d in days]
     assert found["trend"] == "rising" and found["rain"] == "ok" and found["met_place"] == "Shah Alam"
-    assert found["thresholds"] == {"watch_mm": 20, "high_mm": 30, "set_from": "Shah Alam"}
+    assert found["levels"] is True and found["met"] == "ok"
+    assert found["thresholds"] == {"watch_mm": 20, "high_mm": 30, "set_from": "Shah Alam", **outlook.CALIBRATION}
     assert [w["title_en"] for w in found["warnings"]] == ["Thunderstorms Warning"]
 
 
@@ -166,8 +194,39 @@ def test_without_googles_rain_the_card_still_gives_words_warnings_and_tides(monk
             raise e
         found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=fail)
         assert found["rain"] == state and found["trend"] is None
-        assert [d["level"] for d in found["days"]] == [None, None, "high", None, None]
+        assert [d["level"] for d in found["days"]] == [None] * 5 and found["days"][2]["warned"]
         assert all(d["rain_mm"] is None for d in found["days"]) and found["days"][1]["met"]["text"] == "Ribut petir"
+
+
+def test_a_continuous_rain_warning_sets_the_day_high_even_with_little_rain(monkeypatch):
+    rain = warning("Continuous Rain Warning", "Amaran Hujan Berterusan", "Continuous rain is expected over the states of "
+                   "Selangor (Petaling and Klang) until Friday, 27 November 2026.", "2026-11-26T00:00:00", "2026-11-27T23:59:59")
+    met(monkeypatch, warnings=(rain,))
+    days = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)["days"]
+    assert [d["level"] for d in days[:3]] == ["high", "high", "watch"]
+
+
+def test_levels_are_given_only_where_past_floods_set_them(monkeypatch):
+    met(monkeypatch)
+    found = outlook.build("kuantan", 3.8, 103.3, now=NOW, rain_fn=lambda *a: RAIN)
+    assert found["levels"] is False and found["trend"] is None
+    assert all(d["level"] is None for d in found["days"]) and found["days"][1]["rain_mm"] == 48.1
+
+
+def test_six_days_are_asked_so_the_fifth_is_there_before_7_am(monkeypatch):
+    met(monkeypatch)
+    asked = {}
+    early = datetime(2026, 11, 27, 2, 0, tzinfo=MYT)   # Google's first day may still be the 26th (07:00 to 07:00)
+    google = [{"date": d, "mm": 5.0, "chance_pct": 40} for d in ["2026-11-26", *DATES[1:], "2026-12-01"]]
+    found = outlook.build("shah-alam", 3.07, 101.52, now=early, rain_fn=lambda lat, lon, days: asked.update(days=days) or google)
+    assert asked["days"] == 6 and [d["date"] for d in found["days"]][0] == "2026-11-27"
+    assert all(d["rain_mm"] == 5.0 for d in found["days"]) and found["trend"] == "steady"
+
+
+def test_a_metmalaysia_outage_is_said_not_shown_as_no_warning(monkeypatch):
+    monkeypatch.setattr(outlook, "_cached", lambda key, fetch, clock: None)
+    found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)
+    assert found["met"] == "down" and found["warnings"] == [] and found["levels"] is True
 
 
 def test_an_area_without_a_metmalaysia_place_or_tide_table_still_answers(monkeypatch):
@@ -175,6 +234,7 @@ def test_an_area_without_a_metmalaysia_place_or_tide_table_still_answers(monkeyp
     monkeypatch.setattr(outlook, "place", lambda area_id: None)
     found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)
     assert found["met_place"] is None and found["warnings"] == [] and all(d["met"] is None for d in found["days"])
+    assert found["met"] == "none"
 
 
 # ---------- data.gov.my, kept for everyone

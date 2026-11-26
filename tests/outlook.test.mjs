@@ -12,7 +12,8 @@ const NOW = new Date("2026-11-26T02:00:00Z");   // 10 am on 26 Nov in Malaysia
 const day = (date, mm, level, extra = {}) => ({ date, rain_mm: mm, chance_pct: mm == null ? null : 75, level, warned: false, met: null, big_tide: false, ...extra });
 const DAYS = [day("2026-11-26", 6.3, "low", { met: { text: "Ribut petir", when: "Petang dan Malam" } }), day("2026-11-27", 48.1, "high", { big_tide: true }),
   day("2026-11-28", 24.4, "watch"), day("2026-11-29", 17.4, "low"), day("2026-11-30", 7.3, "low")];
-const FOUND = { days: DAYS, warnings: [], trend: "rising", rain: "ok", met_place: "Shah Alam", thresholds: { watch_mm: 20, high_mm: 30, set_from: "Shah Alam" }, source: "https://www.met.gov.my/" };
+const THRESHOLDS = { watch_mm: 20, high_mm: 30, set_from: "Shah Alam", since: 2024, floods: 10, watch_days: 79, watch_floods: 8, high_days: 28, high_floods: 5 };
+const FOUND = { days: DAYS, warnings: [], trend: "rising", rain: "ok", met: "ok", levels: true, met_place: "Shah Alam", thresholds: THRESHOLDS, source: "https://www.met.gov.my/" };
 
 beforeEach(() => {
   installFakeDom();
@@ -55,7 +56,7 @@ test("the card says Checking until the answer comes, and so the page can see it 
 
 test("the card leads with the worst day, then a row a day with its level, rain and MetMalaysia's words", () => {
   const section = mount({ data: FOUND });
-  assert.match(section.textContent, /Tomorrow: about 48 mm of rain\. Floods here have come on days with this much\. Rising\./);
+  assert.match(section.textContent, /Tomorrow: about 48 mm of rain forecast\. In Shah Alam since 2024, most days this wet had no recorded flood; about 1 in 6 did\. More rain ahead\./);
   const rows = [...section.querySelector(".outlook-days").children];
   assert.equal(rows.length, 5);
   assert.match(rows[0].textContent, /Today.*Low.*6 mm · 75%.*Thunderstorms, afternoon and night/);
@@ -70,9 +71,10 @@ test("a MetMalaysia warning is shown first, and a quiet week says so", () => {
     warnings: [{ title_en: "Thunderstorms Warning", title_ms: "Amaran Ribut Petir", valid_from: "2026-11-26T14:00:00", valid_to: "2026-11-26T17:00:00" }] };
   const section = mount({ data: warned });
   assert.match(section.querySelector(".outlook-warning").textContent, /MetMalaysia: Thunderstorms Warning, until/);
-  assert.match(section.textContent, /Today: a MetMalaysia rain or thunderstorm warning covers this area/);
+  assert.match(section.textContent, /Today: a MetMalaysia continuous-rain warning covers this area/);
   const quiet = mount({ data: { ...FOUND, trend: "steady", days: DAYS.map((d) => ({ ...d, level: "low" })) } });
-  assert.match(quiet.textContent, /No heavy rain forecast in the next 5 days\. Steady\./);
+  assert.match(quiet.textContent, /No day with 20 mm of rain or more forecast in the next 5 days\./);
+  assert.doesNotMatch(quiet.textContent, /rain ahead/, "steady says nothing");
 });
 
 test("without Google's rain the rows keep MetMalaysia's words and the card says why the amounts are missing", () => {
@@ -87,7 +89,7 @@ test("the card in Malay", () => {
   useLang("ms");
   const section = mount({ data: FOUND });
   assert.match(section.textContent, /5 hari akan datang/);
-  assert.match(section.textContent, /Esok: kira-kira 48 mm hujan/);
+  assert.match(section.textContent, /Esok: kira-kira 48 mm hujan diramal\. Di Shah Alam sejak 2024/);
   assert.match([...section.querySelector(".outlook-days").children][1].textContent, /Tinggi.*Air pasang besar/);
 });
 
@@ -95,4 +97,39 @@ test("before any answer the card already says it is checking, so it is never an 
   const section = document.createElement("section");
   createOutlook(section, () => NOW);
   assert.match(section.textContent, /Next 5 days.*Checking/);
+});
+
+test("a watch day says how often a day that wet had a flood, and the method says most such days had none", () => {
+  const watch = { ...FOUND, days: DAYS.map((d) => ({ ...d, level: d.level === "high" ? "watch" : d.level })) };
+  const section = mount({ data: watch });
+  assert.match(section.textContent, /Tomorrow: about 48 mm of rain forecast\. In Shah Alam since 2024, about 1 in 10 days this wet had a recorded flood\./);
+  assert.match(section.textContent, /8 of 10 recorded floods came on a day of 20 mm or more, but most such days had no flood/);
+  assert.match(section.textContent, /Google Weather, whose day runs 7 am to 7 am/);
+});
+
+test("outside the area the levels were set on, the card gives the forecast with no level", () => {
+  const plain = { ...FOUND, levels: false, trend: null, days: DAYS.map((d) => ({ ...d, level: null })) };
+  const section = mount({ data: plain });
+  assert.match(section.textContent, /Tomorrow has the most rain forecast: about 48 mm\./);
+  assert.match(section.textContent, /No levels here: they were set on the floods in Shah Alam/);
+  assert.equal(section.querySelector(".outlook-level"), null);
+  assert.doesNotMatch(section.textContent, /recorded flood/);
+});
+
+test("when Google expects rain worth a level and MetMalaysia says none, the row says the forecasts disagree", () => {
+  const split = { ...FOUND, days: [DAYS[0], { ...DAYS[1], met: { text: "Tiada Hujan", when: "Sepanjang Hari" } }, ...DAYS.slice(2)] };
+  const rows = [...mount({ data: split }).querySelector(".outlook-days").children];
+  assert.match(rows[1].textContent, /No rain, all day · Forecasts disagree/);
+  assert.doesNotMatch(rows[0].textContent, /disagree/);
+});
+
+test("a MetMalaysia outage is said, not shown as no warning", () => {
+  assert.match(mount({ data: { ...FOUND, met: "down" } }).textContent, /MetMalaysia could not be reached just now/);
+});
+
+test("an answer from an earlier day asks for a reload instead of calling yesterday Today", () => {
+  const section = document.createElement("section");
+  createOutlook(section, () => new Date("2026-11-27T02:00:00Z")).set({ data: FOUND });
+  assert.match(section.textContent, /This outlook is from an earlier day\. Reload the page/);
+  assert.equal(section.querySelector(".outlook-days"), null);
 });
