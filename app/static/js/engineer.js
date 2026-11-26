@@ -164,7 +164,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     section.hidden = !st.isOn;
     button.setAttribute("aria-pressed", String(st.isOn));
     if (!st.isOn) return;
-    section.replaceChildren(
+    section.replaceChildren(...[   // replaceChildren would show a false (the Run row for other tools) as text
       h("div", { class: "eng-head" }, h("h2", { id: "engineer-heading" }, t("eng.heading")),
         h("button", { type: "button", class: "btn btn-link", onclick: () => toggle(false) }, t("eng.close"))),
       h("p", { class: "muted" }, t("eng.lead")),
@@ -182,7 +182,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
       h("ul", { class: "eng-downloads" },
         h("li", {}, h("a", { href: `/api/eng/export.csv?${params}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`, download: "" }, t("eng.csv"))),
         layer && h("li", {}, h("a", { href: `/api/eng/rain-pools-${st.storm}.tif?${params}`, download: "" }, t("eng.tif", { mm: st.storm })))),
-      h("p", { class: "fineprint" }, t("eng.licence")), h("p", { class: "fineprint" }, t("eng.noVelocity")));
+      h("p", { class: "fineprint" }, t("eng.licence")), h("p", { class: "fineprint" }, t("eng.noVelocity"))].filter(Boolean));
   };
   const toggle = (isOn) => {
     st.isOn = isOn;
