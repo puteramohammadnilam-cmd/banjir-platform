@@ -9,7 +9,7 @@ export default Object.freeze({
   "evac.nationwide": "Dibuka untuk banjir di seluruh Malaysia: {count}.",
   "evac.checked": "Daripada senarai JKM, disemak pada {time}. Pusat dalam lingkungan kira-kira {km} km dari kawasan yang ditunjukkan.",
   "evac.link": "InfoBencana JKM: semua pusat yang dibuka",
-  "evac.failed": "Senarai JKM tidak menjawab sekarang, jadi kami tidak dapat menyatakan pusat mana yang dibuka. Semak halaman JKM sendiri:",
+  "evac.failed": "Kami tidak dapat mendapatkan senarai JKM, jadi kami tidak dapat menyatakan pusat mana yang dibuka. Semak halaman JKM sendiri:",
   "reference.srcEvacLabel": "Pusat pemindahan banjir dibuka sekarang",
   "reference.srcEvac": "InfoBencana JKM, Jabatan Kebajikan Masyarakat Malaysia: senarai awam pusat yang dibuka, pusat banjir sahaja, bilangan sahaja",
   "tide.heading": "Pasang surut di {station}",

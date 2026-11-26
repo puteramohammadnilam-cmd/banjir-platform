@@ -2,7 +2,10 @@
 its name, district, the disaster, and counts of evacuees and families with how full it is. The feed holds no person's
 details. Centres opened for other disasters (fire, storm) are left out: this is a flood tool.
 
-Fetched by the server only, at most once every CACHE_S for all visitors together (RETRY_S after a failure). One request
+Fetched by the server only, at most once every CACHE_S for all visitors together. After a failure it is tried again in
+RETRY_S, and each failure in a row doubles that, up to MAX_RETRY_S: since November 2026 JKM refuses connections from
+outside Malaysia, so a server abroad would otherwise wait on it every minute. One line is logged when the feed starts
+failing and one when it answers again. One request
 fetches while the others are answered from what was last fetched, so none waits on JKM. A list older than STALE_S is
 not shown. The page gets the centres within MARGIN_KM of the box of the area or section on screen, nearest its middle
 first. Standard library only.
@@ -24,11 +27,13 @@ from .places import distance_m
 
 FEED = "https://infobencanajkmv2.jkm.gov.my/api/pusat-buka.php"
 PORTAL = "https://infobencanajkmv2.jkm.gov.my/landing/"
-TIMEOUT_S = 8                 # per socket wait, and for the whole read
+SOCKET_S = 3                  # per connect or socket read; the feed answered in about 0.1 s when it was reachable
+TIMEOUT_S = 8                 # for the whole read
 MAX_BYTES = 2_000_000         # today's answer is under 1 kB; thousands of centres fit well within this
 CHUNK = 65_536
 CACHE_S = 300
-RETRY_S = 60
+RETRY_S = 60                  # the first retry after a failure; doubled for each failure in a row
+MAX_RETRY_S = 1800
 STALE_S = 900
 MARGIN_KM = 5
 MAX_SHOWN = 5
@@ -41,7 +46,7 @@ FLOOD = "banjir"              # JKM's word for the disaster, as in "Banjir" and 
 
 log = logging.getLogger(__name__)
 _lock = threading.Lock()   # held only by the one request that is fetching; the others do not wait for it
-_EMPTY = {"tried": -math.inf, "ok": False, "good_at": -math.inf, "centres": None, "checked": None}
+_EMPTY = {"tried": -math.inf, "ok": False, "fails": 0, "good_at": -math.inf, "centres": None, "checked": None}
 _state = dict(_EMPTY)
 
 
@@ -88,7 +93,7 @@ def _fetch() -> list[dict]:
     """Every open flood centre the feed lists. Raises FeedError for any answer that is not one."""
     request = urllib.request.Request(FEED, headers={"User-Agent": "MyFlood/1.0 (flood information tool)"})
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:   # noqa: S310  fixed https host
+        with urllib.request.urlopen(request, timeout=SOCKET_S) as response:   # noqa: S310  fixed https host
             if urllib.parse.urlsplit(response.geturl()).hostname != urllib.parse.urlsplit(FEED).hostname:
                 raise FeedError("the JKM feed redirected to another host")
             points = json.loads(_read(response).decode("utf-8")).get("points")
@@ -110,15 +115,19 @@ def open_centres(clock: Callable[[], float] = time.monotonic, fetch: Callable[[]
     """(every open flood centre, when it was checked as ISO UTC), or None when there is no list younger than STALE_S."""
     global _state
     now = clock()
-    due = now - _state["tried"] >= (CACHE_S if _state["ok"] else RETRY_S)
-    if due and _lock.acquire(blocking=False):
+    fails = _state["fails"]
+    wait = CACHE_S if _state["ok"] else min(RETRY_S * 2 ** max(fails - 1, 0), MAX_RETRY_S)
+    if now - _state["tried"] >= wait and _lock.acquire(blocking=False):
         try:
             centres = fetch()
-            _state = {"tried": now, "ok": True, "good_at": now, "centres": centres,
+            if fails:
+                log.warning("Evacuation centre feed is answering again, after %d failed tries", fails)
+            _state = {"tried": now, "ok": True, "fails": 0, "good_at": now, "centres": centres,
                       "checked": datetime.now(timezone.utc).isoformat(timespec="minutes")}
         except FeedError as exc:
-            log.warning("Evacuation centre feed failed: %s", exc)
-            _state = {**_state, "tried": now, "ok": False}
+            if not fails:
+                log.warning("Evacuation centre feed failed: %s (asked less often while it keeps failing)", exc)
+            _state = {**_state, "tried": now, "ok": False, "fails": fails + 1}
         finally:
             _lock.release()
     found = _state

@@ -9,7 +9,7 @@ export default Object.freeze({
   "evac.nationwide": "Open for floods across Malaysia: {count}.",
   "evac.checked": "From JKM's list, checked at {time}. Centres within about {km} km of the area shown.",
   "evac.link": "JKM InfoBencana: every open centre",
-  "evac.failed": "JKM's list did not answer just now, so we cannot say which centres are open. Check JKM's own page:",
+  "evac.failed": "We could not get JKM's list, so we cannot say which centres are open. Check JKM's own page:",
   "reference.srcEvacLabel": "Flood evacuation centres open now",
   "reference.srcEvac": "JKM InfoBencana, the Department of Social Welfare Malaysia: its public list of open centres, flood centres only, counts only",
   "tide.heading": "Tide at {station}",

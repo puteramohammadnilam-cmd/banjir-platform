@@ -40,7 +40,7 @@ test("when JKM's feed fails, the card says it could not check, with JKM's own pa
     createEvacuation(section).set(state);
     assert.equal(section.hidden, false, JSON.stringify(state));
     assert.match(section.textContent, /Flood evacuation centres open now/);
-    assert.match(section.textContent, /did not answer just now/);
+    assert.match(section.textContent, /could not get JKM's list/);
     assert.equal(section.querySelector("a").getAttribute("href"), "https://infobencanajkmv2.jkm.gov.my/landing/");
   }
 });

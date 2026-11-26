@@ -554,7 +554,8 @@ def coverage() -> dict:
 @app.api_route("/api/evacuation", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
 def evacuation_centres(area: str | None = None, section: str | None = None) -> dict:
     """Evacuation centres open now near the area or section, from JKM's public feed (fetched at most every 5 minutes
-    for everyone); `centres` is null while the feed is failing, and the page then leaves the card out."""
+    for everyone); `centres` is null while the feed is failing, and the card then says it could not get JKM's list
+    and links to JKM's own page."""
     found, part = known_scope(area, section)
     return ok({"centres": evacuation.for_box(part["bbox"] if part else found.view)})
 

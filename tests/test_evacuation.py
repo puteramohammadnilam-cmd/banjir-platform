@@ -86,6 +86,50 @@ def test_a_failure_keeps_the_last_list_a_while_and_is_tried_again_sooner(caplog)
     assert len(calls) == 2 and "HTTP 503" in caplog.text
 
 
+def test_a_feed_that_keeps_failing_is_asked_less_often_and_logged_once_per_outage(caplog):
+    # since Nov 2026 JKM refuses connections from outside Malaysia: a blocked feed must not cost a wait every minute
+    calls = []
+
+    def bad():
+        calls.append(1)
+        raise evacuation.FeedError("URLError from the JKM feed")
+
+    t = 0.0
+    evacuation.for_box(BOX, clock=lambda: t, fetch=bad)
+    for fails in range(1, 9):
+        wait = min(evacuation.RETRY_S * 2 ** (fails - 1), evacuation.MAX_RETRY_S)
+        before = len(calls)
+        evacuation.for_box(BOX, clock=lambda: t + wait - 1, fetch=bad)
+        assert len(calls) == before, f"asked again before {wait} s after failure {fails}"
+        t += wait
+        evacuation.for_box(BOX, clock=lambda: t, fetch=bad)
+        assert len(calls) == before + 1
+    assert wait == evacuation.MAX_RETRY_S
+    assert caplog.text.count("feed failed") == 1, "one line per outage, not one a minute"
+    _, good = fetching([ROW])
+    assert evacuation.for_box(BOX, clock=lambda: t + wait, fetch=good)["count"] == 1
+    assert "answering again" in caplog.text
+    t += wait + evacuation.CACHE_S
+    evacuation.for_box(BOX, clock=lambda: t, fetch=bad)
+    assert caplog.text.count("feed failed") == 2, "a new outage is logged again"
+    before = len(calls)
+    evacuation.for_box(BOX, clock=lambda: t + evacuation.RETRY_S, fetch=bad)
+    assert len(calls) == before + 1, "after a good answer the wait starts again at RETRY_S"
+
+
+def test_the_feed_waits_at_most_socket_s_per_step(monkeypatch):
+    seen = {}
+
+    def fake_urlopen(request, timeout):
+        seen["timeout"] = timeout
+        raise urllib.error.URLError(TimeoutError("timed out"))
+
+    monkeypatch.setattr(evacuation.urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(evacuation.FeedError, match="URLError"):
+        evacuation._fetch()
+    assert seen["timeout"] == evacuation.SOCKET_S <= 3
+
+
 def test_with_no_list_yet_a_failing_feed_gives_none():
     def bad():
         raise evacuation.FeedError("timeout")
