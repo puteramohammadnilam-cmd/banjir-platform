@@ -24,10 +24,10 @@ export const isUsablePoint = (place) => isPoint(place) && parseRef(place.id)?.ki
   && place.cell?.bounds?.length === 4 && place.cell.bounds.every(Number.isFinite);
 
 /** `map()` gives the map, `cross` the element drawn over its centre. show(node) puts the aim panel in the place card and
- *  hide() closes that card; onPlace(place, squares) gets a point the server has checked, with the squares that came
- *  with it (cells.js squaresOf). */
-export function createPinMode({ map, cross, show, hide, onPlace }) {
-  const st = { aim: null, turn: 0, fix: null, coverage: null, panel: null };
+ *  hide() ends it (Cancel, Escape); onPlace(place, squares) gets a point the server has checked, with the squares that
+ *  came with it (cells.js squaresOf); onModeChange() is told when pin mode starts or stops (the map's cursor). */
+export function createPinMode({ map, cross, show, hide, onPlace, onModeChange = () => {} }) {
+  const st = { aim: null, turn: 0, fix: null, coverage: null, panel: null, wasCooperative: false };
   const dialog = createGpsDialog();
   document.body.append(dialog.node);
   const coverage = () => {
@@ -94,7 +94,8 @@ export function createPinMode({ map, cross, show, hide, onPlace }) {
     paint({ phase: "aiming" });
     if (!isWideFix(accuracy)) return check({ lat, lon }, { isFix: true });
     coverage().then((found) => { st.fix = coverageAt(lat, lon, found).square?.id ?? null; }, () => {});
-    return paint({ note: statusNote(WORDS.wideFix) });
+    paint({ note: statusNote(WORDS.wideFix) });
+    return refresh();   // the jump came while locating, so its moveend said nothing about the new spot
   }
 
   /** "Use my location": the dialog first; the browser's own permission prompt comes only after "Share my location". */
@@ -117,7 +118,8 @@ export function createPinMode({ map, cross, show, hide, onPlace }) {
     cross.hidden = true;
     map().off("move", placeCross);
     map().off("moveend", onMoveEnd);
-    map().getCanvas().style.cursor = "";
+    if (st.wasCooperative) map().cooperativeGestures.enable();
+    onModeChange();
   }
 
   function cancel() {
@@ -132,15 +134,18 @@ export function createPinMode({ map, cross, show, hide, onPlace }) {
     st.fix = null;
     st.panel = createAimPanel({ onCheck: () => check(centre()), onCancel: cancel, onLocate: locate, canLocate: "geolocation" in navigator });
     st.panel.node.querySelector(".aim-help")?.after(h("p", { class: "aim-help" }, t("mg.pinTap")));
-    show(st.panel.node);
-    st.panel.show();
+    st.panel.show();   // on show before show(): a phone measures the sheet to lift the cross clear of it
     st.panel.paint(describe(st.aim));
     if (at) map().jumpTo({ center: [at.lon, at.lat], zoom: Math.max(map().getZoom(), AIM_ZOOM) });
+    show(st.panel.node);
+    // one finger moves the map while aiming, as on the main page; two again afterwards
+    st.wasCooperative = map().cooperativeGestures?.isEnabled() ?? false;
+    if (st.wasCooperative) map().cooperativeGestures.disable();
     cross.hidden = false;
     placeCross();
     map().on("move", placeCross);
     map().on("moveend", onMoveEnd);
-    map().getCanvas().style.cursor = "crosshair";
+    onModeChange();
     refresh();
     map().getCanvas().focus({ preventScroll: true });
   }

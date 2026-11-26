@@ -38,15 +38,18 @@ function drawMarks(map, points) {
     paint: { "circle-radius": 5, "circle-color": "#fff", "circle-stroke-color": MARK, "circle-stroke-width": 2.5 } });
 }
 
-/** The drawer. getMap() gives the map once it is up; beforeId(map) the layer the pictures go under; isAiming() whether
- *  the pin has the map's clicks. click(lngLat) hands a click to the tool that is on, and says whether one took it. */
-export function glDrawer({ getMap, beforeId, isAiming = () => false }) {
+/** The drawer. getMap() gives the map once it is up; beforeId(map) the layer the pictures go under; hasOurLayers(map)
+ *  whether the page's own layers are on the map's style yet (not while another base map loads: redraw() then adds it
+ *  all); isAiming() whether the pin has the map's clicks; onToolChange() is told when a tool is picked or put down.
+ *  click(lngLat) hands a click to the tool that is on, and says whether one took it. */
+export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => false, onToolChange = () => {} }) {
   const shown = {};   // by key: {url, bounds, opacity}
   let points = [];
   let tool = null;
   const ready = () => {
     const map = getMap();
-    return map?.isStyleLoaded() ? map : null;   // a base map still loading: redraw() adds it all once it is in
+    // not map.isStyleLoaded(): that is false too while any tile or picture loads, and a drop then would leave it drawn
+    return map && hasOurLayers(map) ? map : null;
   };
   return {
     isAiming,
@@ -70,9 +73,9 @@ export function glDrawer({ getMap, beforeId, isAiming = () => false }) {
     },
     setTool(isOn, onClick) {
       tool = isOn ? onClick : null;
-      const canvas = getMap()?.getCanvas();
-      if (canvas) canvas.style.cursor = isOn ? "crosshair" : "";
+      onToolChange();
     },
+    isToolOn: () => tool !== null,
     click(lngLat) {
       if (!tool) return false;
       tool({ latlng: { lat: lngLat.lat, lng: lngLat.lng } });

@@ -209,13 +209,13 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
   .mg-summary .mg-phone-only { display: flex; }
   .mg-search { flex: 1 1 60%; max-width: none; }
   .mg-lang { order: 3; }
-  .mg-side { top: auto; left: 10px; right: 10px; bottom: 16px; width: auto; }
+  .mg-side { top: auto; left: 10px; right: 10px; bottom: 16px; z-index: 4; width: auto; }   /* above .mg-right, so the place card covers engineer mode's sheet */
   .mg-summary { padding: 10px 12px; }
   .mg-summary .mg-k, .mg-summary .mg-wet-sub { display: none; }
   .mg-big { font-size: 24px; }
   .mg-side:has(.mg-place:not([hidden])) .mg-summary { display: none; }
   .mg-place { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 62vh; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
-  /* the tools under the bar, on the right; engineer mode's panel a sheet like the place card, which covers it */
+  /* the tools under the bar, on the right; engineer mode's panel a sheet like the place card, which covers it (.mg-side's z-index) */
   .mg-right { top: 108px; right: 10px; bottom: auto; width: auto; }
   .mg-tool { min-height: 44px; padding: 7px 10px; }
   .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }

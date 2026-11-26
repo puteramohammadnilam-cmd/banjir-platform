@@ -79,12 +79,23 @@ test("clearing the marks empties them, and never removes a source its layers sti
   const calls = [];
   const map = { isStyleLoaded: () => true, getSource: (id) => (id === "mg-eng-marks" ? { setData: (data) => calls.push(["data", data.features.length]) } : undefined),
     getLayer: () => undefined, removeSource: (id) => calls.push(["remove", id]), removeLayer() {} };
-  glDrawer({ getMap: () => map, beforeId: () => undefined }).drop("marks");
+  glDrawer({ getMap: () => map, beforeId: () => undefined, hasOurLayers: () => true }).drop("marks");
   assert.deepEqual(calls, [["data", 0]]);
 });
 
+test("a picture is taken off even while tiles or the picture itself are still loading", () => {
+  const removed = [];
+  const map = { isStyleLoaded: () => false, getLayer: () => ({}), getSource: () => ({}), removeLayer: (id) => removed.push(id),
+    removeSource() {}, addSource() {}, addLayer() {} };
+  const drawer = glDrawer({ getMap: () => map, beforeId: () => undefined, hasOurLayers: () => true });
+  drawer.picture("pools", "/pools-70.png", LAYER.bounds, 0.8);
+  removed.length = 0;
+  drawer.drop("pools");
+  assert.deepEqual(removed, ["mg-eng-pools"]);
+});
+
 test("a click goes to the tool that is on, as the panel reads it, and to nothing when none is", () => {
-  const drawer = glDrawer({ getMap: () => null, beforeId: () => undefined });
+  const drawer = glDrawer({ getMap: () => null, beforeId: () => undefined, hasOurLayers: () => true });
   assert.equal(drawer.click({ lat: 3, lng: 101 }), false);
   const got = [];
   drawer.setTool(true, (event) => got.push(event.latlng));
@@ -98,8 +109,8 @@ test("what engineer mode drew comes back after a base map change", () => {
   const added = [];
   const map = { isStyleLoaded: () => false, getSource: () => undefined, getLayer: () => undefined,
     addSource: (id, source) => added.push(["source", id, source.type]), addLayer: (layer, before) => added.push(["layer", layer.id, before]) };
-  const drawer = glDrawer({ getMap: () => map, beforeId: () => "road" });
-  drawer.picture("pools", "/pools-70.png", LAYER.bounds, 0.8);   // the style is still loading: nothing added yet
+  const drawer = glDrawer({ getMap: () => map, beforeId: () => "road", hasOurLayers: () => false });
+  drawer.picture("pools", "/pools-70.png", LAYER.bounds, 0.8);   // another base map is still loading: nothing added yet
   assert.equal(added.length, 0);
   drawer.redraw(map);
   assert.deepEqual(added.slice(0, 2), [["source", "mg-eng-pools", "image"], ["layer", "mg-eng-pools", "road"]]);

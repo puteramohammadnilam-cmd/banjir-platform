@@ -36,7 +36,7 @@ const st = {
   area: null, sections: [], index: [], shelters: [], satellite: null, styles: {},
   shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
   visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
-  point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false,
+  point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false, resume: null, cardTurn: 0,
 };
 st.rp = st.link.rp;
 st.base = st.link.base;
@@ -182,14 +182,17 @@ function fitSection(sectionId) {
 
 function showCard(nodes, { focus = true } = {}) {
   const card = $("mg-place");
+  st.cardTurn += 1;
   if (card.hidden && !card.contains(document.activeElement)) st.returnFocus = document.activeElement;
   card.replaceChildren(...nodes);
+  card.setAttribute("aria-live", "polite");
   card.hidden = false;
   if (focus) card.querySelector("h2")?.focus({ preventScroll: true });
 }
 
 function closeCard() {
   const wasOpen = !$("mg-place").hidden;
+  st.cardTurn += 1;
   st.pin?.stop();
   clearPoint();
   st.picked = null;
@@ -302,14 +305,40 @@ function showPoint(place, squares, { focus = true, move = true } = {}) {
 
 /** Pin mode, from the pin button or a point's "Move the pin": any card goes, and the aim panel takes its place. */
 function startPin(options = {}) {
+  if (st.pin.isOn()) return st.map.getCanvas().focus({ preventScroll: true });   // already aiming: keep what Cancel brings back
+  const resume = st.point;   // kept for Cancel, which shows it again
   closeCard();
-  st.pin.start(options);
+  st.resume = resume;
+  return st.pin.start(options);
 }
 
-/** The aim panel in the place card; on a phone the map's centre, and so the cross, moves up clear of that sheet. */
+/** Pin mode's Cancel or Escape: the point that was on show before, if any, comes back. */
+function endPin() {
+  const back = st.resume;
+  st.resume = null;
+  closeCard();
+  if (back) showPoint(back.place, back.squares, { move: false });
+}
+
+function onPinned(place, squares) {
+  st.resume = null;
+  showPoint(place, squares);
+}
+
+/** The aim panel in the place card; on a phone the map's centre, and so the cross, moves up clear of that sheet. The
+ *  card is not a live region meanwhile: the panel has its own status and alert, which would otherwise be read twice. */
 function showAim(node) {
   showCard([h("div", { class: "mg-handle", "aria-hidden": "true" }), node], { focus: false });
+  $("mg-place").setAttribute("aria-live", "off");
   if (PHONE.matches) st.map.easeTo({ padding: { ...NO_PAD, bottom: $("mg-place").offsetHeight }, duration: duration() });
+}
+
+/** The map's cursor: a crosshair while the pin or an engineer tool has the clicks, else a hand over a shop. */
+function syncCursor(isOverShop = false) {
+  const canvas = st.map?.getCanvas();
+  if (!canvas) return;
+  if (st.pin?.isOn() || st.eng?.isToolOn()) canvas.style.cursor = "crosshair";
+  else canvas.style.cursor = isOverShop ? "pointer" : "";
 }
 
 async function openSection(sectionId, { fit = true } = {}) {
@@ -486,21 +515,22 @@ function openMap(style) {
   map.on("style.load", () => addOurLayers(map));
   map.once("load", () => { st.isReady = true; });
   map.on("click", onMapClick);
-  map.on("mouseenter", "mg-shops", () => { map.getCanvas().style.cursor = "pointer"; });
-  map.on("mouseleave", "mg-shops", () => { map.getCanvas().style.cursor = ""; });
+  map.on("mouseenter", "mg-shops", () => syncCursor(true));
+  map.on("mouseleave", "mg-shops", () => syncCursor(false));
   if (st.tilt) map.once("load", () => map.easeTo({ ...TILT, duration: 0 }));
   return map;
 }
 
 /** The pin and engineer mode: their buttons, and engineer mode's panel in the right column (a sheet on a phone). */
 function wireTools() {
-  st.pin = createPinMode({ map: () => st.map, cross: $("mg-cross"), show: showAim, hide: closeCard, onPlace: (place, squares) => showPoint(place, squares) });
+  st.pin = createPinMode({ map: () => st.map, cross: $("mg-cross"), show: showAim, hide: endPin, onPlace: onPinned, onModeChange: () => syncCursor() });
   const pinButton = $("mg-pin");
   pinButton.hidden = !st.canPin;
   pinButton.querySelector("span").textContent = t("pin.heading");
   pinButton.addEventListener("click", () => startPin());
   $("mg-eng-btn").querySelector("span").textContent = t("eng.switch");
-  st.eng = glDrawer({ getMap: () => st.map, beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line", isAiming: () => st.pin.isOn() });
+  st.eng = glDrawer({ getMap: () => st.map, beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line",
+    hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), isAiming: () => st.pin.isOn(), onToolChange: () => syncCursor() });
   createEngineer({ section: $("mg-eng"), button: $("mg-eng-btn"), area: st.area, drawer: st.eng });
   st.map.getCanvas().addEventListener("keydown", (event) => {
     if (event.key === "Enter" && st.pin.isOn()) st.pin.checkCentre();
@@ -533,10 +563,15 @@ async function startFromLink() {
 async function openLinkedPoint(ref) {
   if (!st.canPin) return say(t("mg.pointMissed"), true);
   say(t("mg.pointLoading"));
+  const turn = st.cardTurn;
+  const isStale = () => st.cardTurn !== turn || st.pin.isOn();   // the person has opened something else meanwhile
   try {
     const found = await st.pin.linked(ref);
+    if (isStale()) return undefined;
     if (found) return showPoint(found.place, found.squares);
-  } catch { /* said below */ }
+  } catch {
+    if (isStale()) return undefined;
+  }
   return say(t("mg.pointMissed"), true);
 }
 
