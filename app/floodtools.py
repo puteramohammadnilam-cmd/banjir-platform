@@ -71,6 +71,7 @@ MAPS_OFF = "Google Maps is not set up in this build, so this cannot be checked."
 MAPS_DOWN = "Google Maps did not answer just now. Try again later."
 MAX_MAPS_LOOKUPS = 3   # per chat question, so a model told to check every shop cannot run up the bill
 MAPS_SPENT = "Enough Google lookups for one question. Answer with what you have."
+MAPS_CAPPED = "This month's free Google lookups are used up, so this cannot be checked until the 1st of next month."
 ESTIMATE_MAX = {"value_at_risk_rm": 50_000_000, "floor_height_cm": 300, "daily_takings_rm": 1_000_000,
                 "closed_days": 365, "raise_cm": 300, "measure_cost_rm": 50_000_000,
                 "built_in_rm": 50_000_000, "vehicles_rm": 50_000_000, "unpaid_workers": 1_000}
@@ -570,6 +571,8 @@ def rain_forecast() -> dict:
         outlook = googlemaps.rain_outlook(*_rain_at(), RAIN_HOURS)
     except googlemaps.NotConfigured:
         return {"error": MAPS_OFF}
+    except googlemaps.FreeLimitReached:
+        return {"error": MAPS_CAPPED}
     except googlemaps.UpstreamError:
         return {"error": MAPS_DOWN}
     return {**{key: outlook[key] for key in RAIN_FIELDS if key in outlook},
@@ -600,6 +603,8 @@ def business_status(business_id: str) -> dict:
         listing = googlemaps.place_status(p["name"], p["lat"], p["lon"])
     except googlemaps.NotConfigured:
         return {"error": MAPS_OFF}
+    except googlemaps.FreeLimitReached:
+        return {"error": MAPS_CAPPED}
     except googlemaps.UpstreamError:
         return {"error": MAPS_DOWN}
     # a listing's name is set by whoever owns the listing: cleaned like a name from the map

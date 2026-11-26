@@ -11,6 +11,9 @@ __pycache__/
 # JRC flood depth rasters (9 files, about 77 MB): copied in by hand, listed in app/data/rasters/SOURCES.txt
 app/data/rasters/*.tif
 .coverage
+# the monthly count of Google Maps calls (app/googlemaps.py), local runs only
+.maps-usage.json
+.maps-usage.json.part
 
 # raw answers of tools/gen_illustrations.py (the web files are committed)
 tools/illustrations_raw/

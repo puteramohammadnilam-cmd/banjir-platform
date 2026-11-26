@@ -28,6 +28,7 @@ Open http://localhost:8081.
 
 - Gemini key: get a free one at https://aistudio.google.com/apikey and put it in `.env` as `GOOGLE_API_KEY`. Without it the map and cards still work. The chat and photo features say the AI is not connected.
 - Google Maps Platform key (optional): put it in `.env` as `GOOGLE_MAPS_API_KEY`. Enable the Weather API and Places API (New) on it. Without it the rain forecast and the open or closed check are left out.
+- Free-only cap: the server counts its Weather and Places calls each month and stops before Google's free allowance runs out (defaults 9,000 Weather and 4,500 Places a month, against 10,000 and 5,000 free in November 2026). Past the limit the page and the chat say the checks are back on the 1st. The month starts at midnight US Pacific, as Google's does. The count is kept in `MAPS_USAGE_FILE` so restarts and deploys keep it; a count that cannot be read or saved stops the calls. Google's allowance is per billing account, so other projects on the same account are not counted here: keep a budget alert in Google Cloud as well. Settings are in `.env.example`.
 - ArcGIS key (optional): put it in `.env` as `ARCGIS_API_KEY` for the satellite photo on the 3D page. See "Satellite photo on the 3D page". Without it that page shows the street map.
 - Without the flood depth files, the two built areas still work, because their depths are already in the repo. Checking any point does not: `/api/status` then says `points_ready: false`.
 

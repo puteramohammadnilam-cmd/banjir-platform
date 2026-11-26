@@ -710,7 +710,10 @@ def rain(area: str | None = None, section: str | None = None) -> dict:
     lat, lon = sections.centre(part) if part else found.centre()
     if not googlemaps.is_configured():
         return ok({"configured": False, "rain": None})
-    return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
+    try:
+        return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
+    except googlemaps.FreeLimitReached:
+        return ok({"configured": True, "rain": None, "capped": True})   # the page says it is back on the 1st
 
 
 @app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain
@@ -721,8 +724,11 @@ def listing(place_id: str) -> dict:
     premise = known_business(place_id)
     if not googlemaps.is_configured():
         return ok({"configured": False, "place": None})
-    return ok({"configured": True,
-               "place": call_maps(googlemaps.place_status, premise["name"], premise["lat"], premise["lon"])})
+    try:
+        return ok({"configured": True,
+                   "place": call_maps(googlemaps.place_status, premise["name"], premise["lat"], premise["lon"])})
+    except googlemaps.FreeLimitReached:
+        return ok({"configured": True, "place": None, "capped": True})
 
 
 @app.post("/api/news", dependencies=[Depends(rate_limit)])

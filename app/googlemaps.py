@@ -8,17 +8,27 @@ Terms that shape this file: Google Maps content may not be cached beyond what ea
 Places, only coordinates and place ids), so nothing here is cached and spend is bounded by the per-visitor
 limits in main.py plus the quotas and budget set in Google Cloud (see README). Results are shown with Google
 attribution by the callers.
+
+Monthly cap: every Weather and Places call is counted before it is made, and once a month's count reaches its limit
+(FREE_LIMITS, under Google's free allowance) the call is not made and FreeLimitReached is raised, so this site alone
+cannot run up a bill. The count is kept in MAPS_USAGE_FILE so a restart or deploy does not reset it, and a count that
+cannot be read or saved stops the calls rather than start again from 0. Google counts per billing account: other
+projects on the same account share the free allowance and are not counted here.
 """
 from __future__ import annotations
 
 import http.client
 import json
+import logging
 import math
 import os
 import re
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 WEATHER = "https://weather.googleapis.com/v1/forecast/hours:lookup"
 PLACES = "https://places.googleapis.com/v1/places:searchText"
@@ -30,6 +40,17 @@ MAX_NAME_CHARS = 80       # a listing's name is set by whoever owns the listing:
 UNNAMED = "Unnamed"       # how tools/build_area.py labels businesses with no name on the map
 STATUS = {"OPERATIONAL": "open", "CLOSED_TEMPORARILY": "closed for now",
           "CLOSED_PERMANENTLY": "closed for good", "FUTURE_OPENING": "not open yet"}
+# Calls a month, kept 10% under Google's free allowance (Nov 2026: Weather 10,000; Places Text Search Pro 5,000, then
+# USD 32 per 1,000). MAPS_WEATHER_MONTHLY_LIMIT / MAPS_PLACES_MONTHLY_LIMIT can set them lower, never higher.
+FREE_LIMITS = {"weather": 9_000, "places": 4_500}
+# Google starts the free allowance again at midnight US Pacific on the 1st. A fixed UTC-8 starts our month at that
+# moment in winter and an hour after it in summer time, never before it.
+BILLING_TZ = timezone(timedelta(hours=-8))
+USAGE_FILE = Path(__file__).resolve().parents[1] / ".maps-usage.json"   # MAPS_USAGE_FILE overrides it
+
+log = logging.getLogger(__name__)
+_usage_lock = threading.Lock()
+_usage: dict | None = None    # {"month": "YYYY-MM" or None, "weather": n, "places": n}; read from the file on first use
 
 
 class NotConfigured(RuntimeError):
@@ -38,6 +59,76 @@ class NotConfigured(RuntimeError):
 
 class UpstreamError(RuntimeError):
     """A Google API did not answer usefully. The message is for logs, not for users, and never holds the key."""
+
+
+class FreeLimitReached(RuntimeError):
+    """This month's free calls of one kind are used up, or their count cannot be kept: the call was not made."""
+
+
+def _usage_file() -> Path:
+    return Path(os.environ.get("MAPS_USAGE_FILE") or USAGE_FILE)
+
+
+def _limit(kind: str) -> int:
+    raw = os.environ.get(f"MAPS_{kind.upper()}_MONTHLY_LIMIT", "").strip()
+    try:
+        wanted = int(raw) if raw else FREE_LIMITS[kind]
+    except ValueError:
+        return 0   # a bad setting stops the calls rather than risk a bill
+    return max(0, min(wanted, FREE_LIMITS[kind]))
+
+
+def _is_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _stopped(reason: str) -> FreeLimitReached:
+    log.error("Google Maps calls stopped: %s (%s)", reason, _usage_file())
+    return FreeLimitReached(reason)
+
+
+def _load() -> dict:
+    path = _usage_file()
+    if not path.exists():
+        return {"month": None}
+    try:
+        usage = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise _stopped(f"cannot read the usage file ({type(exc).__name__})") from exc
+    if (not isinstance(usage, dict) or not isinstance(usage.get("month"), str)
+            or not all(_is_count(usage.get(kind, 0)) for kind in FREE_LIMITS)):
+        raise _stopped("the usage file does not hold a month and counts")
+    return usage
+
+
+def _save(usage: dict) -> None:
+    path = _usage_file()
+    part = path.with_name(path.name + ".part")
+    try:
+        part.write_text(json.dumps(usage), encoding="utf-8")
+        os.replace(part, path)   # whole or not at all: a crash mid-write cannot leave half a count
+    except OSError as exc:
+        raise _stopped(f"cannot save the usage file ({type(exc).__name__})") from exc
+
+
+def _spend(kind: str, now: datetime | None = None) -> None:
+    """Count one call of `kind` ("weather" or "places") this month, or raise FreeLimitReached without counting it."""
+    global _usage
+    month = (now or datetime.now(timezone.utc)).astimezone(BILLING_TZ).strftime("%Y-%m")
+    with _usage_lock:
+        usage = _usage if _usage is not None else _load()
+        if usage.get("month") != month:
+            usage = {"month": month}
+        used, limit = usage.get(kind, 0), _limit(kind)
+        if used >= limit:
+            _usage = usage
+            raise FreeLimitReached(f"{kind}: {used} calls this month, the free limit")
+        counted = {**usage, kind: used + 1}
+        _save(counted)
+        _usage = counted
+    if used + 1 == limit:
+        log.warning("Google Maps %s: this month's %d free calls are used up; no more until the 1st (US Pacific)",
+                    kind, limit)
 
 
 def is_configured() -> bool:
@@ -94,8 +185,10 @@ def summarize_hours(hours: list[dict]) -> dict:
 
 def rain_outlook(lat: float, lon: float, hours: int) -> dict:
     """Rain expected over the next `hours` hours at one point, from the Google Weather API."""
+    headers = {"X-Goog-Api-Key": _key()}
+    _spend("weather")
     data = _get(WEATHER, {"location.latitude": lat, "location.longitude": lon, "hours": hours, "pageSize": hours},
-                {"X-Goog-Api-Key": _key()})
+                headers)
     forecast = data.get("forecastHours", [])[:hours]
     # an empty or unrecognised answer must not read as "no rain" in a flood tool
     if not any("precipitation" in h for h in forecast):
@@ -142,11 +235,13 @@ def place_status(name: str, lat: float, lon: float) -> dict | None:
     if name.startswith(UNNAMED) or not _words(name):
         return None
     dlat, dlon = MATCH_RADIUS_M / 110_574, MATCH_RADIUS_M / (111_320 * math.cos(math.radians(lat)))
+    headers = {"X-Goog-Api-Key": _key(), "X-Goog-FieldMask": PLACE_FIELDS}
+    _spend("places")
     data = _post(PLACES, {"textQuery": name, "pageSize": 5,
                           "locationRestriction": {"rectangle": {
                               "low": {"latitude": lat - dlat, "longitude": lon - dlon},
                               "high": {"latitude": lat + dlat, "longitude": lon + dlon}}}},
-                 {"X-Goog-Api-Key": _key(), "X-Goog-FieldMask": PLACE_FIELDS})
+                 headers)
     wanted = _words(name)
     listings = [(p, got) for p in data.get("places") or [] if (got := _listing(p))]   # a broken listing is skipped
     found = [(_metres(lat, lon, plat, plon), p, text) for p, (plat, plon, text) in listings if wanted & _words(text)]

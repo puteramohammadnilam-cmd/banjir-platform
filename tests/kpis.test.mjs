@@ -55,6 +55,16 @@ test("the rain tile shows while it is asked, and with a dash when the answer fai
   assert.equal(figure(rain), "–");
 });
 
+test("when this month's free Google Weather checks are used up, the rain tile says so in both languages", () => {
+  const { kpis, rain } = mount();
+  kpis.setRain({ configured: true, data: null, capped: true });
+  assert.equal(figure(rain), "–");
+  assert.match(rain.textContent, /free Google Weather checks are used up/);
+  const malay = mount({}, "ms");
+  malay.kpis.setRain({ configured: true, data: null, capped: true });
+  assert.match(malay.rain.textContent, /Semakan percuma Google Weather/);
+});
+
 test("a rain tile that was shown goes away again if the answer says it is not configured", () => {
   const { container, kpis, rain } = mount();
   kpis.setRain(RAIN);

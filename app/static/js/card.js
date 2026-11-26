@@ -65,6 +65,7 @@ function listingFact(listing) {
   const card = (value, lead, more = []) => factCard({ iconName: "pin", label: "Google Maps", value, lead, more });
   if (listing.busy) return card(null, h("p", { class: "fact-note" }, t("business.mapsChecking")));
   if (listing.error) return card(null, h("p", { class: "fact-note" }, listing.error));
+  if (listing.capped) return card(null, h("p", { class: "fact-note" }, t("business.mapsCapped")));
   if (!listing.place) return card(t("business.mapsNone"), h("p", { class: "fact-note" }, t("business.mapsNoneNote")));
   const { place } = listing;
   return card(t("business.listedAs", { status: t(LISTED[place.status] ?? "listing.unknown") }),

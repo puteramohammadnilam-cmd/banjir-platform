@@ -334,7 +334,7 @@ function loadRain(app) {
   if (!app.start.status.maps_ready) return;
   app.store.update({ rain: { configured: true, busy: true } });   // the tile is in the grid ("…") from the start, so nothing jumps when the answer comes
   api.getRain(app.start.area.id, app.start.section?.id).then(
-    ({ configured, rain }) => app.store.update({ rain: { configured, data: rain } }),
+    ({ configured, rain, capped }) => app.store.update({ rain: { configured, data: rain, capped: Boolean(capped) } }),
     () => app.store.update({ rain: { configured: true, error: true } }));
 }
 
