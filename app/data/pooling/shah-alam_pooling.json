@@ -1,0 +1,71 @@
+{
+ "version": 1,
+ "area": "shah-alam",
+ "layer": "rain_pools",
+ "storms_mm": [
+  40,
+  70,
+  100
+ ],
+ "bounds": [
+  101.429861,
+  2.950139,
+  101.589861,
+  3.230139
+ ],
+ "rows": 1008,
+ "cols": 576,
+ "drains_mm": 30.0,
+ "runoff": 0.8,
+ "min_dip_m": 0.15,
+ "min_depth_m": 0.1,
+ "burn_m": 1.0,
+ "classes": [
+  {
+   "index": 1,
+   "up_to_m": 0.3,
+   "colour": "#a9b4ff"
+  },
+  {
+   "index": 2,
+   "up_to_m": 1.0,
+   "colour": "#6c6ff0"
+  },
+  {
+   "index": 3,
+   "up_to_m": null,
+   "colour": "#3a2aa8"
+  }
+ ],
+ "summary": {
+  "40mm": {
+   "squares": 7159,
+   "share": 0.0123,
+   "deepest_m": 2.7
+  },
+  "70mm": {
+   "squares": 16686,
+   "share": 0.0287,
+   "deepest_m": 10.36
+  },
+  "100mm": {
+   "squares": 20497,
+   "share": 0.0353,
+   "deepest_m": 14.38
+  }
+ },
+ "licence": "CC BY-NC-SA 4.0",
+ "credit": "Rain pools: our screening model on FABDEM V1-2 (Hawker and others 2022, University of Bristol, CC BY-NC-SA 4.0; from Copernicus DEM GLO-30, (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA) and OpenStreetMap drains (ODbL)",
+ "check": {
+  "storm_mm": 70,
+  "sections_with_rain_floods": 29,
+  "sections_without": 25,
+  "auc": 0.53,
+  "p": 0.358,
+  "baseline_low_ground_auc": 0.62,
+  "baseline_low_ground_p": 0.078,
+  "hotspots": 21,
+  "hotspot_percentile": 36.4,
+  "baseline_low_ground_hotspot_percentile": 60.1
+ }
+}

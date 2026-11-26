@@ -5,6 +5,7 @@
 
 import act from "./en-act.js";
 import cover from "./en-cover.js";
+import eng from "./en-eng.js";
 import look from "./en-look.js";
 import reference from "./en-reference.js";
 import social from "./en-social.js";
@@ -12,6 +13,7 @@ import social from "./en-social.js";
 export default Object.freeze({
   ...reference,
   ...act,
+  ...eng,
   ...look,
   ...cover,
   ...social,

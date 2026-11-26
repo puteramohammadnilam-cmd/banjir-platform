@@ -298,6 +298,15 @@ Swapping parts:
 - Another model: set `GEMINI_MODEL`.
 - Another provider: rewrite `ask()` and `read_shop_photo()` in `app/ai.py`. Nothing else changes.
 
+## Engineer mode and rain pools
+
+A switch in the footer ("Engineer mode", or `?engineer=1`, remembered in the browser) opens a panel under the map for engineers and planners. Nothing in it calls Google.
+
+- Rain pools: where an hour of 40, 70 or 100 mm of rain would stand when the drains take only 30 mm of it (`app/pooling_model.py`: priority-flood dips, rain over each dip's catchment, fill and spill downhill). Built on FABDEM bare-earth heights with the mapped drains lowered 1 m (`tools/fetch_fabdem.py` fetches only the needed tiles by HTTP range; `tools/build_pooling.py`). `tools/check_pooling.py` checks it against the flood record and the JPS hotspots, with the low ground layer as the baseline; the result is shown on the panel. Sections with rain floods on record did not show more pooling than others, while JPS hotspots sat nearer the pools than random spots, so it is a screening layer for engineer mode, not a fact on each shop.
+- Tools: inspect (every value at a spot), profile A to B (up to 5 km), basin (the land draining through a spot), bund +0.8 m or pond -0.8 m what-if (the model runs again on a window around it), your own ESRI ASCII grid (up to 500 x 500, never stored), a CSV of the businesses with every value, and the rain pools GeoTIFF. Model runs share one slot and have their own rate limit (`app/engineer_api.py`).
+- Not here: flow speed and hazard need a 2-D flow model.
+- Licence: `app/data/pooling` is CC BY-NC-SA 4.0 (FABDEM), non-commercial; see its README.txt.
+
 ## Satellite photo on the 3D page
 
 The 3D mock-up (`/3d.html`) draws Esri World Imagery under the buildings when the server has an ArcGIS key, and the OpenStreetMap street map when it has none (then the "Satellite photo" switch is hidden). The key comes from a free ArcGIS Location Platform account, which comes with a commercial deployment licence. Esri's keyless imagery server is not used, and the Content-Security-Policy does not allow it.

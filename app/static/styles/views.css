@@ -449,3 +449,25 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 .outlook-level.level-watch { color: var(--risk-warning); background: var(--risk-warning-wash); }
 .outlook-level.level-low { color: var(--risk-normal); }
 .outlook-level.level-none { color: var(--ink-2); }
+
+/* Engineer mode (js/engineer.js): a panel under the map, its key, chart and tables */
+.engineer { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); }
+.eng-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+.eng-layer { display: grid; gap: var(--space-2); }
+.eng-key { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.eng-key li { display: flex; align-items: center; gap: var(--space-2); }
+.eng-key .swatch { width: 1rem; height: 1rem; border-radius: var(--radius-sm); display: inline-block; }
+.eng-tools { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.eng-chart { width: 100%; height: auto; max-width: 40rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.eng-line { fill: none; stroke-width: 2; }
+.eng-line.ground { stroke: var(--ink-2); }
+.eng-line.pool { stroke: #6c6ff0; stroke-width: 3; }
+.eng-line.river { stroke: var(--brand); stroke-dasharray: 4 3; }
+.eng-axis { font-size: 11px; fill: var(--ink-2); }
+.eng-axis.end { text-anchor: end; }
+.eng-values { display: grid; grid-template-columns: minmax(12rem, auto) 1fr; gap: var(--space-1) var(--space-3); }
+.eng-values dd { margin: 0; font-variant-numeric: tabular-nums; }
+.eng-table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.eng-table th, .eng-table td { padding: var(--space-1) var(--space-3); border-bottom: 1px solid var(--line); text-align: left; }
+.eng-upload-picture { image-rendering: pixelated; max-width: 100%; width: 20rem; border: 1px solid var(--line); }
+.eng-downloads { display: grid; gap: var(--space-1); }

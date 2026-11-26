@@ -56,6 +56,9 @@
   <link rel="modulepreload" href="js/evacuation.js">
   <link rel="modulepreload" href="js/tide.js">
   <link rel="modulepreload" href="js/outlook.js">
+  <link rel="modulepreload" href="js/engineer.js">
+  <link rel="modulepreload" href="js/strings/en-eng.js">
+  <link rel="modulepreload" href="js/strings/ms-eng.js">
   <link rel="modulepreload" href="js/river-gauge.js">
   <link rel="modulepreload" href="js/history.js">
   <link rel="modulepreload" href="js/kpis.js">
@@ -176,6 +179,7 @@
       </div>
       <div class="scope-bar" id="scope"></div>
       <div class="stamp" id="stamp"></div>
+      <section class="surface engineer" id="engineer" aria-labelledby="engineer-heading" hidden></section>
       <div class="overview-live">
         <section class="surface evac" id="evacuation" aria-labelledby="evacuation-heading" hidden></section>
         <section class="surface tide" id="tide" aria-labelledby="tide-heading" hidden></section>
@@ -344,6 +348,7 @@
     <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
     <p><span data-i18n="footer.forecasts">River flood forecasts:</span> <a href="https://sites.research.google/floods/" target="_blank" rel="noopener noreferrer" translate="no">Google Flood Hub</a><span data-i18n="footer.levels">. Live river levels and warnings:</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a><span data-i18n="footer.emergency">. In an emergency call 999.</span></p>
     <p><button type="button" class="btn btn-link" data-goto="reference" data-i18n="footer.more">More about the data, privacy and costs</button></p>
+    <p><button type="button" class="btn btn-link" id="engineer-switch" aria-pressed="false" aria-controls="engineer" data-i18n="eng.switch">Engineer mode</button></p>
   </footer>
 
   <button type="button" class="chat-fab" id="chat-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-dialog" hidden>

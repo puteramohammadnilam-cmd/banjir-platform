@@ -33,8 +33,8 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, outlook,  # noqa: E402
-               places, plan, raster, satellite, sections, stock, tide)
+from . import (ai, areas, chatguard, dryspots, engineer_api, evacuation, floodtools, googlemaps, indexes,  # noqa: E402
+               lowground, outlook, places, plan, raster, satellite, sections, stock, tide)
 
 log = logging.getLogger("banjir")
 
@@ -94,8 +94,8 @@ SECURITY_HEADERS = {
     "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",   # GPS and voice for this page, no frame
 }
 # Google results may not be cached; a point is personal; a rotated imagery key must not linger in a cache
-NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot", "/api/satellite", "/api/outlook")
-POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/dry-spot", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
+NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot", "/api/satellite", "/api/outlook", "/api/eng/")
+POST_ONLY = ("/api/eng/whatif", "/api/eng/upload", "/api/ask", "/api/photo", "/api/estimate", "/api/dry-spot", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
 # business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
 # {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
 PLACE_NAMES = AliasChoices("place", "business_id")
@@ -106,6 +106,7 @@ QUESTION_WORDS = f"Please check your input and try again. Questions can be up to
 VALIDATION_WORDS = (   # (path prefix, message) for a request body or path that does not fit; else QUESTION_WORDS
     ("/api/estimate", "Please check the figures. Use plain numbers, such as 50000."),
     ("/api/point", POINT_WORDS),
+    ("/api/eng/", "Please check the spot, the line or shape (2 to 50 points) and the storm size."),
     ("/api/news", "Please reload the page and ask for the news again."),
     ("/api/photo", "The photo could not be sent. Please choose it again."),
     ("/api/plan", "Please choose Bahasa Melayu or English, and check the figures."),
@@ -769,4 +770,6 @@ def news(body: NewsIn | None = None) -> dict:
     return ok(call_ai(ai.flood_news, area, section))
 
 
+app.include_router(engineer_api.router(limit=_limit, known_area=known_area, known_scope=known_scope, ok=ok,
+                                      png_answer=png_answer, map_limit=map_limit, methods=GET_AND_HEAD))
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

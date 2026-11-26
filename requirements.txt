@@ -2,3 +2,4 @@ fastapi==0.142.2
 uvicorn==0.54.0
 google-genai==2.27.0
 python-dotenv==1.2.4
+numpy==2.5.5   # engineer mode: the rain pools model (app/pooling_model.py) for a what-if or an uploaded grid

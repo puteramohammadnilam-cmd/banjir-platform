@@ -138,3 +138,11 @@ test("when today's share of Google checks is used up, the card says rain amounts
   const noRain = { ...FOUND, rain: "capped_day", trend: null, days: DAYS.map((d) => ({ ...d, rain_mm: null, chance_pct: null, level: null })) };
   assert.match(mount({ data: noRain }).textContent, /rain amounts are back tomorrow/);
 });
+
+test("with an Arus address set, the card links to it and says it is the author's own model", () => {
+  const section = mount({ data: { ...FOUND, arus: "https://arus.example/map?lat=3.07&lon=101.52" } });
+  const link = [...section.querySelectorAll("a")].find((a) => a.textContent.includes("Arus"));
+  assert.equal(link.getAttribute("href"), "https://arus.example/map?lat=3.07&lon=101.52");
+  assert.match(section.textContent, /Arus is Farhan Syah's own forecast model, not checked by MyFlood/);
+  assert.doesNotMatch(mount({ data: FOUND }).textContent, /Arus/);
+});

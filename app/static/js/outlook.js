@@ -112,6 +112,8 @@ function body(found, now) {
       ? t("outlook.how", { watch: th.watch_mm, high: th.high_mm, place: th.set_from, since: th.since, caught: th.watch_floods, floods: th.floods })
       : t("outlook.noLevels", { place: th.set_from })),
     h("p", { class: "muted small" }, t("outlook.sources")),
+    found.arus && h("p", { class: "small" }, h("a", { href: found.arus, target: "_blank", rel: "noopener noreferrer" }, t("outlook.arus")),
+      " ", h("span", { class: "fineprint" }, t("outlook.arusNote"))),
     h("p", { class: "fineprint" }, [t("outlook.notWarning"), " ",
       h("a", { href: MET_PAGE, target: "_blank", rel: "noopener noreferrer" }, t("outlook.metLink"))]),
   ].filter(Boolean);

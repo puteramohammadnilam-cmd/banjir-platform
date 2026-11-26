@@ -316,3 +316,15 @@ def test_every_area_has_a_metmalaysia_place_that_fits():
     for area in areas.load_all():
         found = outlook.place(area.id)
         assert found and found[0][:2] in ("Tn", "Ds") and found[3], area.id
+
+
+def test_the_arus_link_is_there_only_when_set_and_https(monkeypatch):
+    met(monkeypatch)
+    build = lambda: outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)
+    monkeypatch.delenv("ARUS_URL", raising=False)
+    assert build()["arus"] is None
+    monkeypatch.setenv("ARUS_URL", "https://arus.example/map?lat={lat}&lon={lon}")
+    assert build()["arus"] == "https://arus.example/map?lat=3.07000&lon=101.52000"
+    for bad in ("http://arus.example/", "https://arus.example/{city}", "javascript:alert(1)"):
+        monkeypatch.setenv("ARUS_URL", bad)
+        assert build()["arus"] is None, bad

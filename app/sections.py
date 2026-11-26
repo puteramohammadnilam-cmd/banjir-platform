@@ -40,7 +40,7 @@ import re
 from collections.abc import Mapping
 from functools import lru_cache
 
-from . import areas, geo, indexes, lowground, raster, tide
+from . import areas, engineer, geo, indexes, lowground, raster, tide
 from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
@@ -371,7 +371,8 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
              "history": history_for(area, section_id), "bigger_flood_example": area.bigger_flood_example,
              "flash_flood_example": area.flash_flood_example, "index_method": index_method(area.id),
              "losses": areas._thaw(area.losses),
-             "layers": {"flash_flood": indexes.layer(area.id), "low_ground": lowground.layer(area.id)}}
+             "layers": {"flash_flood": indexes.layer(area.id), "low_ground": lowground.layer(area.id),
+                        "rain_pools": engineer.layer(area.id)}}
     if has_sections(area):
         found.update(section_word=areas._thaw(area.section_word), default_section=area.default_section)
     return found

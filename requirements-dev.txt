@@ -3,3 +3,5 @@ pytest==9.1.1
 pytest-cov==7.1.0
 httpx2==2.16.0   # starlette.testclient; httpx itself still comes in with google-genai
 Pillow==12.3.0   # tools/gen_illustrations.py: resize and convert the drawings (not needed by the server)
+tifffile==2026.11.16   # tools/build_pooling.py and check_pooling.py read FABDEM tiles
+imagecodecs==2026.11.11

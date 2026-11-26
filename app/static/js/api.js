@@ -52,6 +52,14 @@ export const getEvacuation = (areaId, sectionId = null) =>
 /** The next five days' rain, MetMalaysia's words and warnings, big tides and levels (app/outlook.py). */
 export const getOutlook = (areaId, sectionId = null) =>
   call(`/api/outlook?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
+/** Engineer mode (app/engineer.py): our own data only, no Google call. `at` is a Leaflet {lat, lng}. */
+const q = (n) => encodeURIComponent(Number(n).toFixed(6));
+export const engInspect = (areaId, lat, lng) => call(`/api/eng/inspect?area=${area(areaId)}&lat=${q(lat)}&lon=${q(lng)}`);
+export const engBasin = (areaId, lat, lng) => call(`/api/eng/basin?area=${area(areaId)}&lat=${q(lat)}&lon=${q(lng)}`);
+export const engProfile = (areaId, a, b) =>
+  call(`/api/eng/profile?area=${area(areaId)}&a_lat=${q(a.lat)}&a_lon=${q(a.lng)}&b_lat=${q(b.lat)}&b_lon=${q(b.lng)}`);
+export const engWhatif = (payload) => call("/api/eng/whatif", payload);
+export const engUpload = (payload) => call("/api/eng/upload", payload);
 /** Today's predicted tides at the area's tide gauge (null for an area without one). */
 export const getTide = (areaId) => call(`/api/tide?area=${area(areaId)}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);

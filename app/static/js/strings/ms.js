@@ -6,6 +6,7 @@
 
 import act from "./ms-act.js";
 import cover from "./ms-cover.js";
+import eng from "./ms-eng.js";
 import look from "./ms-look.js";
 import reference from "./ms-reference.js";
 import social from "./ms-social.js";
@@ -13,6 +14,7 @@ import social from "./ms-social.js";
 export default Object.freeze({
   ...reference,
   ...act,
+  ...eng,
   ...look,
   ...cover,
   ...social,

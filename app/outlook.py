@@ -23,6 +23,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
 import re
 import threading
 import time
@@ -268,6 +269,20 @@ def _rain(rain_fn: Callable, lat: float, lon: float) -> tuple[dict[str, dict], s
         return {}, "down"
 
 
+def arus_link(lat: float, lon: float) -> str | None:
+    """A link to Arus (Farhan Syah's flood forecast map) at the spot, from ARUS_URL, a https:// address that may hold
+    {lat} and {lon}; None while it is not set or not https. Arus is its author's own, uncalibrated model: the card
+    only links to it, and says so."""
+    template = os.environ.get("ARUS_URL", "").strip()
+    if not template.startswith("https://"):
+        return None
+    try:
+        return template.format(lat=f"{lat:.5f}", lon=f"{lon:.5f}")
+    except (KeyError, IndexError, ValueError):
+        log.error("ARUS_URL must hold only {lat} and {lon} as placeholders")
+        return None
+
+
 def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rain_fn: Callable | None = None) -> dict:
     """What GET /api/outlook sends: the next DAYS days from today (Malaysian dates), each with Google's rain and
     chance, MetMalaysia's words, whether a warning covers it, a big-tide flag and a level; the warnings themselves; the
@@ -293,4 +308,4 @@ def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rai
             "met": met_state, "met_place": where[1] if where else None, "levels": has_levels,
             "thresholds": {"watch_mm": WATCH_MM, "high_mm": HIGH_MM, "set_from": calibrated.name if calibrated else None,
                            **CALIBRATION},
-            "source": SOURCE}
+            "source": SOURCE, "arus": arus_link(lat, lon)}

@@ -73,4 +73,6 @@ export default Object.freeze({
   "outlook.stale": "Ramalan ini dari hari sebelumnya. Muat semula halaman untuk ramalan hari ini.",
   "outlook.noLevels": "Tiada tahap di sini: tahap ditetapkan daripada banjir di {place}, dan banjir di sini belum disemak dengan cara yang sama.",
   "outlook.sources": "Hujan daripada Google Weather, yang harinya bermula 7 pagi hingga 7 pagi; ramalan dan amaran daripada MetMalaysia.",
+  "outlook.arus": "Lihat ke mana air mungkin merebak beberapa hari akan datang: Arus",
+  "outlook.arusNote": "Arus ialah model ramalan Farhan Syah sendiri, tidak disemak oleh MyFlood.",
 });

@@ -73,4 +73,6 @@ export default Object.freeze({
   "outlook.stale": "This outlook is from an earlier day. Reload the page for today's.",
   "outlook.noLevels": "No levels here: they were set on the floods in {place}, and the floods here were not checked the same way.",
   "outlook.sources": "Rain from Google Weather, whose day runs 7 am to 7 am; forecast words and warnings from MetMalaysia.",
+  "outlook.arus": "See where water may spread in the next days: Arus",
+  "outlook.arusNote": "Arus is Farhan Syah's own forecast model, not checked by MyFlood.",
 });
