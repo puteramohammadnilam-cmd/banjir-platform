@@ -62,4 +62,13 @@ export default Object.freeze({
   "eng.licence": "Tanah asal dan takungan hujan datang daripada FABDEM (CC BY-NC-SA 4.0): untuk kegunaan bukan komersial sahaja, dan dikongsi serupa.",
   "eng.noVelocity": "Tiada di sini: kelajuan aliran dan bahaya (kedalaman x kelajuan) memerlukan model aliran 2-D, yang tidak dijalankan aplikasi ini.",
   "eng.failed": "Tidak berjaya: {why}",
+  "news.badge": "BARU",
+  "news.title": "Apa yang baru",
+  "news.outlookTitle": "5 hari akan datang:",
+  "news.outlook": "hujan, ramalan MetMalaysia dan air pasang besar bagi setiap lima hari akan datang, di bawah peta.",
+  "news.engineerTitle": "Mod jurutera:",
+  "news.engineer": "peta takungan hujan dan alat untuk jurutera dan perancang.",
+  "news.show": "Tunjukkan",
+  "news.open": "Buka",
+  "news.gotIt": "Faham",
 });

@@ -5,6 +5,7 @@
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { lang, t } from "./i18n.js";
+import { newBadge } from "./news.js";
 
 const STORE = "myflood-engineer";
 const TOOLS = ["off", "inspect", "profile", "basin", "bund", "pond"];
@@ -165,11 +166,11 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     button.setAttribute("aria-pressed", String(st.isOn));
     if (!st.isOn) return;
     section.replaceChildren(...[   // replaceChildren would show a false (the Run row for other tools) as text
-      h("div", { class: "eng-head" }, h("h2", { id: "engineer-heading" }, t("eng.heading")),
+      h("div", { class: "eng-head" }, h("h2", { id: "engineer-heading" }, t("eng.heading"), newBadge()),
         h("button", { type: "button", class: "btn btn-link", onclick: () => toggle(false) }, t("eng.close"))),
       h("p", { class: "muted" }, t("eng.lead")),
       layer ? h("div", { class: "eng-layer" },
-        h("label", {}, h("input", { type: "checkbox", checked: st.isLayerOn, onchange: (e) => { st.isLayerOn = e.target.checked; showPools(); } }), " ", t("eng.layer")),
+        h("label", {}, h("input", { type: "checkbox", checked: st.isLayerOn, onchange: (e) => { st.isLayerOn = e.target.checked; showPools(); } }), " ", t("eng.layer"), newBadge()),
         stormChoice(), ...layerKey(layer)) : h("p", {}, t("eng.layerNone")),
       toolChoice(), h("p", { class: "muted small" }, t(`eng.hint.${st.tool}`)),
       (st.tool === "bund" || st.tool === "pond") && h("p", { class: "eng-actions" },
@@ -192,6 +193,8 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     if (isOn) section.scrollIntoView?.({ block: "nearest" });
   };
   button.addEventListener("click", () => toggle(!st.isOn));
+  const badge = newBadge();
+  if (badge && button.parentNode) button.after(badge);
   mapApi?.addOverlay?.(({ map }) => map.on("click", onClick));
   draw();
   return { toggle, state: st, lang };

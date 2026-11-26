@@ -4,6 +4,7 @@
 // visit that never reaches it costs no Google call. It is not a flood warning, and the card says so.
 import { h } from "./dom.js";
 import { dateLocale, lang, t } from "./i18n.js";
+import { newBadge } from "./news.js";
 import { malaysiaToday } from "./tide.js";
 
 const MET_PAGE = "https://www.met.gov.my/";
@@ -126,7 +127,7 @@ const untilMidnight = (now) => 86_400_000 - ((now.getTime() + 8 * 3_600_000) % 8
  *  shown from the start, so the page can tell when it scrolls into view. */
 export function createOutlook(section, now = () => new Date()) {
   let shown;
-  const heading = () => h("h2", { class: "small-heading", id: "outlook-heading" }, t("outlook.heading"));
+  const heading = () => h("h2", { class: "small-heading", id: "outlook-heading" }, t("outlook.heading"), newBadge());
   section.replaceChildren(heading(), h("p", { class: "muted" }, t("outlook.checking")));   // until the first answer
   let timer = null;
   // A page left open past midnight: "Today" would be yesterday, so the card says to reload instead.

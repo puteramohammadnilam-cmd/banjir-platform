@@ -62,4 +62,13 @@ export default Object.freeze({
   "eng.licence": "Bare ground and rain pools come from FABDEM (CC BY-NC-SA 4.0): non-commercial use only, and share alike.",
   "eng.noVelocity": "Not here: flow speed and hazard (depth x speed) need a 2-D flow model, which this app does not run.",
   "eng.failed": "That did not work: {why}",
+  "news.badge": "NEW",
+  "news.title": "What's new",
+  "news.outlookTitle": "Next 5 days:",
+  "news.outlook": "rain, MetMalaysia's forecast and big tides for each of the next five days, under the map.",
+  "news.engineerTitle": "Engineer mode:",
+  "news.engineer": "a rain pools map and tools for engineers and planners.",
+  "news.show": "Show me",
+  "news.open": "Open",
+  "news.gotIt": "Got it",
 });

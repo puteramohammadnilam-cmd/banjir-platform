@@ -7,6 +7,7 @@ import { h } from "./dom.js";
 import { createEngineer } from "./engineer.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createInsurance } from "./insurance.js";
+import { createNews } from "./news.js";
 import { createOverview, mapFrame } from "./overview.js";
 import { createPin } from "./pin.js";
 import { createPlanCard, planFigures } from "./plan.js";
@@ -494,7 +495,9 @@ function createViews(app) {
     onSelect: (id) => select(app, id), onOpen: (id) => open(app, id),
     onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint, city,
   });
-  createEngineer({ section: $("engineer"), button: $("engineer-switch"), mapApi: overview.map, area: start.area, sectionId: start.section?.id ?? null });
+  const engineer = createEngineer({ section: $("engineer"), button: $("engineer-switch"), mapApi: overview.map, area: start.area, sectionId: start.section?.id ?? null });
+  createNews($("whats-new"), { onShowOutlook: () => $("outlook")?.scrollIntoView({ behavior: "smooth", block: "center" }),
+    onOpenEngineer: engineer ? () => engineer.toggle(true) : null });
   const pin = createPin({   // a point's squares are drawn unless the page's own squares cover it (none on a whole city's map)
     map: overview.map, anchor: $("map"), area: { ...start.page, view: mapFrame(start.page, city).ownedBox }, tabBar: document.querySelector(".tabs"),
     getCoverage: () => coverageOf(app),

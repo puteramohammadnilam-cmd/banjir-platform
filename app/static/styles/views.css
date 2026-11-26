@@ -471,3 +471,14 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 .eng-table th, .eng-table td { padding: var(--space-1) var(--space-3); border-bottom: 1px solid var(--line); text-align: left; }
 .eng-upload-picture { image-rendering: pixelated; max-width: 100%; width: 20rem; border: 1px solid var(--line); }
 .eng-downloads { display: grid; gap: var(--space-1); }
+
+/* What is new (js/news.js): a "NEW" pill beside the new parts, and a note at the top of the Area overview */
+.badge-new { display: inline-block; margin-inline-start: 0.5em; padding: 0.1em 0.5em; border-radius: 999px; background: var(--marker);
+  color: #1a1100; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; line-height: 1.5; vertical-align: middle; }
+.whats-new { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4); border: 1px solid var(--marker); border-inline-start-width: 4px; border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--marker) 10%, var(--surface)); }
+.whats-new-title { margin: 0; font-weight: 700; display: flex; align-items: center; gap: var(--space-2); }
+.whats-new-title .badge-new { margin: 0; }
+.whats-new-list { flex: 1 1 24rem; display: grid; gap: var(--space-1); margin: 0; }
+.whats-new-close { margin-inline-start: auto; }
