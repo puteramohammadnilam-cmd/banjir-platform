@@ -326,6 +326,22 @@ function loadEvacuation(app) {
     () => app.store.update({ evacuation: { error: true } }));
 }
 
+/** The next five days, asked once and only when the card comes into view: each answer is a Google Weather call, inside
+ *  the free monthly cap (app/googlemaps.py), so a visit that never scrolls to it costs none. */
+function loadOutlook(app) {
+  const card = document.getElementById("outlook");
+  const load = () => api.getOutlook(app.start.area.id, app.start.section?.id).then(
+    ({ outlook }) => app.store.update({ outlook: { data: outlook } }),
+    () => app.store.update({ outlook: { error: true } }));
+  if (!card || !("IntersectionObserver" in globalThis)) return void load();
+  const watch = new IntersectionObserver((seen) => {
+    if (!seen.some((entry) => entry.isIntersecting)) return;
+    watch.disconnect();
+    load();
+  }, { rootMargin: "200px" });
+  watch.observe(card);
+}
+
 function loadTide(app) {
   api.getTide(app.start.area.id).then(({ tide }) => app.store.update({ tide: { data: tide } }), () => app.store.update({ tide: { error: true } }));
 }
@@ -537,7 +553,7 @@ function render(app, views, state, previous) {
   views.showTab(state.tab);
   if (state.tab === "reference") syncReferenceNav(referenceLinks(), (id) => $(id)?.closest("section"));
   document.body.dataset.tab = state.tab;   // views.css: the header's search steps aside on the Area overview, which has its own
-  views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain, evacuation: state.evacuation, tide: state.tide });
+  views.overview.render({ rp: state.rp, selectedId: state.placeKey, rain: state.rain, evacuation: state.evacuation, tide: state.tide, outlook: state.outlook });
   views.business.render({ premise: place, rp: state.rp, photo, listing: state.listings[state.placeKey], dry: state.drySpots[state.placeKey] });
   if (place && !state.drySpots[state.placeKey]) queueMicrotask(() => loadDrySpot(app, state.placeKey));   // after this draw
   if (place) views.floodMode.refresh(floodContext(app));   // the car step, when its answer comes while the checklist is open
@@ -578,6 +594,7 @@ function startApp(start, initial, url) {
   loadRain(app);
   loadEvacuation(app);
   loadTide(app);
+  loadOutlook(app);
   const follow = linkFollower(app);
   window.addEventListener("hashchange", () => follow(readUrl(location).place));
   return follow;

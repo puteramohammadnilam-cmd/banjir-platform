@@ -1,0 +1,11 @@
+{
+  "location_id": "Tn070",
+  "place": "Shah Alam",
+  "state": "Selangor",
+  "districts": [
+    "Petaling",
+    "Klang",
+    "Shah Alam"
+  ],
+  "about": "MetMalaysia forecast place (data.gov.my weather/forecast location_id) and the state and districts its warnings must name to cover this area (app/outlook.py). Checked 26 Nov 2026."
+}

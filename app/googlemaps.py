@@ -31,6 +31,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 WEATHER = "https://weather.googleapis.com/v1/forecast/hours:lookup"
+DAYS = "https://weather.googleapis.com/v1/forecast/days:lookup"
 PLACES = "https://places.googleapis.com/v1/places:searchText"
 PLACE_FIELDS = "places.id,places.displayName,places.businessStatus,places.googleMapsUri,places.location"
 TIMEOUT_S = 8
@@ -194,6 +195,33 @@ def rain_outlook(lat: float, lon: float, hours: int) -> dict:
     if not any("precipitation" in h for h in forecast):
         raise UpstreamError("no usable forecast hours from Google Weather")
     return summarize_hours(forecast)
+
+
+def _rain_day(day: dict) -> dict | None:
+    """One forecast day as {date, mm, chance_pct}: day and night rain added, the higher chance; None without a date."""
+    when = day.get("displayDate") or {}
+    if not all(isinstance(when.get(part), int) for part in ("year", "month", "day")):
+        return None
+    halves = [(day.get(name) or {}).get("precipitation") for name in ("daytimeForecast", "nighttimeForecast")]
+    rain = [half for half in halves if isinstance(half, dict)]
+    if not rain:
+        return None
+    return {"date": f"{when['year']:04d}-{when['month']:02d}-{when['day']:02d}",
+            "mm": round(sum(_mm(half.get("qpf") or {}) for half in rain), 1),
+            "chance_pct": max((half.get("probability") or {}).get("percent") or 0 for half in rain)}
+
+
+def rain_days(lat: float, lon: float, days: int) -> list[dict]:
+    """Rain expected on each of the next `days` days at one point, today first, from the Google Weather API. A day runs
+    7 am to 7 am Malaysian time, as Google gives it."""
+    headers = {"X-Goog-Api-Key": _key()}
+    _spend("weather")
+    data = _get(DAYS, {"location.latitude": lat, "location.longitude": lon, "days": days, "pageSize": days}, headers)
+    found = [_rain_day(day) for day in (data.get("forecastDays") or [])[:days] if isinstance(day, dict)]
+    rain = [day for day in found if day]
+    if not rain:   # as rain_outlook: an empty answer must not read as five dry days
+        raise UpstreamError("no usable forecast days from Google Weather")
+    return rain
 
 
 def _metres(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

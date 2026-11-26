@@ -428,9 +428,23 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 .section-table:has(.col-flash) .col-share { width: 26%; }   /* room for the index's columns */
 .col-score .sort-button { white-space: nowrap; }
 /* Area overview: evacuation centres open now, and the tide */
-.evac, .tide { display: grid; gap: var(--space-2); align-content: start; }
+.evac, .tide, .outlook { display: grid; gap: var(--space-2); align-content: start; }
 .tide-highs { font-weight: 600; }
 .tide-big { font-weight: 600; color: var(--brand); }
 .evac-list { display: grid; gap: var(--space-2); }
 .evac-list li { display: grid; gap: 2px; padding-top: var(--space-2); border-top: 1px solid var(--line); }
 .evac-summary { font-weight: 600; }
+/* "Next 5 days": one row a day, its level as a coloured word (high, watch, low), then rain and MetMalaysia's words */
+.outlook-headline { font-weight: 600; }
+.outlook-warning { padding: var(--space-2) var(--space-3); border-left: 3px solid var(--risk-danger); background: var(--risk-danger-wash); }
+.outlook-days { display: grid; gap: 0; }
+.outlook-days li { display: grid; grid-template-columns: minmax(6.5rem, auto) auto 1fr; column-gap: var(--space-3); row-gap: 2px; align-items: baseline; padding: var(--space-2) 0; border-top: 1px solid var(--line); }
+.outlook-met { grid-column: 1 / -1; }
+.outlook-met:empty { display: none; }
+.outlook-day { font-weight: 600; }
+.outlook-rain { font-variant-numeric: tabular-nums; text-align: right; }
+.outlook-level { padding: 0 var(--space-2); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; }
+.outlook-level.level-high { color: var(--risk-danger); background: var(--risk-danger-wash); }
+.outlook-level.level-watch { color: var(--risk-warning); background: var(--risk-warning-wash); }
+.outlook-level.level-low { color: var(--risk-normal); }
+.outlook-level.level-none { color: var(--ink-2); }

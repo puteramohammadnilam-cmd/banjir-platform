@@ -1,0 +1,9 @@
+{
+  "location_id": "Ds048",
+  "place": "Kuala Terengganu",
+  "state": "Terengganu",
+  "districts": [
+    "Kuala Terengganu"
+  ],
+  "about": "MetMalaysia forecast place (data.gov.my weather/forecast location_id) and the state and districts its warnings must name to cover this area (app/outlook.py). Checked 26 Nov 2026."
+}

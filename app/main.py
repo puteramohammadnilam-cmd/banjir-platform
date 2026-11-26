@@ -33,8 +33,8 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, places,  # noqa: E402
-               plan, raster, satellite, sections, stock, tide)
+from . import (ai, areas, chatguard, dryspots, evacuation, floodtools, googlemaps, indexes, lowground, outlook,  # noqa: E402
+               places, plan, raster, satellite, sections, stock, tide)
 
 log = logging.getLogger("banjir")
 
@@ -91,7 +91,7 @@ SECURITY_HEADERS = {
     "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",   # GPS and voice for this page, no frame
 }
 # Google results may not be cached; a point is personal; a rotated imagery key must not linger in a cache
-NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot", "/api/satellite")
+NO_STORE_PATHS = ("/api/rain", "/api/place/", "/api/point", "/api/dry-spot", "/api/satellite", "/api/outlook")
 POST_ONLY = ("/api/ask", "/api/photo", "/api/estimate", "/api/dry-spot", "/api/news", "/api/point", "/api/stock", "/api/plan", "/api/voice")
 # business_id: the name the page used before there were points. "place" wins whenever it is in the body, even as null:
 # {"place": null, "business_id": "node-1"} selects nothing in /api/ask, and is a 422 in /api/photo and /api/estimate.
@@ -714,6 +714,14 @@ def rain(area: str | None = None, section: str | None = None) -> dict:
         return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
     except googlemaps.FreeLimitReached:
         return ok({"configured": True, "rain": None, "capped": True})   # the page says it is back on the 1st
+
+
+@app.get("/api/outlook", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain: one Google Weather call
+def outlook_days(area: str | None = None, section: str | None = None) -> dict:
+    """The next five days at the middle of the area or of one of its sections (app/outlook.py)."""
+    found, part = known_scope(area, section)
+    lat, lon = sections.centre(part) if part else found.centre()
+    return ok({"outlook": outlook.build(found.id, lat, lon)})
 
 
 @app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain

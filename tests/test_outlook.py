@@ -1,0 +1,258 @@
+"""The "Next 5 days" card (app/outlook.py, GET /api/outlook): Google Weather's daily rain, MetMalaysia's forecast words
+and warnings (data.gov.my), big-tide days, and the fixed rules that give each day a level. No network: Google and
+data.gov.my are faked with answers shaped like the real ones of 26 Nov 2026.
+
+Run from 11_Platform_Draft:  .venv/bin/python -m pytest -q tests/test_outlook.py
+"""
+import math
+from datetime import datetime, timedelta, timezone
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app import googlemaps, main, outlook, tide
+
+MYT = timezone(timedelta(hours=8))
+NOW = datetime(2026, 11, 26, 10, 0, tzinfo=MYT)
+DATES = ["2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29", "2026-11-30"]
+
+
+def google_day(iso, day_mm, night_mm, day_pct=30, night_pct=40, unit="MILLIMETERS"):
+    year, month, day = (int(x) for x in iso.split("-"))
+    half = lambda mm, pct: {"precipitation": {"qpf": {"unit": unit, "quantity": mm}, "probability": {"type": "RAIN", "percent": pct}}}
+    return {"displayDate": {"year": year, "month": month, "day": day}, "daytimeForecast": half(day_mm, day_pct),
+            "nighttimeForecast": half(night_mm, night_pct)}
+
+
+GOOGLE = {"forecastDays": [google_day("2026-11-26", 0.97, 5.28), google_day("2026-11-27", 12.1, 36.04, 75, 75),
+                           google_day("2026-11-28", 16.36, 8.0, 75, 75), google_day("2026-11-29", 8.37, 9.0, 65, 70),
+                           google_day("2026-11-30", 5.36, 1.9, 55, 55)], "timeZone": {"id": "Asia/Kuala_Lumpur"}}
+RAIN = [{"date": d, "mm": mm, "chance_pct": pct} for d, mm, pct in
+        zip(DATES, (6.3, 48.1, 24.4, 17.4, 7.3), (40, 75, 75, 70, 55))]
+MET_ROWS = [{"location": {"location_id": "Tn070", "location_name": "Shah Alam"}, "date": d, "summary_forecast": text,
+             "summary_when": when} for d, text, when in
+            (("2026-11-26", "Ribut petir", "Petang dan Malam"), ("2026-11-27", "Ribut petir", "Sepanjang Hari"),
+             ("2026-11-28", "Tiada Hujan", "Sepanjang Hari"), ("2026-11-29", "Hujan", "Pagi"))]
+
+
+def warning(title_en, title_ms, text, start, end, heading="WARNING"):
+    return {"warning_issue": {"issued": start, "title_en": title_en, "title_bm": title_ms}, "valid_from": start,
+            "valid_to": end, "heading_en": heading, "heading_bm": heading, "text_en": text}
+
+
+HULU_ONLY = warning("Thunderstorms Warning", "Amaran Ribut Petir",
+                    "Thunderstorms, heavy rain and strong winds are expected over the states of Kedah (Kuala Muda, Sik) "
+                    "• Selangor (Hulu Selangor) • Sabah: Interior (Tambunan) until 5:00 PM; Thursday, 26 November 2026.",
+                    "2026-11-26T14:00:00", "2026-11-26T17:00:00")
+SEA = warning("Strong Winds and Rough Seas Warning", "Amaran Angin Kencang dan Laut Bergelora",
+              "THUNDERSTORMS WARNING Thunderstorms, heavy rain and strong winds are expected over the waters of Perak "
+              "• Selangor • Pahang until 6:00 PM", "2026-11-23T00:00:00", "2026-11-28T23:59:59")
+PETALING = warning("Thunderstorms Warning", "Amaran Ribut Petir",
+                   "Thunderstorms, heavy rain and strong winds are expected over the states of Selangor (Petaling, Klang "
+                   "and Kuala Langat) • Johor (Muar) until 9:00 PM; Saturday, 28 November 2026.",
+                   "2026-11-28T15:00:00", "2026-11-28T21:00:00")
+STATE_WIDE = warning("Continuous Rain Warning", "Amaran Hujan Berterusan",
+                     "Continuous rain is expected to occur over the states of Kelantan (Pasir Puteh, Kota Bharu) • "
+                     "Terengganu until Sunday, 29 November 2026.", "2026-11-26T00:00:00", "2026-11-29T23:59:59",
+                     "CONTINUOUS RAIN WARNING (ALERT)")
+
+
+@pytest.fixture(autouse=True)
+def fresh(monkeypatch):
+    outlook._cache.clear()
+    main._hits.clear()
+    monkeypatch.setenv("GOOGLE_MAPS_API_KEY", "test-key")
+
+
+def met(monkeypatch, rows=MET_ROWS, warnings=(HULU_ONLY, SEA, PETALING, STATE_WIDE)):
+    monkeypatch.setattr(outlook, "_fetch_forecast", lambda location_id: [r for r in rows if r["location"]["location_id"] == location_id])
+    monkeypatch.setattr(outlook, "_fetch_warnings", lambda: list(warnings))
+
+
+# ---------- Google Weather daily rain
+
+def test_rain_days_adds_day_and_night_and_keeps_the_higher_chance(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(googlemaps, "_get", lambda url, params, headers: seen.update(url=url, params=params) or GOOGLE)
+    days = googlemaps.rain_days(3.07, 101.52, 5)
+    assert seen["url"] == googlemaps.DAYS and seen["params"]["days"] == 5 and "key" not in seen["params"]
+    assert days[1] == {"date": "2026-11-27", "mm": 48.1, "chance_pct": 75}
+    assert [d["date"] for d in days] == DATES
+
+
+def test_rain_days_is_counted_in_the_free_cap_and_an_empty_answer_is_an_error(monkeypatch):
+    monkeypatch.setenv("MAPS_WEATHER_MONTHLY_LIMIT", "1")
+    monkeypatch.setattr(googlemaps, "_get", lambda url, params, headers: {"forecastDays": []})
+    with pytest.raises(googlemaps.UpstreamError):
+        googlemaps.rain_days(3.07, 101.52, 5)
+    with pytest.raises(googlemaps.FreeLimitReached):
+        googlemaps.rain_days(3.07, 101.52, 5)
+
+
+def test_rain_days_converts_inches_and_skips_a_day_without_a_date(monkeypatch):
+    broken = {**google_day("2026-11-27", 1, 1), "displayDate": {"year": 2026}}
+    monkeypatch.setattr(googlemaps, "_get", lambda *a: {"forecastDays": [google_day("2026-11-26", 0.1, 0.1, unit="INCHES"), broken]})
+    assert googlemaps.rain_days(3.07, 101.52, 5) == [{"date": "2026-11-26", "mm": 5.1, "chance_pct": 40}]
+
+
+# ---------- MetMalaysia warnings: which ones cover the area
+
+@pytest.mark.parametrize("text, covered", [
+    (HULU_ONLY["text_en"], False),          # Selangor, but only Hulu Selangor
+    (PETALING["text_en"], True),            # a district of the area is listed
+    (STATE_WIDE["text_en"], False),         # other states
+    ("Continuous rain is expected over the states of Selangor until Sunday, 29 November 2026.", True),   # the whole state
+    ("Heavy rain is expected over the states of Selangor (Hulu Langat) • Klang Valley", False),
+])
+def test_a_warning_covers_the_area_only_for_its_state_whole_or_one_of_its_districts(text, covered):
+    assert outlook.covers(text, "Selangor", ("Petaling", "Klang", "Shah Alam")) is covered
+
+
+def test_only_rain_and_thunderstorm_warnings_on_land_are_kept(monkeypatch):
+    met(monkeypatch)
+    kept = outlook.warnings_for("shah-alam")
+    assert [w["title_en"] for w in kept] == ["Thunderstorms Warning"] and kept[0]["valid_from"] == "2026-11-28T15:00:00"
+    assert outlook.warnings_for("kuala-terengganu")[0]["heading_en"] == "CONTINUOUS RAIN WARNING (ALERT)"
+
+
+# ---------- the rules
+
+@pytest.mark.parametrize("mm, warned, level", [
+    (0, False, "low"), (19.9, False, "low"), (20, False, "watch"), (29.9, False, "watch"), (30, False, "high"),
+    (5, True, "high"), (None, True, "high"), (None, False, None),
+])
+def test_each_day_gets_its_level_from_the_rain_and_any_warning(mm, warned, level):
+    assert outlook.level(mm, warned) == level
+
+
+@pytest.mark.parametrize("levels, trend", [
+    (["low", "high", "low", "low", "low"], "rising"), (["high", "low", "low", "low", "low"], "easing"),
+    (["watch", "watch", "low", "low", "low"], "steady"), (["low", None, "low", "low", "low"], None),
+])
+def test_the_trend_compares_today_with_the_days_ahead(levels, trend):
+    assert outlook.trend(levels) == trend
+
+
+def test_the_thresholds_are_the_ones_the_past_floods_gave():
+    assert (outlook.WATCH_MM, outlook.HIGH_MM, outlook.DAYS) == (20, 30, 5)
+
+
+# ---------- the whole answer
+
+def big_tide_day():
+    ranges, big = tide.day_ranges("shah-alam"), tide.doc("shah-alam")["big_range_m"]
+    return {day for day, r in ranges.items() if r >= big}
+
+
+def test_build_gives_five_days_with_rain_words_warnings_and_tides(monkeypatch):
+    met(monkeypatch)
+    found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda lat, lon, days: RAIN)
+    days = found["days"]
+    assert [d["date"] for d in days] == DATES
+    assert [d["level"] for d in days] == ["low", "high", "high", "low", "low"]   # the 28th: a warning for Petaling
+    assert days[2]["warned"] and not days[3]["warned"] and days[1]["rain_mm"] == 48.1 and days[1]["chance_pct"] == 75
+    assert days[0]["met"] == {"text": "Ribut petir", "when": "Petang dan Malam"} and days[4]["met"] is None
+    assert [d["big_tide"] for d in days] == [d["date"] in big_tide_day() for d in days]
+    assert found["trend"] == "rising" and found["rain"] == "ok" and found["met_place"] == "Shah Alam"
+    assert found["thresholds"] == {"watch_mm": 20, "high_mm": 30, "set_from": "Shah Alam"}
+    assert [w["title_en"] for w in found["warnings"]] == ["Thunderstorms Warning"]
+
+
+def test_without_googles_rain_the_card_still_gives_words_warnings_and_tides(monkeypatch):
+    met(monkeypatch)
+    for error, state in ((googlemaps.FreeLimitReached("cap"), "capped"), (googlemaps.NotConfigured("no key"), "off"),
+                         (googlemaps.UpstreamError("HTTP 503"), "down")):
+        def fail(lat, lon, days, e=error):
+            raise e
+        found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=fail)
+        assert found["rain"] == state and found["trend"] is None
+        assert [d["level"] for d in found["days"]] == [None, None, "high", None, None]
+        assert all(d["rain_mm"] is None for d in found["days"]) and found["days"][1]["met"]["text"] == "Ribut petir"
+
+
+def test_an_area_without_a_metmalaysia_place_or_tide_table_still_answers(monkeypatch):
+    met(monkeypatch)
+    monkeypatch.setattr(outlook, "place", lambda area_id: None)
+    found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)
+    assert found["met_place"] is None and found["warnings"] == [] and all(d["met"] is None for d in found["days"])
+
+
+# ---------- data.gov.my, kept for everyone
+
+def test_metmalaysia_is_asked_once_an_hour_for_everyone_and_kept_through_a_failure(monkeypatch, caplog):
+    calls, answers = [], [MET_ROWS, outlook.FeedError("timeout"), outlook.FeedError("timeout"), MET_ROWS]
+
+    def fetch(location_id):
+        calls.append(1)
+        answer = answers[len(calls) - 1]
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+
+    monkeypatch.setattr(outlook, "_fetch_forecast", fetch)
+    clock = [0.0]
+    get = lambda: outlook.forecast_for("shah-alam", clock=lambda: clock[0])
+    assert get()["2026-11-26"]["text"] == "Ribut petir"
+    clock[0] = outlook.CACHE_S - 1
+    get()
+    assert len(calls) == 1
+    clock[0] = outlook.CACHE_S
+    assert get()["2026-11-27"]["text"] == "Ribut petir", "the last good answer is kept through a failure"
+    clock[0] += outlook.RETRY_S - 1
+    get()
+    assert len(calls) == 2, "not asked again within RETRY_S"
+    clock[0] += 1
+    get()
+    assert len(calls) == 3 and caplog.text.count("MetMalaysia") == 1, "one log line per outage"
+    clock[0] = outlook.CACHE_S + outlook.STALE_S + 1
+    assert get() is not None and len(calls) == 4
+
+
+def test_a_metmalaysia_answer_that_is_not_a_list_is_a_feed_error(monkeypatch):
+    class Answer:
+        def __init__(self, body):
+            self.body = body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def geturl(self):
+            return outlook.FORECAST
+
+        def read(self, size=-1):
+            body, self.body = self.body, b""
+            return body
+
+    monkeypatch.setattr(outlook.urllib.request, "urlopen", lambda request, timeout: Answer(b'{"error": "rate limited"}'))
+    with pytest.raises(outlook.FeedError):
+        outlook._get_list(outlook.FORECAST, {"filter": "Tn070@location__location_id"})
+
+
+def test_metmalaysia_words_are_kept_short_and_plain():
+    rows = [{**MET_ROWS[0], "summary_forecast": "Ribut  petir\n" + "x" * 200, "summary_when": None}]
+    assert outlook.parse_forecast(rows, "Tn070")["2026-11-26"] == {"text": ("Ribut petir " + "x" * 200)[:80], "when": ""}
+    assert outlook.parse_forecast([{"date": "2026-11-26"}, "junk"], "Tn070") == {}
+
+
+# ---------- the endpoint
+
+def test_the_endpoint_answers_for_an_area_and_a_section(monkeypatch):
+    met(monkeypatch)
+    monkeypatch.setattr(googlemaps, "rain_days", lambda lat, lon, days: RAIN)
+    client = TestClient(main.app)
+    found = client.get("/api/outlook?area=shah-alam").json()
+    assert found["success"] and len(found["data"]["outlook"]["days"]) == 5
+    assert client.get("/api/outlook?area=shah-alam&section=seksyen-25").json()["success"]
+    assert client.get("/api/outlook?area=nowhere").status_code == 404
+    assert "no-store" in client.get("/api/outlook?area=shah-alam").headers.get("cache-control", "")
+    assert not math.isnan(found["data"]["outlook"]["days"][0]["rain_mm"])
+
+
+def test_every_area_has_a_metmalaysia_place_that_fits():
+    from app import areas
+    for area in areas.load_all():
+        found = outlook.place(area.id)
+        assert found and found[0][:2] in ("Tn", "Ds") and found[3], area.id
