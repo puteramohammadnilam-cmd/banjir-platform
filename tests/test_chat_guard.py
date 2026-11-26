@@ -9,7 +9,7 @@ import re
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ai, chatguard, costs, main
+from app import ai, chatguard, costs, floodtools, main
 from test_place_ai import gemini_says, scripted_gemini
 
 FAKE_KEY = "AIza" + "x" * 35   # built here, so no key-shaped text sits in the repo for a secret scanner
@@ -121,6 +121,15 @@ def test_an_answer_that_copies_the_rules_is_withheld_but_ordinary_answers_go_out
                  "About RM 500 × 5 days closed: RM 2,500 of lost sales, a rough estimate.",
                  chatguard.REFUSAL):
         assert chatguard.screen_answer(fine, ai._private(), ai.TOOL_NAMES) is None, fine
+
+
+def test_a_rain_answer_that_repeats_the_rain_tools_caveat_goes_out():
+    # 26 Nov 2026: Gemini repeated rain_forecast's 26-word caveat word for word, so "Is heavy rain due today?" got
+    # the refusal. A caveat the model is meant to pass on must stay shorter than the copied-run limit.
+    doc = " ".join(floodtools.rain_forecast.__doc__.split())
+    caveat = doc[doc.index("or an error.") + len("or an error."):].strip()
+    answer = f"Google Weather expects 18 mm of rain over the next 12 hours. {caveat} Check JPS Public Infobanjir."
+    assert chatguard.screen_answer(answer, ai._private(), ai.TOOL_NAMES) is None
 
 
 def test_only_answers_the_server_signed_come_back_as_earlier_turns(monkeypatch):

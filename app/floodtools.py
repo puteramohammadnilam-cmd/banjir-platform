@@ -559,9 +559,11 @@ def rain_forecast() -> dict:
 
     Returns:
         Total rain in millimetres, the wettest hour, the highest chance of rain and the current
-        condition, or an error. This is a weather forecast, not a flood warning: heavy rain raises
-        the chance of local flooding but the tool cannot say whether a shop will flood.
+        condition, or an error. Not a flood warning: heavy rain makes local floods likelier, but it
+        cannot tell if a shop will flood.
     """
+    # The model may repeat the caveat above word for word, so it stays well under chatguard.COPIED_RUN_WORDS (24);
+    # the 26-word one before 26 Nov 2026 got rain answers withheld as copied instructions.
     if not _may_look_up():
         return {"error": MAPS_SPENT}
     try:

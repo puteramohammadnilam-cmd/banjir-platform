@@ -1,6 +1,6 @@
 # MyFlood
 
-MyFlood shows a small business how much river flood water a place could get in the model, and what that could roughly cost. It is an entry for the AI Builder Cup 2026.
+MyFlood shows a small business how much river flood water a place could get in the model, and what that could roughly cost. It was built for the AI Builder Cup 2026.
 
 You pick a business on the map, or check any point in Malaysia by dropping a pin or using GPS. You see the modelled water depth for a 1 in 10, 20 and 50 years flood; floods bigger than 1 in 50 years are not shown. A form turns that into a rough ringgit loss. An assistant powered by Gemini answers questions about it in Bahasa Melayu or English. It reads its numbers from the data through tools, and never does the sums itself.
 
@@ -193,7 +193,7 @@ These are the claims this app makes about your location, and what backs each one
 | Gemini grounded on Google Search | The "Latest flood news" button: an answer with its web sources and Google's search suggestions | `app/ai.py`, `app/main.py` |
 | Google Weather API | Rain expected in the next 12 hours, as a banner and as a chat tool | `app/googlemaps.py` |
 | Places API (New) | Whether Google Maps lists the selected shop as open, closed for now or closed for good | `app/googlemaps.py` |
-| Cloud Run, Secret Manager | Hosting; the two keys are stored as secrets | `Dockerfile`, `deploy.sh` |
+| Cloud Run, Secret Manager | Optional hosting (the live site is on a VPS, see "Deploy"); the two keys are stored as secrets | `Dockerfile`, `deploy.sh` |
 | Google Flood Hub | Linked for river flood forecasts. Its API is in a pilot with a waitlist | footer |
 
 Terms followed: Google results are shown with Google attribution. Nothing from Google is cached: the Maps Platform terms allow caching only coordinates and place ids, and the Gemini API terms forbid caching or framing grounded results. Search suggestions are shown exactly as given, next to the answer. Coordinates from Google are never used to look up a depth: points come only from a pin, GPS or OpenStreetMap.
@@ -263,7 +263,9 @@ Coverage on 3 October 2026: Python 98% of `app/` lines, JavaScript 94% of lines.
 
 ## Deploy
 
-Cloud Run, from this folder. You need the gcloud CLI, logged in, and a Google Cloud project with billing.
+The live site, https://banjirdemo.katalysmedia.asia, runs on an Ubuntu + nginx server. The Cloud Run service was shut down in November 2026. The server is deployed with `deploy_vps.sh`, which is kept outside this repo. It ships the last commit plus the nine flood rasters, and runs the app as the systemd service `banjir-check` from `/opt/banjir-check` (names from before the MyFlood rename). Keys go in `/opt/banjir-check/.env`; after a change, run `sudo systemctl restart banjir-check`.
+
+Cloud Run still works, from this folder. You need the gcloud CLI, logged in, and a Google Cloud project with billing.
 
 ```bash
 PROJECT=your-project-id ./deploy.sh
@@ -308,7 +310,7 @@ The 3D mock-up (`/3d.html`) draws Esri World Imagery under the buildings when th
    - Copy the key when it is shown. Esri shows it only once.
 3. Give it to the server as `ARCGIS_API_KEY`:
    - Local: add `ARCGIS_API_KEY=` and the key to `.env`, then restart uvicorn.
-   - The VPS demo: add the same line to `/opt/myflood/.env` on the server, then `sudo systemctl restart myflood`.
+   - The live server: add the same line to `/opt/banjir-check/.env`, then `sudo systemctl restart banjir-check`.
    - Cloud Run: once, run `gcloud secrets create arcgis-api-key --data-file=-`, paste the key, press Enter and then Ctrl-D (the line break is ignored). Then run `./deploy.sh`: it gives the service account access to the secret and passes it as `ARCGIS_API_KEY`. Without the secret it deploys as before and says so. A new key later: `gcloud secrets versions add arcgis-api-key --data-file=-`, then deploy again.
 4. Open `/3d.html`: the photo should be on, with "Powered by Esri | Source: Esri, Vantor, …" in the map's credits (the (i) button). Check usage on the Location Platform dashboard after a few visits; a tilted map loads more tiles than a flat one.
 
