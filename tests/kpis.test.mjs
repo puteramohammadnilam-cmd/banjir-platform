@@ -65,6 +65,12 @@ test("when this month's free Google Weather checks are used up, the rain tile sa
   assert.match(malay.rain.textContent, /Semakan percuma Google Weather/);
 });
 
+test("when today's share of free checks is used up, the rain tile says they are back tomorrow", () => {
+  const { kpis, rain } = mount();
+  kpis.setRain({ configured: true, data: null, capped: true, until: "tomorrow" });
+  assert.match(rain.textContent, /Today's share of free Google Weather checks is used up\. Back tomorrow/);
+});
+
 test("a rain tile that was shown goes away again if the answer says it is not configured", () => {
   const { container, kpis, rain } = mount();
   kpis.setRain(RAIN);

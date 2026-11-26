@@ -58,6 +58,7 @@ export default Object.freeze({
   "outlook.trend.easing": "Less rain ahead.",
   "outlook.warning": "MetMalaysia: {title}, until {until}",
   "outlook.capped": "This month's free Google Weather checks are used up, so rain amounts are back on the 1st.",
+  "outlook.cappedDay": "Today's share of free Google Weather checks is used up, so rain amounts are back tomorrow.",
   "outlook.down": "Google Weather did not answer just now, so rain amounts are left out.",
   "outlook.off": "Rain amounts need Google Weather, which is not set up here.",
   "outlook.how": "Watch: {watch} mm of rain or more in a day. High: {high} mm or more, or a MetMalaysia continuous-rain warning. In {place} since {since}, {caught} of {floods} recorded floods came on a day of {watch} mm or more, but most such days had no flood. Set on rain that fell, not on forecasts.",

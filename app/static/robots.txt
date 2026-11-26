@@ -1,0 +1,3 @@
+# Pages may be crawled. The /api/ answers behind them may not: some are Google lookups with a monthly limit.
+User-agent: *
+Disallow: /api/

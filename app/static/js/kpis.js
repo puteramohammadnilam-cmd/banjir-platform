@@ -51,7 +51,7 @@ export const rainShown = (rain) => Boolean(rain?.configured || rain?.busy);
 function rainText(rain) {
   const due = (hours) => t("overview.rainDue", { hours });
   if (!rain || rain.busy) return ["…", due(RAIN_HOURS), t("overview.rainChecking")];
-  if (rain.capped) return ["–", due(RAIN_HOURS), t("overview.rainCapped")];
+  if (rain.capped) return ["–", due(RAIN_HOURS), t(rain.until === "tomorrow" ? "overview.rainCappedDay" : "overview.rainCapped")];
   if (rain.error || !rain.data) return ["–", due(RAIN_HOURS), t("overview.rainNoAnswer")];
   const { total_mm: total, max_chance_pct: chance, hours } = rain.data;
   return [t("overview.rainMm", { mm: total }), due(hours), t("overview.rainNote", { pct: chance })];

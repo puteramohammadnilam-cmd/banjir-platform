@@ -2,11 +2,12 @@
 no test writes the real count or starts from another test's."""
 import pytest
 
-from app import googlemaps
+from app import googlemaps, main
 
 
 @pytest.fixture(autouse=True)
 def maps_usage_file(tmp_path, monkeypatch):
     monkeypatch.setenv("MAPS_USAGE_FILE", str(tmp_path / "maps-usage.json"))
     monkeypatch.setattr(googlemaps, "_usage", None)
+    monkeypatch.setattr(main, "_maps_today", {"day": None, "counts": {}})
     return tmp_path / "maps-usage.json"

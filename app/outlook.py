@@ -259,6 +259,8 @@ def _rain(rain_fn: Callable, lat: float, lon: float) -> tuple[dict[str, dict], s
         return {d["date"]: d for d in rain_fn(lat, lon, ASK_DAYS)}, "ok"
     except googlemaps.NotConfigured:
         return {}, "off"
+    except googlemaps.DailyShareReached:
+        return {}, "capped_day"
     except googlemaps.FreeLimitReached:
         return {}, "capped"
     except googlemaps.UpstreamError as exc:
@@ -269,7 +271,7 @@ def _rain(rain_fn: Callable, lat: float, lon: float) -> tuple[dict[str, dict], s
 def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rain_fn: Callable | None = None) -> dict:
     """What GET /api/outlook sends: the next DAYS days from today (Malaysian dates), each with Google's rain and
     chance, MetMalaysia's words, whether a warning covers it, a big-tide flag and a level; the warnings themselves; the
-    trend; whether Google's rain came ("ok", "capped", "off" or "down"); whether MetMalaysia answered ("ok", "down",
+    trend; whether Google's rain came ("ok", "capped", "capped_day", "off" or "down"); whether MetMalaysia answered ("ok", "down",
     or "none" for an area without a met.json); and whether levels are given (only in SET_FROM_AREA)."""
     today = (now or datetime.now(timezone.utc)).astimezone(MYT)
     dates = [(today + timedelta(days=k)).strftime("%Y-%m-%d") for k in range(DAYS)]

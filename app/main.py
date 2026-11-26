@@ -55,6 +55,9 @@ AUDIO_TYPES = {"audio/wav"}   # the page turns every recording into WAV, a forma
 NOT_HEARD = "Sorry, I could not hear a question in that recording. Try again, a little closer to the phone."
 RATE_LIMIT = 20             # chat, photo and news: each one is a Gemini call
 MAPS_RATE_LIMIT = 60        # rain and open-or-closed lookups: cheap, and fired as visitors click round the map
+MAPS_DAILY_PER_VISITOR = 50   # Google-backed answers a day for one address (Malaysian day): a visitor going through
+# every section and a dozen shops stays under it; one bot cannot use the free monthly allowance (googlemaps.py)
+MAPS_VISITOR_DAY_WORDS = "This connection has used today's Google Maps checks. They are back tomorrow."
 CALC_RATE_LIMIT = 120       # cost estimates from the form: arithmetic only, no Google call
 GEO_RATE_LIMIT = 120        # point checks: one for each pin dropped or GPS fix
 DRY_RATE_LIMIT = 600        # where to move the car: asked by the page for each place picked; a lookup in a file
@@ -122,6 +125,7 @@ _hits: dict[str, deque[float]] = defaultdict(deque)
 _hits_lock = threading.Lock()
 _ai_slots = threading.BoundedSemaphore(MAX_AI_CALLS)
 _ai_today = {"day": None, "calls": 0}   # guarded by _hits_lock
+_maps_today: dict = {"day": None, "counts": {}}   # Google-backed answers per visitor today; guarded by _hits_lock
 areas.preload()   # a malformed area file stops the server here, at start-up, not in the middle of a request
 sections.preload()
 
@@ -236,7 +240,19 @@ def rate_limit(request: Request) -> None:
 
 
 def maps_limit(request: Request) -> None:
+    """Per visitor: MAPS_RATE_LIMIT in RATE_WINDOW_S, and at most MAPS_DAILY_PER_VISITOR a Malaysian day. In memory, so
+    a restart starts the day's counts again; the daily share in googlemaps.py is the limit that survives one."""
     _limit(request, "maps", MAPS_RATE_LIMIT)
+    day, who = datetime.now(AI_DAY_ZONE).strftime("%Y-%m-%d"), client_ip(request)
+    with _hits_lock:
+        if _maps_today["day"] != day:
+            _maps_today.update(day=day, counts={})
+        counts = _maps_today["counts"]
+        if who not in counts and len(counts) >= MAX_TRACKED_CLIENTS:
+            raise HTTPException(429, "The service is busy. Please try again shortly.")
+        if counts.get(who, 0) >= MAPS_DAILY_PER_VISITOR:
+            raise HTTPException(429, MAPS_VISITOR_DAY_WORDS)
+        counts[who] = counts.get(who, 0) + 1
 
 
 def calc_limit(request: Request) -> None:
@@ -694,6 +710,11 @@ def flood_plan(body: PlanIn) -> dict:
                "contacts": plan.contacts(area, body.language)})
 
 
+def capped_until(exc: Exception) -> str:
+    """When stopped Google checks are back: "tomorrow" for today's share, "month" for the month's limit."""
+    return "tomorrow" if isinstance(exc, googlemaps.DailyShareReached) else "month"
+
+
 def call_maps(fn, *args):
     """Run a Google Maps Platform call; upstream failures become a clean 502 without details."""
     try:
@@ -712,8 +733,8 @@ def rain(area: str | None = None, section: str | None = None) -> dict:
         return ok({"configured": False, "rain": None})
     try:
         return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS)})
-    except googlemaps.FreeLimitReached:
-        return ok({"configured": True, "rain": None, "capped": True})   # the page says it is back on the 1st
+    except googlemaps.FreeLimitReached as exc:   # the page says when it is back
+        return ok({"configured": True, "rain": None, "capped": True, "until": capped_until(exc)})
 
 
 @app.get("/api/outlook", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain: one Google Weather call
@@ -735,8 +756,8 @@ def listing(place_id: str) -> dict:
     try:
         return ok({"configured": True,
                    "place": call_maps(googlemaps.place_status, premise["name"], premise["lat"], premise["lon"])})
-    except googlemaps.FreeLimitReached:
-        return ok({"configured": True, "place": None, "capped": True})
+    except googlemaps.FreeLimitReached as exc:
+        return ok({"configured": True, "place": None, "capped": True, "until": capped_until(exc)})
 
 
 @app.post("/api/news", dependencies=[Depends(rate_limit)])

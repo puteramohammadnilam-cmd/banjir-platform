@@ -96,7 +96,7 @@ function warningLine(w) {
   return h("p", { class: "outlook-warning" }, t("outlook.warning", { title, until: untilText(w.valid_to) }));
 }
 
-const RAIN_NOTE = { capped: "outlook.capped", down: "outlook.down", off: "outlook.off" };
+const RAIN_NOTE = { capped: "outlook.capped", capped_day: "outlook.cappedDay", down: "outlook.down", off: "outlook.off" };
 const TREND = { rising: "outlook.trend.rising", easing: "outlook.trend.easing" };   // steady says nothing
 
 function body(found, now) {

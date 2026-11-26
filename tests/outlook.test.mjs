@@ -133,3 +133,8 @@ test("an answer from an earlier day asks for a reload instead of calling yesterd
   assert.match(section.textContent, /This outlook is from an earlier day\. Reload the page/);
   assert.equal(section.querySelector(".outlook-days"), null);
 });
+
+test("when today's share of Google checks is used up, the card says rain amounts are back tomorrow", () => {
+  const noRain = { ...FOUND, rain: "capped_day", trend: null, days: DAYS.map((d) => ({ ...d, rain_mm: null, chance_pct: null, level: null })) };
+  assert.match(mount({ data: noRain }).textContent, /rain amounts are back tomorrow/);
+});

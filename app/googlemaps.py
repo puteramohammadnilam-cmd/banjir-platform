@@ -14,6 +14,10 @@ Monthly cap: every Weather and Places call is counted before it is made, and onc
 cannot run up a bill. The count is kept in MAPS_USAGE_FILE so a restart or deploy does not reset it, and a count that
 cannot be read or saved stops the calls rather than start again from 0. Google counts per billing account: other
 projects on the same account share the free allowance and are not counted here.
+
+Daily share: each Malaysian day may use what is left of the month divided by the days left in it (today included),
+so a quiet day leaves more for the days after, and a bot can use up one day's calls, not the month's. Past it the
+call is not made and DailyShareReached (a FreeLimitReached) is raised; the page says the checks are back tomorrow.
 """
 from __future__ import annotations
 
@@ -47,6 +51,8 @@ FREE_LIMITS = {"weather": 9_000, "places": 4_500}
 # Google starts the free allowance again at midnight US Pacific on the 1st. A fixed UTC-8 starts our month at that
 # moment in winter and an hour after it in summer time, never before it.
 BILLING_TZ = timezone(timedelta(hours=-8))
+MYT = timezone(timedelta(hours=8))     # the daily share turns at midnight in Malaysia, when visitors' day does
+DAILY_SHARE = True                     # tests of the month's limit alone turn it off
 USAGE_FILE = Path(__file__).resolve().parents[1] / ".maps-usage.json"   # MAPS_USAGE_FILE overrides it
 
 log = logging.getLogger(__name__)
@@ -64,6 +70,10 @@ class UpstreamError(RuntimeError):
 
 class FreeLimitReached(RuntimeError):
     """This month's free calls of one kind are used up, or their count cannot be kept: the call was not made."""
+
+
+class DailyShareReached(FreeLimitReached):
+    """Today's share of the month's free calls of one kind is used up: the call was not made. Back tomorrow."""
 
 
 def _usage_file() -> Path:
@@ -96,8 +106,11 @@ def _load() -> dict:
         usage = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise _stopped(f"cannot read the usage file ({type(exc).__name__})") from exc
+    start = usage.get("day_start", {}) if isinstance(usage, dict) else None
     if (not isinstance(usage, dict) or not isinstance(usage.get("month"), str)
-            or not all(_is_count(usage.get(kind, 0)) for kind in FREE_LIMITS)):
+            or not all(_is_count(usage.get(kind, 0)) for kind in FREE_LIMITS)
+            or not isinstance(usage.get("day", ""), str) or not isinstance(start, dict)
+            or not all(_is_count(start.get(kind, 0)) for kind in FREE_LIMITS)):
         raise _stopped("the usage file does not hold a month and counts")
     return usage
 
@@ -112,24 +125,41 @@ def _save(usage: dict) -> None:
         raise _stopped(f"cannot save the usage file ({type(exc).__name__})") from exc
 
 
+def _days_left(day: datetime) -> int:
+    """Days from `day` to the end of its month, `day` included."""
+    first_of_next = (day.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return (first_of_next.date() - day.date()).days
+
+
 def _spend(kind: str, now: datetime | None = None) -> None:
-    """Count one call of `kind` ("weather" or "places") this month, or raise FreeLimitReached without counting it."""
+    """Count one call of `kind` ("weather" or "places") this month, or raise FreeLimitReached (the month's limit) or
+    DailyShareReached (today's share) without counting it."""
     global _usage
-    month = (now or datetime.now(timezone.utc)).astimezone(BILLING_TZ).strftime("%Y-%m")
+    now = now or datetime.now(timezone.utc)
+    month, local = now.astimezone(BILLING_TZ).strftime("%Y-%m"), now.astimezone(MYT)
+    day = local.strftime("%Y-%m-%d")
     with _usage_lock:
         usage = _usage if _usage is not None else _load()
         if usage.get("month") != month:
             usage = {"month": month}
-        used, limit = usage.get(kind, 0), _limit(kind)
+        if usage.get("day") != day:   # a new day: its share is worked out from what the month has left at its start
+            usage = {**usage, "day": day, "day_start": {k: usage.get(k, 0) for k in FREE_LIMITS}}
+        used, limit, start = usage.get(kind, 0), _limit(kind), usage["day_start"].get(kind, 0)
+        share = math.ceil(max(0, limit - start) / _days_left(local))
         if used >= limit:
             _usage = usage
             raise FreeLimitReached(f"{kind}: {used} calls this month, the free limit")
+        if DAILY_SHARE and used - start >= share:
+            _usage = usage
+            raise DailyShareReached(f"{kind}: {used - start} calls today, today's share of {share}")
         counted = {**usage, kind: used + 1}
         _save(counted)
         _usage = counted
     if used + 1 == limit:
         log.warning("Google Maps %s: this month's %d free calls are used up; no more until the 1st (US Pacific)",
                     kind, limit)
+    elif DAILY_SHARE and used + 1 - start == share:
+        log.warning("Google Maps %s: today's share of %d free calls is used up; more tomorrow", kind, share)
 
 
 def is_configured() -> bool:

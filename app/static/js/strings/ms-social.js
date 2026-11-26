@@ -58,6 +58,7 @@ export default Object.freeze({
   "outlook.trend.easing": "Kurang hujan akan datang.",
   "outlook.warning": "MetMalaysia: {title}, sehingga {until}",
   "outlook.capped": "Semakan percuma Google Weather bulan ini sudah habis, jadi jumlah hujan ada semula pada 1 haribulan.",
+  "outlook.cappedDay": "Bahagian semakan percuma Google Weather hari ini sudah habis, jadi jumlah hujan ada semula esok.",
   "outlook.down": "Google Weather tidak menjawab buat masa ini, jadi jumlah hujan tidak ditunjukkan.",
   "outlook.off": "Jumlah hujan memerlukan Google Weather, yang tidak disediakan di sini.",
   "outlook.how": "Awas: {watch} mm hujan atau lebih sehari. Tinggi: {high} mm atau lebih, atau amaran hujan berterusan MetMalaysia. Di {place} sejak {since}, {caught} daripada {floods} banjir yang direkodkan berlaku pada hari dengan {watch} mm atau lebih, tetapi kebanyakan hari sebegitu tiada banjir. Ditetapkan pada hujan yang turun, bukan pada ramalan.",
