@@ -172,6 +172,7 @@ These are the claims this app makes about your location, and what backs each one
 - Rain: for a point outside the listed areas, Google Weather gets the square's centre rounded to 0.01 degrees, about 1 km. Inside an area, it gets the area's centre.
 - Google Places is asked only about mapped businesses, by OpenStreetMap name and coordinates. It is never asked about a point.
 - The map tiles come from OpenStreetMap's servers, which see the map area you view. After a GPS fix the map opens at street level (zoom 17), where one tile is about 300 m wide.
+- On the new map preview (`/map.html`) the base map's tiles, fonts and icons come from OpenFreeMap (`tiles.openfreemap.org`), which sees the map area you view and this site's address.
 - On the 3D page the satellite photo's tiles come from Esri's servers (`ibasemaps-api.arcgis.com`), which see the map area you view and this site's address.
 - A photo you upload (of the shop front, or of the stock inside) is sent to Gemini to be read. This app does not save it. Google's Gemini API terms apply to it.
 - A voice question is recorded only while the Speak button is on, sent to Gemini as audio to write down the words, and not saved or logged by this app (`tests/test_voice.py`). Answers to spoken questions are read aloud by your browser's own speech voice (some browsers use an online voice for this).
@@ -306,6 +307,15 @@ A switch in the footer ("Engineer mode", or `?engineer=1`, remembered in the bro
 - Tools: inspect (every value at a spot), profile A to B (up to 5 km), basin (the land draining through a spot), bund +0.8 m or pond -0.8 m what-if (the model runs again on a window around it), your own ESRI ASCII grid (up to 500 x 500, never stored), a CSV of the businesses with every value, and the rain pools GeoTIFF. Model runs share one slot and have their own rate limit (`app/engineer_api.py`).
 - Not here: flow speed and hazard need a 2-D flow model.
 - Licence: `app/data/pooling` is CC BY-NC-SA 4.0 (FABDEM), non-commercial; see its README.txt.
+
+## New map preview
+
+`/map.html` is a preview of the Area overview on a new map, in the style of Farhan Syah's Arus (MIT, `app/static/vendor/LICENSE-arus.txt`). The main page keeps the old map until this one has everything.
+
+- MapLibre (already vendored for the 3D page) on OpenFreeMap's free vector maps: light (Positron) and dark, plus Esri's satellite photo through our key. The styles are copies in `app/static/vendor/openfreemap/`, so the flood water always goes under the streets and names; see its README.txt.
+- Floating cards: search, the main page's tabs, the flood size, the layers, and a place card (a bottom sheet on phones) for a shop or a section, with links back to the main page's details, cost and 3D. English and Bahasa Melayu (`strings/*-map.js`).
+- Sections are shaded at once; a section's squares and shops load when it is opened, one request each. A link holds the view: `map.html?area=shah-alam&section=seksyen-25&place=node-13414432501&rp=50`, plus `&base=dark` or `&base=sat` and `&tilt=1`.
+- Not yet: the pin (check any point), engineer mode, keyboard access to single shops on the map (the search reaches every shop).
 
 ## Satellite photo on the 3D page
 

@@ -1,6 +1,10 @@
 // Words in Bahasa Melayu for engineer mode (js/engineer.js): its switch, the rain pools layer and the map tools.
 // Kept apart so strings/ms.js stays under the file size limit.
+// The new map preview's words (strings/ms-map.js) ride along here, so ms.js stays under the file size limit.
+import map from "./ms-map.js";
+
 export default Object.freeze({
+  ...map,
   "eng.switch": "Mod jurutera",
   "eng.heading": "Mod jurutera",
   "eng.lead": "Alat saringan untuk jurutera dan perancang, menggunakan data aplikasi ini sendiri. Tiada apa-apa di sini ramalan banjir, dan tiada yang memanggil Google.",

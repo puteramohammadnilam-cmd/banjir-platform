@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8fafc">
+  <!-- the mark: a flood post with water at its foot -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23060a0f'/%3E%3Crect x='12' y='3' width='8' height='26' fill='%23e7eff5'/%3E%3Crect x='12' y='3' width='8' height='6' fill='%23ff6a5f'/%3E%3Crect x='12' y='15' width='8' height='6' fill='%23ff6a5f'/%3E%3Crect y='21' width='32' height='11' fill='%2346d3ff' fill-opacity='0.75'/%3E%3C/svg%3E">
+  <title>Flood map (preview) · MyFlood</title>
+  <meta name="description" content="A preview of MyFlood's new flood map: the modelled flood by section, its squares and every shop, with a card for each.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..900&family=Martian+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="map-preview/map-gl.css">
+  <script src="vendor/maplibre-gl-csp.js"></script>
+  <script type="module" src="js/map-gl.js"></script>
+</head>
+<!-- A preview of the Area overview on the new map (js/map-gl.js). The main page (index.html) keeps the old map. -->
+<body class="mg">
+  <div id="mg-map" class="mg-map" role="application" aria-label="Map of the modelled flood: sections, flood squares and shops"></div>
+
+  <header class="mg-top mg-hud">
+    <a class="mg-logo" id="mg-home" href="./" aria-label="MyFlood main page"><i aria-hidden="true"></i>MyFlood</a>
+    <span class="mg-area" id="mg-area"></span>
+    <div class="mg-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="mg-q" type="search" placeholder="Search your shop" aria-label="Search a shop by name" autocomplete="off">
+      <div class="mg-results mg-hud" id="mg-results" hidden></div>
+    </div>
+    <span class="mg-spacer"></span>
+    <span class="mg-tag" id="mg-tag" title="A preview of the new map. The main page still uses the old one.">Preview</span>
+    <div class="mg-seg" id="mg-bases" role="group" aria-label="Base map"></div>
+    <button type="button" class="mg-btn" id="mg-tilt" aria-pressed="false" title="Tilt the map and raise the buildings">3D</button>
+    <nav class="mg-seg mg-lang" id="mg-lang" aria-label="Language"></nav>
+  </header>
+
+  <nav class="mg-tabs" id="mg-tabs" aria-label="Sections of the site"></nav>
+
+  <div class="mg-side">
+    <section class="mg-hud mg-card mg-summary" id="mg-summary" aria-live="polite"></section>
+    <section class="mg-hud mg-place" id="mg-place" aria-live="polite" hidden></section>
+  </div>
+
+  <aside class="mg-hud mg-card mg-layers" id="mg-layers"></aside>
+
+  <p class="mg-status mg-hud"><b aria-hidden="true"></b><span id="mg-status">River flood model · 90 m squares</span> · <span id="mg-hint">Loading the map…</span></p>
+  <p class="mg-problem mg-hud" id="mg-problem" role="alert" hidden></p>
+  <noscript><p class="mg-problem mg-hud">This map needs JavaScript. <a href="./">Open the main page</a></p></noscript>
+</body>
+</html>

@@ -1,6 +1,10 @@
 // Words in English for engineer mode (js/engineer.js): its switch, the rain pools layer and the map tools.
 // Kept apart so strings/en.js stays under the file size limit.
+// The new map preview's words (strings/en-map.js) ride along here, so en.js stays under the file size limit.
+import map from "./en-map.js";
+
 export default Object.freeze({
+  ...map,
   "eng.switch": "Engineer mode",
   "eng.heading": "Engineer mode",
   "eng.lead": "Screening tools for engineers and planners, on this app's own data. Nothing here is a flood forecast, and none of it calls Google.",

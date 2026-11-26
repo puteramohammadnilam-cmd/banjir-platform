@@ -78,12 +78,13 @@ MAX_ID_CHARS = 40
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
         # the 3D page's map (MapLibre) fetches its tiles, so the tile hosts are in connect-src as well as img-src;
-        # its satellite photo is Esri's keyed World Imagery (app/satellite.py), never the keyless server
+        # its satellite photo is Esri's keyed World Imagery (app/satellite.py), never the keyless server; the new map
+        # preview (map.html) draws OpenFreeMap's vector tiles, fonts and sprites from tiles.openfreemap.org
         "default-src 'self'; script-src 'self'; "
-        "connect-src 'self' https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com; "
+        "connect-src 'self' https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com https://tiles.openfreemap.org; "
         # inline styles only for Google's search suggestions, which must be shown as given; scripts stay 'self'
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
-        "img-src 'self' data: blob: https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com; "
+        "img-src 'self' data: blob: https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com https://tiles.openfreemap.org; "
         "frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'"
     ),
     "X-Content-Type-Options": "nosniff",
