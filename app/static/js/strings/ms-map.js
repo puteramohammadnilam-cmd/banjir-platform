@@ -2,6 +2,7 @@
 // Spread into strings/ms.js through ms-eng.js, so ms.js stays under the file size limit.
 export default Object.freeze({
   "mg.title": "Peta banjir (pratonton) · MyFlood",
+  "header.newMap": "Peta baharu",   // the main page's link here (index.html)
   "mg.mapLabel": "Peta banjir dalam model: bahagian bandar, petak banjir dan kedai",
   "mg.back": "Halaman utama MyFlood",
   "mg.search": "Cari kedai anda",

@@ -59,3 +59,9 @@ def test_arus_is_credited_with_its_licence():
     licence = (STATIC / "vendor" / "LICENSE-arus.txt").read_text(encoding="utf-8")
     assert "MIT License" in licence and "Farhan Syah" in licence
     assert "LICENSE-arus.txt" in (STATIC / "js" / "map-gl.js").read_text(encoding="utf-8")
+
+
+def test_the_main_page_links_to_the_preview():
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    assert 'id="map-link" href="map.html"' in page
+    assert "map.html${location.search}" in (STATIC / "js" / "main.js").read_text(encoding="utf-8")

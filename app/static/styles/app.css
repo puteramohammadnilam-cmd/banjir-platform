@@ -47,6 +47,10 @@ a { color: var(--brand); }
 .finder input { width: 100%; height: 44px; padding: 0 var(--space-3) 0 38px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-sunk); color: var(--ink); }
 .finder input:hover { border-color: var(--field-border); }
 .badge { padding: 3px 8px; border: 1px solid rgb(255 177 74 / 0.6); border-radius: var(--radius-sm); background: none; color: var(--marker); font: 400 var(--text-label) var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+/* the link to the new map (map.html), beside the language switch */
+.map-link { display: flex; flex: none; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); color: var(--ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; white-space: nowrap; transition: border-color var(--duration-fast), background-color var(--duration-fast); }
+.map-link .icon { color: var(--brand); }
+.map-link:hover { border-color: var(--brand); background: rgb(70 211 255 / 0.08); }
 /* BM | EN: two 44 px buttons, the page's language pressed */
 .lang-switch { display: flex; flex: none; padding: 2px; gap: 2px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
 .lang-switch button { min-width: 44px; min-height: 44px; padding: 0 var(--space-2); border: 0; border-radius: calc(var(--radius-sm) - 2px); background: none; color: var(--ink-2); font: 400 var(--text-xs) var(--font-mono); letter-spacing: 0.04em; cursor: pointer; transition: background-color var(--duration-fast), color var(--duration-fast); }
@@ -182,7 +186,8 @@ body.load-failed :is(.tabs, main > .panel, .chat-fab, .finder) { display: none !
   .topbar { flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
   .place, .badge { display: none; }
   .finder { order: 3; width: 100%; margin-left: 0; }
-  .lang-switch { margin-left: auto; }
+  .map-link { margin-left: auto; padding: 0 var(--space-2); }   /* brand on the left; the map link and BM | EN on the right */
+  .map-link .icon { display: none; }
   .tabs {
     position: fixed; z-index: 1000; top: auto; bottom: 0; left: 0; right: 0;
     justify-content: space-around; gap: 0; padding: 0 0 env(safe-area-inset-bottom);
@@ -197,6 +202,13 @@ body.load-failed :is(.tabs, main > .panel, .chat-fab, .finder) { display: none !
 /* five tabs on the narrowest phones: a smaller label, so a whole Bahasa Melayu word such as "Perniagaan" fits */
 @media (max-width: 359px) {
   .tabs [role="tab"] { padding-inline: 2px; font-size: 0.625rem; }
+}
+/* the map link as its icon alone, its words kept for screen readers, where the header is full: brand, link and BM | EN
+   on one row at 320 px, and the search box keeps its room on small tablets in Bahasa Melayu */
+@media (max-width: 359px), (min-width: 721px) and (max-width: 959px) {
+  .map-link { justify-content: center; min-width: 44px; padding: 0; }
+  .map-link .icon { display: block; }
+  .map-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 
 /* touch screens: a field under 16 px makes iOS Safari zoom the page when it is tapped (the cost form's were 14 px),

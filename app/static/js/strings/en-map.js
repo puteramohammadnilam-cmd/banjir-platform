@@ -2,6 +2,7 @@
 // strings/en.js through en-eng.js, so en.js stays under the file size limit.
 export default Object.freeze({
   "mg.title": "Flood map (preview) · MyFlood",
+  "header.newMap": "New map",   // the main page's link here (index.html)
   "mg.mapLabel": "Map of the modelled flood: sections, flood squares and shops",
   "mg.back": "MyFlood main page",
   "mg.search": "Search your shop",

@@ -496,6 +496,11 @@ function createViews(app) {
     onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint, city,
   });
   const engineer = createEngineer({ section: $("engineer"), button: $("engineer-switch"), mapApi: overview.map, area: start.area, sectionId: start.section?.id ?? null });
+  // the header's New map link opens map.html on this view: area, section, shop and flood size, the page's own query
+  // (a point never goes: it stays in the fragment, and the new map has no pin yet)
+  const mapLink = $("map-link");
+  const freshMapLink = () => { mapLink.href = `map.html${location.search}`; };
+  for (const type of ["pointerdown", "focus", "click"]) mapLink?.addEventListener(type, freshMapLink);
   createNews($("whats-new"), { onShowOutlook: () => $("outlook")?.scrollIntoView({ behavior: "smooth", block: "center" }),
     onOpenEngineer: engineer ? () => engineer.toggle(true) : null, focusAfter: $("panel-overview") });
   const pin = createPin({   // a point's squares are drawn unless the page's own squares cover it (none on a whole city's map)
