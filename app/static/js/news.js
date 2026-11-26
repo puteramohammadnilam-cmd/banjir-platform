@@ -24,15 +24,17 @@ function seen(storage) {
   }
 }
 
-/** The "What's new" note in `section`: shown while the news is fresh and until "Got it" in this browser. onShowOutlook
- *  and onOpenEngineer take the visitor to each new part. */
-export function createNews(section, { onShowOutlook, onOpenEngineer, storage = globalThis.localStorage, now = new Date() } = {}) {
+/** The "What's new" note in `section`: a notice floating over the page's corner (so it moves nothing as it appears),
+ *  shown while the news is fresh and until "Got it" in this browser. onShowOutlook and onOpenEngineer take the visitor
+ *  to each new part; after "Got it", focus goes to `focusAfter`. */
+export function createNews(section, { onShowOutlook, onOpenEngineer, focusAfter = null, storage = globalThis.localStorage, now = new Date() } = {}) {
   if (!section) return null;
   const close = () => {
     try {
       storage?.setItem(SEEN_KEY, "1");
     } catch { /* private mode: the note comes back next visit */ }
     section.hidden = true;
+    focusAfter?.focus?.({ preventScroll: true });
   };
   section.hidden = !isFresh(now) || seen(storage);
   if (section.hidden) return { close };

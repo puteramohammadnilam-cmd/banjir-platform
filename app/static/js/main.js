@@ -497,7 +497,7 @@ function createViews(app) {
   });
   const engineer = createEngineer({ section: $("engineer"), button: $("engineer-switch"), mapApi: overview.map, area: start.area, sectionId: start.section?.id ?? null });
   createNews($("whats-new"), { onShowOutlook: () => $("outlook")?.scrollIntoView({ behavior: "smooth", block: "center" }),
-    onOpenEngineer: engineer ? () => engineer.toggle(true) : null });
+    onOpenEngineer: engineer ? () => engineer.toggle(true) : null, focusAfter: $("panel-overview") });
   const pin = createPin({   // a point's squares are drawn unless the page's own squares cover it (none on a whole city's map)
     map: overview.map, anchor: $("map"), area: { ...start.page, view: mapFrame(start.page, city).ownedBox }, tabBar: document.querySelector(".tabs"),
     getCoverage: () => coverageOf(app),

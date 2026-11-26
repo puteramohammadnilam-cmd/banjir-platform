@@ -52,3 +52,11 @@ test("the note stays away once the news is old", () => {
   createNews(section, { storage: store(), now: AFTER });
   assert.equal(section.hidden, true);
 });
+
+test("after Got it, focus goes where the page says, not to the top of the page", () => {
+  const section = document.createElement("aside");
+  let focused = false;
+  createNews(section, { storage: store(), now: DURING, focusAfter: { focus: () => { focused = true; } } });
+  [...section.querySelectorAll("button")].find((b) => b.textContent === "Got it").click();
+  assert.equal(focused, true);
+});

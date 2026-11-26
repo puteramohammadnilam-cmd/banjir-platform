@@ -475,12 +475,17 @@ body[data-tab="overview"] .badge { margin-left: auto; }   /* the badge and BM | 
 /* What is new (js/news.js): a "NEW" pill beside the new parts, and a note at the top of the Area overview */
 .badge-new { display: inline-block; margin-inline-start: 0.5em; padding: 0.1em 0.5em; border-radius: 999px; background: var(--marker);
   color: #1a1100; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; line-height: 1.5; vertical-align: middle; }
-.whats-new { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin: var(--space-3) 0;
+/* a notice floating over the bottom-left corner, clear of the chat button: it moves nothing on the page as it appears */
+.whats-new { position: fixed; z-index: 1100; left: var(--space-4); bottom: var(--space-4); max-width: min(26rem, calc(100vw - 7.5rem));
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4);
   padding: var(--space-3) var(--space-4); border: 1px solid var(--marker); border-inline-start-width: 4px; border-radius: var(--radius-md);
-  background: color-mix(in oklab, var(--marker) 10%, var(--surface)); }
+  background: color-mix(in oklab, var(--marker) 12%, var(--surface)); box-shadow: 0 10px 30px rgb(0 0 0 / 0.45); }
+.whats-new[hidden] { display: none; }
+@media print { .whats-new { display: none; } }
+@media (max-width: 640px) { .whats-new { left: var(--space-3); bottom: 6.5rem; max-width: calc(100vw - 6.5rem); } }   /* above the bottom tab bar, clear of the chat button */
 .whats-new-title { margin: 0; font-weight: 700; display: flex; align-items: center; gap: var(--space-2); }
 .whats-new-title .badge-new { margin: 0; }
-.whats-new-list { flex: 1 1 24rem; display: grid; gap: var(--space-1); margin: 0; }
+.whats-new-list { flex: 1 1 100%; display: grid; gap: var(--space-1); margin: 0; font-size: var(--text-sm); }
 .whats-new-close { margin-inline-start: auto; }
 .eng-tool-on { cursor: crosshair; }
 label.btn:focus-within { outline: 3px solid var(--action); outline-offset: 2px; }

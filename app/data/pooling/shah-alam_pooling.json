@@ -39,18 +39,18 @@
  ],
  "summary": {
   "40mm": {
-   "squares": 10602,
+   "squares": 10642,
    "share": 0.0183,
    "deepest_m": 4.36
   },
   "70mm": {
-   "squares": 20533,
-   "share": 0.0354,
+   "squares": 20716,
+   "share": 0.0357,
    "deepest_m": 13.77
   },
   "100mm": {
-   "squares": 22969,
-   "share": 0.0396,
+   "squares": 23208,
+   "share": 0.04,
    "deepest_m": 19.68
   }
  },

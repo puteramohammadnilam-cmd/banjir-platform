@@ -90,7 +90,8 @@ function layerKey(layer) {
 export function createEngineer({ section, button, mapApi, area, sectionId = null, wanted = isWanted() }) {
   if (!section || !button) return null;
   let leaflet = null;
-  mapApi?.addOverlay?.(({ map }) => { leaflet = map; });
+  let isAiming = () => false;   // while the pin is being placed (pin.js), the map's clicks are the pin's
+  mapApi?.addOverlay?.(({ map, isAiming: aiming }) => { leaflet = map; isAiming = aiming ?? isAiming; });
   const layer = area?.layers?.rain_pools ?? null;
   const st = { isOn: wanted, storm: layer?.storms?.includes(70) ? 70 : layer?.storms?.[0], isLayerOn: false, tool: "off", points: [] };
   const overlays = { pools: null, result: null, marks: null };
@@ -122,7 +123,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
     }
   };
   const onClick = (event) => {
-    if (!st.isOn || st.tool === "off") return;
+    if (!st.isOn || st.tool === "off" || isAiming()) return;
     const at = event.latlng;
     if (st.tool === "inspect") return run(() => api.engInspect(area.id, at.lat, at.lng), inspectView);
     if (st.tool === "basin") {
@@ -146,6 +147,7 @@ export function createEngineer({ section, button, mapApi, area, sectionId = null
       return compareView(found);
     }));
   const clear = () => {
+    latest += 1;   // an answer still on its way is no longer wanted
     st.points = [];
     drop("marks");
     drop("result");

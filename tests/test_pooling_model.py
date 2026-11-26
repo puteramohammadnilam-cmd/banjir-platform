@@ -95,9 +95,11 @@ def test_what_a_full_dip_spills_reaches_the_dip_downhill_even_when_its_outlet_sl
     ground = valley()
     filled, down, dips, ends, reach = prepared = pm.prepare(ground, SPACING)
     upper, lower = dips.label[3, 4], dips.label[3, 11]
-    outlet = dips.outlet[upper]
-    assert dips.label.ravel()[ends[outlet]] == upper, "the outlet's steepest slope runs back into the dip"
-    assert reach[outlet] == lower, "but its overflow path reaches the dip downhill"
+    rim = int(down[dips.cells[upper][0]])
+    while dips.label.ravel()[rim] == upper:
+        rim = int(down[rim])
+    assert dips.label.ravel()[ends[rim]] == upper, "the rim's steepest slope runs back into the dip"
+    assert reach[dips.outlet[upper]] == lower, "but its overflow reaches the dip downhill"
     # 150 mm: the upper dip overflows, the lower is not full, so no water is lost: what both hold together equals what
     # the lower one holds with no upper dip at all
     with_upper = pm.ponding(ground, 150, SPACING, drains_mm=0, runoff=1.0, prepared=prepared)
@@ -118,3 +120,15 @@ def test_first_dip_follows_the_overflow_path_and_ends_at_the_edge():
     label = np.array([-1, -1, 7, -1, -1])
     down = np.array([1, 2, 3, pm.NO_DOWN, 3])     # 0 -> 1 -> 2 (dip 7) -> 3 (edge); 4 -> 3
     assert pm.first_dip(label, down).tolist() == [7, 7, 7, -1, -1]
+
+
+def test_every_dip_overflows_to_a_lower_level_never_back_into_itself():
+    # whole-metre heights give many flat rims at exactly the spill level, where the outlet used to point back in
+    ground = np.random.default_rng(7).integers(0, 6, size=(40, 40)).astype(float)
+    filled, down, dips, ends, reach = pm.prepare(ground, SPACING)
+    assert len(dips.cells) > 10
+    for k, outlet in enumerate(dips.outlet):
+        if outlet >= 0:
+            assert filled.flat[outlet] < dips.level[k], k
+            assert reach[outlet] != k, k
+            assert reach[outlet] < 0 or dips.level[reach[outlet]] < dips.level[k], "only ever to a lower dip"

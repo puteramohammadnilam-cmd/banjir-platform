@@ -101,6 +101,18 @@ def sinks(to: np.ndarray) -> np.ndarray:
         end = nxt
 
 
+def outlet_of(lowest: int, top: float, filled: np.ndarray, down: np.ndarray) -> int:
+    """Where a dip full to `top` overflows: along the overflow path from its lowest square, the first square whose own
+    spill level is lower; NO_DOWN when the path leaves the grid first. Squares of a flat rim, at the same level, are
+    passed over, so the water never comes back into the dip, and it always goes to a lower one."""
+    at = lowest
+    while down[at] >= 0:
+        at = int(down[at])
+        if filled.flat[at] < top:
+            return at
+    return NO_DOWN
+
+
 def find_dips(ground: np.ndarray, filled: np.ndarray, down: np.ndarray, cell_m2: float) -> Dips:
     rows, cols = ground.shape
     wet = (filled - np.nan_to_num(ground, nan=np.inf)) >= MIN_DIP_M
@@ -129,7 +141,7 @@ def find_dips(ground: np.ndarray, filled: np.ndarray, down: np.ndarray, cell_m2:
         heights = ground.flat[members]
         members = members[np.argsort(heights, kind="stable")]
         top = filled.flat[members[0]]
-        exit_at = next((d for d in down[members] if d >= 0 and label[d] != k), NO_DOWN)
+        exit_at = outlet_of(members[0], top, filled, down)
         cells.append(members)
         capacity.append(float(np.sum(top - ground.flat[members]) * cell_m2))
         outlet.append(exit_at)

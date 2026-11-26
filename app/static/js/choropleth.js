@@ -117,7 +117,11 @@ export function createChoropleth(map, renderer, sections, { onOpen, isAiming = (
     const path = L.geoJSON(section.outline, { renderer, interactive: true, bubblingMouseEvents: false });
     path.setStyle({ ...outline(false), ...paint(metric, section, rp) })
       .bindTooltip(() => tooltipNode(metric.tooltip(section, rp)), { sticky: true, direction: "top", className: "choro-tooltip", opacity: 1 })
-      .on("click", (event) => { if (toolClaim.active) toolClaim.onClick?.(event); else if (!isAiming()) onOpen(section.id); })
+      .on("click", (event) => {
+        if (isAiming()) return;
+        if (toolClaim.active) toolClaim.onClick?.(event);
+        else onOpen(section.id);
+      })
       .on("mouseover", () => highlight(section.id))
       .on("mouseout", () => highlight(null))
       .addTo(map);
