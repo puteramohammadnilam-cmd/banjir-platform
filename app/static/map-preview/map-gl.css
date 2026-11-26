@@ -125,6 +125,9 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 .mg-status { position: fixed; left: 14px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px;
   color: var(--mg-ink2); font: 500 11.5px var(--mg-mono); }
 .mg-status b { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a; }
+.mg-status.mg-alert { color: var(--mg-deep); }
+.mg-status.mg-alert b { background: var(--mg-deep); }
+.mg-phone-only { display: none; }
 .mg-problem { position: fixed; top: 50%; left: 50%; z-index: 10; max-width: 26rem; margin: 0; padding: 16px 18px; transform: translate(-50%, -50%); }
 .mg-shelter { width: 18px; height: 16px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.35)); }
 .mg .maplibregl-ctrl-group { border-radius: 10px; box-shadow: var(--mg-shadow); }
@@ -134,6 +137,11 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 @media (max-width: 700px) {
   .mg-top { top: 10px; left: 10px; right: 10px; flex-wrap: wrap; gap: 6px; padding: 6px 8px; }
   .mg-area, .mg-spacer, .mg-tag, .mg-tabs, .mg-layers, .mg-status { display: none; }
+  .mg-status.mg-alert { display: flex; top: 112px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows */
+  .mg-search input { font-size: 16px; }   /* under 16px, iOS zooms the page into the box */
+  .mg-seg button, .mg-seg a { padding: 6px 9px; }
+  .mg-x { width: 44px; height: 44px; }
+  .mg-summary .mg-phone-only { display: flex; }
   .mg-search { flex: 1 1 60%; max-width: none; }
   .mg-lang { order: 3; }
   .mg-side { top: auto; left: 10px; right: 10px; bottom: 16px; width: auto; }

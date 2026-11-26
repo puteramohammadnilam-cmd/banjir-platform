@@ -8,7 +8,7 @@ import { beforeEach, test } from "node:test";
 import { useLang } from "../app/static/js/i18n.js";
 import { sectionCard, shopCard, summaryCard } from "../app/static/js/map-gl-card.js";
 import { badge, depthRamp, distanceKm, nearestShelter, readMapLink, searchIndex, sectionsGeo, shopsGeo, squaresGeo,
-  underRoads, wetTotals } from "../app/static/js/map-gl-data.js";
+  underRoads, wetShops, wetTotals } from "../app/static/js/map-gl-data.js";
 import { installFakeDom } from "./fake_dom.mjs";
 
 const SECTION = { id: "sec-1", name: "Section 1", bbox: [101.5, 3.0, 101.51, 3.01], outline: { type: "Polygon", coordinates: [] },
@@ -78,8 +78,14 @@ test("the base map copies keep the layer our water goes under", () => {
   }
 });
 
-test("the badge grows with the water at the door, and no water or a missing depth is dry", () => {
-  assert.deepEqual([null, -1, 0, 0.2, 0.5, 1.76].map((d) => badge(d).tone), ["dry", "dry", "dry", "watch", "high", "deep"]);
+test("the badge uses the main page's depth bands, and no water or a missing depth is dry", () => {
+  assert.deepEqual([null, -1, 0, 0.2, 0.89, 1.0, 1.76, 2.5].map((d) => badge(d).tone), ["dry", "dry", "dry", "watch", "watch", "high", "deep", "deep"]);
+  assert.deepEqual([0.5, 1.0, 1.76].map((d) => badge(d).key), ["band.1.words", "band.2.words", "band.3.words"]);
+});
+
+test("an area with no sections counts its wet shops itself", () => {
+  const premises = [SHOP, { ...SHOP, id: "node-2", depth_m: { 10: null, 20: null, 50: null } }, { ...SHOP, id: "node-3", depth_m: {} }];
+  assert.equal(wetShops(premises, "50"), 1);
 });
 
 test("the nearest relief centre is the closest by distance, and none listed gives null", () => {
@@ -101,10 +107,20 @@ test("the totals add up wet businesses across sections for the flood size picked
 test("a shop's card says the depth in words, lists each flood size and the nearest centre, and links on", () => {
   const nodes = shopCard(SHOP, { rp: "50", sectionName: "Section 1", shelters: SHELTERS, links: LINKS, onClose() {}, onShare() {} });
   const words = text(nodes);
-  for (const want of ["Kedai Satu", "Very deep", "about 1.8 m of water", "1.76 m", "1.35 m", "Near school", "Full details", "Directions", "2025-12-28"]) {
+  for (const want of ["Kedai Satu", "Over an adult's head", "about 1.8 m of water", "1.76 m", "1.35 m", "Near school", "Full details", "Directions",
+    "2025-12-28", "straight line"]) {
     assert.ok(words.includes(want), want);
   }
   assert.ok(!words.includes("a road with no name"));
+});
+
+test("the card uses the server's nearest relief centre when the shop has one, and opens outside links safely", () => {
+  const shop = { ...SHOP, shelter: { name: "Dewan Server", distance_m: 3773 } };
+  const nodes = shopCard(shop, { rp: "50", sectionName: "", shelters: SHELTERS, links: LINKS });
+  const words = text(nodes);
+  assert.ok(words.includes("Dewan Server") && words.includes("3.8 km") && !words.includes("Near school"));
+  const away = nodes.flatMap((node) => node.children ?? []).find((node) => node.getAttribute?.("target") === "_blank");
+  assert.equal(away.getAttribute("rel"), "noopener noreferrer");
 });
 
 test("a dry shop's card says so, in Malay too", () => {
@@ -118,11 +134,15 @@ test("a section's card gives its share of wet squares and its wet businesses", (
   const props = sectionsGeo([SECTION]).features[0].properties;
   const words = text(sectionCard(props, { rp: "50", link: "./?section=sec-1", onClose() {} }));
   assert.ok(words.includes("25% of squares wet") && words.includes("12 of its 40 businesses"));
+  const tiny = { ...props, s50: 0.003 };
+  assert.ok(text(sectionCard(tiny, { rp: "50", link: "./", onClose() {} })).includes("Under 1% of squares wet"));
 });
 
 test("the flood size card counts wet businesses and marks the size picked", () => {
   const nodes = summaryCard({ wet: 571, all: 2445, rp: "50", onPick() {} });
   assert.ok(text(nodes).includes("571 of 2,445"));
-  const picked = nodes.at(-1).children.filter((button) => button.getAttribute("aria-pressed") === "true");
-  assert.equal(picked.length, 1);
+  assert.ok(text(nodes).includes("businesses get water in the model"));
+  const sizes = nodes.find((node) => node.getAttribute?.("class") === "mg-rp");
+  const picked = sizes.children.filter((button) => button.getAttribute("aria-pressed") === "true");
+  assert.deepEqual(picked.map((button) => button.getAttribute("data-rp")), ["50"]);
 });

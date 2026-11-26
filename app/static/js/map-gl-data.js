@@ -2,14 +2,14 @@
 // section's data turned into GeoJSON, the paint rules that follow the flood size and the theme, where our water goes
 // in a base map's layers, the place card's badge and the nearest relief centre. map-gl.js draws with them.
 // Look and layering adapted from Arus by Farhan Syah (MIT, vendor/LICENSE-arus.txt).
-import { SCENARIOS } from "./dom.js";
+import { ADULT_M, COUNTER_M, SCENARIOS, band } from "./dom.js";
 import { readUrl } from "./place.js";
 
 export const BASEMAPS = ["map", "sat", "dark"];
 export const STYLE_FILES = { map: "vendor/openfreemap/positron.json", dark: "vendor/openfreemap/dark.json" };
 const NO_DEPTH = -1;   // GeoJSON has no null in a paint rule: dry squares and shops carry -1
-const SHALLOW_M = 0.3;
-const DEEP_M = 1;
+// the badge's tone for each of the main page's depth bands (dom.js BANDS): up to the counter, over it, over a head...
+const BAND_TONES = ["watch", "high", "deep", "deep", "deep"];
 const EARTH_KM = 6371;
 // the first base-map layer our water goes under: buildings, roads and every name stay drawn over it (Arus,
 // findFloodInsertBeforeId)
@@ -74,8 +74,9 @@ export function depthRamp(rp, isDark) {
   return ["step", ["get", `d${rp}`], "rgba(0,0,0,0)", 0, ...steps];
 }
 
-/** A shop's dot: grey when the model keeps it dry, then yellow, orange and red as the water at its door deepens. */
-export const shopColour = (rp) => ["step", ["get", `d${rp}`], "#94a3b8", 0, "#eab308", SHALLOW_M, "#f97316", DEEP_M, "#e11d48"];
+/** A shop's dot: grey when the model keeps it dry, then yellow up to counter height, orange over the counter and red
+ *  over an adult's head, the main page's depth bands (dom.js). */
+export const shopColour = (rp) => ["step", ["get", `d${rp}`], "#94a3b8", 0, "#eab308", COUNTER_M, "#f97316", ADULT_M, "#e11d48"];
 
 /** A section's shading by its share of wet squares, as the main page's choropleth bands it. */
 export const sectionFill = (rp) => ["step", ["get", `s${rp}`], "rgba(0,0,0,0)", 0.0001, "#93c5fd", 0.05, "#60a5fa",
@@ -86,12 +87,10 @@ export function underRoads(layers = []) {
   return (layers.find((layer) => OVER_WATER.test(layer.id)) ?? layers.find((layer) => layer.type === "symbol"))?.id;
 }
 
-/** The place card's badge for the water at a door: its tone and its words' key. */
+/** The place card's badge for the water at a door: its tone and its words' key, the main page's band words. */
 export function badge(depth) {
-  if (!(typeof depth === "number" && depth > 0)) return { tone: "dry", key: "mg.badge.dry" };
-  if (depth < SHALLOW_M) return { tone: "watch", key: "mg.badge.shallow" };
-  if (depth < DEEP_M) return { tone: "high", key: "mg.badge.deep" };
-  return { tone: "deep", key: "mg.badge.veryDeep" };
+  const n = band(depth);
+  return n ? { tone: BAND_TONES[n - 1], key: `band.${n}.words` } : { tone: "dry", key: "mg.badge.dry" };
 }
 
 /** Great-circle distance in km between two {lat, lon}. */
@@ -117,6 +116,9 @@ export function searchIndex(index, words, limit = 6) {
   if (wanted.length < 2) return [];
   return index.filter((entry) => entry.name?.toLowerCase().includes(wanted)).slice(0, limit);
 }
+
+/** Shops with water at the door in the model for a flood size: an area with no sections counts its shops itself. */
+export const wetShops = (premises, rp) => premises.filter((p) => band(p.depth_m?.[rp]) > 0).length;
 
 /** Wet businesses across the area for a flood size, and all of them. */
 export function wetTotals(sections, rp) {

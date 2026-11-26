@@ -1,49 +1,62 @@
 /* global maplibregl */
-// The new map, a preview (map.html, ?map preview of the Area overview): MapLibre on OpenFreeMap's vector base maps
-// (copies in vendor/openfreemap, so a change there cannot move our water over the names), Esri's satellite photo through
-// our key (app/satellite.py), floating cards, and a place card for a shop or a section. The area's sections are shaded
-// at once; a section's squares and shops load when it is opened (one GET each, as the main page does). No pin, no
-// engineer tools yet: the main page keeps those, and Leaflet, until this map has them.
-// Look adapted from Arus by Farhan Syah (MIT, vendor/LICENSE-arus.txt). The words are in strings/*-map.js.
+// The new map, a preview (map.html) of the Area overview: MapLibre on OpenFreeMap's vector base maps (copies in
+// vendor/openfreemap, so a change there cannot move our water over the names), Esri's satellite photo through our key
+// (app/satellite.py), floating cards, and a place card for a shop or a section. A city split into sections is shaded at
+// once and a section's squares and shops load when it is opened (one GET each, as the main page does); an area with no
+// sections shows all its squares and shops at once. No pin, no engineer tools yet: the main page keeps those, and
+// Leaflet, until this map has them. Look adapted from Arus by Farhan Syah (MIT, vendor/LICENSE-arus.txt). The words are
+// in strings/*-map.js.
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { lang, t } from "./i18n.js";
 import { layersCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
 import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squaresGeo,
-  underRoads, wetTotals } from "./map-gl-data.js";
+  underRoads, wetShops, wetTotals } from "./map-gl-data.js";
 import { writeUrl } from "./place.js";
 
-maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");   // the CSP build runs its worker from our own file
 const $ = (id) => document.getElementById(id);
 const PHONE = window.matchMedia("(max-width: 700px)");
 const motionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const EMPTY = { type: "FeatureCollection", features: [] };
 const FLY_MS = 900;
 const SHOP_ZOOM = 16;
+const HIT_PX = 6;   // a tap this close to a shop's dot picks the shop
 const FIT_PAD = { top: 120, bottom: 60, left: 380, right: 280 };   // the cards over the map's edges (map-preview/map-gl.css)
 const PHONE_PAD = { top: 80, bottom: 120, left: 20, right: 20 };
+const NO_PAD = { top: 0, bottom: 0, left: 0, right: 0 };
 const TILT = { pitch: 55, bearing: -18 };
 
 const st = {
   link: readMapLink(window.location.search, window.location.hash),
   area: null, sections: [], index: [], shelters: [], satellite: null, styles: {},
-  shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null,
-  visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null,
+  shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
+  visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
 };
 st.rp = st.link.rp;
 st.base = st.link.base;
 st.tilt = st.link.tilt;
 
 const isDark = () => st.base !== "map";
-const pageLink = (extra = {}) => writeUrl({ area: st.area?.id, section: st.section, rp: st.rp, lang: lang === "en" ? null : lang, ...extra });
-const mainLink = (extra) => `./${pageLink(extra)}`;
-const say = (words) => { $("mg-hint").textContent = words; };
+const duration = () => (motionAllowed() ? FLY_MS : 0);
+const langParam = (code = lang) => (code === "en" ? null : code);
+const mainLink = (extra) => `./${writeUrl({ area: st.area?.id, section: st.section, rp: st.rp, lang: langParam(), ...extra })}`;
+const hint = () => t(st.sections.length ? "mg.hint" : "mg.hintShops");
+const sectionName = (id) => st.sections.find((section) => section.id === id)?.name ?? "";
+
+/** The words at the foot of the map; a problem also shows on phones, where the strip is otherwise hidden. */
+function say(words, isProblem = false) {
+  $("mg-hint").textContent = words;
+  $("mg-hint").closest(".mg-status").classList.toggle("mg-alert", isProblem);
+}
 
 /* ---- the base maps ---- */
 
 async function baseStyle(base) {
   if (base === "sat") return satelliteStyle();
-  st.styles[base] ??= await fetch(STYLE_FILES[base]).then((r) => r.json());
+  st.styles[base] ??= await fetch(STYLE_FILES[base]).then((r) => {
+    if (!r.ok) throw new Error(`${r.status}`);
+    return r.json();
+  });
   return st.styles[base];
 }
 
@@ -63,20 +76,22 @@ async function satelliteTiles() {
   }
 }
 
+/** The cards follow the base map: light over the street map, dark over the dark map and the photo. */
+function applyTheme() {
+  document.documentElement.dataset.theme = isDark() ? "dark" : "light";
+  document.querySelectorAll("[data-base]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.base === st.base)));
+}
+
 /* ---- our layers: sections, squares, shops ---- */
 
-const squaresData = () => squaresGeo([...st.cells.values()], st.cellDeg);
+const squaresData = () => (st.cellDeg ? squaresGeo([...st.cells.values()], st.cellDeg) : EMPTY);
 const shopsData = () => shopsGeo([...st.shops.values()]);
-
-function addSources(map) {
-  map.addSource("mg-sections", { type: "geojson", data: sectionsGeo(st.sections) });
-  map.addSource("mg-squares", { type: "geojson", data: st.cellDeg ? squaresData() : EMPTY });
-  map.addSource("mg-shops", { type: "geojson", data: shopsData() });
-}
 
 function addOurLayers(map) {
   if (!st.area || map.getSource("mg-sections")) return;
-  addSources(map);
+  map.addSource("mg-sections", { type: "geojson", data: sectionsGeo(st.sections) });
+  map.addSource("mg-squares", { type: "geojson", data: squaresData() });
+  map.addSource("mg-shops", { type: "geojson", data: shopsData() });
   const before = underRoads(map.getStyle().layers);
   const fade = (from, to) => ["interpolate", ["linear"], ["zoom"], 12, from, 16, to];
   map.addLayer({ id: "mg-section-fill", type: "fill", source: "mg-sections", paint: { "fill-color": sectionFill(st.rp), "fill-opacity": fade(0.42, 0.1) } }, before);
@@ -113,55 +128,67 @@ function showLayers(map) {
 }
 
 function paintFloodSize(map) {
-  if (!map.getLayer("mg-squares")) return;
+  if (!map?.getLayer("mg-squares")) return;
   map.setPaintProperty("mg-squares", "fill-color", depthRamp(st.rp, isDark()));
   map.setPaintProperty("mg-shops", "circle-color", shopColour(st.rp));
   map.setPaintProperty("mg-section-fill", "fill-color", sectionFill(st.rp));
 }
 
-/* ---- a section's squares and shops ---- */
+const markPicked = (id) => st.map?.getLayer("mg-picked") && st.map.setFilter("mg-picked", ["==", ["get", "id"], id ?? ""]);
+
+/* ---- squares and shops: a section's, or a whole area's ---- */
+
+function keep({ cells = [], premises = [], cellDeg }) {
+  if (cellDeg) st.cellDeg = cellDeg;
+  cells.forEach((cell) => st.cells.set(`${cell[0]},${cell[1]}`, cell));
+  premises.forEach((premise) => st.shops.set(premise.id, premise));
+  st.map?.getSource("mg-squares")?.setData(squaresData());
+  st.map?.getSource("mg-shops")?.setData(shopsData());
+}
 
 async function loadSection(sectionId) {
   if (st.loaded.has(sectionId)) return;
-  const name = st.sections.find((section) => section.id === sectionId)?.name ?? sectionId;
-  say(t("mg.sectionLoading", { name }));
+  say(t("mg.sectionLoading", { name: sectionName(sectionId) || sectionId }));
   const data = await api.getSectionData(st.area.id, sectionId);
   st.loaded.add(sectionId);
-  st.cellDeg = data.town.cell_deg;
-  data.town.cells.forEach((cell) => st.cells.set(`${cell[0]},${cell[1]}`, cell));
-  data.premises.forEach((premise) => st.shops.set(premise.id, premise));
-  st.map.getSource("mg-squares")?.setData(squaresData());
-  st.map.getSource("mg-shops")?.setData(shopsData());
-  say(t("mg.hint"));
+  keep({ cells: data.town.cells, premises: data.premises, cellDeg: data.town.cell_deg });
+  say(hint());
 }
 
 function fitSection(sectionId) {
   const bbox = st.sections.find((section) => section.id === sectionId)?.bbox;
-  if (bbox) st.map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: PHONE.matches ? PHONE_PAD : FIT_PAD, duration: motionAllowed() ? FLY_MS : 0, maxZoom: 16 });
+  if (bbox) st.map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: PHONE.matches ? PHONE_PAD : FIT_PAD, duration: duration(), maxZoom: 16 });
 }
 
 /* ---- the place card ---- */
 
-function showCard(nodes) {
+function showCard(nodes, { focus = true } = {}) {
   const card = $("mg-place");
+  if (card.hidden && !card.contains(document.activeElement)) st.returnFocus = document.activeElement;
   card.replaceChildren(...nodes);
   card.hidden = false;
-  card.querySelector("h2")?.focus({ preventScroll: true });
+  if (focus) card.querySelector("h2")?.focus({ preventScroll: true });
 }
 
 function closeCard() {
+  const wasOpen = !$("mg-place").hidden;
   st.picked = null;
+  st.card = null;
   $("mg-place").hidden = true;
-  st.map?.getLayer("mg-picked") && st.map.setFilter("mg-picked", ["==", ["get", "id"], ""]);
+  markPicked(null);
   writeLink();
-  say(t("mg.hint"));
+  say(hint());
+  if (!wasOpen) return;
+  if (PHONE.matches) st.map?.easeTo({ padding: NO_PAD, duration: duration() });
+  const back = st.returnFocus?.isConnected && st.returnFocus !== document.body ? st.returnFocus : st.map?.getCanvas();
+  back?.focus({ preventScroll: true });
 }
 
 function shopLinks(shop) {
   const at = { section: shop.section, place: shop.id };
   return {
     details: mainLink({ ...at, tab: "business" }), cost: mainLink({ ...at, tab: "cost" }),
-    see3d: st.area.has_3d ? `3d.html${writeUrl({ area: st.area.id, ...at, rp: st.rp })}` : null,
+    see3d: st.area.has_3d && shop.has_3d !== false ? `3d.html${writeUrl({ area: st.area.id, ...at, rp: st.rp })}` : null,
     directions: `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`,
   };
 }
@@ -172,59 +199,89 @@ async function share() {
   await navigator.clipboard?.writeText(url).then(() => say(t("mg.shared")), () => {});
 }
 
-function showShop(shop, { fly = false } = {}) {
+function showShop(shop, { fly = false, focus = true, move = true } = {}) {
   st.picked = shop.id;
+  st.card = { kind: "shop", id: shop.id };
   st.section = shop.section ?? st.section;
-  st.map.getLayer("mg-picked") && st.map.setFilter("mg-picked", ["==", ["get", "id"], shop.id]);
-  const sectionName = st.sections.find((section) => section.id === shop.section)?.name ?? "";
-  showCard(shopCard(shop, { rp: st.rp, sectionName, shelters: st.shelters, links: shopLinks(shop), onClose: closeCard, onShare: share }));
-  // on a phone the card is a sheet over the map's lower part, so the shop goes in the part still showing
-  const padding = PHONE.matches ? { bottom: $("mg-place").offsetHeight } : undefined;
-  const duration = motionAllowed() ? FLY_MS : 0;
-  if (fly) st.map.flyTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), padding, duration });
-  else if (padding) st.map.easeTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM - 1), padding, duration });
+  markPicked(shop.id);
+  showCard(shopCard(shop, { rp: st.rp, sectionName: sectionName(shop.section), shelters: st.shelters, links: shopLinks(shop),
+    onClose: closeCard, onShare: share }), { focus });
   writeLink();
   say(shop.name);
+  if (!move) return;
+  // on a phone the card is a sheet over the map's lower part, so the shop goes in the part still showing
+  const padding = PHONE.matches ? { ...NO_PAD, bottom: $("mg-place").offsetHeight } : undefined;
+  if (fly) st.map.flyTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), padding, duration: duration() });
+  else if (padding) st.map.easeTo({ center: [shop.lon, shop.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM - 1), padding, duration: duration() });
+}
+
+function showSection(sectionId, { focus = true } = {}) {
+  const props = sectionsGeo(st.sections).features.find((f) => f.properties.id === sectionId)?.properties;
+  if (!props) return;
+  st.card = { kind: "section", id: sectionId };
+  showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
 }
 
 async function openSection(sectionId, { fit = true } = {}) {
   st.section = sectionId;
   st.picked = null;
-  st.map.getLayer("mg-picked") && st.map.setFilter("mg-picked", ["==", ["get", "id"], ""]);
-  const props = sectionsGeo(st.sections).features.find((f) => f.properties.id === sectionId)?.properties;
-  if (props) showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }));
+  markPicked(null);
+  showSection(sectionId);
   if (fit) fitSection(sectionId);
   writeLink();
-  await loadSection(sectionId).catch((error) => say(t("mg.failed", { why: error.message })));
+  await loadSection(sectionId).catch((error) => say(t("mg.failed", { why: error.message }), true));
 }
 
+/** A shop picked in the search: its section loads first; a later pick or click wins over a slow load. */
 async function openShop(entry) {
-  await openSection(entry.section, { fit: false });
+  st.want = entry.id;
+  if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
-  if (shop) showShop(shop, { fly: true });
+  if (shop && st.want === entry.id) showShop(shop, { fly: true });
 }
 
-/** This page's own address for what is on show, so a shared link opens the same view. */
+/* ---- this page's link, and the links that carry it ---- */
+
+/** The query for what is on show: the main page's fields, then the base map and the tilt. */
+function mapQuery(extra = {}) {
+  const query = writeUrl({ area: st.area?.id, section: st.section, place: st.picked, rp: st.rp, lang: langParam(), ...extra });
+  const more = [st.base === "map" ? null : `base=${st.base}`, st.tilt ? "tilt=1" : null].filter(Boolean).join("&");
+  return more ? `${query}${query.length > 1 ? "&" : ""}${more}` : query;
+}
+
+/** This page's own address for what is on show, so a shared link opens the same view; the language, home and tab
+ *  links follow it. */
 function writeLink() {
-  const query = writeUrl({ area: st.area?.id, section: st.section, place: st.picked, rp: st.rp, lang: lang === "en" ? null : lang });
-  const base = st.base === "map" ? "" : `${query.length > 1 ? "&" : ""}base=${st.base}`;
-  window.history.replaceState(null, "", `map.html${query}${base}`);
+  window.history.replaceState(null, "", `map.html${mapQuery()}`);
+  drawLinks();
+}
+
+function drawLinks() {
+  if (!st.area) return;
+  const langLink = (code, label) => h("a", { href: `map.html${mapQuery({ lang: code })}`, "aria-current": code === lang ? "true" : null }, label);
+  $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
+  $("mg-home").href = mainLink({ place: st.picked });
+  const tab = (key) => h("a", { href: mainLink({ place: st.picked, tab: key === "overview" ? null : key }), "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
+  $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
 }
 
 /* ---- the bar, the cards and their controls ---- */
 
 function drawSummary() {
-  const { wet } = wetTotals(st.sections, st.rp);
-  const all = st.area.counts?.businesses ?? wetTotals(st.sections, st.rp).all;
+  const wet = st.sections.length ? wetTotals(st.sections, st.rp).wet : wetShops([...st.shops.values()], st.rp);
+  const all = st.area.counts?.businesses ?? st.shops.size;
   $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize }));
 }
 
 function pickFloodSize(rp) {
+  const hadFocus = $("mg-summary").contains(document.activeElement);
   st.rp = rp;
   paintFloodSize(st.map);
   drawSummary();
-  const shop = st.picked && st.shops.get(st.picked);
-  if (shop) showShop(shop);
+  if (hadFocus) $("mg-summary").querySelector(`[data-rp="${rp}"]`)?.focus();
+  const shop = st.card?.kind === "shop" && st.shops.get(st.card.id);
+  if (shop) showShop(shop, { focus: false, move: false });
+  else if (st.card?.kind === "section") showSection(st.card.id, { focus: false });
   writeLink();
 }
 
@@ -235,13 +292,23 @@ function drawLayers() {
   }));
 }
 
+/** Another base map: the style is fetched first, and a later pick wins; on a failure the old map and its look stay. */
 async function pickBase(base) {
   if (base === st.base) return;
+  const before = st.base;
   st.base = base;
-  document.documentElement.dataset.theme = isDark() ? "dark" : "light";
-  document.querySelectorAll("[data-base]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.base === base)));
-  st.map.setStyle(await baseStyle(base), { diff: false });   // a diffed swap fires no style.load, so ours would not come back
-  writeLink();
+  applyTheme();
+  try {
+    const style = await baseStyle(base);
+    if (st.base !== base) return;
+    st.map.setStyle(style, { diff: false });   // a diffed swap fires no style.load, so ours would not come back
+    writeLink();
+  } catch (error) {
+    if (st.base !== base) return;
+    st.base = before;
+    applyTheme();
+    say(t("mg.failed", { why: error.message }), true);
+  }
 }
 
 function toggleTilt() {
@@ -249,51 +316,53 @@ function toggleTilt() {
   $("mg-tilt").setAttribute("aria-pressed", String(st.tilt));
   if (st.tilt) addBuildings(st.map);
   else if (st.map.getLayer("mg-buildings")) st.map.removeLayer("mg-buildings");
-  st.map.easeTo({ ...(st.tilt ? TILT : { pitch: 0, bearing: 0 }), duration: motionAllowed() ? FLY_MS : 0 });
+  st.map.easeTo({ ...(st.tilt ? TILT : { pitch: 0, bearing: 0 }), duration: duration() });
+  writeLink();
 }
 
 function drawBar() {
   const base = (key) => h("button", { type: "button", "data-base": key, "aria-pressed": String(key === st.base), onclick: () => pickBase(key) }, t(`mg.base.${key}`));
-  const bases = ["map", ...(st.satellite ? ["sat"] : []), "dark"];
-  $("mg-bases").replaceChildren(...bases.map(base));
-  $("mg-tilt").textContent = t("mg.tilt");
+  $("mg-bases").replaceChildren(...["map", ...(st.satellite ? ["sat"] : []), "dark"].map(base));
+  Object.assign($("mg-tilt"), { textContent: t("mg.tilt"), title: t("mg.tiltLabel"), onclick: toggleTilt });
   $("mg-tilt").setAttribute("aria-pressed", String(st.tilt));
-  $("mg-tilt").onclick = toggleTilt;
-  const langLink = (code, label) => h("a", { href: `map.html${writeUrl({ area: st.area.id, section: st.section, place: st.picked, rp: st.rp, lang: code })}`,
-    "aria-current": code === lang ? "true" : null }, label);
-  $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
   $("mg-area").textContent = st.area.display_name ?? st.area.name;
-  $("mg-home").href = mainLink({});
   $("mg-home").setAttribute("aria-label", t("mg.back"));
-  Object.assign($("mg-q"), { placeholder: t("mg.search") });
+  $("mg-q").placeholder = t("mg.search");
   $("mg-q").setAttribute("aria-label", t("mg.searchLabel"));
-  $("mg-tag").textContent = t("mg.preview");
-  $("mg-tag").title = t("mg.previewNote");
-  $("mg-tilt").title = t("mg.tiltLabel");
+  Object.assign($("mg-tag"), { textContent: t("mg.preview"), title: t("mg.previewNote") });
   $("mg-bases").setAttribute("aria-label", t("mg.base.label"));
   $("mg-lang").setAttribute("aria-label", t("mg.lang"));
   $("mg-tabs").setAttribute("aria-label", t("mg.tabsLabel"));
   $("mg-status").textContent = t("mg.status");
-  const tab = (key) => h("a", { href: key === "overview" ? mainLink({}) : mainLink({ tab: key }), "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
-  $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
+  drawLinks();
 }
 
 function wireSearch() {
   const box = $("mg-results");
-  const pick = (entry) => () => { box.hidden = true; $("mg-q").value = entry.name; openShop(entry); };
-  $("mg-q").addEventListener("input", (event) => {
-    const hits = searchIndex(st.index, event.target.value);
-    const sectionName = (id) => st.sections.find((section) => section.id === id)?.name ?? "";
+  const input = $("mg-q");
+  const close = () => { box.hidden = true; };
+  const pick = (entry) => () => { close(); input.value = entry.name; openShop(entry); };
+  input.addEventListener("input", () => {
+    const hits = searchIndex(st.index, input.value);
     box.replaceChildren(...(hits.length
       ? hits.map((entry) => h("button", { type: "button", onclick: pick(entry) }, entry.name, h("small", {}, sectionName(entry.section))))
       : [h("p", { class: "mg-muted mg-small" }, t("mg.noMatch"))]));
-    box.hidden = event.target.value.trim().length < 2;
+    box.hidden = input.value.trim().length < 2;
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || box.hidden) return;
+    event.stopPropagation();   // the first Escape closes the list, not the place card
+    close();
+  });
+  input.closest(".mg-search").addEventListener("focusout", (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) close();
   });
 }
 
 function addShelters(map) {
   st.markers = st.shelters.map((shelter) => {
-    const mark = h("div", { class: "mg-shelter", title: `${t("mg.shelterTitle")}: ${shelter.name}`, role: "img", "aria-label": `${t("mg.shelterTitle")}: ${shelter.name}` },
+    const words = `${t("mg.shelterTitle")}: ${shelter.name}`;
+    const mark = h("div", { class: "mg-shelter", title: words, role: "img", "aria-label": words },
       s("svg", { width: "18", height: "16", viewBox: "0 0 18 16", "aria-hidden": "true" },
         s("path", { d: "M9 1 17 15H1z", fill: "#16a34a", stroke: "#fff", "stroke-width": "1.6", "stroke-linejoin": "round" })));
     return new maplibregl.Marker({ element: mark }).setLngLat([shelter.lon, shelter.lat]).addTo(map);
@@ -304,7 +373,10 @@ function addShelters(map) {
 
 function onMapClick(event) {
   const map = st.map;
-  const shop = map.queryRenderedFeatures(event.point, { layers: ["mg-shops"] })[0];
+  $("mg-results").hidden = true;
+  st.want = null;
+  const { x, y } = event.point;
+  const shop = map.queryRenderedFeatures([[x - HIT_PX, y - HIT_PX], [x + HIT_PX, y + HIT_PX]], { layers: ["mg-shops"] })[0];
   const found = shop && st.shops.get(shop.properties.id);
   if (found) return showShop(found);
   const section = map.queryRenderedFeatures(event.point, { layers: ["mg-section-hit"] })[0];
@@ -329,43 +401,53 @@ function openMap(style) {
   return map;
 }
 
-function showProblem(words, withLink = false) {
-  $("mg-problem").replaceChildren(words, withLink ? h("a", { href: "./" }, ` ${t("mg.toMain")}`) : null);
+function showProblem(words) {
+  $("mg-problem").replaceChildren(words, " ", h("a", { href: "./" }, t("mg.toMain")));
   $("mg-problem").hidden = false;
+  say(words, true);
 }
 
 async function startFromLink() {
   const { section, place } = st.link;
-  if (!section || !st.sections.some((known) => known.id === section)) return;
-  await openSection(section);
+  if (section && st.sections.some((known) => known.id === section)) await openSection(section);
   const shop = place && st.shops.get(place);
   if (shop) showShop(shop);
+}
+
+/** The area's data and its base map; false, with the problem shown, when either cannot be had. */
+async function load() {
+  try {
+    const [data, satellite] = await Promise.all([st.link.area ? api.getAreaData(st.link.area) : api.getDefaultData(), satelliteTiles()]);
+    Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite });
+    if (!st.sections.length) keep({ cells: data.town?.cells, premises: data.premises, cellDeg: data.town?.cell_deg });
+    if (st.base === "sat" && !satellite) st.base = "map";
+    return await baseStyle(st.base);
+  } catch (error) {
+    showProblem(t("mg.failed", { why: error.message }));
+    return null;
+  }
 }
 
 async function start() {
   document.title = t("mg.title");
   document.documentElement.lang = lang;
-  document.documentElement.dataset.theme = isDark() ? "dark" : "light";
   $("mg-map").setAttribute("aria-label", t("mg.mapLabel"));
   say(t("mg.loading"));
-  let data;
-  try {
-    [data, st.satellite] = await Promise.all([st.link.area ? api.getAreaData(st.link.area) : api.getDefaultData(), satelliteTiles()]);
-  } catch (error) {
-    return showProblem(t("mg.failed", { why: error.message }), true);
-  }
-  Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [] });
-  if (st.base === "sat" && !st.satellite) st.base = "map";
+  if (!window.maplibregl) return showProblem(t("mg.noWebgl"));
+  maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js");   // the CSP build runs its worker from our own file
+  const style = await load();
+  if (!style) return undefined;
+  applyTheme();
   drawBar(); drawSummary(); drawLayers(); wireSearch();
   try {
-    st.map = openMap(await baseStyle(st.base));
+    st.map = openMap(style);
   } catch {
-    return showProblem(t("mg.noWebgl"), true);
+    return showProblem(t("mg.noWebgl"));
   }
   addShelters(st.map);
   document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCard(); });
-  say(t("mg.hint"));
-  await startFromLink();
+  say(hint());
+  return startFromLink();
 }
 
 start();
