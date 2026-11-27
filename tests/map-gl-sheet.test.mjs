@@ -36,7 +36,7 @@ beforeEach(() => {
 function mount(status = { maps_ready: true, ai_ready: true }) {
   const sheet = document.createElement("section");
   sheet.hidden = true;
-  const panels = { business: document.createElement("div"), cost: document.createElement("div"), insurance: document.createElement("div") };
+  const panels = Object.fromEntries(["overview", "business", "cost", "insurance", "reference"].map((tab) => [tab, document.createElement("div")]));
   const back = document.createElement("button");
   const label = document.createElement("span");
   const changed = [];
@@ -105,7 +105,7 @@ test("moving between the sheet's tabs adds no step, shows one tab at a time, and
   place.open("cost", shop, HOME, "20");
   await settle();
   assert.equal(label.textContent, "Flood cost");
-  assert.deepEqual(["business", "cost", "insurance"].map((tab) => panels[tab].hidden), [true, false, true]);
+  assert.deepEqual(["overview", "business", "cost", "insurance", "reference"].map((tab) => panels[tab].hidden), [true, true, false, true, true]);
   place.open("insurance", shop, HOME, "20");
   assert.equal(steps.pushed, 1);
   assert.equal(place.tab(), "insurance");
@@ -118,4 +118,20 @@ test("the flood plan and Compare places come under My business, with a place", (
   place.open("business", shop, HOME, "20");
   const names = panels.business.children.map((child) => child.getAttribute?.("class") ?? "");
   assert.ok(names.some((name) => name.includes("plan-card")) && names.some((name) => name.includes("compare-card")));
+});
+
+test("the area's tabs draw through their own panel, with no place and nothing asked for", async () => {
+  const drawn = [];
+  const sheet = document.createElement("section");
+  sheet.hidden = true;
+  const panels = Object.fromEntries(["overview", "business", "cost", "insurance", "reference"].map((tab) => [tab, document.createElement("div")]));
+  const place = createPlaceSheet({ sheet, panels, back: document.createElement("button"), label: document.createElement("span"),
+    status: { maps_ready: true }, areas: async () => [], about: { overview: { render: (rp) => drawn.push(["overview", rp]) }, reference: { render: () => drawn.push(["reference"]) } },
+    on: { pickRp() {}, showOnMap() {}, movePin() {}, goto() {}, ask() {}, openArea() {}, openCompared() {}, find() {}, checkPoint: null, changed() {} } });
+  place.open("overview", null, HOME, "20");
+  place.open("reference", null, HOME, "20");
+  await settle();
+  assert.deepEqual(drawn.slice(0, 2), [["overview", "20"], ["reference"]]);   // and again when the areas list comes
+  assert.equal(panels.reference.hidden, false);
+  assert.deepEqual(asked.filter((path) => path !== "/api/areas"), [], "no listing, car spot or estimate for the area's tabs");
 });

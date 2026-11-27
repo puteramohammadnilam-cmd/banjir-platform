@@ -5,20 +5,21 @@
 // whole city's map what the sections are shaded by (susceptibility.js), and the low ground layer's (lowground.js).
 import { SQUARE_RAMP } from "./cells.js";
 import { DEPTH_METRIC, FLASH_METRIC, SCORE_METRIC, choroplethKey, createChoropleth } from "./choropleth.js";
-import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, ringgit, roadName } from "./dom.js";
+import { BANDS, SCENARIOS, band, depthText, h, icon, kindText, renderPicker, roadName } from "./dom.js";
 import { createEvacuation } from "./evacuation.js";
 import { createTide } from "./tide.js";
 import { createOutlook } from "./outlook.js";
 import { renderHistory } from "./history.js";
-import { dataWord, numberLocale, t } from "./i18n.js";
+import { dataWord, t } from "./i18n.js";
 import { createKpis } from "./kpis.js";
 import { createLowGround } from "./lowground.js";
 import { createMap, createPictureLayer } from "./map.js";
 import { createScopeBar } from "./scope.js";
 import { renderStamp, scenarioSentence } from "./stamp.js";
 import { createSectionTable } from "./section-table.js";
+import { listNotes, renderLosses, renderMethod } from "./reference-cards.js";
 import {
-  FLASH_RAMP, LAYER_OPACITY, flashWord, highShare, mapControls, methodBody, rampSwatch, scoreOf, showsScore,
+  FLASH_RAMP, LAYER_OPACITY, flashWord, highShare, mapControls, rampSwatch, scoreOf, showsScore,
 } from "./susceptibility.js";
 
 const $ = (id) => document.getElementById(id);
@@ -83,14 +84,6 @@ export function createIndexControls(slot, { map, layer, metrics, word = null, va
   });
   slot.replaceChildren(...(nodes.length ? [...nodes, alert] : []), ...extra);
   slot.hidden = nodes.length + extra.length === 0;
-}
-
-/** "How these are worked out" (`details`, its words in `body`), where the area has the index's method or layer. */
-export function renderMethod(details, body, area, { word = null } = {}) {
-  const method = area.index_method ?? null;
-  const layer = area.layers?.flash_flood ?? null;
-  details.hidden = !method && !layer;
-  body.replaceChildren(...(details.hidden ? [] : methodBody(method, { showScore: showsScore(method), word, credit: layer?.credit ?? null })));
 }
 
 const depthChip = (depth, rp) => {
@@ -198,34 +191,6 @@ export function createCityDirectory(parts, index, { area, sections, ...ways }) {
 
 /** The area's data notes in the Reference tab, open to read, each under its short heading; the card is hidden when the
  *  area has none. */
-function listNotes(element, card, notes) {
-  const shown = notes.filter(([, text]) => text);
-  element.replaceChildren(...shown.flatMap(([key, text]) => [h("h3", { class: "small-heading" }, t(key)), h("p", {}, text)]));
-  card.hidden = !shown.length;
-}
-
-// From RM 10 million a loss is said in millions, one decimal; below that in full, so RM 1,049,000 keeps its 49,000.
-const MILLIONS_FROM_RM_THOUSAND = 10_000;
-/** A loss in RM thousand, as people read it: "RM 396.4 million", "RM 1,049,000", or none recorded. */
-export const lossWords = (thousand) => (thousand === 0 ? t("losses.none")
-  : thousand >= MILLIONS_FROM_RM_THOUSAND
-    ? t("losses.million", { n: (thousand / 1000).toLocaleString(numberLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })
-    : ringgit(thousand * 1000));
-
-/** The Reference tab's card of past flood losses to business premises, from the area's config (`losses`), with its note
- *  and source; hidden for an area that has none. Place names come from the config, never from the page's strings. */
-function renderLosses(losses) {
-  $("losses-card").hidden = !losses;
-  if (!losses) return;
-  const head = h("tr", {}, h("th", { scope: "col" }, t("losses.year")), losses.places.map((place) => h("th", { scope: "col" }, place)));
-  const rows = losses.years.map((row) => h("tr", { class: row.rm_thousand.every((v) => v === 0) ? "is-none" : null },
-    h("th", { scope: "row" }, String(row.year)), row.rm_thousand.map((value) => h("td", {}, lossWords(value)))));
-  $("losses-body").replaceChildren(
-    h("div", { class: "table-scroll" }, h("table", { class: "loss-table losses-table" },
-      h("caption", { class: "visually-hidden" }, t("losses.caption")), h("thead", {}, head), h("tbody", {}, rows))),
-    h("p", {}, losses.note), h("p", { class: "fineprint" }, losses.source));
-}
-
 /** The area's data notes, each folded under a short heading of what it tells ([key, text] pairs; a note the area does
  *  not have is left out). Long and needed by few, so they are there to open, not to wade through. */
 function foldNotes(element, notes) {
@@ -238,6 +203,8 @@ function foldNotes(element, notes) {
  *  and what the area's data notes say about where its businesses and relief centres come from (an area may have no notes).
  *  On the whole city's map (`city` given, with its `word` for a section) the map is about the sections' shading, and the
  *  table of sections under it, which holds the same figures, describes it. */
+export { lossWords, renderMethod } from "./reference-cards.js";   // tests and older callers read them here
+
 export function renderAreaLabels(area, city = null) {
   $("finder-hero-label").textContent = t("hero.headingIn", { area: area.name });
   $("directory-heading").textContent = t("overview.directoryHeading", { area: area.name });

@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="styles/cost.css">
   <link rel="stylesheet" href="styles/insurance.css">
   <link rel="stylesheet" href="styles/chat.css">
+  <link rel="stylesheet" href="styles/reference.css">
   <link rel="stylesheet" href="map-preview/map-gl.css">
   <script src="vendor/maplibre-gl-csp.js"></script>
   <script type="module" src="js/map-gl.js"></script>
@@ -63,23 +64,157 @@
   </div>
   <div class="mg-cross" id="mg-cross" aria-hidden="true" hidden></div>
 
-  <!-- the place's tabs, a sheet over the map (js/map-gl-sheet.js): the old interface's My business, Flood cost and
-       Insurance in this map's look -->
+  <!-- the site's tabs, a sheet over the map (js/map-gl-sheet.js): the old interface's Area overview cards, My business,
+       Flood cost, Insurance and Reference in this map's look -->
   <section class="mg-sheet" id="mg-sheet" aria-labelledby="mg-sheet-label" hidden>
     <div class="mg-sheet-bar">
       <button type="button" class="mg-btn mg-sheet-back" id="mg-sheet-back">Back to the map</button>
       <span class="mg-sheet-label" id="mg-sheet-label">My business</span>
     </div>
+    <div class="mg-sheet-body" id="panel-area" hidden></div>   <!-- not panel-overview: views.css lays that out for the old page -->
     <div class="mg-sheet-body" id="panel-business"></div>
     <div class="mg-sheet-body" id="panel-cost" hidden></div>
     <div class="mg-sheet-body" id="panel-insurance" hidden></div>
+    <!-- Reference: the old interface's markup, its words filled from data-i18n (js/map-gl-reference.js) -->
+    <div class="mg-sheet-body" id="panel-reference" hidden>
+      <header class="view-head">
+        <p class="kicker" data-i18n="tab.reference">Reference</p>
+        <h1 class="view-title" data-i18n="reference.title">Where this comes from</h1>
+        <p class="muted" data-i18n="reference.lead">The data behind each tab, how it is worked out, and what it cannot tell you.</p>
+      </header>
+      <picture class="drawing drawing-d-street">
+        <source type="image/webp" srcset="img/illustrations/d-street.webp 1x, img/illustrations/d-street@2x.webp 2x">
+        <img src="img/illustrations/d-street.png" width="720" height="309" loading="lazy" decoding="async" data-i18n-attr="alt:drawing.street" alt="Drawing made with Google Gemini: a row of shophouses by a river, with lines marking three flood heights.">
+      </picture>
+      <section class="ref-short" aria-labelledby="ref-short-heading">
+        <h2 id="ref-short-heading" class="kicker" data-i18n="reference.shortHeading">In short</h2>
+        <ul class="ref-short-list">
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-wave"/></svg>
+            <p><strong data-i18n="reference.short1Title">A model, not a record</strong> <span data-i18n="reference.short1">Depths come from a global computer model in 90 m squares: not an official flood map, and not a forecast.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg>
+            <p><strong data-i18n="reference.short2Title">Ringgit are rough</strong> <span data-i18n="reference.short2">Loss figures are estimates from your answers and published damage curves, not a valuation or an insurance figure.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+            <p><strong data-i18n="reference.short3Title">Check before you act</strong> <span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
+          </li>
+          <li class="ref-short-item">
+            <svg class="icon" aria-hidden="true"><use href="#i-store"/></svg>
+            <p><strong data-i18n="reference.short4Title">Your choices stay here</strong> <span data-i18n="reference.short4">Your language and the shop you pick are kept only in this browser.</span></p>
+          </li>
+        </ul>
+      </section>
+      <div class="ref-layout">
+        <nav class="ref-nav" aria-labelledby="ref-nav-heading">
+          <h2 id="ref-nav-heading" class="small-heading" data-i18n="reference.contents">On this page</h2>
+          <ol>
+            <li><button type="button" class="ref-jump" data-jump="ref-what" data-i18n="reference.navWhat">What it shows</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-map" data-i18n="reference.navMap">The map</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-method" data-i18n="reference.navMethod">Flood scores</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-money" data-i18n="reference.navMoney">Ringgit figures</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-losses" data-i18n="reference.navLosses">Past losses</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-sdg" data-i18n="reference.navSdg">SDGs</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-sources" data-i18n="reference.navSources">Sources</button></li>
+            <li><button type="button" class="ref-jump" data-jump="ref-privacy" data-i18n="reference.navPrivacy">Privacy</button></li>
+          </ol>
+        </nav>
+        <div class="ref-body">
+          <section class="ref-section" aria-labelledby="ref-what">
+            <h2 id="ref-what" tabindex="-1" data-i18n="reference.whatHeading">What this tool shows</h2>
+            <p><strong data-i18n="footer.testBuild">This is a test build.</strong> <span data-i18n="footer.model">Depths come from a global computer model in 90 m squares. It is not an official flood map, not a forecast, and not a record of real floods. Businesses are points on a public map and have not been checked on the ground.</span></p>
+          </section>
+          <section class="ref-section" id="map-notes-card" aria-labelledby="ref-map" hidden>
+            <h2 id="ref-map" tabindex="-1" data-i18n="overview.mapExtrasHeading">About this map</h2>
+            <div class="reference-notes" id="map-note"></div>
+          </section>
+          <section class="ref-section index-method" id="index-method" aria-labelledby="ref-method" hidden>
+            <h2 id="ref-method" tabindex="-1" data-i18n="flash.methodHeading">How these are worked out</h2>
+            <div class="index-method-body" id="index-method-body"></div>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-money">
+            <h2 id="ref-money" tabindex="-1" data-i18n="reference.moneyHeading">Ringgit figures</h2>
+            <p data-i18n="footer.money">Ringgit figures are rough estimates, not a valuation or an insurance figure: from the values you give, an Asia-wide damage curve (JRC 2017) and the JPS 2003 flood damage guideline. For vehicles parked at the shop, a US car damage curve (US Army Corps of Engineers, 2009); for workers' pay, the minimum wage (Minimum Wages Order 2024).</p>
+          </section>
+          <section class="ref-section" id="losses-card" aria-labelledby="ref-losses" hidden>
+            <h2 id="ref-losses" tabindex="-1" data-i18n="reference.lossesHeading">Past flood losses to business premises</h2>
+            <p data-i18n="reference.lossesLead">What the Department of Statistics Malaysia (DOSM) counted as lost to business premises in floods each year: the total for the whole state or district, not one shop's loss.</p>
+            <div id="losses-body"></div>
+          </section>
+          <section class="ref-section ref-sdg" aria-labelledby="ref-sdg">
+            <h2 id="ref-sdg" tabindex="-1" data-i18n="reference.sdgHeading">How this serves the SDGs</h2>
+            <p data-i18n="reference.sdgLead">MyFlood is a free, public-interest tool. It contributes to these targets of the United Nations Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction; it does not measure them.</p>
+            <p class="sdg-icons">
+              <img src="img/sdg/goal-11.png" width="96" height="96" loading="lazy" data-i18n-attr="alt:reference.sdg11Alt" alt="Sustainable Development Goal 11: Sustainable Cities and Communities">
+              <img src="img/sdg/goal-13.png" width="96" height="96" loading="lazy" data-i18n-attr="alt:reference.sdg13Alt" alt="Sustainable Development Goal 13: Climate Action">
+            </p>
+            <dl class="ref-sources sdg-targets">
+              <div class="ref-source"><dt data-i18n="reference.sdg115Label">Target 11.5</dt><dd data-i18n="reference.sdg115">Cut the direct economic losses caused by disasters, including water-related ones. The tool shows each shop the loss a flood could bring in the model, and what lifting stock or moving cars would save.</dd></div>
+              <div class="ref-source"><dt data-i18n="reference.sdg131Label">Target 13.1</dt><dd data-i18n="reference.sdg131">Strengthen resilience and adaptive capacity to climate-related hazards. The flood warning checklist, where to move the car and the insurance questions help a shop prepare.</dd></div>
+              <div class="ref-source"><dt data-i18n="reference.sdg133Label">Target 13.3</dt><dd data-i18n="reference.sdg133">Awareness on adaptation, impact reduction and early warning. Plain-language flood depths in English and Bahasa Melayu, with links to official warnings.</dd></div>
+              <div class="ref-source"><dt data-i18n="reference.sendaiGLabel">Sendai Framework, Target G</dt><dd data-i18n="reference.sendaiG">Access for people to disaster risk information and assessments. Free flood risk information for each mapped business and for any point.</dd></div>
+            </dl>
+            <p class="fineprint" data-i18n="reference.sdgDisclaimer">The content of this publication has not been approved by the United Nations and does not reflect the views of the United Nations or its officials or Member States.</p>
+            <p class="fineprint"><a href="https://www.un.org/sustainabledevelopment/" target="_blank" rel="noopener noreferrer" data-i18n="reference.sdgLinkGoals">The Sustainable Development Goals (United Nations)</a><span aria-hidden="true" translate="no"> · </span><a href="https://www.un.org/sustainabledevelopment/wp-content/uploads/2023/09/E_SDG_Guidelines_Sep20238.pdf" target="_blank" rel="noopener noreferrer" data-i18n="reference.sdgLinkGuidelines">Guidelines for the use of the SDG logo and icons</a></p>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-sources">
+            <h2 id="ref-sources" tabindex="-1" data-i18n="reference.sourcesHeading">Data sources and credits</h2>
+            <dl class="ref-sources">
+            <div class="ref-source"><dt data-i18n="reference.srcDepthLabel">Flood depth</dt><dd data-i18n="reference.srcDepth">European Commission JRC global river flood hazard maps v2.1, CC BY 4.0</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcHeightLabel">Ground height</dt><dd data-i18n="reference.srcHeight">Copernicus GLO-30, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcMapLabel">Businesses, roads, rivers and base map</dt><dd data-i18n="reference.srcMap">© OpenStreetMap contributors, ODbL</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcRecordLabel">Flood record</dt><dd data-i18n="reference.srcRecord">News reports, and single facts from the JPS Malaysia annual flood reports for 2021 and 2022, each cited with its page</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcLossesLabel">Past losses to business premises</dt><dd data-i18n="reference.srcLosses">Department of Statistics Malaysia</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcHotspotsLabel">Flood hotspots</dt><dd data-i18n="reference.srcHotspots">JPS Selangor Info Banjir: its 2026 flood hotspot list, place names only, read 8 Oct 2026</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcEvacLabel">Flood evacuation centres open now</dt><dd data-i18n="reference.srcEvac">JKM InfoBencana, the Department of Social Welfare Malaysia: its public list of open centres, flood centres only, counts only</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcTideLabel">Tide</dt><dd data-i18n="reference.srcTide">University of Hawaii Sea Level Center research quality tide-gauge data (gauge run by JUPEM), free to use and redistribute; predicted with utide</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcMetLabel">Weather forecast and warnings</dt><dd data-i18n="reference.srcMet">MetMalaysia (the Malaysian Meteorological Department), through data.gov.my, CC BY 4.0</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcGaugeLabel">River gauges</dt><dd data-i18n="reference.srcGauge">Names and places of JPS river level gauges, from JPS Public Infobanjir's station list; the link opens JPS's own page with its readings</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcCarLabel">Car flood damage</dt><dd data-i18n="reference.srcCar">US Army Corps of Engineers, Economic Guidance Memorandum 09-04 (2009), public domain. Malaysian repair prices for comparison: workshop quotes in Utusan Malaysia (31 Dec 2021) and Sinar Harian, as news reports; Malaysia has no vehicle damage standard</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcPriceLabel">Price index</dt><dd data-i18n="reference.srcPrice">World Bank, CC BY 4.0</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcRainLabel">Rain forecast</dt><dd data-i18n="reference.srcRain">Google Weather</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcOpenLabel">Open or closed</dt><dd data-i18n="reference.srcOpen">Google Maps</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcNewsLabel">News</dt><dd data-i18n="reference.srcNews">Gemini with Google Search</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcSdgLabel">SDG icons</dt><dd data-i18n="reference.srcSdg">United Nations, used as its SDG guidelines allow for non-commercial, informational use</dd></div>
+            <div class="ref-source"><dt data-i18n="reference.srcDrawLabel">Drawings</dt><dd data-i18n="reference.srcDraw">Made with Google Gemini, October 2026. They are drawings, not photos of real places</dd></div>
+            </dl>
+          </section>
+          <section class="ref-section" aria-labelledby="ref-privacy">
+            <h2 id="ref-privacy" tabindex="-1" data-i18n="reference.privacyHeading">Privacy</h2>
+            <ul class="ref-privacy">
+            <li data-i18n="reference.privTiles">Map tiles come from OpenStreetMap's servers, which see the part of the map you view; at street level, where the map goes when you share your location, that is within about 300 m.</li>
+            <li data-i18n="reference.privWeather">If you ask the chat about rain, Google Weather gets the area's centre, or for a point you picked outside the listed areas its 90 m square rounded to about 1 km.</li>
+            <li data-i18n="reference.privGemini">For a point you picked, Gemini gets the area's name, the flood depths and the nearest relief centre with its distance, never its coordinates.</li>
+            <li data-i18n="reference.privMedia">Photos and voice recordings go to Gemini to be read and are not saved by this tool.</li>
+            <li data-i18n="reference.privBrowser">Your language and the shop you pick are kept only in this browser.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- the chat (js/map-gl-chat.js): the old interface's button and dialog; its words come from data-i18n -->
   <svg class="sprite" aria-hidden="true" focusable="false">
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20l1.2-4.3A7.5 7.5 0 1 1 20 12.5z"/><path d="M9 12h.01M12.5 12h.01M16 12h.01"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 13c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 18c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 10v10h16V10"/><path d="M3 10 5 4h14l2 6"/><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v.01M18 14.5v.01"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20l1.2-4.3A7.5 7.5 0 1 1 20 12.5z"/><path d="M9 12h.01M12.5 12h.01M16 12h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-road" viewBox="0 0 24 24"><path d="M6 20 10 4M18 20 14 4M12 6.5v2M12 11.5v2M12 16.5v2"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7 10 4.5h4L15.5 7"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15.5a4 4 0 0 1 .4-8 5.5 5.5 0 0 1 10.3 1.4A3.4 3.4 0 0 1 17.5 15.5z"/><path d="m8.5 18.5-1 2M12.5 18.5l-1 2M16.5 18.5l-1 2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/></symbol>
+    <linearGradient id="water-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fdcff" stop-opacity="0.78"/><stop offset="0.35" stop-color="#2a8fd0" stop-opacity="0.72"/><stop offset="1" stop-color="#0f4c80" stop-opacity="0.9"/></linearGradient>
   </svg>
   <button type="button" class="chat-fab" id="chat-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-dialog" hidden>
     <span class="chat-fab-mark"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg></span>

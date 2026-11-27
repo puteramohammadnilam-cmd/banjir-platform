@@ -10,7 +10,9 @@ import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { createEngineer } from "./engineer.js";
 import { createMapChat } from "./map-gl-chat.js";
-import { SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
+import { createAreaPanel } from "./map-gl-area.js";
+import { createReferencePanel } from "./map-gl-reference.js";
+import { PLACE_TABS, SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
 import { applyStatic, lang, t } from "./i18n.js";
 import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
 import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
@@ -176,6 +178,7 @@ async function loadSection(sectionId) {
   st.loaded.add(sectionId);
   st.pages.set(sectionId, pageArea(data.area, data.section));   // My business needs the section's record and example
   keep({ cells: data.town.cells, premises: data.premises, cellDeg: data.town.cell_deg });
+  st.sheet?.refresh();   // the Area overview, open on this section, now has its businesses
   say(hint());
 }
 
@@ -198,7 +201,7 @@ function showCard(nodes, { focus = true } = {}) {
 
 function closeCard() {
   const wasOpen = !$("mg-place").hidden;
-  st.sheet?.close();   // the sheet is the card's: it goes with it (and before the aim panel takes the card)
+  closePlaceTab();   // the place's tabs are the card's: they go with it
   st.chat?.render(null);
   st.cardTurn += 1;
   st.pin?.stop();
@@ -256,7 +259,8 @@ function showSection(sectionId, { focus = true } = {}) {
   if (!props) return;
   st.pin?.stop();
   clearPoint();
-  st.sheet?.close();   // a section has no business card
+  closePlaceTab();   // a section has no business card; the Area overview and Reference follow it
+  st.sheet?.refresh();
   st.chat?.render(null);   // and the chat is about the area again
   st.card = { kind: "section", id: sectionId };
   showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
@@ -326,6 +330,7 @@ function showPoint(place, squares, { focus = true, move = true } = {}) {
 /** Pin mode, from the pin button or a point's "Move the pin": any card goes, and the aim panel takes its place. */
 function startPin(options = {}) {
   if (st.pin.isOn()) return st.map.getCanvas().focus({ preventScroll: true });   // already aiming: keep what Cancel brings back
+  st.sheet?.close();   // the aim panel takes the place card, which a sheet would cover
   const resume = st.point;   // kept for Cancel, which shows it again
   closeCard();
   st.resume = resume;
@@ -402,9 +407,9 @@ function drawLinks() {
   $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
   $("mg-home").href = `map.html${writeUrl({ area: st.area.id, lang: langParam() })}`;   // this map's home: the whole area
   document.querySelectorAll("#mg-old, .mg-old-link").forEach((link) => { link.href = mainLink({ place: st.picked }); });
-  // the Area overview is this map, and My business, Flood cost and Insurance its sheet; Reference is the old interface's
-  const onMap = Object.fromEntries([["overview", () => st.sheet.close()], ...SHEET_TABS.map((key) => [key, () => openSheet(key)])]);
-  const href = (key) => (onMap[key] ? `map.html${mapQuery({ tab: key === "overview" ? null : key })}` : mainLink({ place: st.picked, tab: key }));
+  // every tab opens in the sheet over this map; the Area overview chip stands for the map itself while none is open
+  const onMap = Object.fromEntries(SHEET_TABS.map((key) => [key, () => openSheet(key)]));
+  const href = (key) => `map.html${mapQuery({ tab: key })}`;
   const tab = (key) => h("a", { href: href(key), "aria-current": key === (sheetTab() ?? "overview") ? "page" : null,
     onclick: onMap[key] && plainClick(onMap[key]) }, t(`tab.${key}`));
   $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
@@ -428,6 +433,20 @@ function cardPlace() {
   if (st.card?.kind === "point") return st.point?.place ?? null;
   const shop = st.card?.kind === "shop" && st.shops.get(st.card.id);
   return shop ? businessPlace(shop, st.area.id) : null;
+}
+
+/** Closes the sheet when it shows one of the place's tabs (the card has changed or gone). */
+function closePlaceTab() {
+  if (st.sheet?.isOpen() && PLACE_TABS.includes(st.sheet.tab())) st.sheet.close();
+}
+
+/** What the Area overview and Reference are about: the section on show once loaded, else the whole area. */
+function areaScope() {
+  const sectionId = st.section && st.loaded.has(st.section) ? st.section : null;
+  const shops = [...st.shops.values()];
+  return { areaId: st.area.id, sectionId, page: (sectionId && st.pages.get(sectionId)) || st.area, sections: st.sections,
+    word: st.area.section_word ?? null,
+    premises: sectionId ? shops.filter((shop) => shop.section === sectionId) : st.sections.length ? st.index : shops };
 }
 
 /** Opens the sheet on `tab` (the one on show, when it is open) for the card's place. */
@@ -469,7 +488,17 @@ function wireSheet() {
   });
   st.sheet = createPlaceSheet({
     sheet: $("mg-sheet"), back: $("mg-sheet-back"), label: $("mg-sheet-label"), status: st.status, areas: () => st.areasList,
-    panels: { business: $("panel-business"), cost: $("panel-cost"), insurance: $("panel-insurance") },
+    panels: Object.fromEntries(SHEET_TABS.map((tab) => [tab, $(tab === "overview" ? "panel-area" : `panel-${tab}`)])),
+    about: {
+      overview: createAreaPanel({ panel: $("panel-area"), scope: areaScope, status: st.status, areas: () => st.areasList, on: {
+        section: (id) => { st.sheet.close(); openSection(id); },
+        wholeArea: () => { st.section = null; writeLink(); st.sheet.refresh(); },
+        sectionHref: (id) => `map.html${mapQuery({ section: id, place: null, tab: null })}`,
+        areaHref: (id) => `map.html${withMapView(writeUrl({ area: id, lang: langParam() }), st.base, st.tilt)}`,
+        redraw: () => st.sheet.refresh(),
+      } }),
+      reference: createReferencePanel({ panel: $("panel-reference"), scope: areaScope, goto: (tab) => openSheet(tab) }),
+    },
     on: {
       pickRp: pickFloodSize,
       showOnMap: (place) => st.map.flyTo({ center: [place.lon, place.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), duration: duration() }),

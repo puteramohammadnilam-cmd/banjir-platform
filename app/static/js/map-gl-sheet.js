@@ -17,17 +17,19 @@ import { isPoint } from "./place.js";
 import { createPlanCard, planFigures } from "./plan.js";
 import { MAX_PHOTOS } from "./stock.js";
 
-export const SHEET_TABS = ["business", "cost", "insurance"];
+export const SHEET_TABS = ["overview", "business", "cost", "insurance", "reference"];
+export const PLACE_TABS = ["business", "cost", "insurance"];   // the tabs about the place on the card
 const pageKey = (page) => `${page?.id}|${page?.section_id ?? ""}`;
 /** A place's section id: a business's is its id, a point's comes as {id, name} (null outside any section). */
 const sectionOf = (place) => (typeof place?.section === "string" ? place.section : place?.section?.id ?? null);
 
-/** `sheet` holds `panels` ({business, cost, insurance}: #panel-business and so on, where the old stylesheets lay them
- *  out), its `back` button and its `label`; `status` is GET /api/status's answer; areas() resolves the listed areas. `on`
+/** `sheet` holds `panels` (one for each of SHEET_TABS: #panel-business and so on, where the old stylesheets lay them
+ *  out), its `back` button and its `label`; `about` draws the tabs that are about the area, not the place ({overview,
+ *  reference}: map-gl-area.js and map-gl-reference.js, each with render(rp)); `status` is GET /api/status's answer; areas() resolves the listed areas. `on`
  *  is what the map does: pickRp(rp), showOnMap(place), movePin(place), goto(tab, place) for the old interface's other
  *  tabs, ask(opener) for the chat, openArea(areaId, place), openCompared(place), find() and checkPoint() (or null) for
  *  the empty state, and changed() when the sheet opens, closes or changes tab (the map writes its link). */
-export function createPlaceSheet({ sheet, panels, back, label, status, areas, on }) {
+export function createPlaceSheet({ sheet, panels, back, label, status, areas, about = {}, on }) {
   const st = { place: null, page: null, rp: "50", tab: "business", business: null, viewKey: null, areas: [], pushed: false,
     ignorePop: false, photos: {}, listings: {}, drySpots: {}, estimates: {}, stocks: {}, plans: {}, planLanguage: lang,
     compared: readCompared() };
@@ -149,7 +151,7 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
 
   /** Flood cost works out a first look by itself when it, or Insurance, is opened on a place with no estimate yet. */
   function firstLook() {
-    if (!st.place || st.tab === "business" || st.estimates[idOf()]) return;
+    if (!st.place || !["cost", "insurance"].includes(st.tab) || st.estimates[idOf()]) return;
     const figures = cost.figures();
     if (figures) sendEstimate(figures, { isAssumed: true });
   }
@@ -158,7 +160,8 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
     const id = idOf();
     for (const tab of SHEET_TABS) panels[tab].hidden = tab !== st.tab;
     label.textContent = t(`tab.${st.tab}`);
-    if (st.tab === "business") {
+    if (about[st.tab]) about[st.tab].render(st.rp);
+    else if (st.tab === "business") {
       business().render({ premise: st.place, rp: st.rp, photo: st.photos[id], listing: st.listings[id], dry: st.drySpots[id] });
       plan.node.hidden = !st.place;
       compare.node.hidden = !st.place;
@@ -173,7 +176,7 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
 
   function load() {
     const id = idOf();
-    if (!id) return;
+    if (!id || !PLACE_TABS.includes(st.tab)) return;
     if (st.tab === "business" && status?.maps_ready && !isPoint(id)) loadOnce(st.listings[id], store("listings"), () => api.getPlace(id));
     loadOnce(st.drySpots[id], store("drySpots"), () => api.getDrySpot(id));
   }
@@ -254,6 +257,10 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
       }
       on.changed();
       if (wasHidden) focusTitle();
+    },
+    /** Draws again what is on show: the area or section changed under the Area overview or Reference. */
+    refresh() {
+      if (!sheet.hidden) draw();
     },
     /** Another flood size, picked on the map or in the sheet. */
     setRp(rp) {

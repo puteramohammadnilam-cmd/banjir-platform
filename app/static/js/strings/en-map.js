@@ -52,6 +52,8 @@ export default Object.freeze({
   "mg.say.pointWet": "In a 1 in {rp} years flood, the model puts about {m} m of water on this square: {words}.",
   "mg.movePin": "Move the pin",
   "mg.backToMap": "Back to the map",
+  "mg.allArea": "See all of {area}",
+  "mg.areaPick": "Area",
   "mg.pinTap": "Or tap the spot on the map.",
   "mg.pointLoading": "Checking the point in the link…",
   "mg.pointMissed": "The point in the link could not be checked.",

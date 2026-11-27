@@ -198,7 +198,9 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg-sheet-label { color: var(--ink-3); font: 600 11px var(--mg-mono); letter-spacing: 0.05em; text-transform: uppercase; }
 .mg-sheet-body { flex: 1; overflow: auto; padding: 18px 20px 28px; font-size: 1rem; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) { .mg-sheet { animation: none; } }
-[data-theme="light"] .mode-open { color: #1a1100; }   /* "Flood is coming": dark words on the light theme's amber (white is 3.2:1) */
+[data-theme="light"] .mode-open { color: #1a1100; }
+.mg-area-pick select { margin-left: 6px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink); font: inherit; }   /* "Flood is coming": dark words on the light theme's amber (white is 3.2:1) */
 /* business.css lays My business in two columns from a 901 px screen; the sheet is narrower than the screen, so it keeps
    one column until the sheet itself is wide enough */
 @media (max-width: 1239px) {
