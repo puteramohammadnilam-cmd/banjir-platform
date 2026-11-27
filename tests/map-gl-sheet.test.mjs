@@ -1,12 +1,13 @@
-// node --test tests/map-gl-biz.test.mjs
-// My business in a sheet over the new map (js/map-gl-biz.js): opening it adds one step to the browser's history and
-// asks for the place's answers only then (the Google Maps listing only for a business, and only with Maps on); closing
-// it from the page takes that step off quietly; the phone's back closes it. No network: fetch is faked.
+// node --test tests/map-gl-sheet.test.mjs
+// The place's tabs in a sheet over the new map (js/map-gl-sheet.js): opening it adds one step to the browser's history
+// and asks for the place's answers only then (the Google Maps listing only for a business on My business, and only
+// with Maps on); moving between its tabs adds none; Flood cost works out a first look; closing it from the page takes
+// the step off quietly; the phone's back closes it. No network: fetch is faked.
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
 import { useLang } from "../app/static/js/i18n.js";
-import { createBusinessSheet } from "../app/static/js/map-gl-biz.js";
+import { createPlaceSheet } from "../app/static/js/map-gl-sheet.js";
 import { loadOnce } from "../app/static/js/place-data.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { HOME, point, shop } from "./point_fixtures.mjs";
@@ -27,19 +28,23 @@ beforeEach(() => {
   globalThis.history = { pushState: () => { steps.pushed += 1; }, back: () => { steps.back += 1; popListeners.forEach((listener) => listener()); } };
   globalThis.fetch = async (path) => {
     asked.push(String(path).split("?")[0]);
-    return { json: async () => ({ success: true, data: { areas: [] } }) };
+    return { json: async () => ({ success: false, error: "not in this test" }) };   // every answer an error: nothing to draw
   };
+  globalThis.sessionStorage = { getItem: () => null, setItem() {} };
 });
 
 function mount(status = { maps_ready: true, ai_ready: true }) {
   const sheet = document.createElement("section");
   sheet.hidden = true;
-  const panel = document.createElement("div");
+  const panels = { business: document.createElement("div"), cost: document.createElement("div"), insurance: document.createElement("div") };
   const back = document.createElement("button");
+  const label = document.createElement("span");
   const changed = [];
-  const biz = createBusinessSheet({ sheet, panel, back, status, areas: async () => [],
-    on: { pickRp() {}, showOnMap() {}, movePin() {}, goto() {}, ask() {}, openArea() {}, find() {}, checkPoint() {}, changed: () => changed.push(sheet.hidden) } });
-  return { sheet, panel, back, biz, changed };
+  const place = createPlaceSheet({ sheet, panels, back, label, status, areas: async () => [],
+    on: { pickRp() {}, showOnMap() {}, movePin() {}, goto() {}, ask() {}, openArea() {}, openCompared() {}, find() {}, checkPoint() {},
+      changed: () => changed.push(sheet.hidden) } });
+  const biz = { ...place, open: (where, page, rp, options) => place.open("business", where, page, rp, options) };
+  return { sheet, panel: panels.business, panels, label, back, biz, place, changed };
 }
 
 test("opening the sheet shows the place, adds one history step, and only then asks for its listing and car spot", async () => {
@@ -93,4 +98,24 @@ test("an answer asked for once is asked again only after an error", async () => 
   await loadOnce({ ok: 1 }, (value) => got.push(value), async () => ({ ok: 2 }));
   await loadOnce({ error: "x" }, (value) => got.push(value), async () => { throw new Error("down"); });
   assert.deepEqual(got, [{ busy: true }, { ok: 1 }, { busy: true }, { error: "down" }]);
+});
+
+test("moving between the sheet's tabs adds no step, shows one tab at a time, and Flood cost works out a first look", async () => {
+  const { place, panels, label } = mount();
+  place.open("cost", shop, HOME, "20");
+  await settle();
+  assert.equal(label.textContent, "Flood cost");
+  assert.deepEqual(["business", "cost", "insurance"].map((tab) => panels[tab].hidden), [true, false, true]);
+  place.open("insurance", shop, HOME, "20");
+  assert.equal(steps.pushed, 1);
+  assert.equal(place.tab(), "insurance");
+  assert.ok(asked.includes("/api/estimate"), "the first look is asked for when Flood cost opens");
+  assert.ok(!asked.some((path) => path.startsWith("/api/place/")), "no Google listing off My business");
+});
+
+test("the flood plan and Compare places come under My business, with a place", () => {
+  const { place, panels } = mount();
+  place.open("business", shop, HOME, "20");
+  const names = panels.business.children.map((child) => child.getAttribute?.("class") ?? "");
+  assert.ok(names.some((name) => name.includes("plan-card")) && names.some((name) => name.includes("compare-card")));
 });

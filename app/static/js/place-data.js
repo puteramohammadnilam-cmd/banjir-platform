@@ -43,3 +43,18 @@ export async function readShopPhoto(file, before, set, send) {
     set({ ...before, busy: false, error: error.message });
   }
 }
+
+/** Prints one sheet alone (the flood plan or the area summary): a copy goes in #print-root, a child of the body, and
+ *  business.css prints only that while it holds something. It is emptied after printing; where the browser never says
+ *  so (iOS), the screen is unchanged anyway, as #print-root is never shown on screen. */
+export function printSheet(sheet) {
+  if (!sheet) return;
+  let root = document.getElementById("print-root");
+  if (!root) {
+    root = h("div", { id: "print-root" });
+    document.body.append(root);
+    window.addEventListener("afterprint", () => root.replaceChildren());
+  }
+  root.replaceChildren(sheet.cloneNode(true));
+  window.print();
+}

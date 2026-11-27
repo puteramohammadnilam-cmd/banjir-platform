@@ -36,11 +36,19 @@ test("a bare address opens the new map, unless this browser chose the old interf
   assert.equal(goesTo("", "", null, { blocked: true }), "./map.html");
 });
 
-test("a link that names a view, a tab, a place or a point still opens the old page", () => {
-  for (const [search, hash] of [["?tab=business", ""], ["?section=sec-1&rp=20", ""], ["?rp=20", ""], ["?shop=node-1", ""],
-    ["?area=kota-tinggi", ""], ["", "#place=pt:3.00042,101.50042"]]) {
+test("a link that names a view, the overview or Reference, a place or a point still opens the old page", () => {
+  for (const [search, hash] of [["?tab=overview", ""], ["?tab=reference&rp=20", ""], ["?section=sec-1&rp=20", ""], ["?rp=20", ""],
+    ["?shop=node-1", ""], ["?area=kota-tinggi", ""], ["", "#place=pt:3.00042,101.50042"]]) {
     assert.equal(goesTo(search, hash), null, search + hash);
   }
+});
+
+test("a link to My business, Flood cost, Insurance or the chat opens the new map's sheet, with its query and point", () => {
+  assert.equal(goesTo("?section=sec-1&tab=cost&place=node-1&rp=20", ""), "./map.html?section=sec-1&tab=cost&place=node-1&rp=20");
+  assert.equal(goesTo("?tab=business&rp=50", "#place=pt:3.00042,101.50042"), "./map.html?tab=business&rp=50#place=pt:3.00042,101.50042");
+  assert.equal(goesTo("?tab=insurance", ""), "./map.html?tab=insurance");
+  assert.equal(goesTo("?tab=ask&place=node-1", ""), "./map.html?tab=ask&place=node-1");
+  assert.equal(goesTo("?tab=cost&place=node-1", "", "old"), null, "a browser that chose the old interface stays");
 });
 
 test("a query that names no view goes along to the new map: a language, a share's tracking", () => {

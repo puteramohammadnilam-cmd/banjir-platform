@@ -207,6 +207,9 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg #panel-business :is(.risk, .biz-side) { grid-area: auto; }   /* business.css's named areas would add columns */
 }
 
+/* the chat's button (chat.css), beside the map's zoom buttons and over its credits */
+.mg .chat-fab { right: 58px; bottom: 34px; }
+
 /* the strip at the foot, problems, map pieces */
 .mg-status { position: fixed; left: 14px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px;
   color: var(--mg-ink2); font: 500 11.5px var(--mg-mono); }
@@ -247,6 +250,11 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   .mg:has(.mg-eng:not([hidden])) .mg-summary { display: none; }
   .mg .btn { min-height: 44px; }
+  /* the chat's button: over the flood size strip; in the corner over a full-screen sheet; away while a place card,
+     which has its own ways on, fills the foot of the screen */
+  .mg .chat-fab { right: 10px; bottom: calc(256px + env(safe-area-inset-bottom)); }   /* clear of the flood size strip, about 224 px in Bahasa Melayu */
+  .mg:has(.mg-sheet:not([hidden])) .chat-fab { bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .mg:has(.mg-place:not([hidden])):not(:has(.mg-sheet:not([hidden]))) .chat-fab { display: none; }
   .mg-sheet { inset: 0; z-index: 7; width: auto; border: 0; border-radius: 0; }   /* over the bar and any alert: it has its own way back */
   .mg-sheet-back { min-height: 44px; }
   .mg-handle { display: block; width: 40px; height: 4px; margin: 8px auto 0; border-radius: 2px; background: var(--mg-line); }

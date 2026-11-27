@@ -7,7 +7,7 @@ import { h } from "./dom.js";
 import { createEngineer } from "./engineer.js";
 import { leafletDrawer } from "./engineer-leaflet.js";
 import { rememberUi } from "./ui-choice.js";
-import { loadOnce, readShopPhoto, shrinkPhoto } from "./place-data.js";
+import { loadOnce, printSheet, readShopPhoto, shrinkPhoto } from "./place-data.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createInsurance } from "./insurance.js";
 import { createNews } from "./news.js";
@@ -219,21 +219,6 @@ async function writePlan(app, language) {
   } catch (error) {
     setPlan({ result: before?.result, error: error.message });
   }
-}
-
-/** Prints one sheet alone (the flood plan or the area summary): a copy goes in #print-root, a child of the body, and
- *  views.css prints only that while it holds something. It is emptied after printing; where the browser never says so
- *  (iOS), the screen is unchanged anyway, as #print-root is never shown on screen. */
-function printSheet(sheet) {
-  if (!sheet) return;
-  let root = $("print-root");
-  if (!root) {
-    root = h("div", { id: "print-root" });
-    document.body.append(root);
-    window.addEventListener("afterprint", () => root.replaceChildren());
-  }
-  root.replaceChildren(sheet.cloneNode(true));
-  window.print();
 }
 
 /** Work out the cost for the place on show. isAssumed marks the first look the tab works out by itself (estimateState). */

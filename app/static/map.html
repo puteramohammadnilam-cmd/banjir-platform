@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="styles/views.css">
   <link rel="stylesheet" href="styles/business.css">
   <link rel="stylesheet" href="styles/act.css">
+  <link rel="stylesheet" href="styles/cost.css">
+  <link rel="stylesheet" href="styles/insurance.css">
+  <link rel="stylesheet" href="styles/chat.css">
   <link rel="stylesheet" href="map-preview/map-gl.css">
   <script src="vendor/maplibre-gl-csp.js"></script>
   <script type="module" src="js/map-gl.js"></script>
@@ -60,14 +63,61 @@
   </div>
   <div class="mg-cross" id="mg-cross" aria-hidden="true" hidden></div>
 
-  <!-- My business, a sheet over the map (js/map-gl-biz.js): the old interface's business card in this map's look -->
-  <section class="mg-sheet" id="mg-biz" aria-labelledby="mg-biz-label" hidden>
+  <!-- the place's tabs, a sheet over the map (js/map-gl-sheet.js): the old interface's My business, Flood cost and
+       Insurance in this map's look -->
+  <section class="mg-sheet" id="mg-sheet" aria-labelledby="mg-sheet-label" hidden>
     <div class="mg-sheet-bar">
-      <button type="button" class="mg-btn mg-sheet-back" id="mg-biz-back">Back to the map</button>
-      <span class="mg-sheet-label" id="mg-biz-label">My business</span>
+      <button type="button" class="mg-btn mg-sheet-back" id="mg-sheet-back">Back to the map</button>
+      <span class="mg-sheet-label" id="mg-sheet-label">My business</span>
     </div>
     <div class="mg-sheet-body" id="panel-business"></div>
+    <div class="mg-sheet-body" id="panel-cost" hidden></div>
+    <div class="mg-sheet-body" id="panel-insurance" hidden></div>
   </section>
+
+  <!-- the chat (js/map-gl-chat.js): the old interface's button and dialog; its words come from data-i18n -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20l1.2-4.3A7.5 7.5 0 1 1 20 12.5z"/><path d="M9 12h.01M12.5 12h.01M16 12h.01"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></symbol>
+  </svg>
+  <button type="button" class="chat-fab" id="chat-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-dialog" hidden>
+    <span class="chat-fab-mark"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg></span>
+    <span data-i18n="chat.open">Ask AI</span>
+  </button>
+
+  <dialog class="chat-dialog" id="chat-dialog" tabindex="-1" aria-labelledby="chat-title">
+    <header class="chat-head">
+      <div>
+        <h2 id="chat-title" data-i18n="chat.title">Ask AI</h2>
+        <p class="chat-about" id="chat-about"></p>
+      </div>
+      <form method="dialog">
+        <button class="chat-close" id="chat-close" data-i18n-attr="aria-label:chat.close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </form>
+    </header>
+    <section class="chat-body" aria-label="Conversation" data-i18n-attr="aria-label:ask.conversation">
+      <p class="fineprint chat-lead" id="ask-lead" data-i18n="ask.lead">Gemini reads this tool's flood data, Google Weather and Google Maps. It answers in Bahasa Melayu or English.</p>
+      <p class="alert alert-inline alert-info" id="ai-status" hidden></p>
+      <ol class="messages" id="messages" aria-live="polite"></ol>
+      <div class="chat-try">
+        <h3 class="small-heading" data-i18n="ask.try">Try asking</h3>
+        <div class="chips" id="chips"></div>
+      </div>
+      <form id="ask-form" class="ask-form" autocomplete="off">
+        <label class="visually-hidden" for="question" data-i18n="ask.question">Your question</label>
+        <input id="question" class="field" name="question" type="text" maxlength="500" required data-i18n-attr="placeholder:ask.placeholderShop" placeholder="Ask about this shop, or about this tool">
+        <button type="submit" class="btn btn-primary" data-i18n="ask.send">Ask</button>
+      </form>
+      <details class="chat-news">
+        <summary data-i18n="ask.news">Flood news</summary>
+        <p class="muted small" data-i18n="ask.newsLead">Gemini searches Google for recent news and lists its sources.</p>
+        <button type="button" class="btn btn-secondary" id="news"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span data-i18n="ask.newsButton">Latest flood news</span></button>
+      </details>
+      <p class="fineprint chat-urgent"><span data-i18n="ask.urgent">Check anything urgent with</span> <a href="https://publicinfobanjir.water.gov.my/" target="_blank" rel="noopener noreferrer" translate="no">JPS Public Infobanjir</a> <span data-i18n="ask.urgentEnd">or call 999.</span></p>
+    </section>
+  </dialog>
+
 
   <p class="mg-status mg-hud"><b aria-hidden="true"></b><span id="mg-status">River flood model · 90 m squares</span> · <span id="mg-hint">Loading the map…</span></p>
   <p class="mg-problem mg-hud" id="mg-problem" role="alert" hidden></p>

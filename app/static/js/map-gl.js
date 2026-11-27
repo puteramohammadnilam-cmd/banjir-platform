@@ -9,8 +9,9 @@
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { createEngineer } from "./engineer.js";
-import { createBusinessSheet } from "./map-gl-biz.js";
-import { lang, t } from "./i18n.js";
+import { createMapChat } from "./map-gl-chat.js";
+import { SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
+import { applyStatic, lang, t } from "./i18n.js";
 import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
 import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
   squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
@@ -40,7 +41,7 @@ const st = {
   shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
   visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
   point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false, resume: null, cardTurn: 0,
-  status: null, pages: new Map(), biz: null,
+  status: null, pages: new Map(), sheet: null, chat: null, areasList: null,
 };
 st.rp = st.link.rp;
 st.base = st.link.base;
@@ -197,7 +198,8 @@ function showCard(nodes, { focus = true } = {}) {
 
 function closeCard() {
   const wasOpen = !$("mg-place").hidden;
-  st.biz?.close();   // the sheet is the card's: it goes with it (and before the aim panel takes the card)
+  st.sheet?.close();   // the sheet is the card's: it goes with it (and before the aim panel takes the card)
+  st.chat?.render(null);
   st.cardTurn += 1;
   st.pin?.stop();
   clearPoint();
@@ -216,7 +218,8 @@ function closeCard() {
 function shopLinks(shop) {
   const at = { section: shop.section, place: shop.id };
   return {
-    details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openBusiness(), cost: mainLink({ ...at, tab: "cost" }),
+    details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openSheet("business"),
+    cost: `map.html${mapQuery({ ...at, tab: "cost" })}`, onCost: () => openSheet("cost"),
     see3d: st.area.has_3d && shop.has_3d !== false ? `3d.html${writeUrl({ area: st.area.id, ...at, rp: st.rp })}` : null,
     directions: `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`,
   };
@@ -237,7 +240,8 @@ function showShop(shop, { fly = false, focus = true, move = true } = {}) {
   markPicked(shop.id);
   showCard(shopCard(shop, { rp: st.rp, sectionName: sectionName(shop.section), shelters: st.shelters, links: shopLinks(shop),
     onClose: closeCard, onShare: share }), { focus });
-  if (st.biz?.isOpen()) openBusiness();   // a shop picked while the sheet is open: the sheet shows it
+  if (st.sheet?.isOpen()) openSheet();   // a shop picked while the sheet is open: the sheet shows it
+  st.chat?.render(cardPlace());
   writeLink();
   say(shop.name);
   if (!move) return;
@@ -252,7 +256,7 @@ function showSection(sectionId, { focus = true } = {}) {
   if (!props) return;
   st.pin?.stop();
   clearPoint();
-  st.biz?.close();   // a section has no business card
+  st.sheet?.close();   // a section has no business card
   st.card = { kind: "section", id: sectionId };
   showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
 }
@@ -283,7 +287,8 @@ function clearPoint() {
 
 function pointLinks(place) {
   const at = { section: place.section?.id ?? null, place: place.id };   // writeUrl puts a point in the fragment, never the query
-  return { details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openBusiness(), cost: mainLink({ ...at, tab: "cost" }),
+  return { details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openSheet("business"),
+    cost: `map.html${mapQuery({ ...at, tab: "cost" })}`, onCost: () => openSheet("cost"),
     directions: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}` };
 }
 
@@ -301,12 +306,13 @@ function showPoint(place, squares, { focus = true, move = true } = {}) {
     loadSection(sectionId).then(() => {
       if (st.point?.place !== place) return;
       say(title);
-      if (st.biz?.isOpen()) openBusiness();   // the section's own flood record and example, now it is in
+      if (st.sheet?.isOpen()) openSheet();   // the section's own flood record and example, now it is in
     }, (error) => say(t("mg.failed", { why: error.message }), true));
   }
   showCard(pointCard(place, { rp: st.rp, title, subline, links: pointLinks(place), onClose: closeCard, onShare: share,
     onMove: () => startPin({ at: place }) }), { focus });
-  if (st.biz?.isOpen()) openBusiness();
+  if (st.sheet?.isOpen()) openSheet();
+  st.chat?.render(place);
   writeLink();
   say(title);
   if (!move) return;
@@ -367,18 +373,18 @@ async function openSection(sectionId, { fit = true } = {}) {
 /** A shop picked in the search: its section loads first; a later pick or click wins over a slow load. */
 async function openShop(entry) {
   st.want = entry.id;
-  const hadSheet = st.biz?.isOpen();   // opening its section closes the sheet: a search made in it opens it again
+  const hadSheet = st.sheet?.isOpen();   // opening its section closes the sheet: a search made in it opens it again
   if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
   if (!shop || st.want !== entry.id) return;
   showShop(shop, { fly: true });
-  if (hadSheet) openBusiness();
+  if (hadSheet) openSheet();
 }
 
 /* ---- this page's link, and the links that carry it ---- */
 
 /** The query for what is on show: the main page's fields, then the base map and the tilt. */
-const sheetTab = () => (st.biz?.isOpen() ? "business" : null);
+const sheetTab = () => (st.sheet?.isOpen() ? st.sheet.tab() : null);
 const mapQuery = (extra = {}) => withMapView(writeUrl({ area: st.area?.id, section: st.section, tab: sheetTab(), place: st.picked,
   rp: st.rp, lang: langParam(), ...extra }), st.base, st.tilt);
 
@@ -395,9 +401,9 @@ function drawLinks() {
   $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
   $("mg-home").href = `map.html${writeUrl({ area: st.area.id, lang: langParam() })}`;   // this map's home: the whole area
   document.querySelectorAll("#mg-old, .mg-old-link").forEach((link) => { link.href = mainLink({ place: st.picked }); });
-  // the Area overview is this map and My business its sheet; the other tabs are the old interface's
-  const onMap = { overview: () => st.biz.close(), business: () => openBusiness() };
-  const href = (key) => (onMap[key] ? `map.html${mapQuery({ tab: key === "business" ? "business" : null })}` : mainLink({ place: st.picked, tab: key }));
+  // the Area overview is this map, and My business, Flood cost and Insurance its sheet; Reference is the old interface's
+  const onMap = Object.fromEntries([["overview", () => st.sheet.close()], ...SHEET_TABS.map((key) => [key, () => openSheet(key)])]);
+  const href = (key) => (onMap[key] ? `map.html${mapQuery({ tab: key === "overview" ? null : key })}` : mainLink({ place: st.picked, tab: key }));
   const tab = (key) => h("a", { href: href(key), "aria-current": key === (sheetTab() ?? "overview") ? "page" : null,
     onclick: onMap[key] && plainClick(onMap[key]) }, t(`tab.${key}`));
   $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
@@ -410,7 +416,7 @@ const plainClick = (act) => (event) => {
   act();
 };
 
-/* ---- My business, a sheet over the map (map-gl-biz.js) ---- */
+/* ---- the place's tabs, a sheet over the map (map-gl-sheet.js) ---- */
 
 const sectionIdOf = (place) => (typeof place?.section === "string" ? place.section : place?.section?.id ?? null);
 /** The page a place is on, as the old interface makes it (start.js pageArea): its section's once loaded, else the area. */
@@ -423,41 +429,52 @@ function cardPlace() {
   return shop ? businessPlace(shop, st.area.id) : null;
 }
 
-function openBusiness(place = cardPlace(), options = {}) {
-  st.biz.open(place, pageOf(place), st.rp, options);
+/** Opens the sheet on `tab` (the one on show, when it is open) for the card's place. */
+function openSheet(tab = st.sheet.isOpen() ? st.sheet.tab() : "business", place = cardPlace(), options = {}) {
+  st.sheet.open(tab, place, pageOf(place), st.rp, options);
+}
+
+/** A place in Compare places: on this map (its section loads first; the sheet, open, follows it), or another area's. */
+function openCompared(place) {
+  const { areaId, sectionId } = place.page ?? {};
+  if (areaId && areaId !== st.area.id) {
+    window.location.assign(`map.html${withMapView(writeUrl({ area: areaId, section: sectionId, place: place.id, rp: st.rp, lang: langParam() }), st.base, st.tilt)}`);
+  } else if (place.is_point) showPoint(place, null);
+  else openShop({ id: place.id, section: sectionId ?? sectionIdOf(place) });
 }
 
 /** The sheet opened or closed: the link follows it, and focus that was in a closed sheet goes back to the card. */
 function onSheetChanged() {
   writeLink();
-  const isOpen = st.biz.isOpen();
+  const isOpen = st.sheet.isOpen();
   // what the sheet covers is out of reach by keyboard and screen reader: the cards beside the map, and on a phone, where
   // the sheet fills the screen, the bar, the tabs, the tools and the map too
   for (const selector of [".mg-side", ".mg-top", ".mg-tabs", ".mg-right", "#mg-map"]) {
     document.querySelector(selector).inert = isOpen && (selector === ".mg-side" || PHONE.matches);
   }
-  if (isOpen || !(document.activeElement === document.body || $("mg-biz").contains(document.activeElement))) return;
+  if (isOpen || !(document.activeElement === document.body || $("mg-sheet").contains(document.activeElement))) return;
   ($("mg-place").hidden ? st.map.getCanvas() : $("mg-place").querySelector("h2"))?.focus({ preventScroll: true });
 }
 
-/** The old interface's chat, about the place: its link with ?tab=ask, which opens the chat over the page. */
-function askLink(place) {
-  const url = new URL(mainLink({ place: place?.id ?? null, section: sectionIdOf(place) }), window.location.href);
-  url.searchParams.set("tab", "ask");
-  return `${url.pathname}${url.search}${url.hash}`;
-}
-
-function wireBusiness() {
-  PHONE.addEventListener("change", () => st.biz.isOpen() && onSheetChanged());   // a turn or a resize: what it covers changes
-  st.biz = createBusinessSheet({
-    sheet: $("mg-biz"), panel: $("panel-business"), back: $("mg-biz-back"), status: st.status,
-    areas: () => api.getAreas().then((list) => list.areas ?? []),
+/** The sheet, and the chat it and the cards ask: both built once the area's data and the status are in. */
+function wireSheet() {
+  PHONE.addEventListener("change", () => st.sheet.isOpen() && onSheetChanged());   // a turn or a resize: what it covers changes
+  st.areasList = api.getAreas().then((list) => list.areas ?? []).catch(() => []);
+  st.areasList.then((areas) => {
+    st.chat = createMapChat({ area: st.area, areas, status: st.status, getPlaceRef: () => st.picked });
+    st.chat.render(cardPlace());
+    if (st.link.chat) st.chat.open();   // the old Ask AI tab's link (?tab=ask): the chat over the map
+  });
+  st.sheet = createPlaceSheet({
+    sheet: $("mg-sheet"), back: $("mg-sheet-back"), label: $("mg-sheet-label"), status: st.status, areas: () => st.areasList,
+    panels: { business: $("panel-business"), cost: $("panel-cost"), insurance: $("panel-insurance") },
     on: {
       pickRp: pickFloodSize,
       showOnMap: (place) => st.map.flyTo({ center: [place.lon, place.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), duration: duration() }),
       movePin: (place) => startPin({ at: place }),
       goto: (tab, place) => window.location.assign(mainLink({ place: place?.id ?? null, section: sectionIdOf(place), tab })),
-      ask: (place) => window.location.assign(askLink(place)),
+      ask: (opener) => st.chat?.open(opener),
+      openCompared,
       // no tab, as place.js pageLink: the query of a move that carries a point is the same as any other move's
       openArea: (areaId, place) => window.location.assign(`map.html${withMapView(writeUrl({ area: areaId, place: place.id, rp: st.rp, lang: langParam() }), st.base, st.tilt)}`),
       find: () => $("mg-q").focus(),
@@ -465,8 +482,7 @@ function wireBusiness() {
       changed: onSheetChanged,
     },
   });
-  $("mg-biz-back").textContent = t("mg.backToMap");
-  $("mg-biz-label").textContent = t("tab.business");
+  $("mg-sheet-back").textContent = t("mg.backToMap");
 }
 
 /* ---- the bar, the cards and their controls ---- */
@@ -481,7 +497,7 @@ function drawSummary() {
 function pickFloodSize(rp) {
   const hadFocus = $("mg-summary").contains(document.activeElement);
   st.rp = rp;
-  st.biz?.setRp(rp);
+  st.sheet?.setRp(rp);
   paintFloodSize(st.map);
   drawSummary();
   if (hadFocus) $("mg-summary").querySelector(`[data-rp="${rp}"]`)?.focus();
@@ -631,7 +647,7 @@ function wireTools() {
 function onKey(event) {
   if (event.key !== "Escape" || event.defaultPrevented || st.pin?.isAsking() || document.querySelector("dialog[open]")) return;
   if (st.pin?.isOn()) st.pin.cancel();
-  else if (st.biz?.isOpen()) st.biz.close();
+  else if (st.sheet?.isOpen()) st.sheet.close();
   else closeCard();
 }
 
@@ -650,7 +666,7 @@ async function startFromLink() {
     const shop = place && st.shops.get(place);
     if (shop) showShop(shop);
   }
-  if (tab === "business") openBusiness(cardPlace(), { push: false });   // a link to the sheet opens it, with no step to go back to
+  if (SHEET_TABS.includes(tab)) openSheet(tab, cardPlace(), { push: false });   // a link to the sheet opens it, with no step to go back to
 }
 
 /** A point the link names, checked again; a failure is said, and the map stays as it is. */
@@ -704,7 +720,8 @@ async function start() {
   }
   addShelters(st.map);
   wireTools();
-  wireBusiness();
+  applyStatic(document);   // the chat's own words in map.html (data-i18n), as the old page fills them
+  wireSheet();
   document.addEventListener("keydown", onKey);
   say(hint());
   return startFromLink();

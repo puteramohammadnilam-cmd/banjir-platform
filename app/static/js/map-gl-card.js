@@ -50,12 +50,14 @@ const head = (title, onClose) => [
 ];
 const tile = (label, value, note = null, isPicked = false) => h("div", { class: isPicked ? "mg-stat mg-picked" : "mg-stat" },
   h("div", { class: "mg-stat-k" }, label), h("div", { class: "mg-stat-v" }, value), note && h("div", { class: "mg-stat-k" }, note));
-/** "Full details": My business in a sheet over this map (links.onDetails); its address opens the same sheet in a new tab. */
-const detailsLink = (links) => h("a", { class: "mg-btn mg-primary", href: links.details, onclick: links.onDetails && ((event) => {
-  if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  event.preventDefault();
-  links.onDetails();
-}) }, t("mg.details"));
+/** "Full details" and "Flood cost": the sheet over this map on that tab (onOpen); the address opens the same sheet in a
+ *  new tab, as a click with a key held or a long press does. */
+const sheetLink = (text, href, onOpen, primary = false) => h("a", { class: primary ? "mg-btn mg-primary" : "mg-btn", href,
+  onclick: onOpen && ((event) => {
+    if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    onOpen();
+  }) }, text);
 const link = (text, href, primary = false, external = false) => h("a", { class: primary ? "mg-btn mg-primary" : "mg-btn", href,
   target: external ? "_blank" : null, rel: external ? "noopener noreferrer" : null }, text);
 
@@ -90,7 +92,7 @@ export function shopCard(shop, { rp, sectionName, shelters, links, onClose, onSh
     h("p", { class: "mg-say" }, shopSentence(depth, rp)),
     h("div", { class: "mg-stats" }, SCENARIOS.map((size) => tile(t("scenario.label", { rp: size }), metres(shop.depth_m?.[size]), null, size === rp)),
       tile(t("mg.shelter"), near ? t("mg.km", { km: formatNumber(near.km, { maximumFractionDigits: 1 }) }) : "–", near?.shelter.name)),
-    h("div", { class: "mg-acts" }, detailsLink(links), link(t("mg.cost"), links.cost),
+    h("div", { class: "mg-acts" }, sheetLink(t("mg.details"), links.details, links.onDetails, true), sheetLink(t("mg.cost"), links.cost, links.onCost),
       h("button", { type: "button", class: "mg-btn", onclick: onShare }, t("mg.share")),
       links.see3d && link(t("business.see3d"), links.see3d), link(t("mg.directions"), links.directions, false, true)),
     h("p", { class: "mg-fine" }, t("mg.fine"), near ? ` ${t("business.shelterLine")}` : null,
@@ -113,7 +115,7 @@ export function pointCard(place, { rp, title, subline, links, onClose, onShare, 
     h("p", { class: "mg-say" }, isWet ? t("mg.say.pointWet", { rp, m: depth.toFixed(1), words: depthWords(depth) }) : t("mg.say.pointDry", { rp })),
     h("div", { class: "mg-stats" }, SCENARIOS.map((size) => tile(t("scenario.label", { rp: size }), metres(place.depth_m?.[size]), null, size === rp)),
       tile(t("mg.shelter"), near ? t("mg.km", { km: formatNumber(near.km, { maximumFractionDigits: 1 }) }) : "–", near?.shelter.name)),
-    h("div", { class: "mg-acts" }, detailsLink(links), link(t("mg.cost"), links.cost),
+    h("div", { class: "mg-acts" }, sheetLink(t("mg.details"), links.details, links.onDetails, true), sheetLink(t("mg.cost"), links.cost, links.onCost),
       h("button", { type: "button", class: "mg-btn", onclick: onShare }, t("mg.share")),
       h("button", { type: "button", class: "mg-btn", onclick: onMove }, t("mg.movePin")),
       link(t("mg.directions"), links.directions, false, true)),
