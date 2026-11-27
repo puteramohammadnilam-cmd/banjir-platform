@@ -19,6 +19,8 @@ import { MAX_PHOTOS } from "./stock.js";
 
 export const SHEET_TABS = ["business", "cost", "insurance"];
 const pageKey = (page) => `${page?.id}|${page?.section_id ?? ""}`;
+/** A place's section id: a business's is its id, a point's comes as {id, name} (null outside any section). */
+const sectionOf = (place) => (typeof place?.section === "string" ? place.section : place?.section?.id ?? null);
 
 /** `sheet` holds `panels` ({business, cost, insurance}: #panel-business and so on, where the old stylesheets lay them
  *  out), its `back` button and its `label`; `status` is GET /api/status's answer; areas() resolves the listed areas. `on`
@@ -35,20 +37,17 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
    *  place is on show is kept under its own place, and not drawn. */
   const store = (key, id = idOf()) => (value) => {
     st[key] = { ...st[key], [id]: value };
-    if (idOf() === id) draw();
+    if (idOf() === id && !sheet.hidden) draw();   // open() draws anyway
   };
   const floodMode = createFloodMode();
-  const context = () => {
-    const photo = st.photos[idOf()]?.estimate;
-    return { premise: st.place, rp: st.rp, floorCm: photo?.is_shop_front ? photo.floor_height_cm : 0, stock: st.stocks[idOf()],
-      dry: st.drySpots[idOf()], tide: null };
-  };
-  const empty = { onFind: () => { close(); on.find(); }, onCheckPoint: on.checkPoint && (() => { close(); on.checkPoint(); }) };
-  const goto = (tab) => (SHEET_TABS.includes(tab) ? showTab(tab) : on.goto(tab, st.place));
+  /** The floor height a shop-front photo gave, in cm, or null. */
   const floorCm = () => {
     const photo = st.photos[idOf()]?.estimate;
     return photo?.is_shop_front ? photo.floor_height_cm : null;
   };
+  const context = () => ({ premise: st.place, rp: st.rp, floorCm: floorCm() ?? 0, stock: st.stocks[idOf()], dry: st.drySpots[idOf()], tide: null });
+  const empty = { onFind: () => { close(); on.find(); }, onCheckPoint: on.checkPoint && (() => { close(); on.checkPoint(); }) };
+  const goto = (tab) => (SHEET_TABS.includes(tab) ? showTab(tab) : on.goto(tab, st.place));
 
   // ---------- what the tabs send ----------
 
@@ -112,7 +111,7 @@ export function createPlaceSheet({ sheet, panels, back, label, status, areas, on
   const plan = createPlanCard({ isReady, onWrite: writePlan, onPrint: () => printSheet(plan.node.querySelector(".plan-sheet")),
     onLanguage: (language) => { st.planLanguage = language; draw(); } });
   const compare = createCompareCard({
-    onAdd: () => setCompared(addCompared(st.compared, { ...st.place, page: { areaId: st.page.id, sectionId: st.page.section_id ?? null } })),
+    onAdd: () => setCompared(addCompared(st.compared, { ...st.place, page: { areaId: st.page.id, sectionId: sectionOf(st.place) } })),
     onRemove: (id) => setCompared(st.compared.filter((kept) => kept.id !== id)),
     onOpen: (place) => on.openCompared(place),
     onFind: empty.onFind,

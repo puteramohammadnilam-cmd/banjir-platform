@@ -151,8 +151,8 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg dialog.dialog { max-width: min(26rem, calc(100vw - 32px)); padding: 18px 20px; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
   background: var(--mg-solid); color: var(--mg-ink); box-shadow: var(--mg-shadow); }
 .mg dialog.dialog::backdrop { background: rgb(15 23 42 / 0.45); }
-.mg dialog h2 { margin: 0 0 8px; font: 700 18px/1.25 var(--mg-font); }
-.mg dialog p { margin: 0 0 14px; color: var(--mg-ink2); }
+.mg dialog.dialog h2 { margin: 0 0 8px; font: 700 18px/1.25 var(--mg-font); }   /* the location dialog; the chat has its own */
+.mg dialog.dialog p { margin: 0 0 14px; color: var(--mg-ink2); }
 
 /* engineer mode's panel (engineer.js), in this map's look */
 .mg-eng { min-height: 0; overflow: auto; display: grid; align-content: start; gap: 10px; font-size: 13px; }
@@ -189,7 +189,7 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg .badge-new { display: inline-block; margin-inline-start: 6px; padding: 1px 6px; border-radius: 999px; background: #ffb14a; color: #1a1100;
   font: 800 10px/1.5 var(--mg-font); letter-spacing: 0.06em; vertical-align: middle; }
 
-/* My business, a sheet over the map (js/map-gl-biz.js), in the old interface's parts (styles/*.css, light or dark with
+/* the place's tabs, a sheet over the map (js/map-gl-sheet.js), in the old interface's parts (styles/*.css, light or dark with
    the base map); on a phone it fills the screen, under its own bar with the way back */
 .mg-sheet { position: fixed; top: 118px; left: 14px; bottom: 14px; z-index: 4; width: min(1000px, calc(100vw - 324px));
   display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
@@ -206,6 +206,9 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg #panel-business > .biz-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
   .mg #panel-business :is(.risk, .biz-side) { grid-area: auto; }   /* business.css's named areas would add columns */
 }
+
+/* printing the flood plan (business.css shows only #print-root): the page grows with it, not the screen's height */
+@media print { html, body.mg { height: auto; overflow: visible; background: #fff; } }
 
 /* the chat's button (chat.css), beside the map's zoom buttons and over its credits */
 .mg .chat-fab { right: 58px; bottom: 34px; }

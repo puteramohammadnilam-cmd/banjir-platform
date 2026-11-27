@@ -257,6 +257,7 @@ function showSection(sectionId, { focus = true } = {}) {
   st.pin?.stop();
   clearPoint();
   st.sheet?.close();   // a section has no business card
+  st.chat?.render(null);   // and the chat is about the area again
   st.card = { kind: "section", id: sectionId };
   showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
 }
@@ -373,12 +374,12 @@ async function openSection(sectionId, { fit = true } = {}) {
 /** A shop picked in the search: its section loads first; a later pick or click wins over a slow load. */
 async function openShop(entry) {
   st.want = entry.id;
-  const hadSheet = st.sheet?.isOpen();   // opening its section closes the sheet: a search made in it opens it again
+  const openTab = st.sheet?.isOpen() ? st.sheet.tab() : null;   // opening its section closes the sheet: a search made in it opens it again
   if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
   if (!shop || st.want !== entry.id) return;
   showShop(shop, { fly: true });
-  if (hadSheet) openSheet();
+  if (openTab) openSheet(openTab);
 }
 
 /* ---- this page's link, and the links that carry it ---- */
@@ -438,7 +439,8 @@ function openSheet(tab = st.sheet.isOpen() ? st.sheet.tab() : "business", place 
 function openCompared(place) {
   const { areaId, sectionId } = place.page ?? {};
   if (areaId && areaId !== st.area.id) {
-    window.location.assign(`map.html${withMapView(writeUrl({ area: areaId, section: sectionId, place: place.id, rp: st.rp, lang: langParam() }), st.base, st.tilt)}`);
+    const tab = place.is_point ? null : "business";   // no tab with a point, as place.js pageLink
+    window.location.assign(`map.html${withMapView(writeUrl({ area: areaId, section: sectionId, tab, place: place.id, rp: st.rp, lang: langParam() }), st.base, st.tilt)}`);
   } else if (place.is_point) showPoint(place, null);
   else openShop({ id: place.id, section: sectionId ?? sectionIdOf(place) });
 }
@@ -461,7 +463,7 @@ function wireSheet() {
   PHONE.addEventListener("change", () => st.sheet.isOpen() && onSheetChanged());   // a turn or a resize: what it covers changes
   st.areasList = api.getAreas().then((list) => list.areas ?? []).catch(() => []);
   st.areasList.then((areas) => {
-    st.chat = createMapChat({ area: st.area, areas, status: st.status, getPlaceRef: () => st.picked });
+    st.chat = createMapChat({ area: st.area, areas, status: st.status, getPlaceRef: () => cardPlace()?.id ?? null });
     st.chat.render(cardPlace());
     if (st.link.chat) st.chat.open();   // the old Ask AI tab's link (?tab=ask): the chat over the map
   });
@@ -663,8 +665,9 @@ async function startFromLink() {
   if (parseRef(place)?.kind === "point") await openLinkedPoint(place);
   else {
     if (section && st.sections.some((known) => known.id === section)) await openSection(section);
-    const shop = place && st.shops.get(place);
-    if (shop) showShop(shop);
+    const entry = place && !st.shops.has(place) && st.index.find((known) => known.id === place);
+    if (entry) await openShop(entry);   // a link with no section (an old one): the index has the shop's section
+    else if (st.shops.get(place)) showShop(st.shops.get(place));
   }
   if (SHEET_TABS.includes(tab)) openSheet(tab, cardPlace(), { push: false });   // a link to the sheet opens it, with no step to go back to
 }

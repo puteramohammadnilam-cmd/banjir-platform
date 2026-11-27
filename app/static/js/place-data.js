@@ -1,5 +1,5 @@
 // What both pages load and send for the place on show, with no state of their own: the old interface (main.js) and the
-// new map's My business sheet (map-gl-biz.js) keep their answers in their own stores and pass a setter in.
+// new map's place sheet (map-gl-sheet.js) keep their answers in their own stores and pass a setter in.
 import { h } from "./dom.js";
 import { t } from "./i18n.js";
 

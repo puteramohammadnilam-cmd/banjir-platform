@@ -51,6 +51,11 @@ test("a link to My business, Flood cost, Insurance or the chat opens the new map
   assert.equal(goesTo("?tab=cost&place=node-1", "", "old"), null, "a browser that chose the old interface stays");
 });
 
+test("a point in the query is never sent on: this page takes it out of its address", () => {
+  assert.equal(goesTo("?tab=business&place=pt:3.00042,101.50042", ""), null);
+  assert.equal(goesTo("?shop=pt:3.00042,101.50042", ""), null);
+});
+
 test("a query that names no view goes along to the new map: a language, a share's tracking", () => {
   assert.equal(goesTo("?lang=ms", ""), "./map.html?lang=ms");
   assert.equal(goesTo("?fbclid=abc&utm_source=wa", ""), "./map.html?fbclid=abc&utm_source=wa");

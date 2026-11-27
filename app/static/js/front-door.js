@@ -15,5 +15,7 @@
     isOld = localStorage.getItem("myflood-ui") === "old";
   } catch { /* storage blocked: the default, the new map */ }
   const namesNoView = !location.hash && !VIEW.some((key) => query.has(key));
-  if (!isOld && (namesNoView || ON_MAP.includes(query.get("tab")))) location.replace(`./map.html${location.search}${location.hash}`);
+  // a point in the query (a link made wrongly, or very old) is never sent on: this page takes it out of its address
+  const pointInQuery = ["place", "shop"].some((key) => query.get(key)?.startsWith("pt:"));
+  if (!isOld && !pointInQuery && (namesNoView || ON_MAP.includes(query.get("tab")))) location.replace(`./map.html${location.search}${location.hash}`);
 })();
