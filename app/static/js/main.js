@@ -6,6 +6,7 @@ import { createCost, estimateState, needsFirstLook } from "./cost.js";
 import { h } from "./dom.js";
 import { createEngineer } from "./engineer.js";
 import { leafletDrawer } from "./engineer-leaflet.js";
+import { rememberUi } from "./ui-choice.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createInsurance } from "./insurance.js";
 import { createNews } from "./news.js";
@@ -497,11 +498,12 @@ function createViews(app) {
     onArea: (areaId) => changeArea(app, areaId), onCheckPoint: checkPoint, city,
   });
   const engineer = createEngineer({ section: $("engineer"), button: $("engineer-switch"), drawer: leafletDrawer(overview.map), area: start.area, sectionId: start.section?.id ?? null });
-  // the header's New map link opens map.html on this view: area, section, shop and flood size in the page's own query,
-  // and a point in its fragment, which the browser never sends to the server
+  // the header's New version link opens map.html on this view: area, section, shop and flood size in the page's own
+  // query, and a point in its fragment, which the browser never sends to the server; it is remembered as the choice
   const mapLink = $("map-link");
   const freshMapLink = () => { mapLink.href = `map.html${location.search}${location.hash}`; };
   for (const type of ["pointerdown", "focus", "click"]) mapLink?.addEventListener(type, freshMapLink);
+  mapLink?.addEventListener("click", () => rememberUi("new"));
   createNews($("whats-new"), { onShowOutlook: () => $("outlook")?.scrollIntoView({ behavior: "smooth", block: "center" }),
     onOpenEngineer: engineer ? () => engineer.toggle(true) : null, focusAfter: $("panel-overview") });
   const pin = createPin({   // a point's squares are drawn unless the page's own squares cover it (none on a whole city's map)

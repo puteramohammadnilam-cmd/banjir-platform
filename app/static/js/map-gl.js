@@ -15,6 +15,7 @@ import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sections
   squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
 import { glDrawer } from "./map-gl-eng.js";
 import { createPinMode } from "./map-gl-pin.js";
+import { rememberUi } from "./ui-choice.js";
 import { isWithinView, parseRef, writeUrl } from "./place.js";
 import { pointHeader } from "./point.js";
 
@@ -376,7 +377,8 @@ function drawLinks() {
   if (!st.area) return;
   const langLink = (code, label) => h("a", { href: `map.html${mapQuery({ lang: code })}`, "aria-current": code === lang ? "true" : null }, label);
   $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
-  $("mg-home").href = mainLink({ place: st.picked });
+  $("mg-home").href = `map.html${writeUrl({ area: st.area.id, lang: langParam() })}`;   // this map's home: the whole area
+  $("mg-old").href = mainLink({ place: st.picked });
   const tab = (key) => h("a", { href: mainLink({ place: st.picked, tab: key === "overview" ? null : key }), "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
   $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
 }
@@ -386,7 +388,10 @@ function drawLinks() {
 function drawSummary() {
   const wet = st.sections.length ? wetTotals(st.sections, st.rp).wet : wetShops([...st.shops.values()], st.rp);
   const all = st.area.counts?.businesses ?? st.shops.size;
-  $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize }));
+  $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize, onOld: (event) => {
+    rememberUi("old");
+    event.currentTarget.href = mainLink({ place: st.picked });   // the view now, as the click follows it
+  } }));
 }
 
 function pickFloodSize(rp) {
@@ -446,7 +451,7 @@ function drawBar() {
   $("mg-home").setAttribute("aria-label", t("mg.back"));
   $("mg-q").placeholder = t("mg.search");
   $("mg-q").setAttribute("aria-label", t("mg.searchLabel"));
-  Object.assign($("mg-tag"), { textContent: t("mg.preview"), title: t("mg.previewNote") });
+  Object.assign($("mg-old"), { textContent: t("mg.oldUi"), title: t("mg.oldUiNote"), onclick: () => rememberUi("old") });
   $("mg-bases").setAttribute("aria-label", t("mg.base.label"));
   $("mg-lang").setAttribute("aria-label", t("mg.lang"));
   $("mg-tabs").setAttribute("aria-label", t("mg.tabsLabel"));

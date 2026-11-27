@@ -308,9 +308,9 @@ A switch in the footer ("Engineer mode", or `?engineer=1`, remembered in the bro
 - Not here: flow speed and hazard need a 2-D flow model.
 - Licence: `app/data/pooling` is CC BY-NC-SA 4.0 (FABDEM), non-commercial; see its README.txt.
 
-## New map preview
+## New map (the front door)
 
-`/map.html` is a preview of the Area overview on a new map, in the style of Farhan Syah's Arus (MIT, `app/static/vendor/LICENSE-arus.txt`). The main page keeps the old map until this one has everything.
+`/map.html` is the Area overview on a new map, in the style of Farhan Syah's Arus (MIT, `app/static/vendor/LICENSE-arus.txt`). It is the site's front door: a bare address (`/`, nothing in the query or fragment) opens it (`js/front-door.js`, a plain script at the top of `index.html`'s head). Its "Old interface" button opens the old page on the same view, and that page's "New version" button comes back; each browser remembers the last choice (`localStorage` key `myflood-ui`, `js/ui-choice.js`), so someone who picked the old interface lands there. A link that names a view, a tab or a place still opens the old page, as every link it made before does.
 
 - MapLibre (already vendored for the 3D page) on OpenFreeMap's free vector maps: light (Positron) and dark, plus Esri's satellite photo through our key. The styles are copies in `app/static/vendor/openfreemap/`, so the flood water always goes under the streets and names; see its README.txt.
 - Floating cards: search, the main page's tabs, the flood size, the layers, and a place card (a bottom sheet on phones) for a shop or a section, with links back to the main page's details, cost and 3D. English and Bahasa Melayu (`strings/*-map.js`).

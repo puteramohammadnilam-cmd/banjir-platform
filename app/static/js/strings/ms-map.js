@@ -1,15 +1,15 @@
 // Words in Bahasa Melayu for the new map preview (map.html, js/map-gl.js): the same keys as strings/en-map.js.
 // Spread into strings/ms.js through ms-eng.js, so ms.js stays under the file size limit.
 export default Object.freeze({
-  "mg.title": "Peta banjir (pratonton) · MyFlood",
-  "header.newMap": "Peta baharu",   // the main page's link here (index.html)
+  "mg.title": "Peta banjir · MyFlood",
+  "header.newMap": "Versi baharu",   // the old page's switch to this map (index.html)
   "mg.mapLabel": "Peta banjir dalam model: bahagian bandar, petak banjir dan kedai",
   "mg.back": "Halaman utama MyFlood",
   "mg.search": "Cari kedai anda",
   "mg.searchLabel": "Cari kedai mengikut nama",
   "mg.noMatch": "Tiada kedai dengan nama itu di sini.",
-  "mg.preview": "Pratonton",
-  "mg.previewNote": "Pratonton peta baharu. Halaman utama masih guna peta lama.",
+  "mg.oldUi": "Paparan lama",
+  "mg.oldUiNote": "Halaman lama, dengan 5 hari akan datang, pasang surut dan jadual bahagian bandar",
   "mg.base.label": "Peta asas",
   "mg.base.map": "Peta",
   "mg.base.sat": "Satelit",

@@ -13,8 +13,9 @@ const dotKey = (extraClass = "") => h("div", { class: `mg-dots ${extraClass}`.tr
   dot("high", "mg.dot.deep"), dot("deep", "mg.dot.veryDeep"));
 const metres = (depth) => (typeof depth === "number" && depth > 0 ? t("common.metres", { m: depth.toFixed(2) }) : t("mg.dry"));
 
-/** The flood size card: how many businesses get water, and the three flood sizes to pick from. */
-export function summaryCard({ wet, all, rp, onPick }) {
+/** The flood size card: how many businesses get water, and the three flood sizes to pick from. On phones, where the bar
+ *  has no room for it, it also holds the way to the old interface (onOld). */
+export function summaryCard({ wet, all, rp, onPick, onOld = null }) {
   const pick = (size) => h("button", { type: "button", class: size === rp ? "on" : null, "aria-pressed": String(size === rp), "data-rp": size,
     onclick: () => onPick(size) }, h("b", {}, t("mg.rpShort", { rp: size })), h("span", {}, t("mg.chance", { pct: pct(size) })));
   return [
@@ -24,7 +25,8 @@ export function summaryCard({ wet, all, rp, onPick }) {
     h("p", { class: "mg-muted mg-small mg-wet-sub" }, t("mg.wetSub", { rp, pct: pct(rp) })),
     h("div", { class: "mg-rp", role: "group", "aria-label": t("mg.floodSize") }, SCENARIOS.map(pick)),
     dotKey("mg-phone-only"),
-  ];
+    onOld && h("a", { class: "mg-phone-only mg-old-link", href: "./?rp=50", onclick: onOld }, t("mg.oldUi")),
+  ].filter(Boolean);
 }
 
 /** The layers card: a switch for each layer, the squares' depth ramp and the shop dots' colours. */

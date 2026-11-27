@@ -52,6 +52,9 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 .mg-spacer { flex: 1; }
 .mg-tag { padding: 4px 7px; border: 1px solid #f59e0b; border-radius: 6px; color: #b45309; font: 600 11px var(--mg-mono); letter-spacing: 0.06em; text-transform: uppercase; }
 [data-theme="dark"] .mg-tag { color: #fbbf24; }
+a.mg-tag { text-decoration: none; transition: background-color 150ms; }
+a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
+.mg-old-link { margin-top: 8px; color: var(--mg-ink2); font-size: 12px; }
 .mg-seg { display: inline-flex; padding: 3px; border: 1px solid var(--mg-line); border-radius: 10px; background: var(--mg-well); }
 .mg-seg button, .mg-seg a { padding: 6px 12px; border: 0; border-radius: 7px; background: none; color: var(--mg-ink2); font-weight: 500; text-decoration: none; }
 .mg-seg [aria-pressed="true"], .mg-seg [aria-current="true"] { background: var(--mg-solid); color: var(--mg-ink); box-shadow: 0 1px 3px rgb(15 23 42 / 0.15); }
@@ -207,6 +210,7 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
   .mg-seg button, .mg-seg a { padding: 6px 9px; }
   .mg-x { width: 44px; height: 44px; }
   .mg-summary .mg-phone-only { display: flex; }
+  .mg-summary .mg-old-link { align-items: center; min-height: 44px; margin-top: 2px; }   /* a full tap */
   .mg-search { flex: 1 1 60%; max-width: none; }
   .mg-lang { order: 3; }
   .mg-side { top: auto; left: 10px; right: 10px; bottom: 16px; z-index: 4; width: auto; }   /* above .mg-right, so the place card covers engineer mode's sheet */

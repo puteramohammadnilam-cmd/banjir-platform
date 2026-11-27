@@ -1,15 +1,15 @@
 // Words in English for the new map preview (map.html, js/map-gl.js): its bar, cards and place card. Spread into
 // strings/en.js through en-eng.js, so en.js stays under the file size limit.
 export default Object.freeze({
-  "mg.title": "Flood map (preview) · MyFlood",
-  "header.newMap": "New map",   // the main page's link here (index.html)
+  "mg.title": "Flood map · MyFlood",
+  "header.newMap": "New version",   // the old page's switch to this map (index.html)
   "mg.mapLabel": "Map of the modelled flood: sections, flood squares and shops",
-  "mg.back": "MyFlood main page",
+  "mg.back": "MyFlood home",
   "mg.search": "Search your shop",
   "mg.searchLabel": "Search a shop by name",
   "mg.noMatch": "No shop by that name here.",
-  "mg.preview": "Preview",
-  "mg.previewNote": "A preview of the new map. The main page still uses the old one.",
+  "mg.oldUi": "Old interface",
+  "mg.oldUiNote": "The old page, with the next 5 days, tides and the sections table",
   "mg.base.label": "Base map",
   "mg.base.map": "Map",
   "mg.base.sat": "Satellite",
