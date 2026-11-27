@@ -14,8 +14,8 @@ const dotKey = (extraClass = "") => h("div", { class: `mg-dots ${extraClass}`.tr
 const metres = (depth) => (typeof depth === "number" && depth > 0 ? t("common.metres", { m: depth.toFixed(2) }) : t("mg.dry"));
 
 /** The flood size card: how many businesses get water, and the three flood sizes to pick from. On phones, where the bar
- *  has no room for it, it also holds the way to the old interface (oldUi: {href, onClick}). */
-export function summaryCard({ wet, all, rp, onPick, oldUi = null }) {
+ *  has no room for it, it also holds the way to the old interface (oldHref: its link, for the view on show). */
+export function summaryCard({ wet, all, rp, onPick, oldHref = null }) {
   const pick = (size) => h("button", { type: "button", class: size === rp ? "on" : null, "aria-pressed": String(size === rp), "data-rp": size,
     onclick: () => onPick(size) }, h("b", {}, t("mg.rpShort", { rp: size })), h("span", {}, t("mg.chance", { pct: pct(size) })));
   return [
@@ -25,13 +25,13 @@ export function summaryCard({ wet, all, rp, onPick, oldUi = null }) {
     h("p", { class: "mg-muted mg-small mg-wet-sub" }, t("mg.wetSub", { rp, pct: pct(rp) })),
     h("div", { class: "mg-rp", role: "group", "aria-label": t("mg.floodSize") }, SCENARIOS.map(pick)),
     dotKey("mg-phone-only"),
-    oldUi && h("a", { class: "mg-phone-only mg-old-link", href: oldUi.href, onclick: oldUi.onClick }, t("mg.oldUi")),
+    oldHref && h("a", { class: "mg-phone-only mg-old-link", href: oldHref }, t("mg.oldUi")),
   ].filter(Boolean);
 }
 
 /** The layers card: a switch for each layer, the squares' depth ramp and the shop dots' colours. */
 export function layersCard(visible, onToggle) {
-  const toggle = (key) => h("label", {}, h("input", { type: "checkbox", checked: visible[key],
+  const toggle = (key) => h("label", {}, h("input", { type: "checkbox", value: key, checked: visible[key],
     onchange: (event) => onToggle(key, event.target.checked) }), " ", t(`mg.layer.${key}`));
   return [
     h("p", { class: "mg-k" }, t("mg.layers")),
@@ -123,8 +123,8 @@ export function pointCard(place, { rp, title, subline, links, onClose, onShare, 
   ].filter(Boolean);
 }
 
-/** A section's card: its share of wet squares, its wet businesses, and the way to it on the main page. */
-export function sectionCard(section, { rp, link: href, onClose }) {
+/** A section's card: its share of wet squares, its wet businesses, and onOpen() for its Area overview in the sheet. */
+export function sectionCard(section, { rp, onOpen, onClose }) {
   const exact = section[`s${rp}`] * 100;
   const share = Math.round(exact);
   let tone = "dry";
@@ -136,6 +136,6 @@ export function sectionCard(section, { rp, link: href, onClose }) {
     h("p", { class: "mg-sub" }, t("mg.sectionSub", { n: formatNumber(section.n) })),
     h("span", { class: `mg-badge mg-${tone}` }, exact > 0 && share < 1 ? t("mg.wetShareUnder") : t("mg.wetShare", { pct: share })),
     h("p", { class: "mg-say" }, t("mg.sectionSay", { rp, wet: formatNumber(section[`w${rp}`]), n: formatNumber(section.n) })),
-    h("div", { class: "mg-acts" }, link(t("mg.openSection"), href, true)),
+    h("div", { class: "mg-acts" }, h("button", { type: "button", class: "mg-btn mg-primary", onclick: onOpen }, t("mg.openSection"))),
   ];
 }

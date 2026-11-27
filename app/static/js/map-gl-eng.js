@@ -39,14 +39,24 @@ function drawMarks(map, id, points) {
 /** The drawer, its layers named `${prefix}-${key}` (the map's extra layers use one with its own prefix: map-gl-layers.js).
  *  getMap() gives the map once it is up; beforeId(map, key) the layer a picture goes under; hasOurLayers(map)
  *  whether the page's own layers are on the map's style yet (not while another base map loads: redraw() then adds it
- *  all); isAiming() whether the pin has the map's clicks; onToolChange() is told when a tool is picked or put down.
+ *  all); isAiming() whether the pin has the map's clicks; onToolChange() is told when a tool is picked or put down;
+ *  onError(key) when a picture on show did not load.
  *  click(lngLat) hands a click to the tool that is on, and says whether one took it. */
-export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => false, onToolChange = () => {}, prefix = "mg-eng" }) {
+export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => false, onToolChange = () => {}, onError = null, prefix = "mg-eng" }) {
   const layerId = (key) => `${prefix}-${key}`;
   const marksId = layerId("marks");
   const shown = {};   // by key: {url, bounds, opacity}
   let points = [];
   let tool = null;
+  let isListening = false;
+  const listen = (map) => {   // once: the map stays the same across base maps
+    if (!onError || isListening) return;
+    isListening = true;
+    map.on("error", (event) => {
+      const key = Object.keys(shown).find((name) => layerId(name) === event.sourceId);
+      if (key) onError(key);
+    });
+  };
   const ready = () => {
     const map = getMap();
     // not map.isStyleLoaded(): that is false too while any tile or picture loads, and a drop then would leave it drawn
@@ -58,6 +68,7 @@ export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => fals
       shown[key] = { url, bounds, opacity };
       const map = ready();
       if (!map) return;
+      listen(map);
       removeImage(map, layerId(key));
       addImage(map, layerId(key), shown[key], beforeId(map, key));
     },
@@ -84,6 +95,7 @@ export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => fals
     },
     /** After a base map change: the pictures and the marks again, over the new map's layers. */
     redraw(map) {
+      if (Object.keys(shown).length) listen(map);
       Object.entries(shown).forEach(([key, picture]) => addImage(map, layerId(key), picture, beforeId(map, key)));
       if (points.length) drawMarks(map, marksId, points);   // none drawn: nothing to bring back
     },

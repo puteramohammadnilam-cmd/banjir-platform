@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { FLASH_METRIC, SCORE_METRIC } from "../app/static/js/choropleth.js";
+import { FLASH_METRIC, SCORE_METRIC, STREET_WASH, STREET_ZOOM } from "../app/static/js/choropleth.js";
 import { useLang } from "../app/static/js/i18n.js";
 import { searchSections } from "../app/static/js/map-gl-data.js";
 import { metricPaint } from "../app/static/js/map-gl-layers.js";
@@ -27,6 +27,7 @@ test("the search finds sections by their name, another name, and the area's word
   assert.equal(searchSections(finder, "section 7")[0].section, "seksyen-7", "the English word for a Malay name, typed in full");
   assert.equal(new Set(searchSections(finder, "seksyen", 10).map((hit) => hit.section)).size, 3, "each section once");
   assert.deepEqual(searchSections(finder, "s"), [], "two letters at least");
+  assert.deepEqual(searchSections(finder, "city"), [], "the city's name after a section's is not a match");
   assert.deepEqual(searchSections(null, "seksyen"), [], "an area with no sections finds none");
 });
 
@@ -36,6 +37,8 @@ test("shading by flash flood potential or score gives each section the old map's
   const step = SCORE_METRIC.classes[SCORE_METRIC.class(4.2)];
   assert.deepEqual(color.slice(0, 4), ["match", ["get", "id"], "a", step.color]);
   assert.equal(color[5], SCORE_METRIC.classes[0].color, "a section with no score: the 'not worked out' class");
-  assert.equal(opacity.at(-1), 0, "anything else: not drawn");
+  assert.deepEqual(opacity.slice(0, 2), ["step", ["zoom"]]);
+  assert.equal(opacity[2].at(-1), 0, "anything else: not drawn");
+  assert.deepEqual(opacity.slice(3), [STREET_ZOOM, ["*", STREET_WASH, opacity[2]]], "a wash from street level in, as the old map");
   assert.equal(metricPaint(sections, "flash").color[3], FLASH_METRIC.classes[0].color, "no flash figures: the first class");
 });

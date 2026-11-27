@@ -72,7 +72,7 @@ export default Object.freeze({
   "mg.wetShare": "{pct}% petak berair",
   "mg.wetShareUnder": "Kurang 1% petak berair",
   "mg.sectionSay": "Dalam banjir 1 dalam {rp} tahun, {wet} daripada {n} perniagaannya dimasuki air dalam model.",
-  "mg.openSection": "Buka dalam paparan lama",
+  "mg.openSection": "Lihat gambaran kawasan ini",
   "mg.shelterTitle": "Pusat pemindahan banjir",
   "mg.credit": "Kedalaman banjir: JRC v2.1 (CC BY 4.0) · gaya peta ikut Arus (MIT)",
 });

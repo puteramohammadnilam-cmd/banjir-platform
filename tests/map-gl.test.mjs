@@ -130,12 +130,18 @@ test("a dry shop's card says so, in Malay too", () => {
   assert.ok(text(shopCard(dry, { rp: "10", sectionName: "", shelters: [], links: LINKS })).includes("Kering dalam model"));
 });
 
-test("a section's card gives its share of wet squares and its wet businesses", () => {
+test("a section's card gives its share of wet squares and its wet businesses, and opens its overview on this map", () => {
   const props = sectionsGeo([SECTION]).features[0].properties;
-  const words = text(sectionCard(props, { rp: "50", link: "./?section=sec-1", onClose() {} }));
+  let opened = 0;
+  const nodes = sectionCard(props, { rp: "50", onOpen: () => { opened += 1; }, onClose() {} });
+  const words = text(nodes);
   assert.ok(words.includes("25% of squares wet") && words.includes("12 of its 40 businesses"));
+  const open = nodes.at(-1).querySelector("button");
+  assert.equal(open.textContent, "See this section's overview");
+  open.click();
+  assert.equal(opened, 1, "a button on this map, not a link away to the old page");
   const tiny = { ...props, s50: 0.003 };
-  assert.ok(text(sectionCard(tiny, { rp: "50", link: "./", onClose() {} })).includes("Under 1% of squares wet"));
+  assert.ok(text(sectionCard(tiny, { rp: "50", onOpen() {}, onClose() {} })).includes("Under 1% of squares wet"));
 });
 
 test("the flood size card counts wet businesses and marks the size picked", () => {

@@ -13,8 +13,8 @@ import { FLASH_RAMP, SCORE_RAMP, highShare, oneDecimal, scoreClass, scoreOf, swa
 
 const OUTLINE = "#46d3ff";   // --brand in tokens.css
 const LIFTED = "#ffb14a";    // --marker: the section under the pointer, as a picked place is
-const STREET_ZOOM = 15;     // from here in, a point's own squares show: the shading steps back to a wash
-const STREET_WASH = 0.25;
+export const STREET_ZOOM = 15;     // from here in, a point's own squares show: the shading steps back to a wash
+export const STREET_WASH = 0.25;
 const REVEAL_STAGGER_MS = 18;   // the wettest section first, the next a moment later: about a second for a city of 56
 const REVEAL_FADE_MS = 520;
 const NO_SHARE = Object.freeze({ upTo: 0, color: OUTLINE, opacity: 0, words: () => t("choropleth.none") });

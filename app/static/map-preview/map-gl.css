@@ -263,6 +263,11 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg-tool { min-height: 44px; padding: 7px 10px; }
   .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   .mg:has(.mg-eng:not([hidden])) .mg-summary { display: none; }
+  /* the layers card: a sheet like engineer mode's, from its button under the bar */
+  .mg-tools .mg-phone-only { display: inline-flex; }
+  .mg-right:has(#mg-layers-btn[aria-expanded="true"]) .mg-layers { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 4;
+    max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
+  .mg:has(#mg-layers-btn[aria-expanded="true"]) :is(.mg-summary, .chat-fab) { display: none; }   /* the chat button sat on its words */
   .mg .btn { min-height: 44px; }
   /* the chat's button: over the flood size strip; in the corner over a full-screen sheet; away while a place card,
      which has its own ways on, fills the foot of the screen */

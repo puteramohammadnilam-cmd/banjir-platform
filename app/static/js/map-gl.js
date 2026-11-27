@@ -21,7 +21,6 @@ import { glDrawer } from "./map-gl-eng.js";
 import { createMapLayers, metricPaint } from "./map-gl-layers.js";
 import { wireSearch } from "./map-gl-search.js";
 import { createPinMode } from "./map-gl-pin.js";
-import { rememberUi } from "./ui-choice.js";
 import { businessPlace, isWithinView, parseRef, writeUrl } from "./place.js";
 import { pageArea } from "./start.js";
 import { pointHeader } from "./point.js";
@@ -55,7 +54,13 @@ st.tilt = st.link.tilt;
 const isDark = () => st.base !== "map";
 const duration = () => (motionAllowed() ? FLY_MS : 0);
 const langParam = (code = lang) => (code === "en" ? null : code);
-const mainLink = (extra) => `./${writeUrl({ area: st.area?.id, section: st.section, rp: st.rp, lang: langParam(), ...extra })}`;
+/** The old interface on the view on show. ui=old keeps the front door from sending it back here, also in a new tab or
+ *  with storage blocked; front-door.js remembers the choice. */
+function mainLink(extra) {
+  const url = new URL(writeUrl({ area: st.area?.id, section: st.section, rp: st.rp, lang: langParam(), ...extra }), window.location.href);
+  url.searchParams.set("ui", "old");
+  return `./${url.search}${url.hash}`;
+}
 const hint = () => t(st.sections.length ? "mg.hint" : "mg.hintShops");
 const sectionName = (id) => st.sections.find((section) => section.id === id)?.name ?? "";
 
@@ -278,7 +283,7 @@ function showSection(sectionId, { focus = true } = {}) {
   st.sheet?.refresh();
   st.chat?.render(null);   // and the chat is about the area again
   st.card = { kind: "section", id: sectionId };
-  showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
+  showCard(sectionCard(props, { rp: st.rp, onOpen: () => openSheet("overview"), onClose: closeCard }), { focus });
 }
 
 /* ---- a checked point ---- */
@@ -548,7 +553,7 @@ function drawSummary() {
   const wet = st.sections.length ? wetTotals(st.sections, st.rp).wet : wetShops([...st.shops.values()], st.rp);
   const all = st.area.counts?.businesses ?? st.shops.size;
   $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize,
-    oldUi: { href: mainLink({ place: st.picked }), onClick: () => rememberUi("old") } }));
+    oldHref: mainLink({ place: st.picked }) }));
 }
 
 function pickFloodSize(rp) {
@@ -567,8 +572,12 @@ function pickFloodSize(rp) {
 
 function drawLayers() {
   st.pictures ??= glDrawer({ getMap: () => st.map, hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), prefix: "mg-layer",
-    beforeId: (map, key) => (key === "low" && map.getLayer("mg-layer-flash") ? "mg-layer-flash" : "mg-section-fill") });   // low ground under flash
-  st.layers ??= createMapLayers({ area: st.area, sections: st.sections, drawer: st.pictures, onMetric: () => paintSections() });
+    beforeId: (map, key) => (key === "low" && map.getLayer("mg-layer-flash") ? "mg-layer-flash" : "mg-section-fill"),   // low ground under flash
+    onError: (key) => st.layers?.failed(key) });
+  st.layers ??= createMapLayers({ area: st.area, sections: st.sections, drawer: st.pictures, onMetric: () => {
+    if (!st.visible.sections) $("mg-layers").querySelector('input[value="sections"]')?.click();   // a shading shows on the sections
+    paintSections();
+  } });
   $("mg-layers").replaceChildren(...layersCard(st.visible, (key, on) => {
     st.visible[key] = on;
     showLayers(st.map);
@@ -612,7 +621,7 @@ function drawBar() {
   $("mg-home").setAttribute("aria-label", t("mg.back"));
   $("mg-q").placeholder = t("mg.search");
   $("mg-q").setAttribute("aria-label", t("mg.searchLabel"));
-  Object.assign($("mg-old"), { textContent: t("mg.oldUi"), title: t("mg.oldUiNote"), onclick: () => rememberUi("old") });
+  Object.assign($("mg-old"), { textContent: t("mg.oldUi"), title: t("mg.oldUiNote") });
   $("mg-bases").setAttribute("aria-label", t("mg.base.label"));
   $("mg-lang").setAttribute("aria-label", t("mg.lang"));
   $("mg-tabs").setAttribute("aria-label", t("mg.tabsLabel"));
@@ -674,6 +683,9 @@ function wireTools() {
   pinButton.querySelector("span").textContent = t("pin.heading");
   pinButton.addEventListener("click", () => startPin());
   $("mg-eng-btn").querySelector("span").textContent = t("eng.switch");
+  const layersButton = $("mg-layers-btn");   // phones: the layers card opens as a sheet (map-gl.css)
+  layersButton.querySelector("span").textContent = t("mg.layers");
+  layersButton.onclick = () => layersButton.setAttribute("aria-expanded", String(layersButton.getAttribute("aria-expanded") !== "true"));
   st.eng = glDrawer({ getMap: () => st.map, beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line",
     hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), isAiming: () => st.pin.isOn(), onToolChange: () => syncCursor() });
   createEngineer({ section: $("mg-eng"), button: $("mg-eng-btn"), area: st.area, drawer: st.eng });
@@ -691,8 +703,7 @@ function onKey(event) {
 }
 
 function showProblem(words) {
-  // a query, so the front door does not send the person back here, and remembered, so the next visit does not either
-  $("mg-problem").replaceChildren(words, " ", h("a", { href: mainLink(), onclick: () => rememberUi("old") }, t("mg.toMain")));
+  $("mg-problem").replaceChildren(words, " ", h("a", { href: mainLink() }, t("mg.toMain")));
   $("mg-problem").hidden = false;
   say(words, true);
 }

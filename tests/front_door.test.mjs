@@ -16,10 +16,12 @@ const SOURCE = read("../app/static/js/front-door.js");
 const PAGE = read("../app/static/index.html");
 const MAP = read("../app/static/map.html");
 
-/** Where the script sends an address to: "./map.html", or null when the page stays. */
-function goesTo(search, hash, stored = null, { blocked = false } = {}) {
+/** Where the script sends an address to: "./map.html", or null when the page stays. `saved` gets what it remembers. */
+function goesTo(search, hash, stored = null, { blocked = false, saved = {} } = {}) {
   let to = null;
-  const localStorage = { getItem: (key) => { if (blocked) throw new Error("blocked"); return key === UI_KEY ? stored : null; } };
+  const check = () => { if (blocked) throw new Error("blocked"); };
+  const localStorage = { getItem: (key) => { check(); return key === UI_KEY ? stored : null; },
+    setItem: (key, value) => { check(); saved[key] = value; } };
   vm.runInNewContext(SOURCE, { location: { search, hash, replace: (url) => { to = url; } }, localStorage, URLSearchParams });
   return to;
 }
@@ -48,6 +50,14 @@ test("a browser that chose the old interface stays on it", () => {
   assert.equal(goesTo("?tab=cost&place=node-1", "", "old"), null);
 });
 
+test("a link that asks for the old interface stays on it and remembers it, also with storage blocked", () => {
+  const saved = {};
+  assert.equal(goesTo("?section=sec-1&rp=20&ui=old", "", "new", { saved }), null);
+  assert.deepEqual(saved, { [UI_KEY]: "old" });
+  assert.equal(goesTo("?ui=old", "#place=pt:3.00042,101.50042", null, { blocked: true }), null);
+  assert.equal(goesTo("?ui=new", ""), "./map.html?ui=new", "only ui=old");
+});
+
 test("a point in the query is never sent on: this page takes it out of its address", () => {
   assert.equal(goesTo("?tab=business&place=pt:3.00042,101.50042", ""), null);
   assert.equal(goesTo("?shop=pt:3.00042,101.50042", ""), null);
@@ -73,10 +83,10 @@ test("the switch remembers under the key the front door reads, and the script ru
 test("the new map is the front door: no noindex, and its way to the old interface", () => {
   assert.doesNotMatch(MAP, /noindex/);
   assert.match(MAP, /<link rel="canonical" href="map\.html">/);
-  assert.match(MAP, /id="mg-old" href="\.\/\?rp=50"/);   // a query, so the front door never sends it back
-  const nodes = summaryCard({ wet: 1, all: 2, rp: "50", onPick() {}, oldUi: { href: "./?section=sec-1&rp=20", onClick() {} } });
+  assert.match(MAP, /id="mg-old" href="\.\/\?rp=50&amp;ui=old"/);   // ui=old, so the front door never sends it back
+  const nodes = summaryCard({ wet: 1, all: 2, rp: "50", onPick() {}, oldHref: "./?section=sec-1&rp=20&ui=old" });
   const old = nodes.find((node) => node.getAttribute?.("class")?.includes("mg-old-link"));
   assert.equal(old.textContent, "Old interface");
-  assert.equal(old.getAttribute("href"), "./?section=sec-1&rp=20");   // the view on show, for a long press or a new tab too
+  assert.equal(old.getAttribute("href"), "./?section=sec-1&rp=20&ui=old");   // the view on show, for a long press or a new tab too
   assert.equal(summaryCard({ wet: 1, all: 2, rp: "50", onPick() {} }).some((node) => node.getAttribute?.("class")?.includes("mg-old-link")), false);
 });
