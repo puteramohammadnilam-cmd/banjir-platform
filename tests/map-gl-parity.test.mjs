@@ -88,3 +88,18 @@ test("an old area id that is now a section opens the whole area on that section,
   assert.deepEqual([asked, plain.link], [["johor"], { area: "johor" }]);
   assert.equal((await areaForLink({}, api)).data, pages.johor);
 });
+
+test("a relief centre farther than the server's reach is not offered on the shop card", async () => {
+  const { SHELTER_REACH_KM, nearestShelter } = await import("../app/static/js/map-gl-data.js");
+  const { shopCard } = await import("../app/static/js/map-gl-card.js");
+  const { readFileSync } = await import("node:fs");
+  const places = readFileSync(new URL("../app/places.py", import.meta.url), "utf8");
+  assert.equal(Number(places.match(/^SHELTER_REACH_M = ([\d_]+)/m)[1].replaceAll("_", "")), SHELTER_REACH_KM * 1000);
+  const school = { name: "SJK(C) New Kota", lat: 1.74223, lon: 103.90488 };   // Kota Tinggi town
+  const inJohorBahru = { id: "s-1", name: "Kedai", lat: 1.4582, lon: 103.7649, depth_m: { 10: null, 20: null, 50: null }, shelter: null,
+    road: { name: "Jalan", depth_m: {} }, kind: "shop" };
+  assert.equal(nearestShelter(inJohorBahru, [school]), null, "about 35 km away: none");
+  assert.equal(nearestShelter({ lat: 1.75, lon: 103.9 }, [school]).shelter.name, "SJK(C) New Kota");
+  const card = shopCard(inJohorBahru, { rp: "50", sectionName: "Johor Bahru", shelters: [school], links: {}, onClose() {}, onShare() {} });
+  assert.ok(!card.map((node) => node?.textContent ?? "").join(" ").includes("New Kota"));
+});

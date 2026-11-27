@@ -11,6 +11,7 @@ const NO_DEPTH = -1;   // GeoJSON has no null in a paint rule: dry squares and s
 // the badge's tone for each of the main page's depth bands (dom.js BANDS): up to the counter, over it, over a head...
 const BAND_TONES = ["watch", "high", "deep", "deep", "deep"];
 const EARTH_KM = 6371;
+export const SHELTER_REACH_KM = 15;   // app/places.py SHELTER_REACH_M: a centre farther is not offered (tests hold them equal)
 // the first base-map layer our water goes under: buildings, roads and every name stay drawn over it (Arus,
 // findFloodInsertBeforeId)
 const OVER_WATER = /^(building|tunnel|road|highway|bridge|railway|aeroway|transportation)/i;
@@ -127,10 +128,11 @@ export function distanceKm(a, b) {
 
 /** The relief centre nearest a place, {shelter, km}, or null with none listed. */
 export function nearestShelter(place, shelters = []) {
-  return shelters.reduce((best, shelter) => {
+  const best = shelters.reduce((found, shelter) => {
     const km = distanceKm(place, shelter);
-    return !best || km < best.km ? { shelter, km } : best;
+    return !found || km < found.km ? { shelter, km } : found;
   }, null);
+  return best && best.km <= SHELTER_REACH_KM ? best : null;   // a state lists only a town's few
 }
 
 /** Up to `limit` businesses in the area's index whose name holds the words typed, in the index's order. */

@@ -185,3 +185,15 @@ def test_the_chat_prompt_says_susceptibility_not_a_depth_and_not_in_the_river_mo
     assert "flash floods are not in the river model" in prompt
     assert "never give it in metres" in prompt
     assert not [word for word in PLACE_WORDS if word.lower() in ai.SYSTEM.lower()]
+
+
+def test_a_districts_summary_lists_only_relief_centres_within_reach():
+    johor = areas.get("johor")   # its only listed centres are two schools in Kota Tinggi town
+    token = floodtools.start_question(area=johor)
+    try:
+        far, near, whole = (floodtools.area_summary(name) for name in ("Johor Bahru", "Kota Tinggi", ""))
+    finally:
+        floodtools.end_question(token)
+    assert far["shelters"] == floodtools.no_shelters(johor), "about 33 km from its town: none named"
+    assert near["shelters"] == ["SJK(C) New Kota", "SK Laksamana"]
+    assert whole["shelters"] == near["shelters"], "the whole state lists what it has, its notes say where"

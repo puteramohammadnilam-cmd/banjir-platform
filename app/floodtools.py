@@ -268,9 +268,19 @@ def area_summary(section: str = "") -> dict:
     if error:
         return {"error": error}
     shown = sections.section_premises(area.id, part["id"]) if part else areas.premises(area.id)
-    shelters = [_clean(s["name"]) for s in areas.town(area.id)["shelters"]]
+    shelters = [_clean(s["name"]) for s in _shelters_for(area, part)]
     return {"total_businesses": len(shown), "scenarios": _scenarios(shown), **_section_counts(area, part),
             **_flash_flood(area, part), "shelters": shelters or no_shelters(area), "limits": LIMITS, **_area_notes(area)}
+
+
+def _shelters_for(area: areas.Area, part: Mapping | None) -> list[dict]:
+    """The area's listed relief centres; for one section, those within places.SHELTER_REACH_M of its middle (its main
+    town in a state), since a state lists only a town's few."""
+    listed = areas.town(area.id)["shelters"]
+    if part is None:
+        return listed
+    lat, lon = sections.centre(part)
+    return [s for s in listed if places.distance_m(lat, lon, s["lat"], s["lon"]) <= places.SHELTER_REACH_M]
 
 
 def _section_asked(area: areas.Area, section) -> tuple[Mapping | None, str | None]:
