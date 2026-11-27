@@ -374,3 +374,14 @@ def test_a_state_build_stores_no_squares_but_reads_every_premise(depths, inputs)
     premises, town = ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), [], depths, with_cells=False)
     assert town["cells"] == [] and len(premises) == 3
     assert next(p for p in premises if p["name"] == "Bakery")["depth_m"] == depths.depths(100.875, 9.375)
+
+
+def test_a_relief_centre_farther_than_the_reach_is_not_a_premises_centre(depths, inputs):
+    pois, roads, _ = inputs
+    proj = ba.Projection.for_view(FIXTURE_VIEW)
+    far = [{"name": "Far Hall", "lat": 8.0, "lon": 100.0}]   # about 150 km south of the businesses (fixture degrees are big)
+    premises, _ = ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), far, depths)
+    assert all(p["shelter"] is None for p in premises)
+    near = [{"name": "Hall", "lat": 9.4, "lon": 100.9}]
+    premises, _ = ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), near, depths)
+    assert next(p for p in premises if p["name"] == "Bakery")["shelter"]["name"] == "Hall"

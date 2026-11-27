@@ -14,11 +14,11 @@ from fastapi.testclient import TestClient
 from google import genai
 
 import tiff_fixture as fx
-from app import ai, areas, costs, floodtools, googlemaps, main, places
+from app import ai, areas, costs, floodtools, googlemaps, main, places, sections
 
 WET, WET_ID = (6.4321, 101.1987), "pt:6.37500,101.12500"
 OTHER = (5.6, 101.9)                     # another covered fixture point
-KOTA_ID = areas.premises("kota-tinggi")[0]["id"]
+KOTA_ID = "node-11075038761"         # a shop of the old Kota Tinggi town area, now in Johor's Kota Tinggi district
 SRI_MUDA = areas.business("node-13414432501")[0]   # the checklist business, now in the city
 NO_FIGURES = {"shop_size": "", "floor_height_cm": 0, "daily_takings_rm": 0, "closed_days": 0, "raise_cm": 0,
               "measure_cost_rm": 0}
@@ -128,7 +128,7 @@ def test_outside_a_question_selected_stands_for_nothing(rasters):
 def test_a_selected_business_is_selected_and_opens_no_point(rasters):
     token = floodtools.start_question(place=places.resolve(KOTA_ID))
     try:
-        assert floodtools.current_area() == areas.get("kota-tinggi")
+        assert floodtools.current_area() == areas.get("johor")
         assert floodtools.flood_check("selected")["id"] == KOTA_ID
         assert "error" in floodtools.flood_check(WET_ID)
     finally:
@@ -150,7 +150,8 @@ def test_a_point_in_an_area_gets_its_area_and_relief_centre_but_not_where_it_is(
     finally:
         floodtools.end_question(token)
     assert set(result) == POINT_KEYS | {"area_notes"} and result["depth_m"] == place["depth_m"]
-    assert (result["area"], result["shelter"]) == ("Kota Tinggi", {"name": "SJK(C) New Kota", "distance_m": 59})
+    assert (result["area"], result["shelter"]) == ("Johor", {"name": "SJK(C) New Kota", "distance_m": 59})
+    assert place["section"]["id"] == "kota-tinggi", "the old town area is the state's Kota Tinggi district"
     assert not leaks(json.dumps(result), IN_TOWN)
 
 
@@ -225,7 +226,7 @@ def test_the_prompt_for_a_point_in_an_area_names_the_area_not_the_point(private_
     monkeypatch.setattr(ai, "_client", lambda: recording_client(calls))
     assert ai.ask("Banjir tak?", places.point(*IN_TOWN)["id"], []) == "Ok."
     system = calls[0]["config"].system_instruction
-    assert "It lies in the listed area Kota Tinggi." in system and "around Kota Tinggi town centre" in system
+    assert "It lies in the listed area Johor, in Kota Tinggi." in system and areas.get("johor").ai_name in system
     assert not leaks(system, IN_TOWN)
 
 
@@ -358,8 +359,9 @@ def test_a_point_flow_sends_gemini_no_point_and_logs_none(private_rasters, monke
     assert checked["result"]["depth_m"] == place["depth_m"] and cost["result"]["place"] == "the selected point"
     assert rain["result"]["total_mm"] == 3.2 and status["result"] == {"error": floodtools.NOT_A_BUSINESS}
     assert "radius" in wrong["error"]
-    area = places.area_of(place)   # Google Weather gets the area's middle, or the square to 0.01 degrees
-    asked = area.centre() if area else (round(place["lat"], 2), round(place["lon"], 2))
+    area = places.area_of(place)   # Google Weather gets the district's town, else the area's middle, or the square to 0.01 degrees
+    district = sections.get(area, place["section"]["id"]) if area and place.get("section") else None
+    asked = sections.centre(district) if district else area.centre() if area else (round(place["lat"], 2), round(place["lon"], 2))
     assert [(params["location.latitude"], params["location.longitude"]) for params in weather] == [asked]
     logged = caplog.text + "\n".join(record.getMessage() for record in caplog.records)
     assert "A tool call failed (flood_check): TypeError" in logged and not leaks(logged, point)

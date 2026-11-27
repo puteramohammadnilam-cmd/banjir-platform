@@ -6,7 +6,7 @@
 Both resolve to the same keys (the Place), so the page and the AI tools handle either. A point's Place has is_point
 true; name, sector, kind, is_chain, map_last_edited and road null; area_id the listed area whose view holds the
 square's centre, or null; section {id, name} of that area's section holding the centre, or null; shelter the nearest
-relief centre of that area, or null; elevation (app/elevation.py) at the square's centre as the id gives it, or null;
+relief centre of that area within SHELTER_REACH_M, or null; elevation (app/elevation.py) at the square's centre as the id gives it, or null;
 flash_flood ({score, class}, app/indexes.py) at that centre, or null; cell {grid, row, col, bounds}. A business's Place is its premises.json entry (with the elevation and flash_flood areas.premises adds at
 its own point) plus is_point false, its area_id, its section as {id, name} (null in an area not split into sections)
 and cell null.
@@ -88,6 +88,8 @@ REGIONS = (                  # (id, (west, south, east, north)), checked in this
 M_PER_DEG_LAT = 110_574.0
 M_PER_DEG_LON_AT_EQUATOR = 111_320.0
 MAX_NAME_CHARS = 80
+SHELTER_REACH_M = 15_000     # a listed relief centre farther than this is not offered as the one to go to (a state lists
+                             # a town's few); the default city's farthest shop is 12.8 km from its nearest
 SPACE_CATEGORIES = {"Cc", "Zl", "Zp", "Cs", "Co", "Cn"}   # controls, line breaks and stray code points: a space
 DROPPED_CATEGORIES = {"Cf"}                              # format characters (bidi overrides, zero width): removed
 
@@ -273,10 +275,11 @@ def distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def nearest_shelter(area: areas.Area, lat: float, lon: float) -> dict | None:
-    """{name, distance_m} of the area's nearest relief centre, as premises.json gives it; None with no list."""
+    """{name, distance_m} of the area's nearest relief centre, as premises.json gives it; None with no list or none
+    within SHELTER_REACH_M."""
     found = min(((distance_m(lat, lon, s["lat"], s["lon"]), s["name"]) for s in areas.town(area.id)["shelters"]),
                 default=None)
-    return None if found is None else {"name": found[1], "distance_m": round(found[0])}
+    return None if found is None or found[0] > SHELTER_REACH_M else {"name": found[1], "distance_m": round(found[0])}
 
 
 def clean_name(text) -> str:

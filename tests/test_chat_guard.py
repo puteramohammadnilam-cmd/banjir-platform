@@ -163,7 +163,7 @@ def test_ai_ask_withholds_an_answer_that_leaks_and_says_why_without_the_words(mo
 def test_the_rules_and_the_public_guide_come_first_and_the_same_for_every_question(monkeypatch):
     sent = scripted_gemini(monkeypatch, lambda n, body: gemini_says({"text": "Ok."}))
     ai.ask("Banjir tak?", None, [])
-    ai.ask("Hujan?", None, [], main.areas.get("kota-tinggi"))
+    ai.ask("Hujan?", None, [], main.areas.get("johor"))
     first, second = (body["systemInstruction"]["parts"][0]["text"] for body in sent)
     fixed = ai._fixed_system()
     assert first.startswith(fixed) and second.startswith(fixed) and first != second

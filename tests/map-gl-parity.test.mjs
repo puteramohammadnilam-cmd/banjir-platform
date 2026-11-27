@@ -70,3 +70,21 @@ test("the map names a section in the area's own word: a state's district, else a
   useLang("ms");
   assert.deepEqual(sectionWords({ en: "District", ms: "Daerah" }), { word: "daerah" });
 });
+
+test("an old area id that is now a section opens the whole area on that section, and other links are kept", async () => {
+  const { areaForLink } = await import("../app/static/js/map-gl-data.js");
+  const asked = [];
+  const pages = { "kota-tinggi": { area: { id: "johor" }, section: { id: "kota-tinggi" }, sections: [{ id: "kota-tinggi", name: "Kota Tinggi" }] },
+    johor: { area: { id: "johor" }, sections: [{ id: "kota-tinggi", counts: {} }] } };
+  const api = { getAreaData: async (id) => { asked.push(id); return pages[id]; }, getDefaultData: async () => { asked.push("default"); return pages.johor; } };
+  const old = await areaForLink({ area: "kota-tinggi", rp: "50", place: "node-1" }, api);
+  assert.deepEqual(asked, ["kota-tinggi", "johor"]);
+  assert.equal(old.data, pages.johor);
+  assert.deepEqual(old.link, { area: "johor", rp: "50", place: "node-1", section: "kota-tinggi" });
+  const named = await areaForLink({ area: "kota-tinggi", section: "mersing" }, api);
+  assert.equal(named.link.section, "mersing", "a section the link names wins");
+  asked.length = 0;
+  const plain = await areaForLink({ area: "johor" }, api);
+  assert.deepEqual([asked, plain.link], [["johor"], { area: "johor" }]);
+  assert.equal((await areaForLink({}, api)).data, pages.johor);
+});

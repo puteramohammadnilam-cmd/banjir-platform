@@ -60,14 +60,15 @@ Five areas are built in:
 | Kuantan town centre, Pahang | 300 | 191 | 1,085 | 5 (2012 to 2021) |
 | Kota Bharu town centre, Kelantan | 491 | 100 | 618 | 3 (2014 to 2025) |
 | Kuala Terengganu town centre, Terengganu | 158 | 85 | 588 | 5 (1999 to 2025) |
-| Kota Tinggi town centre, Johor | 27, picked by hand | 19 | 382 | none collected; 2 relief centres |
+| Johor (whole state): 10 districts, the Kota Tinggi town centre in the Kota Tinggi district | 7,503 | 286 | none stored: one depth picture per district | none collected; 2 relief centres in Kota Tinggi town |
 
 Kuantan, Kota Bharu and Kuala Terengganu were picked on 3 Oct 2026 from a screen of eleven river towns (OpenStreetMap
 business count and the share wet in the model) and built with `tools/build_area.py`. In all three the model gives
 5 to 10 m at some businesses, where news reports of real floods give about 0.1 to 2 m; each area's notes say so on
-the page and to the AI. Only Kota Tinggi has relief centres.
+the page and to the AI. Johor's only listed relief centres are Kota Tinggi town's two; a business more than 15 km from
+a listed centre is shown none.
 
-The page opens on the default area (for Shah Alam, the city view); `?area=kuantan` (or another id) opens another, `?section=seksyen-25` one section of the city, and the old `?area=sri-muda` is an alias of Seksyen 25. A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
+The page opens on the default area (for Shah Alam, the city view); `?area=kuantan` (or another id) opens another, `?section=seksyen-25` one section of the city, and the old `?area=sri-muda` is an alias of Seksyen 25 (`?area=kota-tinggi`, the old town centre area, of Johor's Kota Tinggi district). A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
 
 Place names live only in the data (`area.json`, and a city's `sections.json` and `history.json`). The backend and the page scripts carry none, and a test guards that. A city split into sections (`app/sections.py`) names its section word, its aliases and its default section in `area.json`; each business names its section.
 

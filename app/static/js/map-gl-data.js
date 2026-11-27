@@ -24,6 +24,15 @@ export function readMapLink(search = "", hash = "") {
   return { ...link, rp: link.rp ?? "50", base: BASEMAPS.includes(base) ? base : "map", tilt: query.get("tilt") === "1" };
 }
 
+/** The data the map opens on, and its link: an old area id that is now one of an area's sections (an alias, such as
+ *  sri-muda or kota-tinggi) is answered with that section's page, so the whole area is asked for instead and the link
+ *  opens on the section (the link's own section, if it names one, still wins). */
+export async function areaForLink(link, { getAreaData, getDefaultData }) {
+  const found = link.area ? await getAreaData(link.area) : await getDefaultData();
+  if (!found.section) return { data: found, link };
+  return { data: await getAreaData(found.area.id), link: { ...link, area: found.area.id, section: link.section ?? found.section.id } };
+}
+
 /** This map's own link: the main page's (place.js writeUrl), then the base map and the tilt. A point stays in the
  *  fragment, last, where the browser never sends it to the server. */
 export function withMapView(link, base, tilt) {

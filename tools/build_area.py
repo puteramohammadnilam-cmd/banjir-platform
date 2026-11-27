@@ -42,6 +42,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from app import areas, geo, raster  # noqa: E402
+from app.places import SHELTER_REACH_M  # noqa: E402
 import sections_io  # noqa: E402
 
 RETURN_PERIODS = raster.RETURN_PERIODS
@@ -218,6 +219,8 @@ def _premise(row: dict, proj: Projection, roads: RoadIndex, shelters: list[dict]
     here = proj.to_m(row["lon"], row["lat"])
     road, road_dist, road_pt = roads.nearest(here)
     shelter = min(shelters, key=lambda s: math.dist(here, proj.to_m(s["lon"], s["lat"])), default=None)
+    if shelter and math.dist(here, proj.to_m(shelter["lon"], shelter["lat"])) > SHELTER_REACH_M:
+        shelter = None   # too far to be the one to go to (a state that lists only a town's few)
     return {
         "id": row["id"],
         "name": row["name"] or UNNAMED_BUSINESS,

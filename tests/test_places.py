@@ -320,11 +320,12 @@ def test_points_are_ready_only_when_a_grid_loads(rasters, tmp_path, monkeypatch)
 # --- businesses and points share one shape ---
 
 def test_a_business_resolves_from_any_area_with_the_place_keys(rasters):
-    kota = areas.premises("kota-tinggi")[0]
+    kota = areas.business("node-11075038761")[0]   # a shop of the old Kota Tinggi town area, now in Johor
     place = places.resolve(kota["id"])
     assert set(place) == PLACE_KEYS == set(places.point(*WET))
-    assert (place["is_point"], place["area_id"], place["cell"]) == (False, "kota-tinggi", None)
-    assert {key: place[key] for key in kota} == kota
+    assert (place["is_point"], place["area_id"], place["cell"]) == (False, "johor", None)
+    assert {key: place[key] for key in kota if key != "section"} == {key: kota[key] for key in kota if key != "section"}
+    assert place["section"] == {"id": "kota-tinggi", "name": "Kota Tinggi"}
 
 
 def test_a_resolved_business_is_a_copy(rasters):
@@ -344,7 +345,7 @@ def test_an_unknown_business_is_reported(rasters, ref):
 
 def test_area_of_gives_the_listed_area_or_none(area_rasters):
     assert places.area_of(places.point(*IN_SRI_MUDA)) == areas.get("shah-alam")
-    assert places.area_of(places.resolve(areas.premises("kota-tinggi")[0]["id"])) == areas.get("kota-tinggi")
+    assert places.area_of(places.resolve("node-11075038761")) == areas.get("johor")
     assert places.area_of({"area_id": None}) is None
 
 
@@ -360,8 +361,8 @@ def test_a_point_inside_an_area_carries_the_area(area_rasters):
 def test_a_point_gets_the_nearest_relief_centre_of_its_area(area_rasters):
     place = places.point(*IN_KOTA_TINGGI)
     lat, lon = place["lat"], place["lon"]
-    assert place["area_id"] == "kota-tinggi"
-    shelters = areas.town("kota-tinggi")["shelters"]
+    assert (place["area_id"], place["section"]["id"]) == ("johor", "kota-tinggi")
+    shelters = areas.town("johor")["shelters"]
     by_distance = sorted((places.distance_m(lat, lon, s["lat"], s["lon"]), s["name"]) for s in shelters)
     assert place["shelter"] == {"name": by_distance[0][1], "distance_m": round(by_distance[0][0])}
     assert place["shelter"] == {"name": "SJK(C) New Kota", "distance_m": 618}
@@ -418,3 +419,10 @@ def test_loading_places_does_not_load_google_maps_at_all():
     modules = loaded.stdout.split()
     assert "app.places" in modules and "app.googlemaps" not in modules and "app.floodtools" not in modules
     assert not [name for name in modules if name == "google" or name.startswith("google.")]
+
+
+def test_a_relief_centre_farther_than_the_reach_is_not_offered():
+    johor = areas.get("johor")   # its only listed centres are in Kota Tinggi town
+    near = places.nearest_shelter(johor, 1.75, 103.9)
+    assert near["name"] in {"SJK(C) New Kota", "SK Laksamana"} and near["distance_m"] < places.SHELTER_REACH_M
+    assert places.nearest_shelter(johor, 1.46, 103.76) is None, "Johor Bahru, about 35 km away: none"

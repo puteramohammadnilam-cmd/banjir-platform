@@ -1,1 +1,1 @@
-{"view":[102.46,1.26,104.55,2.84],"cell_deg":0.0008333333356347339,"return_periods":[10,20,50],"cells":[],"shelters":[]}
+{"view":[102.46,1.26,104.55,2.84],"cell_deg":0.0008333333356347339,"return_periods":[10,20,50],"cells":[],"shelters":[{"name":"SJK(C) New Kota","lat":1.74223,"lon":103.90488},{"name":"SK Laksamana","lat":1.74346,"lon":103.90555}]}

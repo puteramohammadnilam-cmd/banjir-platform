@@ -1377,6 +1377,36 @@
   "shelter": null
  },
  {
+  "id": "node-11075038761",
+  "name": "Ah Boy bak kut teh",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7267455,
+  "lon": 103.8999676,
+  "map_last_edited": "2023-07-29",
+  "depth_m": {
+   "10": 5.23,
+   "20": 5.43,
+   "50": 5.67
+  },
+  "road": {
+   "name": "Jalan Tepi Sungai",
+   "kind": "unclassified",
+   "distance_m": 12,
+   "depth_m": {
+    "10": 5.23,
+    "20": 5.43,
+    "50": 5.67
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1797
+  }
+ },
+ {
   "id": "node-12103645701",
   "name": "Ah Choy Restaurant",
   "sector": "eatery",
@@ -9825,7 +9855,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 3367
+  }
  },
  {
   "id": "node-7266765785",
@@ -10204,6 +10237,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4141089890",
+  "name": "Domino's",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7337586,
+  "lon": 103.9048676,
+  "map_last_edited": "2022-03-04",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.93
+  },
+  "road": {
+   "name": "Jalan Kerapu 1",
+   "kind": "unclassified",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 937
+  }
  },
  {
   "id": "node-4225653397",
@@ -13281,7 +13344,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9682
+  }
  },
  {
   "id": "way-1539527307",
@@ -17361,6 +17427,36 @@
   "shelter": null
  },
  {
+  "id": "node-4142124493",
+  "name": "K Tinggi Hawker",
+  "sector": "eatery",
+  "kind": "food_court",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7276234,
+  "lon": 103.9005517,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 1.28,
+   "20": 1.46,
+   "50": 1.7
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 20,
+   "depth_m": {
+    "10": 1.21,
+    "20": 1.39,
+    "50": 1.58
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1685
+  }
+ },
+ {
   "id": "node-9835255291",
   "name": "KBH Chicken Rice (Eco Palladium)",
   "sector": "eatery",
@@ -17710,6 +17806,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4141089989",
+  "name": "KFC",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7309305,
+  "lon": 103.9014309,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1307
+  }
  },
  {
   "id": "node-4202406690",
@@ -18250,6 +18376,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-6250843928",
+  "name": "KFC",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7337073,
+  "lon": 103.906028,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 951
+  }
  },
  {
   "id": "node-6550570587",
@@ -25296,7 +25452,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9744
+  }
  },
  {
   "id": "node-10946618152",
@@ -25809,7 +25968,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SK Laksamana",
+   "distance_m": 11028
+  }
  },
  {
   "id": "node-4544099001",
@@ -26271,6 +26433,36 @@
   "shelter": null
  },
  {
+  "id": "node-4191496190",
+  "name": "Kofu Restaurant",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7306807,
+  "lon": 103.8986881,
+  "map_last_edited": "2022-06-26",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Abdul Aziz",
+   "kind": "tertiary",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1451
+  }
+ },
+ {
   "id": "way-368421994",
   "name": "Kompleks Gerai Tama Tenang",
   "sector": "eatery",
@@ -26593,6 +26785,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4142124494",
+  "name": "Kopitiam",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7277059,
+  "lon": 103.9001535,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 1.21,
+   "20": 1.39,
+   "50": 1.58
+  },
+  "road": {
+   "name": "Jalan Yusuf",
+   "kind": "unclassified",
+   "distance_m": 19,
+   "depth_m": {
+    "10": 1.21,
+    "20": 1.39,
+    "50": 1.58
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1690
+  }
  },
  {
   "id": "node-5645815621",
@@ -26998,6 +27220,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4161088300",
+  "name": "Kota Food Court",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7311527,
+  "lon": 103.9003547,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Jaya 2",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1324
+  }
  },
  {
   "id": "node-5123298822",
@@ -27942,7 +28194,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9549
+  }
  },
  {
   "id": "node-3106273990",
@@ -28024,6 +28279,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-11292978169",
+  "name": "Local food Center",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7368529,
+  "lon": 103.8903945,
+  "map_last_edited": "2023-10-27",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 18,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1718
+  }
  },
  {
   "id": "node-4856821124",
@@ -29538,6 +29823,36 @@
   "shelter": null
  },
  {
+  "id": "node-4141089390",
+  "name": "Marrybrown",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7306284,
+  "lon": 103.9027227,
+  "map_last_edited": "2024-12-06",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Niaga 2",
+   "kind": "unclassified",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1305
+  }
+ },
+ {
   "id": "node-4202421485",
   "name": "Marrybrown",
   "sector": "eatery",
@@ -30805,6 +31120,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4141056890",
+  "name": "McDonald's",
+  "sector": "eatery",
+  "kind": "fast_food",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7297757,
+  "lon": 103.9023544,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Niaga 3",
+   "kind": "unclassified",
+   "distance_m": 18,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1405
+  }
  },
  {
   "id": "node-4349758489",
@@ -35964,6 +36309,36 @@
   "shelter": null
  },
  {
+  "id": "node-12400082477",
+  "name": "Nasi kandar farroq",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7317074,
+  "lon": 103.9018041,
+  "map_last_edited": "2024-12-06",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.62
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 17,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.62
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1213
+  }
+ },
+ {
   "id": "node-4828949965",
   "name": "Naughty Nuri's Warung",
   "sector": "eatery",
@@ -36747,6 +37122,36 @@
   "shelter": null
  },
  {
+  "id": "node-4142137391",
+  "name": "Okid kopitiam",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7286418,
+  "lon": 103.8998157,
+  "map_last_edited": "2023-05-11",
+  "depth_m": {
+   "10": 0.91,
+   "20": 1.09,
+   "50": 1.28
+  },
+  "road": {
+   "name": "Jalan Tambatan",
+   "kind": "unclassified",
+   "distance_m": 20,
+   "depth_m": {
+    "10": 0.91,
+    "20": 1.09,
+    "50": 1.28
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1605
+  }
+ },
+ {
   "id": "node-13939063698",
   "name": "Okuya Ramen",
   "sector": "eatery",
@@ -37177,6 +37582,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-6482416590",
+  "name": "OldTown White Coffee",
+  "sector": "eatery",
+  "kind": "cafe",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7339952,
+  "lon": 103.9063744,
+  "map_last_edited": "2022-03-04",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 926
+  }
  },
  {
   "id": "node-10946617913",
@@ -38907,6 +39342,36 @@
   "shelter": null
  },
  {
+  "id": "node-4141089789",
+  "name": "Pizza Hut",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7272947,
+  "lon": 103.9011673,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 1.28,
+   "20": 1.46,
+   "50": 1.7
+  },
+  "road": {
+   "name": "Jalan Niaga Utama",
+   "kind": "unclassified",
+   "distance_m": 15,
+   "depth_m": {
+    "10": 1.28,
+    "20": 1.46,
+    "50": 1.7
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1702
+  }
+ },
+ {
   "id": "node-4349720594",
   "name": "Pizza Hut",
   "sector": "eatery",
@@ -40281,7 +40746,40 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2441
+  }
+ },
+ {
+  "id": "node-4141087690",
+  "name": "Public Restaurant",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7218193,
+  "lon": 103.8978823,
+  "map_last_edited": "2023-05-20",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "residential",
+   "distance_m": 23,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2387
+  }
  },
  {
   "id": "node-12345911529",
@@ -41418,6 +41916,36 @@
   "shelter": null
  },
  {
+  "id": "node-4741036991",
+  "name": "Restaurant",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7310871,
+  "lon": 103.8996838,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Jaya",
+   "kind": "unclassified",
+   "distance_m": 4,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1361
+  }
+ },
+ {
   "id": "node-6378428985",
   "name": "Restaurant 68",
   "sector": "eatery",
@@ -42171,7 +42699,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9587
+  }
  },
  {
   "id": "node-11388828704",
@@ -42846,7 +43377,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 10133
+  }
  },
  {
   "id": "node-4396261191",
@@ -45870,7 +46404,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9473
+  }
  },
  {
   "id": "node-9834974964",
@@ -46086,7 +46623,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2663
+  }
  },
  {
   "id": "node-14016125764",
@@ -46896,7 +47436,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9752
+  }
  },
  {
   "id": "node-7417262425",
@@ -47436,7 +47979,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9465
+  }
  },
  {
   "id": "node-13603066858",
@@ -48679,6 +49225,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4141089889",
+  "name": "Restoran Haji Daud",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.730409,
+  "lon": 103.9019216,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Niaga 1",
+   "kind": "unclassified",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1348
+  }
  },
  {
   "id": "node-4655140391",
@@ -52107,7 +52683,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 3366
+  }
  },
  {
   "id": "node-10841473517",
@@ -52242,7 +52821,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9479
+  }
  },
  {
   "id": "node-5584145735",
@@ -54105,7 +54687,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9577
+  }
  },
  {
   "id": "node-7554130945",
@@ -54591,7 +55176,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9767
+  }
  },
  {
   "id": "node-10796247006",
@@ -56805,7 +57393,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SK Laksamana",
+   "distance_m": 3041
+  }
  },
  {
   "id": "node-7417280579",
@@ -58182,7 +58773,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9540
+  }
  },
  {
   "id": "node-11676731881",
@@ -60963,7 +61557,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9789
+  }
  },
  {
   "id": "node-10946616152",
@@ -62151,7 +62748,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9506
+  }
  },
  {
   "id": "node-10946617912",
@@ -68280,7 +68880,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 10465
+  }
  },
  {
   "id": "node-4885207921",
@@ -69307,6 +69910,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-7296262090",
+  "name": "Tadpole Cafe",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7355937,
+  "lon": 103.8911193,
+  "map_last_edited": "2021-01-03",
+  "depth_m": {
+   "10": 1.64,
+   "20": 1.87,
+   "50": 2.11
+  },
+  "road": {
+   "name": "Jalan Mempelam",
+   "kind": "unclassified",
+   "distance_m": 12,
+   "depth_m": {
+    "10": 1.64,
+    "20": 1.87,
+    "50": 2.11
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1698
+  }
  },
  {
   "id": "node-10803091692",
@@ -72681,7 +73314,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 3699
+  }
  },
  {
   "id": "way-581021863",
@@ -74223,6 +74859,36 @@
   "shelter": null
  },
  {
+  "id": "node-1972260511",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7300894,
+  "lon": 103.9003196,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": 0.15,
+   "50": 0.4
+  },
+  "road": {
+   "name": "Jalan Jaya 2",
+   "kind": "unclassified",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "20": 0.15,
+    "50": 0.4
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1435
+  }
+ },
+ {
   "id": "node-1978059687",
   "name": "Unnamed (no name on the map)",
   "sector": "eatery",
@@ -74517,7 +75183,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SK Laksamana",
+   "distance_m": 877
+  }
  },
  {
   "id": "node-2988802110",
@@ -74544,7 +75213,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 943
+  }
  },
  {
   "id": "node-3032471115",
@@ -75624,7 +76296,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2664
+  }
  },
  {
   "id": "node-6483617386",
@@ -75760,6 +76435,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-7004928161",
+  "name": "Unnamed (no name on the map)",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.726723,
+  "lon": 103.9001734,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": 5.23,
+   "20": 5.43,
+   "50": 5.67
+  },
+  "road": {
+   "name": "Jalan Tepi Sungai",
+   "kind": "unclassified",
+   "distance_m": 10,
+   "depth_m": {
+    "10": 5.23,
+    "20": 5.43,
+    "50": 5.67
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1793
+  }
  },
  {
   "id": "node-7021315111",
@@ -76515,7 +77220,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 10332
+  }
  },
  {
   "id": "node-12152185848",
@@ -78567,7 +79275,10 @@
     "50": 4.63
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1887
+  }
  },
  {
   "id": "way-857108700",
@@ -79513,6 +80224,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4980414221",
+  "name": "VR Kota Tinggi Parxian",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7358961,
+  "lon": 103.8908594,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 1.64,
+   "20": 1.87,
+   "50": 2.11
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 17,
+   "depth_m": {
+    "10": 1.64,
+    "20": 1.87,
+    "50": 2.11
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1710
+  }
  },
  {
   "id": "node-4960175621",
@@ -81916,6 +82657,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4142137390",
+  "name": "Yap Noodlehouse",
+  "sector": "eatery",
+  "kind": "restaurant",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7274563,
+  "lon": 103.899068,
+  "map_last_edited": "2019-03-30",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.25
+  },
+  "road": {
+   "name": "Jalan Besar",
+   "kind": "trunk",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.25
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1757
+  }
  },
  {
   "id": "node-12408107880",
@@ -97116,7 +97887,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9944
+  }
  },
  {
   "id": "node-10940052294",
@@ -102330,6 +103104,36 @@
   "shelter": null
  },
  {
+  "id": "node-6482424689",
+  "name": "Al-ihksan",
+  "sector": "shop",
+  "kind": "sports",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7345643,
+  "lon": 103.9071525,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.64
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 14,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 885
+  }
+ },
+ {
   "id": "node-10796247008",
   "name": "Alameen",
   "sector": "shop",
@@ -102759,7 +103563,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9638
+  }
  },
  {
   "id": "node-8861803381",
@@ -103920,7 +104727,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9520
+  }
  },
  {
   "id": "node-8300233005",
@@ -105351,7 +106161,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9513
+  }
  },
  {
   "id": "node-12393851848",
@@ -105838,6 +106651,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-8830509717",
+  "name": "Bojot BJ Motorsports",
+  "sector": "shop",
+  "kind": "motorcycle",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7316188,
+  "lon": 103.899391,
+  "map_last_edited": "2021-06-13",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Tun Habab",
+   "kind": "trunk",
+   "distance_m": 3,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1323
+  }
  },
  {
   "id": "node-6251561781",
@@ -108673,6 +109516,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4142124693",
+  "name": "Celcom",
+  "sector": "shop",
+  "kind": "telecommunication",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7294535,
+  "lon": 103.9013347,
+  "map_last_edited": "2022-05-15",
+  "depth_m": {
+   "10": null,
+   "20": 0.26,
+   "50": 0.5
+  },
+  "road": {
+   "name": "Jalan Niaga 2",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "20": 0.26,
+    "50": 0.5
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1467
+  }
  },
  {
   "id": "node-4375687488",
@@ -114477,7 +115350,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2858
+  }
  },
  {
   "id": "way-849458447",
@@ -115476,7 +116352,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9493
+  }
  },
  {
   "id": "node-7990517192",
@@ -116449,6 +117328,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-12400065204",
+  "name": "FamilyMart",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7293241,
+  "lon": 103.900823,
+  "map_last_edited": "2024-12-06",
+  "depth_m": {
+   "10": 0.18,
+   "20": 0.36,
+   "50": 0.6
+  },
+  "road": {
+   "name": "Jalan Niaga Utama",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": 0.18,
+    "20": 0.36,
+    "50": 0.6
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1497
+  }
  },
  {
   "id": "node-13622682401",
@@ -117934,6 +118843,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4741044001",
+  "name": "Foot massage",
+  "sector": "shop",
+  "kind": "massage",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7316615,
+  "lon": 103.9018777,
+  "map_last_edited": "2017-03-18",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.62
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 8,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.62
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1215
+  }
  },
  {
   "id": "node-7265675898",
@@ -120096,6 +121035,36 @@
   "shelter": null
  },
  {
+  "id": "node-4741043998",
+  "name": "Guardian",
+  "sector": "shop",
+  "kind": "pharmacy",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7303097,
+  "lon": 103.9017989,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.3
+  },
+  "road": {
+   "name": "Jalan Niaga 1",
+   "kind": "unclassified",
+   "distance_m": 9,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.3
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1362
+  }
+ },
+ {
   "id": "node-5093984022",
   "name": "Guardian",
   "sector": "shop",
@@ -121957,6 +122926,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "way-523621478",
+  "name": "Heritage Square",
+  "sector": "shop",
+  "kind": "mall",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7345195,
+  "lon": 103.9047048,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.93
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 33,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 4.23
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 853
+  }
  },
  {
   "id": "node-4349737391",
@@ -125845,6 +126844,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "way-290545975",
+  "name": "KIPMall",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7331159,
+  "lon": 103.9060166,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 39,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1016
+  }
  },
  {
   "id": "node-10605286288",
@@ -129921,7 +130950,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 10033
+  }
  },
  {
   "id": "node-7554130058",
@@ -130299,7 +131331,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9775
+  }
  },
  {
   "id": "node-7432915004",
@@ -134619,7 +135654,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9527
+  }
  },
  {
   "id": "node-6251562005",
@@ -136509,7 +137547,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9698
+  }
  },
  {
   "id": "node-7555646033",
@@ -141237,6 +142278,36 @@
   "shelter": null
  },
  {
+  "id": "node-6482416587",
+  "name": "MR.DIY",
+  "sector": "shop",
+  "kind": "doityourself",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7343,
+  "lon": 103.9048393,
+  "map_last_edited": "2022-03-04",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.93
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 24,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.93
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 877
+  }
+ },
+ {
   "id": "node-7280244217",
   "name": "MR.DIY",
   "sector": "shop",
@@ -143908,6 +144979,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4142124491",
+  "name": "Maxis",
+  "sector": "shop",
+  "kind": "telecommunication",
+  "is_chain": true,
+  "section": "kota-tinggi",
+  "lat": 1.7290759,
+  "lon": 103.9009095,
+  "map_last_edited": "2022-05-15",
+  "depth_m": {
+   "10": 0.18,
+   "20": 0.36,
+   "50": 0.6
+  },
+  "road": {
+   "name": "Jalan Niaga Utama",
+   "kind": "unclassified",
+   "distance_m": 17,
+   "depth_m": {
+    "10": 0.18,
+    "20": 0.36,
+    "50": 0.6
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1520
+  }
  },
  {
   "id": "node-6566753485",
@@ -147877,6 +148978,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-7296262089",
+  "name": "Nananeo Laundry Service",
+  "sector": "shop",
+  "kind": "laundry",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7380679,
+  "lon": 103.8907836,
+  "map_last_edited": "2020-09-21",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 19,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1634
+  }
  },
  {
   "id": "node-12968605443",
@@ -154032,7 +155163,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9661
+  }
  },
  {
   "id": "node-11676731351",
@@ -157003,6 +158137,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-12400056634",
+  "name": "Plaza kota tinggi- main entrance",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7309645,
+  "lon": 103.9025607,
+  "map_last_edited": "2024-12-06",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": null
+  },
+  "road": {
+   "name": "Jalan Niaga 1",
+   "kind": "unclassified",
+   "distance_m": 10,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": null
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1272
+  }
  },
  {
   "id": "node-2563992012",
@@ -165213,6 +166377,36 @@
   "shelter": null
  },
  {
+  "id": "node-4741043627",
+  "name": "SDS",
+  "sector": "shop",
+  "kind": "bakery",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7294117,
+  "lon": 103.9012117,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 0.18,
+   "20": 0.36,
+   "50": 0.6
+  },
+  "road": {
+   "name": "Jalan Niaga 2",
+   "kind": "unclassified",
+   "distance_m": 13,
+   "depth_m": {
+    "10": null,
+    "20": 0.26,
+    "50": 0.5
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1475
+  }
+ },
+ {
   "id": "node-13939063676",
   "name": "SDS Bakery",
   "sector": "shop",
@@ -169017,7 +170211,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 9486
+  }
  },
  {
   "id": "node-12988111282",
@@ -169666,6 +170863,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4741036994",
+  "name": "Specialized bike shop",
+  "sector": "shop",
+  "kind": "bicycle",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7322405,
+  "lon": 103.9021285,
+  "map_last_edited": "2022-06-25",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 1.51
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 16,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.53
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1146
+  }
  },
  {
   "id": "node-7266765872",
@@ -173121,7 +174348,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SK Laksamana",
+   "distance_m": 949
+  }
  },
  {
   "id": "node-7274609775",
@@ -173988,6 +175218,36 @@
   "shelter": null
  },
  {
+  "id": "node-4142124492",
+  "name": "The Store",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7272789,
+  "lon": 103.9017015,
+  "map_last_edited": "2016-04-23",
+  "depth_m": {
+   "10": 1.27,
+   "20": 1.45,
+   "50": 1.69
+  },
+  "road": {
+   "name": "Jalan Niaga",
+   "kind": "unclassified",
+   "distance_m": 15,
+   "depth_m": {
+    "10": 1.27,
+    "20": 1.45,
+    "50": 1.69
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1691
+  }
+ },
+ {
   "id": "way-253195067",
   "name": "The Store",
   "sector": "shop",
@@ -174769,6 +176029,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4741043640",
+  "name": "Totem",
+  "sector": "shop",
+  "kind": "bicycle",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7300593,
+  "lon": 103.9035414,
+  "map_last_edited": "2017-03-18",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 0.19
+  },
+  "road": {
+   "name": "Jalan Niaga 5",
+   "kind": "unclassified",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 0.19
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1354
+  }
  },
  {
   "id": "node-10983349678",
@@ -175635,6 +176925,36 @@
   "shelter": null
  },
  {
+  "id": "node-4161152995",
+  "name": "Tyre Shop",
+  "sector": "shop",
+  "kind": "tyres",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7364943,
+  "lon": 103.9097412,
+  "map_last_edited": "2016-05-02",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 2.8
+  },
+  "road": {
+   "name": "Jalan Bendahara",
+   "kind": "residential",
+   "distance_m": 4,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 2.8
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 833
+  }
+ },
+ {
   "id": "node-4161150203",
   "name": "Tyre shop",
   "sector": "shop",
@@ -175659,7 +176979,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 2797
+  }
  },
  {
   "id": "node-4161149000",
@@ -175686,7 +177009,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 3146
+  }
  },
  {
   "id": "node-7281256990",
@@ -177252,7 +178578,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 964
+  }
  },
  {
   "id": "node-3744041505",
@@ -177657,7 +178986,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1311
+  }
  },
  {
   "id": "node-4264443065",
@@ -177982,6 +179314,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-4741036992",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "pharmacy",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7293193,
+  "lon": 103.9011395,
+  "map_last_edited": "2020-12-17",
+  "depth_m": {
+   "10": 0.18,
+   "20": 0.36,
+   "50": 0.6
+  },
+  "road": {
+   "name": "Jalan Niaga 2",
+   "kind": "unclassified",
+   "distance_m": 10,
+   "depth_m": {
+    "10": 0.18,
+    "20": 0.36,
+    "50": 0.6
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1487
+  }
  },
  {
   "id": "node-4746094650",
@@ -179817,7 +181179,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SK Laksamana",
+   "distance_m": 2001
+  }
  },
  {
   "id": "node-10978242034",
@@ -179899,6 +181264,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-11015581105",
+  "name": "Unnamed (no name on the map)",
+  "sector": "shop",
+  "kind": "convenience",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7320767,
+  "lon": 103.8986445,
+  "map_last_edited": "2023-06-30",
+  "depth_m": {
+   "10": 0.28,
+   "20": 0.52,
+   "50": 0.81
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 14,
+   "depth_m": {
+    "10": 0.28,
+    "20": 0.52,
+    "50": 0.81
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1320
+  }
  },
  {
   "id": "node-11068133048",
@@ -180006,7 +181401,10 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 10312
+  }
  },
  {
   "id": "node-12345915032",
@@ -193398,7 +194796,40 @@
     "50": null
    }
   },
-  "shelter": null
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1917
+  }
+ },
+ {
+  "id": "node-4142908089",
+  "name": "Wet Market",
+  "sector": "shop",
+  "kind": "butcher",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7278757,
+  "lon": 103.9023938,
+  "map_last_edited": "2016-04-23",
+  "depth_m": {
+   "10": null,
+   "20": 0.13,
+   "50": 0.32
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "unclassified",
+   "distance_m": 20,
+   "depth_m": {
+    "10": null,
+    "20": 0.14,
+    "50": 0.34
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 1611
+  }
  },
  {
   "id": "way-331518294",
@@ -199960,6 +201391,36 @@
    }
   },
   "shelter": null
+ },
+ {
+  "id": "node-6482425185",
+  "name": "super 88",
+  "sector": "shop",
+  "kind": "supermarket",
+  "is_chain": false,
+  "section": "kota-tinggi",
+  "lat": 1.7345389,
+  "lon": 103.90445,
+  "map_last_edited": "2019-05-18",
+  "depth_m": {
+   "10": null,
+   "20": null,
+   "50": 1.23
+  },
+  "road": {
+   "name": "a road with no name",
+   "kind": "service",
+   "distance_m": 12,
+   "depth_m": {
+    "10": null,
+    "20": null,
+    "50": 1.23
+   }
+  },
+  "shelter": {
+   "name": "SJK(C) New Kota",
+   "distance_m": 852
+  }
  },
  {
   "id": "node-4558332103",

@@ -6,7 +6,6 @@ The fixture grids are tiny GeoTIFFs (tests/tiff_fixture.py): squares of 0.25 deg
 distance_m" of a business is placed tens of kilometres away to reach a neighbouring square.
 """
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -19,9 +18,6 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import resample_area as ra  # noqa: E402
 
-RAW = Path(os.environ.get("BANJIR_RAW_DIR") or ROOT.parent / "05_Raw_Data_Sources")
-OLD_JRC = RAW / "jrc_glofas_v2_1"
-KOTA_TINGGI_OLD = RAW / "kota_tinggi" / "built_rp10_100_500"   # the area as built before 4 Oct 2026, kept outside the repo
 VIEW = [100.0, 8.5, 101.0, 10.0]   # inside the 8 x 8 fixture grid, which ends at 8 N
 ROWS, COLS = 8, 8
 SQUARE_M = 0.25 * 110574.0   # one fixture square, north to south
@@ -205,28 +201,3 @@ def test_main_refuses_an_area_already_on_the_new_sizes(tmp_path, sets):
     with pytest.raises(ra.ResampleError, match="already"):
         ra.main(["--area", "test", "--from", str(area), "--old-rasters", str(old), "--rasters", str(new),
                  "--out", str(tmp_path / "out")])
-
-
-# ---------- Kota Tinggi, as shipped
-
-def test_kota_tinggi_was_resampled_from_the_old_files_by_this_tool():
-    """The shipped files, checked against the JRC files again: each business and square at 1 in 10, 20 and 50."""
-    if not raster.depth_set().grids:
-        pytest.skip(f"no depth rasters in {raster.raster_dir()}")
-    area = areas.get("kota-tinggi")
-    premises, town = areas.premises(area.id), areas.town(area.id)
-    assert all(raster.depth_set().depths(p["lon"], p["lat"]) == p["depth_m"] for p in premises)
-    assert town["cells"] == raster.depth_set().view_cells(area.view) and town["return_periods"] == [10, 20, 50]
-
-
-def test_kota_tinggi_roads_match_a_fresh_resample_from_the_old_files(tmp_path):
-    if not (OLD_JRC / "ID211_N10_E100_RP100_depth.tif").is_file() or not KOTA_TINGGI_OLD.is_dir():
-        pytest.skip(f"the old files or the old Kota Tinggi build are not in {RAW}")
-    if not raster.depth_set().grids:
-        pytest.skip(f"no depth rasters in {raster.raster_dir()}")
-    old = json.loads((KOTA_TINGGI_OLD / "premises.json").read_text(encoding="utf-8"))
-    old_set = ra.load_old(OLD_JRC)
-    shipped = {p["id"]: p for p in areas.premises("kota-tinggi")}
-    for p in old:
-        assert ra.road_depths(p, list(areas.get("kota-tinggi").view), old_set, raster.depth_set()) == \
-            shipped[p["id"]]["road"]["depth_m"], p["id"]

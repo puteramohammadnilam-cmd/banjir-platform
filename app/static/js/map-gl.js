@@ -15,7 +15,7 @@ import { createReferencePanel } from "./map-gl-reference.js";
 import { PLACE_TABS, SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
 import { applyStatic, lang, t } from "./i18n.js";
 import { layersCard, pointCard, sectionCard, sectionWords, shopCard, summaryCard } from "./map-gl-card.js";
-import { STYLE_FILES, depthRamp, readMapLink, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
+import { STYLE_FILES, areaForLink, depthRamp, readMapLink, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
   squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
 import { glDrawer } from "./map-gl-eng.js";
 import { createMapLayers, drawFloodDepth, metricPaint } from "./map-gl-layers.js";
@@ -748,8 +748,8 @@ async function openLinkedPoint(ref) {
 async function load() {
   try {
     const status = api.getStatus().catch(() => null);   // the pin needs the points' files (points_ready)
-    const [data, satellite] = await Promise.all([st.link.area ? api.getAreaData(st.link.area) : api.getDefaultData(), satelliteTiles()]);
-    Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite,
+    const [{ data, link }, satellite] = await Promise.all([areaForLink(st.link, api), satelliteTiles()]);
+    Object.assign(st, { link, area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite,
       status: await status });
     st.canPin = st.status?.points_ready === true;
     if (!st.sections.length) keep({ cells: data.town?.cells, premises: data.premises, cellDeg: data.town?.cell_deg });
