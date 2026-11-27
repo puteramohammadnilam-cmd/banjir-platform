@@ -11,7 +11,8 @@ tools/fetch_mbsa_sections.py uses).
     "seksyen-u13"); number_label is the label as OSM writes it ("25", "U13"); 56 are needed unless `expected` says.
   - A named set (every feature has an "id"): the id as given (lower case words and digits joined by "-", as in
     "kota-tinggi", since it goes in the page's address), the name as given, number_label None, in the file's order;
-    any count unless `expected` says.
+    any count unless `expected` says. A feature's "town", [lon, lat] inside the outline (a district's main town), is
+    kept as `town` when given.
 The default file is looked for in BANJIR_RAW_DIR when that is set, else in ../05_Raw_Data_Sources. Place words are
 fine here: this is a tool, not app code.
 """
@@ -99,7 +100,14 @@ def _named_of(feature: dict) -> dict:
         raise SectionsError(f"Section id {sid!r} is not lower case words and digits joined by '-'.")
     if not name:
         raise SectionsError(f"Section {sid!r} has no name.")
-    return {"id": sid, "name": name, "number_label": None, "osm_id": properties.get("osm_id"), **_shape(feature, sid)}
+    found = {"id": sid, "name": name, "number_label": None, "osm_id": properties.get("osm_id"), **_shape(feature, sid)}
+    town = properties.get("town")
+    if town is None:
+        return found
+    if not (isinstance(town, list) and len(town) == 2 and all(isinstance(v, (int, float)) for v in town)
+            and geo.point_in_geometry(town[0], town[1], found["geometry"])):
+        raise SectionsError(f"Section {sid!r}: town must be [lon, lat] inside its outline.")
+    return {**found, "town": [float(town[0]), float(town[1])]}
 
 
 def load_sections(path: Path | str | None = None, expected: int | None = None) -> list[dict]:

@@ -83,3 +83,14 @@ export function createMapLayers({ area, sections, drawer, onMetric }) {
     },
   };
 }
+
+/** The river model's depths as one picture per section, for an area that sends no squares (a state split into
+ *  districts: area.layers.flood_depth, app/floodpictures.py), at the flood size and theme on show, with `drawer`
+ *  (map-gl-eng.js glDrawer) where the squares would be; dropped while the squares are switched off. */
+export function drawFloodDepth(drawer, depth, { rp, isDark, isOn, opacity }) {
+  const theme = isDark ? "dark" : "light";
+  for (const { section, bounds } of depth?.pictures ?? []) {
+    if (!isOn) drawer.drop(section);
+    else drawer.picture(section, depth.url.replace("{section}", section).replace("{rp}", rp).replace("{theme}", theme), bounds, opacity);
+  }
+}

@@ -91,7 +91,7 @@ test("a city adds a section select, in the area's own word, with the whole city 
   const { slot, select } = mountCity();
   assert.equal(slot.querySelector('[for="section-select"]').textContent, "Section");
   assert.deepEqual(select.children.map((option) => [option.getAttribute("value"), option.textContent]),
-    [["", "Whole city"], ["seksyen-24", "Seksyen 24"], ["seksyen-25", "Seksyen 25"]]);
+    [["", "All of The City"], ["seksyen-24", "Seksyen 24"], ["seksyen-25", "Seksyen 25"]]);
   assert.equal(select.value, "", "the whole city is on show");
   assert.equal(slot.querySelector('[id="area-hint"]').textContent, "Pick an area or a section, then Open.");
   assert.equal(select.getAttribute("aria-describedby"), "area-hint");

@@ -33,7 +33,7 @@ from google.genai import errors as genai_errors  # noqa: E402
 from pydantic import AliasChoices, BaseModel, Field, StringConstraints, ValidationError  # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from . import (ai, areas, chatguard, dryspots, engineer_api, evacuation, floodtools, googlemaps, indexes,  # noqa: E402
+from . import (ai, areas, chatguard, dryspots, engineer_api, evacuation, floodpictures, floodtools, googlemaps, indexes,  # noqa: E402
                lowground, outlook, places, plan, raster, satellite, sections, stock, tide)
 
 log = logging.getLogger("banjir")
@@ -522,6 +522,14 @@ def flash_flood_layer(area_id: str, request: Request) -> Response:
 def low_ground_layer(area_id: str, level: str, request: Request) -> Response:
     """The low ground map layer of an area at one level, 1, 2, 3 or 5 m (app/lowground.py); any other is a 404."""
     return png_answer(lowground.png_path(area_id, level), request)
+
+
+@app.api_route("/api/areas/{area_id}/flood/{section_id}/{rp}/{theme}.png", dependencies=[Depends(map_limit)],
+               methods=GET_AND_HEAD)
+def flood_picture(area_id: str, section_id: str, rp: str, theme: str, request: Request) -> Response:
+    """A section's flood depth picture at one flood size and theme, for an area that sends no squares
+    (app/floodpictures.py); anything else is a 404."""
+    return png_answer(floodpictures.png_path(area_id, section_id, rp, theme), request)
 
 
 def png_answer(path: Path | None, request: Request) -> Response:

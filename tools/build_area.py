@@ -3,7 +3,7 @@
     .venv/bin/python tools/build_area.py --area kuala-krai --view 102.185 5.513 102.22 5.547 \\
         --pois ../05_Raw_Data_Sources/kuala_krai/overpass_kuala_krai_pois.json \\
         --roads ../05_Raw_Data_Sources/kuala_krai/overpass_kuala_krai_roads.json [--shelters pps.json] \\
-        [--sections sections.geojson] [--replaces AREA]
+        [--sections sections.geojson] [--replaces AREA] [--no-cells] [--skip-taken]
 
 Run from 11_Platform_Draft. It writes premises.json and town.json into app/data/areas/{area} (or --out). The folder's
 area.json is written by hand and must hold the same view.
@@ -19,6 +19,10 @@ Inputs, read only:
     every section stops the build, naming it. Without it there is no `section` key, so older builds stay byte for byte.
   - --replaces, optional and repeatable: an installed area whose businesses this build takes over, so its ids are not
     a clash (a city build that holds a smaller area's businesses, before the smaller one is removed).
+  - --skip-taken, optional: a business another installed area already holds is left out of this build (it stays in
+    that area) instead of stopping it; the run says how many.
+  - --no-cells, optional: town.json holds no squares (cells []), for a whole state whose view is far beyond what
+    app/raster.py view_cells reads; tools/outline_squares.py counts and draws its squares per district instead.
 
 Local metres use the view's centre latitude for the length of a degree of longitude. The nearest road is looked up in
 a grid of 250 m squares (RoadIndex): the same road, distance and point as the search over every segment, ties included.
@@ -252,12 +256,13 @@ def check_placement(view: View, businesses: list[dict], taken_ids: Collection[st
 
 def build(view: View, businesses: list[dict], roads: list[dict], shelters: list[dict],
           depth_set: raster.DepthSet, taken_ids: Collection[str] = (),
-          sections: list[dict] | None = None) -> tuple[list[dict], dict]:
+          sections: list[dict] | None = None, with_cells: bool = True) -> tuple[list[dict], dict]:
     """(premises, town) for one area: the view's wet squares first, so a view the rasters do not cover fails fast.
-    taken_ids are the business ids of the other installed areas; with sections, each business gains its section."""
+    taken_ids are the business ids of the other installed areas; with sections, each business gains its section;
+    without with_cells, town.json holds no squares (--no-cells)."""
     check_placement(view, businesses, taken_ids)
     rows = assign_sections(businesses, sections) if sections is not None else businesses
-    cells = depth_set.view_cells(view)
+    cells = depth_set.view_cells(view) if with_cells else []
     proj = Projection.for_view(view)
     index = RoadIndex(roads)
     premises = [_premise(row, proj, index, shelters, depth_set) for row in rows]
@@ -288,6 +293,8 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--sections", type=Path, help="GeoJSON of the area's sections: each business gains its section")
     parser.add_argument("--replaces", action="append", default=[], metavar="AREA",
                         help="an installed area whose businesses this build takes over (its ids may repeat here)")
+    parser.add_argument("--skip-taken", action="store_true", help="leave out businesses another area already holds")
+    parser.add_argument("--no-cells", action="store_true", help="store no squares in town.json (a whole state)")
     parser.add_argument("--out", type=Path, help="output folder (default app/data/areas/AREA)")
     parser.add_argument("--rasters", type=Path, help="folder of JRC depth files (default app/data/rasters)")
     args = parser.parse_args(argv)
@@ -328,8 +335,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     view = tuple(args.view)
     proj = Projection.for_view(view)
     sections = sections_io.load_sections(args.sections) if args.sections else None
-    premises, town = build(view, load_businesses(args.pois), load_roads(args.roads, proj),
-                           load_shelters(args.shelters), depth_set, installed_ids(args.area, args.replaces), sections)
+    taken, businesses = installed_ids(args.area, args.replaces), load_businesses(args.pois)
+    if args.skip_taken:
+        kept = [row for row in businesses if row["id"] not in taken]
+        print(f"left out {len(businesses) - len(kept)} businesses another area holds")
+        businesses = kept
+    premises, town = build(view, businesses, load_roads(args.roads, proj), load_shelters(args.shelters), depth_set,
+                           taken, sections, with_cells=not args.no_cells)
     write_area(out, premises, town)
     wet = {rp: sum(1 for p in premises if p["depth_m"][str(rp)]) for rp in RETURN_PERIODS}
     print(f"{len(premises)} premises, {len(town['cells'])} flood cells, wet counts {wet}")

@@ -42,3 +42,31 @@ test("shading by flash flood potential or score gives each section the old map's
   assert.deepEqual(opacity.slice(3), [STREET_ZOOM, ["*", STREET_WASH, opacity[2]]], "a wash from street level in, as the old map");
   assert.equal(metricPaint(sections, "flash").color[3], FLASH_METRIC.classes[0].color, "no flash figures: the first class");
 });
+
+test("an area that sends no squares draws one depth picture per section at the flood size and theme on show", async () => {
+  const { drawFloodDepth } = await import("../app/static/js/map-gl-layers.js");
+  const calls = [];
+  const drawer = { picture: (...args) => calls.push(["picture", ...args]), drop: (key) => calls.push(["drop", key]) };
+  const depth = { url: "/api/areas/a/flood/{section}/{rp}/{theme}.png",
+    pictures: [{ section: "d-1", bounds: [1, 2, 3, 4] }, { section: "d-2", bounds: [5, 6, 7, 8] }] };
+  drawFloodDepth(drawer, depth, { rp: 20, isDark: true, isOn: true, opacity: 0.7 });
+  assert.deepEqual(calls, [["picture", "d-1", "/api/areas/a/flood/d-1/20/dark.png", [1, 2, 3, 4], 0.7],
+    ["picture", "d-2", "/api/areas/a/flood/d-2/20/dark.png", [5, 6, 7, 8], 0.7]]);
+  calls.length = 0;
+  drawFloodDepth(drawer, depth, { rp: 50, isDark: false, isOn: false, opacity: 0.7 });
+  assert.deepEqual(calls, [["drop", "d-1"], ["drop", "d-2"]], "squares switched off: the pictures go too");
+  calls.length = 0;
+  drawFloodDepth(drawer, null, { rp: 50, isDark: false, isOn: true, opacity: 0.7 });
+  assert.deepEqual(calls, [], "an area with squares of its own has no pictures");
+});
+
+test("the map names a section in the area's own word: a state's district, else a section", async () => {
+  const { sectionCard, sectionWords } = await import("../app/static/js/map-gl-card.js");
+  assert.deepEqual(sectionWords({ en: "District", ms: "Daerah" }), { word: "district" });
+  assert.deepEqual(sectionWords(null), { word: "section" });
+  const card = sectionCard({ name: "Muar", n: 3, s50: 0.2, w50: 1 }, { rp: "50", onOpen() {}, onClose() {}, words: { word: "district" } });
+  const text = (nodes) => nodes.map((node) => node?.textContent ?? "").join(" ");
+  assert.ok(text(card).includes("See this district's overview"));
+  useLang("ms");
+  assert.deepEqual(sectionWords({ en: "District", ms: "Daerah" }), { word: "daerah" });
+});

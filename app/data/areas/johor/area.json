@@ -1,0 +1,29 @@
+{
+  "id": "johor",
+  "name": "Johor",
+  "display_name": "Johor (whole state)",
+  "view": [
+    102.46,
+    1.26,
+    104.55,
+    2.84
+  ],
+  "zoom": 9,
+  "ai_name": "Johor, Malaysia: the whole state, in its 10 districts (Batu Pahat, Johor Bahru, Kluang, Kota Tinggi, Kulai, Mersing, Muar, Pontian, Segamat and Tangkak)",
+  "news_place": "Johor",
+  "news_region": "Johor, Malaysia",
+  "council": null,
+  "section_word": {
+    "en": "District",
+    "ms": "Daerah"
+  },
+  "default_section": null,
+  "notes": {
+    "businesses": "Shops, eateries and pharmacies as mapped on OpenStreetMap inside the state boundary (fetched 27 Nov 2026; (c) OpenStreetMap contributors, ODbL). The list is what volunteers have mapped, not checked on the ground: many real businesses are missing, more so away from the big towns, and some listed ones may have closed. The shops of the separate Kota Tinggi town centre area are listed there, not here.",
+    "sections": "Districts are Johor's 10 as drawn on OpenStreetMap (fetched 27 Nov 2026; ODbL), not the state's survey lines. Outlines are simplified to within 10 m for the map. A business belongs to the district that holds it, or to the nearest one within 300 m. A district's share of wet squares is over its land and is not the risk of any one shop: a mostly dry district can still have riverside shops in deep water.",
+    "shelters": "No list of relief centres (PPS) is collected for Johor yet. The relief centres open card shows JKM's own list when its service answers.",
+    "depths": "Flood depths are the European Commission JRC global river flood model v2.1 (CC BY 4.0), in 90 m squares, for floods of 1 in 10, 20 and 50 years, drawn as one picture per district. It models rivers overflowing, not drains, flash floods or the sea, so read its depths as the model's, not as what to expect.",
+    "history": "No record of past floods is collected for Johor yet, so the page shows none. That does not mean the state has not flooded."
+  },
+  "history": null
+}

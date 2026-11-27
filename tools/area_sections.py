@@ -5,7 +5,8 @@
 
 Run from 11_Platform_Draft after tools/build_area.py --sections. For each section, in natural order (1 to 36, then U1
 to U20), sections.json holds:
-  id, name, number_label, bbox [west, south, east, north], zoom (a starting zoom that fits the section in about
+  id, name, number_label, town ([lon, lat] of a district's main town, when its outline file gives one), bbox [west,
+  south, east, north], zoom (a starting zoom that fits the section in about
   1,000 px), area_km2, counts, and outline: the section's geometry simplified to within 10 m (app/geo.py) with
   coordinates rounded to 5 decimals (about 1 m).
   counts: businesses, cells (every 90 m square of the depth grid whose centre is in the section, wet or dry: the
@@ -41,11 +42,11 @@ OUTLINE_TOLERANCE_M = 10.0
 OUTLINE_DECIMALS = 5
 MAP_FIT_PX = 1000
 TILE_PX = 256
-MIN_ZOOM, MAX_ZOOM = 12, 17
+MIN_ZOOM, MAX_ZOOM = 8, 17   # 8: a state's district is about 1 degree across (zoom 10)
 
 
 def section_zoom(box: Sequence[float]) -> int:
-    """The largest web-map zoom at which the box's wider side fits in MAP_FIT_PX pixels, kept to 12 to 17."""
+    """The largest web-map zoom at which the box's wider side fits in MAP_FIT_PX pixels, kept to 8 to 17."""
     span = max(box[2] - box[0], box[3] - box[1])
     zoom = math.floor(math.log2(MAP_FIT_PX * 360 / (TILE_PX * span)))
     return max(MIN_ZOOM, min(MAX_ZOOM, zoom))
@@ -132,7 +133,7 @@ def build(premises: list[dict], town: dict, sections: list[dict], depth_set: ras
     else:
         found, outside = square_counts(town, sections, depth_set)
     add_businesses(found, premises)
-    rows = [{"id": s["id"], "name": s["name"], "number_label": s["number_label"],
+    rows = [{"id": s["id"], "name": s["name"], "number_label": s["number_label"], **({"town": s["town"]} if s.get("town") else {}),
              "bbox": [round(v, 6) for v in s["bbox"]], "zoom": section_zoom(s["bbox"]), "area_km2": s["area_km2"],
              "counts": found[s["id"]], "outline": outline(s["geometry"])} for s in sections]
     result = {"outline_tolerance_m": OUTLINE_TOLERANCE_M, "city": city_counts([r["counts"] for r in rows]),

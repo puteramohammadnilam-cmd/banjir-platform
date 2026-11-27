@@ -3,7 +3,7 @@
 // Layout adapted from Arus's "Site Flood Check" card by Farhan Syah (MIT, vendor/LICENSE-arus.txt); every number is
 // MyFlood's own.
 import { CHANCE_YEARS, SCENARIOS, chanceWithin, depthWords, h, kindText, roadName, UNNAMED_ROAD } from "./dom.js";
-import { formatNumber, t } from "./i18n.js";
+import { dataWord, formatNumber, t } from "./i18n.js";
 import { badge, nearestShelter } from "./map-gl-data.js";
 
 const pct = (rp) => Math.round(chanceWithin(Number(rp), CHANCE_YEARS) * 100);
@@ -29,17 +29,22 @@ export function summaryCard({ wet, all, rp, onPick, oldHref = null }) {
   ].filter(Boolean);
 }
 
-/** The layers card: a switch for each layer, the squares' depth ramp and the shop dots' colours. */
-export function layersCard(visible, onToggle) {
+/** The area's word for a section ({en, ms}: "District" in a state), lower case, as {word} for the strings that name
+ *  one; "section" for an area that gives none. */
+export const sectionWords = (words) => ({ word: (dataWord(words) || t("mg.sectionWord")).toLocaleLowerCase() });
+
+/** The layers card: a switch for each layer, the squares' depth ramp and the shop dots' colours. `words` is
+ *  sectionWords' answer. */
+export function layersCard(visible, onToggle, words = sectionWords(null)) {
   const toggle = (key) => h("label", {}, h("input", { type: "checkbox", value: key, checked: visible[key],
-    onchange: (event) => onToggle(key, event.target.checked) }), " ", t(`mg.layer.${key}`));
+    onchange: (event) => onToggle(key, event.target.checked) }), " ", t(`mg.layer.${key}`, words));
   return [
     h("p", { class: "mg-k" }, t("mg.layers")),
     ...["sections", "squares", "shops", "shelters"].map(toggle),
     h("div", { class: "mg-ramp", "aria-hidden": "true" }),
     h("div", { class: "mg-ramp-key" }, h("span", {}, t("mg.ramp.low")), h("span", {}, t("mg.ramp.high"))),
     dotKey(),
-    h("p", { class: "mg-muted mg-small mg-note" }, t("mg.layersNote")),
+    h("p", { class: "mg-muted mg-small mg-note" }, t("mg.layersNote", words)),
   ];
 }
 
@@ -124,7 +129,7 @@ export function pointCard(place, { rp, title, subline, links, onClose, onShare, 
 }
 
 /** A section's card: its share of wet squares, its wet businesses, and onOpen() for its Area overview in the sheet. */
-export function sectionCard(section, { rp, onOpen, onClose }) {
+export function sectionCard(section, { rp, onOpen, onClose, words = sectionWords(null) }) {
   const exact = section[`s${rp}`] * 100;
   const share = Math.round(exact);
   let tone = "dry";
@@ -136,6 +141,6 @@ export function sectionCard(section, { rp, onOpen, onClose }) {
     h("p", { class: "mg-sub" }, t("mg.sectionSub", { n: formatNumber(section.n) })),
     h("span", { class: `mg-badge mg-${tone}` }, exact > 0 && share < 1 ? t("mg.wetShareUnder") : t("mg.wetShare", { pct: share })),
     h("p", { class: "mg-say" }, t("mg.sectionSay", { rp, wet: formatNumber(section[`w${rp}`]), n: formatNumber(section.n) })),
-    h("div", { class: "mg-acts" }, h("button", { type: "button", class: "mg-btn mg-primary", onclick: onOpen }, t("mg.openSection"))),
+    h("div", { class: "mg-acts" }, h("button", { type: "button", class: "mg-btn mg-primary", onclick: onOpen }, t("mg.openSection", words))),
   ];
 }

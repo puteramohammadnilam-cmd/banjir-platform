@@ -14,11 +14,11 @@ import { createAreaPanel } from "./map-gl-area.js";
 import { createReferencePanel } from "./map-gl-reference.js";
 import { PLACE_TABS, SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
 import { applyStatic, lang, t } from "./i18n.js";
-import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
+import { layersCard, pointCard, sectionCard, sectionWords, shopCard, summaryCard } from "./map-gl-card.js";
 import { STYLE_FILES, depthRamp, readMapLink, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
   squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
 import { glDrawer } from "./map-gl-eng.js";
-import { createMapLayers, metricPaint } from "./map-gl-layers.js";
+import { createMapLayers, drawFloodDepth, metricPaint } from "./map-gl-layers.js";
 import { wireSearch } from "./map-gl-search.js";
 import { createPinMode } from "./map-gl-pin.js";
 import { businessPlace, isWithinView, parseRef, writeUrl } from "./place.js";
@@ -61,7 +61,8 @@ function mainLink(extra) {
   url.searchParams.set("ui", "old");
   return `./${url.search}${url.hash}`;
 }
-const hint = () => t(st.sections.length ? "mg.hint" : "mg.hintShops");
+const words = () => sectionWords(st.area?.section_word);
+const hint = () => t(st.sections.length ? "mg.hint" : "mg.hintShops", words());
 const sectionName = (id) => st.sections.find((section) => section.id === id)?.name ?? "";
 
 /** The words at the foot of the map; a problem also shows on phones, where the strip is otherwise hidden. */
@@ -107,6 +108,9 @@ function applyTheme() {
 
 const squaresData = () => (st.cellDeg ? squaresGeo([...st.cells.values()], st.cellDeg) : EMPTY);
 const shopsData = () => shopsGeo([...st.shops.values()]);
+const SQUARE_FADE = ["interpolate", ["linear"], ["zoom"], 12, 0.85, 16, 0.5];
+/** An area that sends no squares (a state) has its depths drawn as one picture per section instead. */
+const drawFlood = () => st.flood && drawFloodDepth(st.flood, st.area.layers.flood_depth, { rp: st.rp, isDark: isDark(), isOn: st.visible.squares, opacity: SQUARE_FADE });
 
 function addOurLayers(map) {
   if (!st.area || map.getSource("mg-sections")) return;
@@ -114,9 +118,8 @@ function addOurLayers(map) {
   map.addSource("mg-squares", { type: "geojson", data: squaresData() });
   map.addSource("mg-shops", { type: "geojson", data: shopsData() });
   const before = underRoads(map.getStyle().layers);
-  const fade = (from, to) => ["interpolate", ["linear"], ["zoom"], 12, from, 16, to];
   map.addLayer({ id: "mg-section-fill", type: "fill", source: "mg-sections", paint: { "fill-color": sectionFill(st.rp), "fill-opacity": SECTION_OPACITY } }, before);
-  map.addLayer({ id: "mg-squares", type: "fill", source: "mg-squares", paint: { "fill-color": depthRamp(st.rp, isDark()), "fill-opacity": fade(0.85, 0.5) } }, before);
+  map.addLayer({ id: "mg-squares", type: "fill", source: "mg-squares", paint: { "fill-color": depthRamp(st.rp, isDark()), "fill-opacity": SQUARE_FADE } }, before);
   map.addLayer({ id: "mg-section-line", type: "line", source: "mg-sections",
     paint: { "line-color": isDark() ? "#46d3ff" : "#1e40af", "line-opacity": 0.55, "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.6, 15, 1.6] } });
   map.addLayer({ id: "mg-section-hit", type: "fill", source: "mg-sections", paint: { "fill-color": "#000", "fill-opacity": 0 } });
@@ -159,6 +162,7 @@ function showLayers(map) {
   show("mg-shops", st.visible.shops);
   show("mg-picked", st.visible.shops);
   st.markers.forEach((marker) => { marker.getElement().hidden = !st.visible.shelters; });
+  drawFlood();
 }
 
 function paintFloodSize(map) {
@@ -167,6 +171,7 @@ function paintFloodSize(map) {
   map.setPaintProperty("mg-point-squares", "fill-color", depthRamp(st.rp, isDark()));
   map.setPaintProperty("mg-shops", "circle-color", shopColour(st.rp));
   paintSections(map);
+  drawFlood();
 }
 
 /** The sections' shading: the river model's share of wet squares at the flood size on show, or what the layers card
@@ -283,7 +288,7 @@ function showSection(sectionId, { focus = true } = {}) {
   st.sheet?.refresh();
   st.chat?.render(null);   // and the chat is about the area again
   st.card = { kind: "section", id: sectionId };
-  showCard(sectionCard(props, { rp: st.rp, onOpen: () => openSheet("overview"), onClose: closeCard }), { focus });
+  showCard(sectionCard(props, { rp: st.rp, onOpen: () => openSheet("overview"), onClose: closeCard, words: words() }), { focus });
 }
 
 /* ---- a checked point ---- */
@@ -574,6 +579,8 @@ function drawLayers() {
   st.pictures ??= glDrawer({ getMap: () => st.map, hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), prefix: "mg-layer",
     beforeId: (map, key) => (key === "low" && map.getLayer("mg-layer-flash") ? "mg-layer-flash" : "mg-section-fill"),   // low ground under flash
     onError: (key) => st.layers?.failed(key) });
+  if (st.area.layers?.flood_depth) st.flood ??= glDrawer({ getMap: () => st.map, hasOurLayers: (map) => Boolean(map.getSource("mg-sections")),
+    prefix: "mg-flood", beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line" });
   st.layers ??= createMapLayers({ area: st.area, sections: st.sections, drawer: st.pictures, onMetric: () => {
     if (!st.visible.sections) $("mg-layers").querySelector('input[value="sections"]')?.click();   // a shading shows on the sections
     paintSections();
@@ -581,7 +588,7 @@ function drawLayers() {
   $("mg-layers").replaceChildren(...layersCard(st.visible, (key, on) => {
     st.visible[key] = on;
     showLayers(st.map);
-  }), ...st.layers.nodes);
+  }, words()), ...st.layers.nodes);
 }
 
 /** Another base map: the style is fetched first, and a later pick wins; on a failure the old map and its look stay. */

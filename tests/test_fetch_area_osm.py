@@ -182,3 +182,15 @@ def test_recorded_city_elements_load_as_businesses_and_roads():
     assert all(101.4 < r["lon"] < 101.6 and 2.9 < r["lat"] < 3.3 and len(r["edited"]) == 10 for r in rows)
     roads = ba.load_roads(FIXTURES / "roads_sample.json", ba.Projection.for_view((101.43, 2.95, 101.59, 3.23)))
     assert roads and all(r["kind"] in ba.VEHICLE_ROADS and len(r["pts"]) >= 2 for r in roads)
+
+
+def test_roads_near_businesses_are_asked_section_by_section_around_each_ones_businesses(tmp_path):
+    near = {fao.near_roads_query(s["osm_id"], 500): {"osm3s": STAMP, "elements": [element("way", i)]}
+            for i, s in enumerate(SECTIONS, start=1)}
+    post, asked = fake_post({fao.pois_query(fao.CITY_RELATION): {"osm3s": STAMP, "elements": [element("node", 7)]}, **near})
+    counts = fao.fetch(tmp_path, "2026-11-27", SECTIONS, post=post, near_m=500)
+    assert counts == {"pois": 1, "roads": 2, "how": {"pois": "city", "roads": "sections"}}
+    assert asked[1:] == list(near), "no state-wide road question: its box would hold every road in it"
+    query = fao.near_roads_query(11, 500)
+    assert "area(3600000011)" in query and "way(around:500)" in query and 'out geom;' in query
+    assert query.index('nwr["shop"]') < query.index("way(around:500)"), "around the businesses just found"

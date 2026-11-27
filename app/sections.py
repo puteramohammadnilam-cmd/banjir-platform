@@ -40,7 +40,7 @@ import re
 from collections.abc import Mapping
 from functools import lru_cache
 
-from . import areas, engineer, geo, indexes, lowground, raster, tide
+from . import areas, engineer, floodpictures, geo, indexes, lowground, raster, tide
 from . import history as flood_record
 
 NEAREST_SECTION_M = 300   # a point in no (simplified) outline takes the nearest section this close, as the build does
@@ -91,11 +91,17 @@ def _problems(item) -> list[str]:
             areas._is_whole(item["zoom"]) and 1 <= item["zoom"] <= areas.MAX_ZOOM,
         "outline must be a Polygon or MultiPolygon": _is_outline(item["outline"]),
         "area_km2 must be a number": areas._is_number(item["area_km2"]),
+        "town, when given, must be [lon, lat] inside the bbox": "town" not in item or _is_town(item["town"], item["bbox"]),
         "counts must hold businesses, cells and wet_businesses and wet_cells by flood size":
             isinstance(counts, Mapping) and all(areas._is_whole(counts.get(name)) for name in ("businesses", "cells"))
             and all(_is_by_flood_size(counts.get(name)) for name in ("wet_businesses", "wet_cells")),
     }
     return [problem for problem, passed in checks.items() if not passed]
+
+
+def _is_town(town, bbox) -> bool:
+    return (isinstance(town, tuple) and len(town) == 2 and all(areas._is_number(v) for v in town)
+            and isinstance(bbox, tuple) and len(bbox) == 4 and bbox[0] <= town[0] <= bbox[2] and bbox[1] <= town[1] <= bbox[3])
 
 
 def _is_by_flood_size(counts) -> bool:
@@ -271,6 +277,7 @@ def city_figures(area_id: str) -> Mapping | None:
 def clear_caches() -> None:
     """Forget every area and section read so far (for tests that point areas.AREAS_DIR elsewhere)."""
     areas.clear_caches()
+    floodpictures.clear_cache()
     for cached in (listed, _by_id, _aliases, city_index, section_premises, section_cells, index_doc):
         cached.cache_clear()
 
@@ -316,9 +323,9 @@ def section_at(area: areas.Area, lat: float, lon: float) -> Mapping | None:
 
 
 def listed_area_at(lat: float, lon: float) -> tuple[areas.Area | None, Mapping | None]:
-    """(area, section) for a point: the first area (the default first) whose view holds it, with its section when the
-    area is split into sections. A point in a split area's view but in none of its sections is in no area there."""
-    for area in areas.load_all():
+    """(area, section) for a point: the smallest area whose view holds it (areas.nearest_first), with its section when
+    the area is split into sections. A point in a split area's view but in none of its sections is in no area there."""
+    for area in areas.nearest_first():
         if not area.contains(lat, lon):
             continue
         if not has_sections(area):
@@ -330,7 +337,10 @@ def listed_area_at(lat: float, lon: float) -> tuple[areas.Area | None, Mapping |
 
 
 def centre(section: Mapping) -> tuple[float, float]:
-    """(lat, lon) of the middle of a section's bbox."""
+    """(lat, lon) of a section's main town when sections.json gives one (a state's district, whose middle can be
+    forest), else of the middle of its bbox."""
+    if section.get("town"):
+        return section["town"][1], section["town"][0]
     west, south, east, north = section["bbox"]
     return (south + north) / 2, (west + east) / 2
 
@@ -372,7 +382,7 @@ def details(area: areas.Area, section_id: str | None = None) -> dict:
              "flash_flood_example": area.flash_flood_example, "index_method": index_method(area.id),
              "losses": areas._thaw(area.losses),
              "layers": {"flash_flood": indexes.layer(area.id), "low_ground": lowground.layer(area.id),
-                        "rain_pools": engineer.layer(area.id)}}
+                        "rain_pools": engineer.layer(area.id), "flood_depth": floodpictures.layer(area.id)}}
     if has_sections(area):
         found.update(section_word=areas._thaw(area.section_word), default_section=area.default_section)
     return found

@@ -639,6 +639,8 @@ def test_parity_every_built_town_square(real):
     checked = []
     for path in built("town.json"):
         town = json.loads(path.read_text(encoding="utf-8"))
+        if not town["cells"] and (path.parent / "flood" / "flood_pictures.json").is_file():
+            continue   # a whole state stores no squares (tests/test_outline_squares.py checks its counts)
         assert_same_town(real, town)
         checked.append(f"{len(town['cells'])} in {path.relative_to(ROOT)}")
     print(f"\nparity, squares equal: {', '.join(checked)}")

@@ -109,6 +109,17 @@ class Area:
         west, south, east, north = self.view
         return (south + north) / 2, (west + east) / 2
 
+    def size(self) -> float:
+        """The view's size in square degrees: where views overlap (a town inside a state), the smaller is first."""
+        west, south, east, north = self.view
+        return (east - west) * (north - south)
+
+
+def nearest_first() -> list[Area]:
+    """Every area, the smallest view first (the default first among equals): a point a town's view and its state's
+    both hold goes to the town, with its own squares and relief centres."""
+    return sorted(load_all(), key=lambda area: (area.size(), not area.is_default))
+
 
 def load_all(root: Path | None = None) -> tuple[Area, ...]:
     """Every area under root (app/data/areas by default): the default first, then by name.
@@ -387,8 +398,8 @@ def business(business_id: str) -> tuple[dict, Area] | None:
 
 
 def area_at(lat: float, lon: float) -> Area | None:
-    """The first area (the default first) whose view holds the point, or None."""
-    return next((area for area in load_all() if area.contains(lat, lon)), None)
+    """The smallest area whose view holds the point (nearest_first), or None."""
+    return next((area for area in nearest_first() if area.contains(lat, lon)), None)
 
 
 def preload() -> None:

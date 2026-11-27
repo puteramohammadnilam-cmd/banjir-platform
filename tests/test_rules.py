@@ -15,7 +15,8 @@ PAGE_SCRIPTS = Path("app/static/js")
 INNERHTML_HOME = "app/static/js/chat.js"   # Google's search suggestions arrive as HTML
 PAGE_FOLDER = Path("app/static")
 PAGE_SUFFIXES = {".html", ".js"}
-PLACE_NAMES = ("Sri Muda", "Taman Sri Muda", "Shah Alam", "Seksyen", "MBSA")   # a curated area's own words: area.json only
+PLACE_NAMES = ("Sri Muda", "Taman Sri Muda", "Shah Alam", "Seksyen", "MBSA",   # a curated area's own words: area.json only
+               "Johor", "Batu Pahat", "Kluang", "Kulai", "Mersing", "Muar", "Pontian", "Segamat", "Tangkak")
 
 # A breach that already exists in code card A0 may not edit: dom.js line 1 is a comment saying "never innerHTML", and
 # the rule is a plain text search. It is a strict xfail on that one script, so every other script stays guarded. Once
@@ -125,7 +126,8 @@ def test_the_page_names_no_place(path):
 def test_the_place_name_scan_matches_any_case_and_leaves_other_words_alone():
     assert place_names_in("Map of TAMAN SRI MUDA") == ["Sri Muda", "Taman Sri Muda"]
     assert place_names_in("seksyen 25, mbsa and shah alam") == ["Shah Alam", "Seksyen", "MBSA"]
-    assert place_names_in("Kota Tinggi town centre, Johor. Malaysia, Selangor, MyFlood") == []
+    assert place_names_in("Kota Tinggi town centre. Malaysia, Selangor, MyFlood") == []
+    assert place_names_in("Johor Bahru and Batu Pahat") == ["Johor", "Batu Pahat"]
 
 
 def function_source(statements: int) -> str:

@@ -37,7 +37,7 @@ def ids_in(area_id: str) -> set[str]:
 # ---------- the areas and their data
 
 def test_every_area_loads_and_the_city_is_the_default():
-    ids = [CITY, "kota-bharu", KOTA_TINGGI, "kuala-terengganu", "kuantan"]
+    ids = [CITY, "johor", "kota-bharu", KOTA_TINGGI, "kuala-terengganu", "kuantan"]
     assert [a.id for a in areas.load_all()] == ids   # the default first, then by id
     assert areas.default().id == CITY and areas.default() == areas.get(CITY)
     assert areas.get("sri-muda") is None and sections.alias("sri-muda")[1]["id"] == "seksyen-25"
@@ -56,8 +56,11 @@ def test_every_premise_lies_inside_its_own_area():
         assert list(area.view) == areas.town(area.id)["view"]   # the config agrees with the built data
         for p in areas.premises(area.id):
             assert west <= p["lon"] <= east and south <= p["lat"] <= north, p["id"]
-            assert areas.area_at(p["lat"], p["lon"]) == area
-            assert sections.listed_area_at(p["lat"], p["lon"])[0] == area, p["id"]
+            owner = areas.area_at(p["lat"], p["lon"])   # a smaller area's view holding it too wins (Kota Tinggi town)
+            assert owner == area or (area.id == "johor" and owner == areas.get(KOTA_TINGGI)), p["id"]
+            listed = sections.listed_area_at(p["lat"], p["lon"])[0]
+            # a Johor shop up to 300 m off a district's line (on the shore) is in none of them
+            assert listed == owner or (listed is None and owner.id == "johor"), p["id"]
     assert areas.area_at(35.68, 139.69) is None   # Tokyo
 
 
@@ -242,14 +245,17 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     first = body["data"]["areas"][0]
     assert set(first) == {"id", "name", "display_name", "view", "zoom", "counts", "has_history", "has_shelters",
                           "has_sections", "aliases", "has_3d"}
-    assert all((area["has_sections"], area["aliases"]) == (False, []) for area in body["data"]["areas"][1:])
+    assert all((area["has_sections"], area["aliases"]) == (area["id"] == "johor", []) for area in body["data"]["areas"][1:])
     assert (first["has_sections"], [alias["id"] for alias in first["aliases"]]) == (True, ["sri-muda"])
     assert (first["id"], first["counts"], first["has_history"], first["has_shelters"]) == (
         CITY, {"businesses": 2445, "squares": 12477, "shelters": 6}, True, True)
     kota = listed[KOTA_TINGGI]
     assert (kota["counts"], kota["has_history"], kota["has_shelters"]) == (
         {"businesses": 27, "squares": 382, "shelters": 2}, False, True)
-    assert len(listed) == 5 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
+    assert len(listed) == 6 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
+    state = listed["johor"]
+    assert (state["counts"], state["has_history"], state["has_shelters"]) == (
+        {"businesses": 7476, "squares": 0, "shelters": 0}, False, False), "a state stores no squares: pictures instead"
 
 
 def test_area_data_carries_the_area_and_its_data(client):

@@ -311,10 +311,16 @@ def test_the_endpoint_answers_for_an_area_and_a_section(monkeypatch):
     assert not math.isnan(found["data"]["outlook"]["days"][0]["rain_mm"])
 
 
+NO_MET = {"johor"}   # a whole state: one MetMalaysia place cannot stand for all its districts (not set up yet)
+
+
 def test_every_area_has_a_metmalaysia_place_that_fits():
     from app import areas
     for area in areas.load_all():
         found = outlook.place(area.id)
+        if area.id in NO_MET:
+            assert found is None, area.id
+            continue
         assert found and found[0][:2] in ("Tn", "Ds") and found[3], area.id
 
 

@@ -366,3 +366,11 @@ def test_the_screened_towns_rebuild_byte_identical_from_their_saved_overpass_ans
              "--out", str(tmp_path)])
     for name in ("premises.json", "town.json"):
         assert (tmp_path / name).read_bytes() == (ROOT / "app" / "data" / "areas" / area_id / name).read_bytes()
+
+
+def test_a_state_build_stores_no_squares_but_reads_every_premise(depths, inputs):
+    pois, roads, _ = inputs
+    proj = ba.Projection.for_view(FIXTURE_VIEW)
+    premises, town = ba.build(FIXTURE_VIEW, ba.load_businesses(pois), ba.load_roads(roads, proj), [], depths, with_cells=False)
+    assert town["cells"] == [] and len(premises) == 3
+    assert next(p for p in premises if p["name"] == "Bakery")["depth_m"] == depths.depths(100.875, 9.375)

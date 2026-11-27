@@ -1,0 +1,612 @@
+{
+ "version": 1,
+ "grid": "N10_E100",
+ "px": 0.0008333333356347339,
+ "py": 0.0008333333333325754,
+ "steps_m": [
+  0.5,
+  1,
+  2,
+  3
+ ],
+ "palettes": {
+  "light": [
+   "#a9d8ff",
+   "#6cb8f0",
+   "#2f86d6",
+   "#1d5fae",
+   "#0b3478"
+  ],
+  "dark": [
+   "#1a6aa8",
+   "#2f9be0",
+   "#62c3f5",
+   "#a8e2ff",
+   "#e6f7ff"
+  ]
+ },
+ "rule": "A square is drawn in the first outline that holds its centre, when the river model gives it water; the colour is the map's depth step.",
+ "credit": "Water: European Commission JRC global river flood hazard maps v2.1, CC BY 4.0.",
+ "outlines": [
+  {
+   "id": "batu-pahat",
+   "name": "Batu Pahat",
+   "counts": {
+    "cells": 228853,
+    "wet_cells": {
+     "10": 45789,
+     "20": 54080,
+     "50": 64190
+    }
+   },
+   "bounds": [
+    102.7745849,
+    1.6220667,
+    103.2537516,
+    2.2004
+   ],
+   "width": 575,
+   "height": 694,
+   "files": {
+    "10": {
+     "light": {
+      "file": "batu-pahat_rp10_light.png",
+      "bytes": 18588,
+      "sha256": "d3c1f0e843847d2609bb0d529941184bc184f1e02f3b1e6853d4e61dbd71397d"
+     },
+     "dark": {
+      "file": "batu-pahat_rp10_dark.png",
+      "bytes": 18588,
+      "sha256": "41ed5847f49c60cd0d9a7d2ae513949749c65d98ac269ecff9e7445ac5ef35fe"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "batu-pahat_rp20_light.png",
+      "bytes": 21217,
+      "sha256": "1c750bc2f5aa497921a5bb1c8854c9718e941e10f84a8368376e6df47eebb911"
+     },
+     "dark": {
+      "file": "batu-pahat_rp20_dark.png",
+      "bytes": 21217,
+      "sha256": "0e8d9fbfb8b2a7218b0c605e4422539b8a7c3a71f0842f1aaf16a08e7348c5c5"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "batu-pahat_rp50_light.png",
+      "bytes": 24530,
+      "sha256": "cf4f97913fd89680d6d4a47f6577e570dc52c008b609cfb46d83437e66a93d96"
+     },
+     "dark": {
+      "file": "batu-pahat_rp50_dark.png",
+      "bytes": 24530,
+      "sha256": "a34c16ec150560e798a161038ddcbf4d3d87f29d7e4f1a176bb21b241469d2bf"
+     }
+    }
+   }
+  },
+  {
+   "id": "johor-bahru",
+   "name": "Johor Bahru",
+   "counts": {
+    "cells": 121097,
+    "wet_cells": {
+     "10": 2921,
+     "20": 3558,
+     "50": 4006
+    }
+   },
+   "bounds": [
+    103.5354182,
+    1.3295667,
+    104.0229182,
+    1.6720667
+   ],
+   "width": 585,
+   "height": 411,
+   "files": {
+    "10": {
+     "light": {
+      "file": "johor-bahru_rp10_light.png",
+      "bytes": 3047,
+      "sha256": "482ea36774db04e09f70c99c8a5fbf67831428808ae0faea668b25fa508a32bd"
+     },
+     "dark": {
+      "file": "johor-bahru_rp10_dark.png",
+      "bytes": 3047,
+      "sha256": "7245ce842012ab02ca27314500dbf3f2ead0eff07f7e6c3da7c42f8453833519"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "johor-bahru_rp20_light.png",
+      "bytes": 3398,
+      "sha256": "3b53721543de706fa8bd0782bd0ec565ee4d1368761136eff6f6947d423f2748"
+     },
+     "dark": {
+      "file": "johor-bahru_rp20_dark.png",
+      "bytes": 3398,
+      "sha256": "439e7e474f551b66c9c780914f8691ed25c04b0349b96a3e9eb06546e5cfb3ec"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "johor-bahru_rp50_light.png",
+      "bytes": 3622,
+      "sha256": "cd6e3eb4b6ffcb51be57533ed698f3dfb54f82b4e87c5d7f6d849f85cafd8c3d"
+     },
+     "dark": {
+      "file": "johor-bahru_rp50_dark.png",
+      "bytes": 3622,
+      "sha256": "f299e8e95f311ae1b3ee386e13d7795410e2de08a9c65798ce2a192a7db05225"
+     }
+    }
+   }
+  },
+  {
+   "id": "kluang",
+   "name": "Kluang",
+   "counts": {
+    "cells": 336003,
+    "wet_cells": {
+     "10": 15697,
+     "20": 16799,
+     "50": 18371
+    }
+   },
+   "bounds": [
+    103.1062516,
+    1.7095667,
+    103.6420849,
+    2.3929
+   ],
+   "width": 643,
+   "height": 820,
+   "files": {
+    "10": {
+     "light": {
+      "file": "kluang_rp10_light.png",
+      "bytes": 7309,
+      "sha256": "1aecb6e9974de073f2bb19f355e7a344e6dcfd49aa39e87391b6e6cebad99128"
+     },
+     "dark": {
+      "file": "kluang_rp10_dark.png",
+      "bytes": 7309,
+      "sha256": "8396ad90686879191d1093d5dd376ed803cd7cd6e415a21aac1c5ba062fa454f"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "kluang_rp20_light.png",
+      "bytes": 7372,
+      "sha256": "7c02e95ec3d3184d7bf738f72547942a7cb3f77b9c3601789de86158f541a5fe"
+     },
+     "dark": {
+      "file": "kluang_rp20_dark.png",
+      "bytes": 7372,
+      "sha256": "6a3c1b4e16a48427076a0fbc4e8dcfddb37295dc93c47d8910c960a76d1cc904"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "kluang_rp50_light.png",
+      "bytes": 7628,
+      "sha256": "ba4d211a2d824434ecf1c5049acb25c1db0ccddc7e7814b472138298ad533375"
+     },
+     "dark": {
+      "file": "kluang_rp50_dark.png",
+      "bytes": 7628,
+      "sha256": "57fe1fb44115a396f3e757b2f4e7d32e07579f1d20748bc940a27ad87281d7a8"
+     }
+    }
+   }
+  },
+  {
+   "id": "kota-tinggi",
+   "name": "Kota Tinggi",
+   "counts": {
+    "cells": 411242,
+    "wet_cells": {
+     "10": 38300,
+     "20": 42634,
+     "50": 47313
+    }
+   },
+   "bounds": [
+    103.5512516,
+    1.3370667,
+    104.2979182,
+    2.0454
+   ],
+   "width": 896,
+   "height": 850,
+   "files": {
+    "10": {
+     "light": {
+      "file": "kota-tinggi_rp10_light.png",
+      "bytes": 20495,
+      "sha256": "e40dd7d11b8b8745c5e517e76c09792a215581714b6cfe5d8a8269aaf852e7ab"
+     },
+     "dark": {
+      "file": "kota-tinggi_rp10_dark.png",
+      "bytes": 20495,
+      "sha256": "0004745c3b15f06ce24e5e5f17d1bff5bf562aba5f92934a9ef561ad56ea3679"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "kota-tinggi_rp20_light.png",
+      "bytes": 21582,
+      "sha256": "25194b01f92bc4f3e6a5179de005c1c0a65bcb2c0b425a51dcfec87fba0040a4"
+     },
+     "dark": {
+      "file": "kota-tinggi_rp20_dark.png",
+      "bytes": 21582,
+      "sha256": "74eb4f79069e5b56fdd00117a7f44e4872be5843c46a9fa2f204defb2c1ea774"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "kota-tinggi_rp50_light.png",
+      "bytes": 23057,
+      "sha256": "3538404883c1b000e435d55a56b971b85d6afa6f1aca4cf1c36fb394f3b51e49"
+     },
+     "dark": {
+      "file": "kota-tinggi_rp50_dark.png",
+      "bytes": 23057,
+      "sha256": "b754db3eb1235dae30ff832d4499ddade42df2bbdc2e29de2e6aa0717777b111"
+     }
+    }
+   }
+  },
+  {
+   "id": "kulai",
+   "name": "Kulai",
+   "counts": {
+    "cells": 88428,
+    "wet_cells": {
+     "10": 321,
+     "20": 324,
+     "50": 329
+    }
+   },
+   "bounds": [
+    103.3629182,
+    1.5229,
+    103.7379182,
+    1.8054
+   ],
+   "width": 450,
+   "height": 339,
+   "files": {
+    "10": {
+     "light": {
+      "file": "kulai_rp10_light.png",
+      "bytes": 522,
+      "sha256": "16f7f0f3cf3387704687e3e788bc7d95e627bb5a353b3037dba321d63e5e9acc"
+     },
+     "dark": {
+      "file": "kulai_rp10_dark.png",
+      "bytes": 522,
+      "sha256": "d2d69f3222019f6c526138635e747c8c1d77c68aff732dd72fab470731deeb5d"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "kulai_rp20_light.png",
+      "bytes": 526,
+      "sha256": "43b57157a0147eec998c813745ed5fa99c6d6738bbf669e3d2d8a3dd2cf15654"
+     },
+     "dark": {
+      "file": "kulai_rp20_dark.png",
+      "bytes": 526,
+      "sha256": "52a8f26e7e09bbd7e673fcd415109e89844404170cfea8c8f56018faa81c6f5d"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "kulai_rp50_light.png",
+      "bytes": 527,
+      "sha256": "b00087a7660526e1f1514caa7ada7eafaa0e79360f393e3b9c628ef713b793b1"
+     },
+     "dark": {
+      "file": "kulai_rp50_dark.png",
+      "bytes": 527,
+      "sha256": "6d9a3099d3e19ee192ea573ec12b11d677edee9c3a45d2823db9fb5b2ad6982d"
+     }
+    }
+   }
+  },
+  {
+   "id": "mersing",
+   "name": "Mersing",
+   "counts": {
+    "cells": 334946,
+    "wet_cells": {
+     "10": 34088,
+     "20": 37898,
+     "50": 41911
+    }
+   },
+   "bounds": [
+    103.2895849,
+    2.0429,
+    104.5412516,
+    2.6687333
+   ],
+   "width": 1502,
+   "height": 751,
+   "files": {
+    "10": {
+     "light": {
+      "file": "mersing_rp10_light.png",
+      "bytes": 19043,
+      "sha256": "0648a7083f24831ea7b2c0e2588d63fc80216aabf16dd1dc806faa1a1af3475e"
+     },
+     "dark": {
+      "file": "mersing_rp10_dark.png",
+      "bytes": 19043,
+      "sha256": "f0b150af4d946846f9f90f92139e01322b2344d4202bee3a075e8eb34e3d0e1c"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "mersing_rp20_light.png",
+      "bytes": 20011,
+      "sha256": "056c6210ed08609f554ac8c7bbd66319237fd0e3f7e860fe1fe9f1ad5d9c63eb"
+     },
+     "dark": {
+      "file": "mersing_rp20_dark.png",
+      "bytes": 20011,
+      "sha256": "391f33c0ed179b386b78108f8b32fec94814147a36ac6884bc4aba8a3932a929"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "mersing_rp50_light.png",
+      "bytes": 20900,
+      "sha256": "4801a056f1d3be4840bcace69c105380336ba605530ac71334b1b0f57c6fe027"
+     },
+     "dark": {
+      "file": "mersing_rp50_dark.png",
+      "bytes": 20900,
+      "sha256": "34eeac0884f60ae3518d99212e0d1d9dbd5664803fd616eabf123b6f4acfe760"
+     }
+    }
+   }
+  },
+  {
+   "id": "muar",
+   "name": "Muar",
+   "counts": {
+    "cells": 165655,
+    "wet_cells": {
+     "10": 24550,
+     "20": 27420,
+     "50": 30312
+    }
+   },
+   "bounds": [
+    102.5412516,
+    1.8529,
+    103.0262516,
+    2.4120667
+   ],
+   "width": 582,
+   "height": 671,
+   "files": {
+    "10": {
+     "light": {
+      "file": "muar_rp10_light.png",
+      "bytes": 11716,
+      "sha256": "2f9eebe157704faa8ccaabeedae247376b6ef07dfbce8d4294e4e237e450dc09"
+     },
+     "dark": {
+      "file": "muar_rp10_dark.png",
+      "bytes": 11716,
+      "sha256": "20f68b0d24eee33abf52d9713e7bdd4b57e61b59ca91f502cb4318fe3fe682ce"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "muar_rp20_light.png",
+      "bytes": 12244,
+      "sha256": "5b5b89380f84f733d726944fe056ad2a179e1ea726f4a19520c61fc3b667e9fa"
+     },
+     "dark": {
+      "file": "muar_rp20_dark.png",
+      "bytes": 12244,
+      "sha256": "88fe30d96404aa965487a131c25519b5578a45f8aa11ef5b4fa3598241ed40b9"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "muar_rp50_light.png",
+      "bytes": 12956,
+      "sha256": "b2b6a36ef9efdfd83440e203dbb50319cc20b156b7b958b246ff1fac256793c0"
+     },
+     "dark": {
+      "file": "muar_rp50_dark.png",
+      "bytes": 12956,
+      "sha256": "b33ad7d5554625df9de07e1d1fe59d32e56dbfa655290563068850df1b6b3a7c"
+     }
+    }
+   }
+  },
+  {
+   "id": "pontian",
+   "name": "Pontian",
+   "counts": {
+    "cells": 109342,
+    "wet_cells": {
+     "10": 6535,
+     "20": 7198,
+     "50": 7762
+    }
+   },
+   "bounds": [
+    103.1870849,
+    1.2654,
+    103.5804182,
+    1.7670667
+   ],
+   "width": 472,
+   "height": 602,
+   "files": {
+    "10": {
+     "light": {
+      "file": "pontian_rp10_light.png",
+      "bytes": 3427,
+      "sha256": "2928e5ac9314618bf73edc7c83d970c6b141e451a2becd8d71e096c774d62f66"
+     },
+     "dark": {
+      "file": "pontian_rp10_dark.png",
+      "bytes": 3427,
+      "sha256": "c9306157097df91f6c105fb5dfcb3ed158a709413642a51c3d72688c24811eb4"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "pontian_rp20_light.png",
+      "bytes": 3662,
+      "sha256": "0f4ef2c8e0eb5f30c01ec317fed147c0bebb9ebff294138842403f6cfc260c81"
+     },
+     "dark": {
+      "file": "pontian_rp20_dark.png",
+      "bytes": 3662,
+      "sha256": "993c7bcc7759c22147eea748ff813733734d5fbb1e8baba50b4324134597400b"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "pontian_rp50_light.png",
+      "bytes": 3832,
+      "sha256": "b5644b237a10085dcd63c9d41a474a869f7cd67437eb7cca39dba686a90475ce"
+     },
+     "dark": {
+      "file": "pontian_rp50_dark.png",
+      "bytes": 3832,
+      "sha256": "d578e771bb3c489700a789ee93c228aa198ef707fd198ec554ed9766fab494de"
+     }
+    }
+   }
+  },
+  {
+   "id": "segamat",
+   "name": "Segamat",
+   "counts": {
+    "cells": 335527,
+    "wet_cells": {
+     "10": 23456,
+     "20": 25113,
+     "50": 26514
+    }
+   },
+   "bounds": [
+    102.6070849,
+    2.1654,
+    103.3787516,
+    2.8337333
+   ],
+   "width": 926,
+   "height": 802,
+   "files": {
+    "10": {
+     "light": {
+      "file": "segamat_rp10_light.png",
+      "bytes": 13478,
+      "sha256": "a1f392dfbe03ae3fc2079d619664637d0e4c7edec4aed34afd979731e5ab1d37"
+     },
+     "dark": {
+      "file": "segamat_rp10_dark.png",
+      "bytes": 13478,
+      "sha256": "242522bfa7eec283333fedcc551f3702120f1d75f140b432f35a8113e62ae6f8"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "segamat_rp20_light.png",
+      "bytes": 13819,
+      "sha256": "f7a2ad8f73c77d7f0efa757adc185c47e6b6e8ea1706b4eef725ad584e63e276"
+     },
+     "dark": {
+      "file": "segamat_rp20_dark.png",
+      "bytes": 13819,
+      "sha256": "df22cc1beb26e6b92b02cf78c1731e0d2099429aea2caaa0f2dbc2d84c939e65"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "segamat_rp50_light.png",
+      "bytes": 13840,
+      "sha256": "3e94754d3c6b7f59e71f487a6b851fdfb47d98c46434fcbef11d0bcc9cbb4e0c"
+     },
+     "dark": {
+      "file": "segamat_rp50_dark.png",
+      "bytes": 13840,
+      "sha256": "253a7e503bbe64435f3a823848bc5f483550584ddf535be73cfb1f57c7a7e83e"
+     }
+    }
+   }
+  },
+  {
+   "id": "tangkak",
+   "name": "Tangkak",
+   "counts": {
+    "cells": 114254,
+    "wet_cells": {
+     "10": 21793,
+     "20": 23781,
+     "50": 25931
+    }
+   },
+   "bounds": [
+    102.4670849,
+    2.0487333,
+    102.8312516,
+    2.4812333
+   ],
+   "width": 437,
+   "height": 519,
+   "files": {
+    "10": {
+     "light": {
+      "file": "tangkak_rp10_light.png",
+      "bytes": 9669,
+      "sha256": "162d8977831563df0a0dc0d6a00f698084a52d6fa7008a48cc184362e1033c7b"
+     },
+     "dark": {
+      "file": "tangkak_rp10_dark.png",
+      "bytes": 9669,
+      "sha256": "12c54bc431f0b959908718c34192c8fa32c639fd27adfe6740a32e71e5d274e3"
+     }
+    },
+    "20": {
+     "light": {
+      "file": "tangkak_rp20_light.png",
+      "bytes": 9960,
+      "sha256": "db51e7f33e1db923fe2820f7959cc70dee0fd1364eb9493670b9dc9c6c2f19c0"
+     },
+     "dark": {
+      "file": "tangkak_rp20_dark.png",
+      "bytes": 9960,
+      "sha256": "f4d42f4bdad5d4f7db7d10641b0d7d30eb92e7c46624ef2f88d9d274f5d00781"
+     }
+    },
+    "50": {
+     "light": {
+      "file": "tangkak_rp50_light.png",
+      "bytes": 10166,
+      "sha256": "ab168a0c887864693a9c365196623968e8612fb660ef074517eafd668880749f"
+     },
+     "dark": {
+      "file": "tangkak_rp50_dark.png",
+      "bytes": 10166,
+      "sha256": "55c6f1fd517e7e48960804a87f7814a7a09c5f3c00b3680ef8d0fede8a632714"
+     }
+    }
+   }
+  }
+ ]
+}

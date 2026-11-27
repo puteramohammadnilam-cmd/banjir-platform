@@ -130,7 +130,6 @@ export default Object.freeze({
 
   // ---------- bandar yang dibahagi kepada beberapa bahagian: scope.js, choropleth.js, section-table.js, overview.js, area-report.js ----------
   // {word} ialah perkataan kawasan itu sendiri bagi bahagiannya, daripada datanya (area.json section_word).
-  "scope.wholeCity": "Seluruh bandar",
   "scope.hintSections": "Pilih kawasan atau {word}, kemudian tekan Buka.",
   "scope.allOf": "Seluruh {city}",
   "city.mapLead": "Setiap {word} diwarnakan mengikut bahagian petak 90 m yang dinaiki air dalam model. Ketik untuk membukanya.",

@@ -103,7 +103,8 @@ def test_a_bigger_flood_that_wets_fewer_is_refused():
 
 def test_zoom_fits_the_section_and_stays_in_range():
     assert asec.section_zoom((101.515, 3.008, 101.55, 3.042)) == 15   # a section the size of the old Sri Muda view
-    assert asec.section_zoom((101.0, 3.0, 102.0, 4.0)) == asec.MIN_ZOOM
+    assert asec.section_zoom((101.0, 3.0, 102.0, 4.0)) == 10, "a state's district, about a degree across"
+    assert asec.section_zoom((95.0, 0.0, 105.0, 4.0)) == asec.MIN_ZOOM
     assert asec.section_zoom((101.0, 3.0, 101.0001, 3.0001)) == asec.MAX_ZOOM
 
 

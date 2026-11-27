@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import tiff_fixture as fx
-from app import ai, areas, costs, googlemaps, main, places, raster
+from app import ai, areas, costs, googlemaps, main, places, raster, sections
 
 ROOT = Path(__file__).resolve().parent.parent
 GRID = "N10_E100"
@@ -356,7 +356,7 @@ REAL_DIR = real_raster_dir()
 @pytest.mark.skipif(REAL_DIR is None, reason="no JRC depth files on this machine")
 def test_parity_each_premise_point_returns_its_depth(monkeypatch):
     monkeypatch.setenv("BANJIR_RASTER_DIR", str(REAL_DIR))
-    monkeypatch.setattr(main, "GEO_RATE_LIMIT", 10_000)
+    monkeypatch.setattr(main, "GEO_RATE_LIMIT", 100_000)
     main._hits.clear()
     client = TestClient(main.app)
     checked = 0
@@ -368,9 +368,12 @@ def test_parity_each_premise_point_returns_its_depth(monkeypatch):
             west, south, east, north = area.view
             lat, lon = data["place"]["lat"], data["place"]["lon"]
             inside = west <= lon <= east and south <= lat <= north
-            assert data["place"]["area_id"] == (area.id if inside else None), premise["id"]
+            # a smaller area's view can hold it too (the Kota Tinggi town centre in Johor's): that one has it
+            owner = sections.listed_area_at(lat, lon)[0]
+            assert data["place"]["area_id"] == (owner.id if owner else None), premise["id"]
+            assert owner in ((area, areas.get("kota-tinggi"), None) if inside else (None,)), premise["id"]
             checked += 1
-    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 2445 + 27 + 300 + 491 + 158
+    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 2445 + 7476 + 27 + 300 + 491 + 158
     example = post_point(client, 3.0297599, 101.5364982).json()["data"]["place"]   # the plan's checklist point
     assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["50"] == 1.76
 

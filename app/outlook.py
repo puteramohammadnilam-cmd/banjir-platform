@@ -173,7 +173,7 @@ def _at_word(text: str, at: int, word: str) -> bool:
 
 
 def covers(text: str, state: str, districts: Sequence[str]) -> bool:
-    """Whether a warning's text ("... over the states of Selangor (Petaling, Klang) • Johor until ...") names the state
+    """Whether a warning's text ("... over the states of Selangor (Petaling, Klang) • Pahang until ...") names the state
     on its own (the whole state), or with one of `districts` in the brackets right after it. A mention inside another
     state's brackets, such as "Hulu Selangor", does not count."""
     depth = 0

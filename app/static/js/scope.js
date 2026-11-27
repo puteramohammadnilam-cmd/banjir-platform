@@ -24,10 +24,11 @@ function picker({ id, label, options, current, onOpen }) {
   return { node, reset };
 }
 
-/** The section picker of a city: the whole city first (unless the city opens on a default section and has no whole-city
- *  page), then its sections in the data's order. onSection(id) opens one, onSection(null) the whole city. */
-function sectionPicker({ sections, sectionId, word, wholeCity, onSection }) {
-  const options = [...(wholeCity ? [["", t("scope.wholeCity")]] : []), ...sections.map((section) => [section.id, section.name])];
+/** The section picker of a city (or a state): the whole of it first, "All of {cityName}" (unless it opens on a default
+ *  section and has no whole page), then its sections in the data's order. onSection(id) opens one, onSection(null) the
+ *  whole. */
+function sectionPicker({ sections, sectionId, word, wholeCity, cityName, onSection }) {
+  const options = [...(wholeCity ? [["", t("scope.allOf", { city: cityName })]] : []), ...sections.map((section) => [section.id, section.name])];
   return picker({ id: "section-select", label: dataWord(word), options, current: sectionId ?? "", onOpen: (value) => onSection(value || null) });
 }
 
@@ -39,7 +40,7 @@ export function createScopeBar(slot, { areas, areaId, onArea, sections = [], sec
   const area = picker({
     id: "area-select", label: t("scope.area"), options: areas.map((entry) => [entry.id, entry.display_name]), current: areaId, onOpen: onArea,
   });
-  const section = sections.length ? sectionPicker({ sections, sectionId, word, wholeCity, onSection }) : null;
+  const section = sections.length ? sectionPicker({ sections, sectionId, word, wholeCity, cityName, onSection }) : null;
   // coming back to this page from the browser's back-forward cache must show what it holds, not what was picked on the way out
   window.addEventListener("pageshow", (event) => { if (event.persisted) { area.reset(); section?.reset(); } });
   const back = section && sectionId && cityHref ? h("a", { class: "scope-back", href: cityHref() }, t("scope.allOf", { city: cityName })) : null;

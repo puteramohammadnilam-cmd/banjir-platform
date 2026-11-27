@@ -1,6 +1,7 @@
 """Fetch a whole city's businesses and roads from OpenStreetMap once (plan Phase 2, workstream E, gate G-P2-1).
 
     .venv/bin/python tools/fetch_area_osm.py [--relation 8347577] [--sections GEOJSON] [--out DIR] [--date YYYY-MM-DD]
+        [--roads-near-m M]
 
 Run from 11_Platform_Draft. Two Overpass questions, a pause before each:
   businesses  shops, crafts, eateries and pharmacies (what tools/build_area.py keeps) inside the city's boundary
@@ -8,6 +9,9 @@ Run from 11_Platform_Draft. Two Overpass questions, a pause before each:
               relations, and the last-edited date build_area needs)
   roads       the roads a vehicle can use (build_area's VEHICLE_ROADS) in the box of the sections widened by
               --margin-m (500 m), so a business near the city edge still finds the road outside it, `out geom`
+With --roads-near-m (a state: its box holds far too many roads), roads are asked section by section instead: the
+vehicle roads within M metres of the section's own businesses (Overpass `around`), the answers merged; a business
+whose nearest road is farther than M from every business then gets the nearest road that was fetched.
 If the city-wide question times out (an Overpass "runtime error" remark, HTTP 504 after the retries, or no answer in
 time), the same question is asked section by section (each section's own area, or its own widened box for roads) and
 the answers are merged, each element once, in Overpass order (nodes, ways, relations; by id).
@@ -70,11 +74,20 @@ def area_id(relation: int) -> int:
     return AREA_OFFSET + relation
 
 
+def _businesses_in(relation: int) -> str:
+    return (f"area({area_id(relation)})->.a;("
+            f'nwr["shop"](area.a);nwr["craft"](area.a);nwr["amenity"~"^({AMENITIES})$"](area.a););')
+
+
 def pois_query(relation: int, timeout: int = QUERY_TIMEOUT_S) -> str:
     """The businesses build_area keeps, inside one boundary relation."""
-    return (f"[out:json][timeout:{timeout}];area({area_id(relation)})->.a;("
-            f'nwr["shop"](area.a);nwr["craft"](area.a);nwr["amenity"~"^({AMENITIES})$"](area.a););'
-            "out center meta;")
+    return f"[out:json][timeout:{timeout}];{_businesses_in(relation)}out center meta;"
+
+
+def near_roads_query(relation: int, metres: float, timeout: int = QUERY_TIMEOUT_S) -> str:
+    """The vehicle roads within `metres` of the businesses inside one boundary relation."""
+    return (f"[out:json][timeout:{timeout}];{_businesses_in(relation)}"
+            f'way(around:{metres:.0f})["highway"~"^({ROAD_KINDS})$"];out geom;')
 
 
 def roads_query(box: BBox, timeout: int = QUERY_TIMEOUT_S) -> str:
@@ -175,7 +188,8 @@ def sources_md(fetched_on: str, queries: dict, how: dict, answers: dict, files: 
                   "- Query (city-wide form):", "", f"      {queries[name]}", ""]
     return "\n".join(lines + [
         "Businesses are shops, crafts, eateries (restaurant, cafe, fast_food, food_court) and pharmacies, the ones",
-        "tools/build_area.py keeps. Roads are the vehicle roads it keeps, in the sections' box widened by 500 m.", "",
+        "tools/build_area.py keeps. Roads are the vehicle roads it keeps, in the sections' box widened by 500 m, or",
+        "(--roads-near-m) those near each section's businesses.", "",
         "shelters.json beside them is not from OpenStreetMap's own lists: tools/pps_shelters.py writes it from",
         "../pps/pps.csv (relief centres named in news reports, placed with OSM; see ../pps/SOURCES.md).", "",
         "## Attribution", "",
@@ -189,15 +203,20 @@ def sources_md(fetched_on: str, queries: dict, how: dict, answers: dict, files: 
 
 
 def fetch(out: Path, fetched_on: str, sections: Sequence[dict], relation: int = CITY_RELATION,
-          margin_m: float = ROAD_MARGIN_M, post: Post = overpass_post) -> dict:
-    """Ask for the businesses and roads, write pois.json, roads.json and SOURCES.md under `out`. Returns counts."""
+          margin_m: float = ROAD_MARGIN_M, post: Post = overpass_post, near_m: float | None = None) -> dict:
+    """Ask for the businesses and roads, write pois.json, roads.json and SOURCES.md under `out`. Returns counts.
+    With near_m, roads are asked section by section, near each section's businesses (see the module docstring)."""
     box = widen(union_box([s["bbox"] for s in sections]), margin_m)
     queries = {"pois": pois_query(relation), "roads": roads_query(box)}
     parts = {"pois": [pois_query(s["osm_id"]) for s in sections],
              "roads": [roads_query(widen(s["bbox"], margin_m)) for s in sections]}
     answers, how = {}, {}
-    for name in ("pois", "roads"):
-        answers[name], how[name] = ask(post, queries[name], parts[name])
+    answers["pois"], how["pois"] = ask(post, queries["pois"], parts["pois"])
+    if near_m:
+        queries["roads"] = near_roads_query(relation, near_m)
+        answers["roads"], how["roads"] = merge([checked(post(near_roads_query(s["osm_id"], near_m))) for s in sections]), "sections"
+    else:
+        answers["roads"], how["roads"] = ask(post, queries["roads"], parts["roads"])
     out.mkdir(parents=True, exist_ok=True)
     files = {name: (json.dumps(answer, ensure_ascii=False) + "\n").encode("utf-8") for name, answer in answers.items()}
     for name, data in files.items():
@@ -213,9 +232,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--margin-m", type=float, default=ROAD_MARGIN_M, help="metres the roads box is widened by")
     parser.add_argument("--date", default=date.today().isoformat())
+    parser.add_argument("--roads-near-m", type=float, help="ask for roads this near each section's businesses only")
     args = parser.parse_args(argv)
     sections = sections_io.load_sections(args.sections)
-    counts = fetch(args.out, args.date, sections, args.relation, args.margin_m)
+    counts = fetch(args.out, args.date, sections, args.relation, args.margin_m, near_m=args.roads_near_m)
     print(f"{counts['pois']} business elements ({counts['how']['pois']}), {counts['roads']} roads "
           f"({counts['how']['roads']}) -> {args.out}")
     return 0
