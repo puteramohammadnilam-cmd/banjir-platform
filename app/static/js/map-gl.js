@@ -15,9 +15,11 @@ import { createReferencePanel } from "./map-gl-reference.js";
 import { PLACE_TABS, SHEET_TABS, createPlaceSheet } from "./map-gl-sheet.js";
 import { applyStatic, lang, t } from "./i18n.js";
 import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
-import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
+import { STYLE_FILES, depthRamp, readMapLink, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
   squaresGeo, underRoads, wetShops, wetTotals, withMapView } from "./map-gl-data.js";
 import { glDrawer } from "./map-gl-eng.js";
+import { createMapLayers, metricPaint } from "./map-gl-layers.js";
+import { wireSearch } from "./map-gl-search.js";
 import { createPinMode } from "./map-gl-pin.js";
 import { rememberUi } from "./ui-choice.js";
 import { businessPlace, isWithinView, parseRef, writeUrl } from "./place.js";
@@ -36,12 +38,13 @@ const PHONE_PAD = { top: 80, bottom: 120, left: 20, right: 20 };
 const NO_PAD = { top: 0, bottom: 0, left: 0, right: 0 };
 const TILT = { pitch: 55, bearing: -18 };
 const PIN_COLOUR = "#e11d48";
+const SECTION_OPACITY = ["interpolate", ["linear"], ["zoom"], 12, 0.42, 16, 0.1];   // the river model's shading fades as you zoom in
 
 const st = {
   link: readMapLink(window.location.search, window.location.hash),
   area: null, sections: [], index: [], shelters: [], satellite: null, styles: {},
   shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
-  visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
+  visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null, layers: null, pictures: null,
   point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false, resume: null, cardTurn: 0,
   status: null, pages: new Map(), sheet: null, chat: null, areasList: null,
 };
@@ -107,7 +110,7 @@ function addOurLayers(map) {
   map.addSource("mg-shops", { type: "geojson", data: shopsData() });
   const before = underRoads(map.getStyle().layers);
   const fade = (from, to) => ["interpolate", ["linear"], ["zoom"], 12, from, 16, to];
-  map.addLayer({ id: "mg-section-fill", type: "fill", source: "mg-sections", paint: { "fill-color": sectionFill(st.rp), "fill-opacity": fade(0.42, 0.1) } }, before);
+  map.addLayer({ id: "mg-section-fill", type: "fill", source: "mg-sections", paint: { "fill-color": sectionFill(st.rp), "fill-opacity": SECTION_OPACITY } }, before);
   map.addLayer({ id: "mg-squares", type: "fill", source: "mg-squares", paint: { "fill-color": depthRamp(st.rp, isDark()), "fill-opacity": fade(0.85, 0.5) } }, before);
   map.addLayer({ id: "mg-section-line", type: "line", source: "mg-sections",
     paint: { "line-color": isDark() ? "#46d3ff" : "#1e40af", "line-opacity": 0.55, "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.6, 15, 1.6] } });
@@ -121,6 +124,8 @@ function addOurLayers(map) {
   if (st.tilt) addBuildings(map);
   showLayers(map);
   st.eng?.redraw(map);
+  st.pictures?.redraw(map);   // the flash flood and low ground pictures
+  paintSections(map);
 }
 
 /** A checked point's square outlined, and the squares that came with it where the area has none of its own. */
@@ -156,7 +161,17 @@ function paintFloodSize(map) {
   map.setPaintProperty("mg-squares", "fill-color", depthRamp(st.rp, isDark()));
   map.setPaintProperty("mg-point-squares", "fill-color", depthRamp(st.rp, isDark()));
   map.setPaintProperty("mg-shops", "circle-color", shopColour(st.rp));
-  map.setPaintProperty("mg-section-fill", "fill-color", sectionFill(st.rp));
+  paintSections(map);
+}
+
+/** The sections' shading: the river model's share of wet squares at the flood size on show, or what the layers card
+ *  chose instead (map-gl-layers.js: flash flood potential, or our score). */
+function paintSections(map = st.map) {
+  if (!map?.getLayer("mg-section-fill")) return;
+  const metric = st.layers?.metric() ?? "depth";
+  const paint = metric === "depth" ? { color: sectionFill(st.rp), opacity: SECTION_OPACITY } : metricPaint(st.sections, metric);
+  map.setPaintProperty("mg-section-fill", "fill-color", paint.color);
+  map.setPaintProperty("mg-section-fill", "fill-opacity", paint.opacity);
 }
 
 const markPicked = (id) => st.map?.getLayer("mg-picked") && st.map.setFilter("mg-picked", ["==", ["get", "id"], id ?? ""]);
@@ -504,6 +519,8 @@ function wireSheet() {
         sectionHref: (id) => `map.html${mapQuery({ section: id, place: null, tab: null })}`,
         areaHref: (id) => `map.html${withMapView(writeUrl({ area: id, tab: "overview", lang: langParam() }), st.base, st.tilt)}`,
         pickRp: pickFloodSize,
+        // a business from the list: its section loads first (the index knows it), the sheet steps aside for its card
+        openShop: (id) => { st.sheet.close(); openShop(st.index.find((entry) => entry.id === id) ?? { id, section: st.shops.get(id)?.section }); },
         redraw: () => st.sheet.refresh(),
       } }),
       reference: createReferencePanel({ panel: $("panel-reference"), scope: areaScope }),
@@ -549,10 +566,13 @@ function pickFloodSize(rp) {
 }
 
 function drawLayers() {
+  st.pictures ??= glDrawer({ getMap: () => st.map, hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), prefix: "mg-layer",
+    beforeId: (map, key) => (key === "low" && map.getLayer("mg-layer-flash") ? "mg-layer-flash" : "mg-section-fill") });   // low ground under flash
+  st.layers ??= createMapLayers({ area: st.area, sections: st.sections, drawer: st.pictures, onMetric: () => paintSections() });
   $("mg-layers").replaceChildren(...layersCard(st.visible, (key, on) => {
     st.visible[key] = on;
     showLayers(st.map);
-  }));
+  }), ...st.layers.nodes);
 }
 
 /** Another base map: the style is fetched first, and a later pick wins; on a failure the old map and its look stay. */
@@ -600,27 +620,6 @@ function drawBar() {
   drawLinks();
 }
 
-function wireSearch() {
-  const box = $("mg-results");
-  const input = $("mg-q");
-  const close = () => { box.hidden = true; };
-  const pick = (entry) => () => { close(); input.value = entry.name; openShop(entry); };
-  input.addEventListener("input", () => {
-    const hits = searchIndex(st.index, input.value);
-    box.replaceChildren(...(hits.length
-      ? hits.map((entry) => h("button", { type: "button", onclick: pick(entry) }, entry.name, h("small", {}, sectionName(entry.section))))
-      : [h("p", { class: "mg-muted mg-small" }, t("mg.noMatch"))]));
-    box.hidden = input.value.trim().length < 2;
-  });
-  input.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || box.hidden) return;
-    event.stopPropagation();   // the first Escape closes the list, not the place card
-    close();
-  });
-  input.closest(".mg-search").addEventListener("focusout", (event) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) close();
-  });
-}
 
 function addShelters(map) {
   st.markers = st.shelters.map((shelter) => {
@@ -753,7 +752,9 @@ async function start() {
   const style = await load();
   if (!style) return undefined;
   applyTheme();
-  drawBar(); drawSummary(); drawLayers(); wireSearch();
+  drawBar(); drawSummary(); drawLayers();
+  wireSearch({ input: $("mg-q"), box: $("mg-results"), area: st.area, sections: st.sections, index: st.index, sectionName,
+    onShop: openShop, onSection: (id) => { st.sheet?.close(); openSection(id); } });
   try {
     st.map = openMap(style);
   } catch {

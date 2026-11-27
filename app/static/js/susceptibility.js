@@ -37,6 +37,12 @@ export const scoreClass = (value) => (isNumber(value) ? SCORE_BREAKS.filter((edg
 /** Our score shows only once the data says so: the user reviews its comparison with past floods first. */
 export const showsScore = (method) => method?.show_score === true;
 
+/** What the whole city's sections can be shaded by: the river model, flash flood potential and our score, where the
+ *  sections have them (and the area's `method` allows the score). */
+export const indexMetrics = (sections, method) => ["depth",
+  ...(sections.some((section) => highShare(section) !== null) ? ["flash"] : []),
+  ...(showsScore(method) && sections.some((section) => scoreOf(section) !== null) ? ["score"] : [])];
+
 /** A note from the data: text, or {en, ms}. */
 export const textOf = (note) => (typeof note === "string" ? note : dataWord(note));
 

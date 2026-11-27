@@ -114,7 +114,12 @@ test("what engineer mode drew comes back after a base map change", () => {
   assert.equal(added.length, 0);
   drawer.redraw(map);
   assert.deepEqual(added.slice(0, 2), [["source", "mg-eng-pools", "image"], ["layer", "mg-eng-pools", "road"]]);
-  assert.ok(added.some(([kind, id]) => kind === "layer" && id === "mg-eng-marks-line"));
+  assert.ok(!added.some(([, id]) => id === "mg-eng-marks-line"), "no marks drawn, none brought back");
+  const named = [];
+  const other = glDrawer({ getMap: () => ({ ...map, addLayer: (layer, before) => named.push([layer.id, before]) }), beforeId: (_map, key) => `under-${key}`,
+    hasOurLayers: () => true, prefix: "mg-layer" });
+  other.picture("low", "/low.png", LAYER.bounds, 0.65);
+  assert.deepEqual(named, [["mg-layer-low", "under-low"]], "its own prefix, and where each picture goes by its key");
 });
 
 test("engineer mode draws its rain pools through the map's drawer, and a tool takes the clicks", () => {

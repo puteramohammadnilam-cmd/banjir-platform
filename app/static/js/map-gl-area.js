@@ -1,12 +1,14 @@
 // The Area overview's cards on the new map (map.html), in its sheet: the old interface's figures (kpis.js), relief
 // centres open now (evacuation.js), the tide (tide.js), the next 5 days (outlook.js), the flood record (history.js),
-// the table of a city's sections (section-table.js) and the printable area summary (area-report.js), the same code.
+// the table of a city's sections (section-table.js), the printable area summary (area-report.js) and the list of every
+// business with a filter (directory.js), the same code.
 // They are about the section on show, or the whole area, at the flood size its own picker shows. What comes from
 // outside is asked for only while the panel is on show, once for the visit: the rain and JKM's open centres per area
 // or section, the tide per area, and the next 5 days (Google Weather has a free monthly cap) per area or section only
 // once its card comes into view, as on the old page.
 import * as api from "./api.js";
 import { buildAreaReport } from "./area-report.js";
+import { createCityDirectory, createDirectory } from "./directory.js";
 import { h, renderPicker } from "./dom.js";
 import { createEvacuation } from "./evacuation.js";
 import { renderHistory } from "./history.js";
@@ -25,7 +27,8 @@ const settled = (promise, shape) => promise.then(shape, () => ({ error: true }))
  *  or the section's page area), premises (with their depths), sections and word (a city's; else [] and null)}.
  *  `status` is GET /api/status's answer and areas() resolves the listed areas, for the chooser. `on`: section(id) opens
  *  a section on the map, wholeArea() goes back from a section to the whole area, sectionHref(id) and areaHref(id) are
- *  the links for them, pickRp(rp) picks a flood size, and redraw() draws the panel again when an answer comes. */
+ *  the links for them, pickRp(rp) picks a flood size, openShop(id) opens a business from the list, and redraw() draws
+ *  the panel again when an answer comes. */
 export function createAreaPanel({ panel, scope, status, areas, on }) {
   const title = h("h1", { class: "view-title" });
   const back = h("p", { class: "small" });
@@ -45,8 +48,9 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
     h("h2", { id: "area-print-heading", class: "small-heading" }, t("overview.printHeading")),
     h("p", { class: "muted small" }, t("overview.printLead")),
     h("button", { type: "button", class: "btn btn-secondary", onclick: () => printSummary() }, t("overview.printButton")));
+  const list = h("section", { class: "surface directory", "aria-labelledby": "directory-heading" });
   panel.replaceChildren(h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("tab.overview")), title, back, chooser, picker),
-    kpiBox, h("div", { class: "overview-live" }, evac, tide, outlook, history), table, print);
+    kpiBox, h("div", { class: "overview-live" }, evac, tide, outlook, history), table, list, print);
   const cards = { evacuation: createEvacuation(evac), tide: createTide(tide), outlook: createOutlook(outlook) };
   const answers = new Map();   // by area or section: {rain, evacuation, outlook, outlookAsked}
   const tides = new Map();     // by area: /api/tide has no section
@@ -119,6 +123,22 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
     shown.sections = isCity ? createSectionTable(tableSlot, { sections: now.sections, word: now.word, hrefOf: on.sectionHref,
       showScore: showsScore(now.page.index_method) }) : null;
     if (isCity) tableHeading.textContent = t("sections.heading", { word: dataWord(now.word, { lower: true }) });
+    drawList(now, isCity);
+  }
+
+  /** Every business of the section or the area, with the old page's filter; a whole city's list waits for a filter
+   *  (it has thousands), as on the old page. Made again, with a new filter box, for each area or section. */
+  function drawList(now, isCity) {
+    const filter = h("input", { class: "field", type: "search", autocomplete: "off", placeholder: t("overview.filterPlaceholder"),
+      "aria-label": t("overview.filterLabel") });
+    const parts = { list: h("ol", { id: "directory" }), filter, status: h("p", { class: "directory-status", role: "status" }),
+      next: h("div", { class: "directory-next", hidden: true }),
+      head: h("div", { class: "directory-head", "aria-hidden": "true" }, ...["colBusiness", "col10", "col20", "col50"].map((key) => h("span", {}, t(`overview.${key}`)))) };
+    list.replaceChildren(h("div", { class: "surface-head" }, h("h2", { id: "directory-heading" }, t("overview.directoryHeading", { area: now.page.name })), filter),
+      parts.status, parts.next, parts.head, parts.list);
+    const ways = { area: now.page, onOpen: on.openShop };
+    if (isCity) createCityDirectory(parts, now.premises, { ...ways, sections: now.sections });
+    else createDirectory(parts, now.premises, ways);
   }
 
   function drawChooser(list) {

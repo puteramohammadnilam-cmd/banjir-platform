@@ -4,8 +4,6 @@
 // (redraw). The same panel and words as the main page's engineer mode.
 
 const MARK = "#f59e0b";
-const MARKS = "mg-eng-marks";
-const layerId = (key) => `mg-eng-${key}`;
 
 /** An image source's four corners, clockwise from the top left, for bounds [west, south, east, north]. */
 export const imageCorners = ([west, south, east, north]) => [[west, north], [east, north], [east, south], [west, south]];
@@ -18,31 +16,34 @@ export function marksGeo(points) {
   return { type: "FeatureCollection", features: [...line, ...dots] };
 }
 
-function addImage(map, key, { url, bounds, opacity }, beforeId) {
-  map.addSource(layerId(key), { type: "image", url, coordinates: imageCorners(bounds) });
-  map.addLayer({ id: layerId(key), type: "raster", source: layerId(key),
+function addImage(map, id, { url, bounds, opacity }, beforeId) {
+  map.addSource(id, { type: "image", url, coordinates: imageCorners(bounds) });
+  map.addLayer({ id, type: "raster", source: id,
     paint: { "raster-opacity": opacity, "raster-fade-duration": 0, "raster-resampling": "nearest" } }, beforeId);
 }
 
-function removeImage(map, key) {
-  if (map.getLayer(layerId(key))) map.removeLayer(layerId(key));
-  if (map.getSource(layerId(key))) map.removeSource(layerId(key));
+function removeImage(map, id) {
+  if (map.getLayer(id)) map.removeLayer(id);
+  if (map.getSource(id)) map.removeSource(id);
 }
 
-function drawMarks(map, points) {
-  if (map.getSource(MARKS)) return map.getSource(MARKS).setData(marksGeo(points));
-  map.addSource(MARKS, { type: "geojson", data: marksGeo(points) });
-  map.addLayer({ id: `${MARKS}-line`, type: "line", source: MARKS, filter: ["==", ["geometry-type"], "LineString"],
+function drawMarks(map, id, points) {
+  if (map.getSource(id)) return map.getSource(id).setData(marksGeo(points));
+  map.addSource(id, { type: "geojson", data: marksGeo(points) });
+  map.addLayer({ id: `${id}-line`, type: "line", source: id, filter: ["==", ["geometry-type"], "LineString"],
     paint: { "line-color": MARK, "line-width": 3 } });
-  return map.addLayer({ id: `${MARKS}-dot`, type: "circle", source: MARKS, filter: ["==", ["geometry-type"], "Point"],
+  return map.addLayer({ id: `${id}-dot`, type: "circle", source: id, filter: ["==", ["geometry-type"], "Point"],
     paint: { "circle-radius": 5, "circle-color": "#fff", "circle-stroke-color": MARK, "circle-stroke-width": 2.5 } });
 }
 
-/** The drawer. getMap() gives the map once it is up; beforeId(map) the layer the pictures go under; hasOurLayers(map)
+/** The drawer, its layers named `${prefix}-${key}` (the map's extra layers use one with its own prefix: map-gl-layers.js).
+ *  getMap() gives the map once it is up; beforeId(map, key) the layer a picture goes under; hasOurLayers(map)
  *  whether the page's own layers are on the map's style yet (not while another base map loads: redraw() then adds it
  *  all); isAiming() whether the pin has the map's clicks; onToolChange() is told when a tool is picked or put down.
  *  click(lngLat) hands a click to the tool that is on, and says whether one took it. */
-export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => false, onToolChange = () => {} }) {
+export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => false, onToolChange = () => {}, prefix = "mg-eng" }) {
+  const layerId = (key) => `${prefix}-${key}`;
+  const marksId = layerId("marks");
   const shown = {};   // by key: {url, bounds, opacity}
   let points = [];
   let tool = null;
@@ -57,19 +58,19 @@ export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => fals
       shown[key] = { url, bounds, opacity };
       const map = ready();
       if (!map) return;
-      removeImage(map, key);
-      addImage(map, key, shown[key], beforeId(map));
+      removeImage(map, layerId(key));
+      addImage(map, layerId(key), shown[key], beforeId(map, key));
     },
     drop(key) {
       if (key === "marks") return this.marks([]);   // the panel clears its points by this name too
       delete shown[key];
       const map = ready();
-      return map && removeImage(map, key);
+      return map && removeImage(map, layerId(key));
     },
     marks(next) {
       points = next;
       const map = ready();
-      if (map) drawMarks(map, points);
+      if (map) drawMarks(map, marksId, points);
     },
     setTool(isOn, onClick) {
       tool = isOn ? onClick : null;
@@ -83,8 +84,8 @@ export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => fals
     },
     /** After a base map change: the pictures and the marks again, over the new map's layers. */
     redraw(map) {
-      Object.entries(shown).forEach(([key, picture]) => addImage(map, key, picture, beforeId(map)));
-      drawMarks(map, points);
+      Object.entries(shown).forEach(([key, picture]) => addImage(map, layerId(key), picture, beforeId(map, key)));
+      if (points.length) drawMarks(map, marksId, points);   // none drawn: nothing to bring back
     },
   };
 }

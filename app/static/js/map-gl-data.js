@@ -139,3 +139,15 @@ export function wetTotals(sections, rp) {
   return sections.reduce((sum, s) => ({ wet: sum.wet + (s.counts.wet_businesses[rp] ?? 0), all: sum.all + s.counts.businesses }),
     { wet: 0, all: 0 });
 }
+
+/** Up to `limit` sections a search could mean, from pick.js sectionFinder's {entries, synonyms}: a section's other name
+ *  or the area's word for a section typed in full first, then names holding the words typed; each section once. */
+export function searchSections(finder, words, limit = 3) {
+  const wanted = words.trim().toLowerCase();
+  if (!finder || wanted.length < 2) return [];
+  const exact = finder.synonyms.get(wanted);
+  const hits = finder.entries.filter(([text]) => text.toLowerCase().includes(wanted)).map(([text, { section }]) => ({ text, section }));
+  const seen = new Set();
+  return [...(exact ? [{ text: null, section: exact.section }] : []), ...hits]
+    .filter((hit) => !seen.has(hit.section) && seen.add(hit.section)).slice(0, limit);
+}
