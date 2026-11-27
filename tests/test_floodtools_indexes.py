@@ -188,12 +188,12 @@ def test_the_chat_prompt_says_susceptibility_not_a_depth_and_not_in_the_river_mo
 
 
 def test_a_districts_summary_lists_only_relief_centres_within_reach():
-    johor = areas.get("johor")   # its only listed centres are two schools in Kota Tinggi town
+    johor = areas.get("johor")   # its listed centres are a few schools from news reports, none near Segamat
     token = floodtools.start_question(area=johor)
     try:
-        far, near, whole = (floodtools.area_summary(name) for name in ("Johor Bahru", "Kota Tinggi", ""))
+        far, near, whole = (floodtools.area_summary(name) for name in ("Segamat", "Kota Tinggi", ""))
     finally:
         floodtools.end_question(token)
-    assert far["shelters"] == floodtools.no_shelters(johor), "about 33 km from its town: none named"
-    assert near["shelters"] == ["SJK(C) New Kota", "SK Laksamana"]
-    assert whole["shelters"] == near["shelters"], "the whole state lists what it has, its notes say where"
+    assert far["shelters"] == floodtools.no_shelters(johor), "over 60 km from its town: none named"
+    assert near["shelters"] == ["SJK(C) New Kota", "SK Laksamana"], "Kota Tinggi's own, not Johor Bahru's 30 km away"
+    assert len(whole["shelters"]) == 10, "the whole state lists what it has, its notes say where"

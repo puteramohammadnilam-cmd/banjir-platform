@@ -422,7 +422,7 @@ def test_loading_places_does_not_load_google_maps_at_all():
 
 
 def test_a_relief_centre_farther_than_the_reach_is_not_offered():
-    johor = areas.get("johor")   # its only listed centres are in Kota Tinggi town
+    johor = areas.get("johor")   # its listed centres are a few schools from news reports, none near Segamat
     near = places.nearest_shelter(johor, 1.75, 103.9)
     assert near["name"] in {"SJK(C) New Kota", "SK Laksamana"} and near["distance_m"] < places.SHELTER_REACH_M
-    assert places.nearest_shelter(johor, 1.46, 103.76) is None, "Johor Bahru, about 35 km away: none"
+    assert places.nearest_shelter(johor, 2.51, 102.81) is None, "Segamat town, over 60 km from any: none"

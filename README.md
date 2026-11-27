@@ -60,13 +60,13 @@ Five areas are built in:
 | Kuantan town centre, Pahang | 300 | 191 | 1,085 | 5 (2012 to 2021) |
 | Kota Bharu town centre, Kelantan | 491 | 100 | 618 | 3 (2014 to 2025) |
 | Kuala Terengganu town centre, Terengganu | 158 | 85 | 588 | 5 (1999 to 2025) |
-| Johor (whole state): 10 districts, the Kota Tinggi town centre in the Kota Tinggi district | 7,503 | 286 | none stored: one depth picture per district | none collected; 2 relief centres in Kota Tinggi town |
+| Johor (whole state): 10 districts, the Kota Tinggi town centre in the Kota Tinggi district | 7,503 | 286 | none stored: one depth picture per district | 15 (2006 to 2026); 10 relief centres |
 
 Kuantan, Kota Bharu and Kuala Terengganu were picked on 3 Oct 2026 from a screen of eleven river towns (OpenStreetMap
 business count and the share wet in the model) and built with `tools/build_area.py`. In all three the model gives
 5 to 10 m at some businesses, where news reports of real floods give about 0.1 to 2 m; each area's notes say so on
-the page and to the AI. Johor's only listed relief centres are Kota Tinggi town's two; a business more than 15 km from
-a listed centre is shown none.
+the page and to the AI. Johor lists 10 relief centres named in news reports (Johor publishes no list of its 777); a business more than 15 km
+from a listed centre is shown none.
 
 The page opens on the default area (for Shah Alam, the city view); `?area=kuantan` (or another id) opens another, `?section=seksyen-25` one section of the city, and the old `?area=sri-muda` is an alias of Seksyen 25 (`?area=kota-tinggi`, the old town centre area, of Johor's Kota Tinggi district). A new area needs its own folder; the server checks every `area.json` when it starts, so a typo stops it at once.
 
@@ -184,7 +184,7 @@ These are the claims this app makes about your location, and what backs each one
 - Depths are river floods on land, from a global model at 90 m. The model does not show flash floods, blocked drains or the sea. "No water in the model" is not a promise that a place stays dry. It can be a hill, the sea, or a place the model does not flood.
 - Points anywhere in Malaysia have depths. Langkawi has no flood water in the model. See "Flood depth rasters".
 - Only the built areas have mapped businesses. The counts are "businesses mapped on OpenStreetMap", not all businesses. Nobody has checked them on the ground. Banks, clinics and fuel stations are left out.
-- Relief centres: Kota Tinggi's two and Shah Alam's six were named in news reports and located on OpenStreetMap. They are not an official list.
+- Relief centres: Shah Alam's six and Johor's ten were named in news reports and located on OpenStreetMap. They are not an official list.
 - Floods more frequent than 1 in 10 years, and bigger than 1 in 50 years, are not in the data. The JRC set has bigger ones (1 in 75 years and up); the app shows 1 in 10, 20 and 50 only, and says bigger floods are not shown.
 - Past floods: Shah Alam's record (`app/data/areas/shah-alam/history.json`, built by `tools/build_history.py`) covers the city and each section; Kuantan, Kota Bharu and Kuala Terengganu keep a short record in their `area.json`. No record is not proof of no flood.
 
@@ -352,7 +352,7 @@ Only sources with clear terms, so the repo can be public.
 - Flood depth: European Commission JRC global river flood hazard maps v2.1 (Baugh and others, 2024), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1. The nine files in `app/data/rasters/` are used unchanged. Our changes in `app/data/areas/`: depths read at each business and its nearest road (`premises.json`) and for the 90 m squares of each area (`town.json`), rounded to the centimetre.
 - Flash flood potential (`app/data/indexes/`, `app/data/areas/*/indexes.json`): method from Smith (2003) as used by Yassin and others (2023), Planning Malaysia 21(2), cited for the method only; the section score uses the criteria weights of Leeonis and others (2024), cited the same way. Inputs: ESA WorldCover 2021 v200, CC BY 4.0, "ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium"; the NDVI of the ESA WorldCover Sentinel-1 and Sentinel-2 10m Annual Composites accessed on 4 October 2026 from https://registry.opendata.aws/esa-worldcover-vito-composites, CC BY 4.0; ISRIC SoilGrids 2.0 (Poggio and others 2021, SOIL 7:217-240, doi:10.5194/soil-7-217-2021), CC BY 4.0; WorldPop 2020 constrained 100 m (doi:10.5258/SOTON/WP00660), CC BY 4.0; OpenStreetMap drains, ODbL; and the Copernicus GLO-30 elevation of `app/data/dem`. `app/data/indexes/SOURCES.txt` lists each input with its date, size and SHA-256. Our changes: ratings, smoothing and averaging into the 1 arc-second grid and per section.
 - Businesses, roads, base map: OpenStreetMap contributors, ODbL (https://opendatacommons.org/licenses/odbl/1-0/). Every `app/data/areas/*/premises.json` is built from OpenStreetMap data, so those files are under the Open Database License 1.0. © OpenStreetMap contributors.
-- Kota Tinggi's relief centres were named in news reports and located on OpenStreetMap. They are not an official list.
+- Johor's relief centres were named in news reports and located on OpenStreetMap. They are not an official list.
 - Past floods in Shah Alam: news, official and research reports and the public 2021 and 2022 ArcGIS flood points (credited on the page), paraphrased with their sources in `app/data/areas/shah-alam/history.json` and on the page.
 - Damage share by water depth: Huizinga, de Moel and Szewczyk (2017), Global flood depth-damage functions, European Commission JRC, Table 3-6. Nine published numbers, typed into `app/costs.py`.
 - Consumer price index for Malaysia: World Bank, CC BY 4.0. It gives one factor, 1.65, in `app/costs.py`.

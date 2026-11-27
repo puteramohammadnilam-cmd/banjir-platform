@@ -77,7 +77,8 @@ def test_the_kota_tinggi_town_area_is_now_johors_kota_tinggi_district():
     for town_shop in ("node-11075038761", "node-4141089890", "node-4141089989"):   # three of the town's 27
         premise, holder = areas.business(town_shop)
         assert holder.id == OTHER and premise["section"] == "kota-tinggi"
-    assert areas.counts(area) == {"businesses": 7503, "squares": 0, "shelters": 2}
+    assert areas.counts(area) == {"businesses": 7503, "squares": 0, "shelters": 10}
+    assert {"SJK(C) New Kota", "SK Laksamana"} <= {s["name"] for s in areas.town(OTHER)["shelters"]}, "the town's two came along"
     assert area.history is None and area.council is None
     assert "not an official list" in area.notes["shelters"] and "15 km" in area.notes["shelters"]
 
@@ -252,7 +253,7 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     assert len(listed) == 5 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
     state = listed[OTHER]
     assert (state["counts"], state["has_history"], state["has_shelters"], state["has_sections"]) == (
-        {"businesses": 7503, "squares": 0, "shelters": 2}, True, True, True), "a state stores no squares: pictures instead"
+        {"businesses": 7503, "squares": 0, "shelters": 10}, True, True, True), "a state stores no squares: pictures instead"
     assert [alias["id"] for alias in state["aliases"]] == ["kota-tinggi"], "the old town area's id"
 
 
