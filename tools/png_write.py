@@ -25,6 +25,8 @@ def chunk(kind: bytes, data: bytes) -> bytes:
 
 def pack_row(indices: Sequence[int], depth: int) -> bytes:
     """One row's indices packed `depth` bits each, most significant first, the last byte padded with zeros."""
+    if depth == 8:
+        return bytes(indices)   # one byte each: the loop below gives the same bytes, far slower on big pictures
     per_byte = 8 // depth
     out = bytearray()
     for start in range(0, len(indices), per_byte):

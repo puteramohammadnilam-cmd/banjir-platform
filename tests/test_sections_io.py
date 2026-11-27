@@ -130,3 +130,37 @@ def test_the_real_bboxes_hold_their_own_outlines_and_sit_in_shah_alam():
         west, south, east, north = s["bbox"]
         assert 101.3 < west < east < 101.7 and 2.9 < south < north < 3.25
         assert s["bbox"] == geo.bbox(s["geometry"])
+
+
+# ---------- a named set (a state's districts): every feature carries its own id
+
+def named(sid, name, west=0.0):
+    ring = [[west, 0], [west + 0.1, 0], [west + 0.1, 0.1], [west, 0.1], [west, 0]]
+    return {"type": "Feature", "properties": {"id": sid, "name": name, "osm_id": 7},
+            "geometry": {"type": "Polygon", "coordinates": [ring]}}
+
+
+def test_a_named_set_keeps_its_ids_names_and_file_order_and_any_count(tmp_path):
+    path = write(tmp_path, [named("muar", "Muar", west=2), named("kota-tinggi", "Kota Tinggi"), named("batu-pahat", "Batu Pahat", west=1)])
+    sections = sections_io.load_sections(path)
+    assert [s["id"] for s in sections] == ["muar", "kota-tinggi", "batu-pahat"], "the file's order, not sorted"
+    assert sections[1]["name"] == "Kota Tinggi" and sections[1]["number_label"] is None
+    assert set(sections[0]) == {"id", "name", "number_label", "osm_id", "geometry", "bbox", "area_km2"}
+    assert sections[0]["bbox"] == (2.0, 0.0, 2.1, 0.1)
+    with pytest.raises(sections_io.SectionsError, match="Expected 2"):
+        sections_io.load_sections(path, expected=2)
+
+
+@pytest.mark.parametrize("sid", ["Kota Tinggi", "kota_tinggi", "-muar", "muar-", "kota--tinggi", "../x"])
+def test_a_named_id_that_cannot_go_in_an_address_is_refused(tmp_path, sid):
+    with pytest.raises(sections_io.SectionsError, match="lower case"):
+        sections_io.load_sections(write(tmp_path, [named(sid, "X")]))
+
+
+def test_a_named_set_needs_names_one_kind_of_feature_and_ids_once(tmp_path):
+    with pytest.raises(sections_io.SectionsError, match="no name"):
+        sections_io.load_sections(write(tmp_path, [named("muar", "  ")]))
+    with pytest.raises(sections_io.SectionsError, match="one kind"):
+        sections_io.load_sections(write(tmp_path, [named("muar", "Muar"), feature("1")]))
+    with pytest.raises(sections_io.SectionsError, match="repeat"):
+        sections_io.load_sections(write(tmp_path, [named("muar", "Muar"), named("muar", "Muar 2", west=1)]))

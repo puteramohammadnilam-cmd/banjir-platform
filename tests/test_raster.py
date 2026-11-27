@@ -697,3 +697,21 @@ def test_ten_thousand_warm_reads_take_under_a_second(request, folder):
     elapsed = time.perf_counter() - start
     print(f"\n10,000 warm reads ({source}, 3 return periods each): {elapsed:.3f} s")
     assert elapsed < 1.0
+
+
+# --- whole rows, for tools that walk districts ---
+
+def test_row_runs_give_the_stored_values_value_at_reads_and_skip_empty_tiles(rp10):
+    for row in (0, 5, fx.TILE - 1, fx.TILE, fx.ROWS - 1):
+        runs = rp10.row_runs(row, -3, fx.COLS + 5)   # cut to the grid: no padding, no wrap
+        read = {first + k: value for first, values in runs for k, value in enumerate(values)}
+        for col in range(fx.COLS):
+            stored = rp10.value_at(row, col, lambda v: v)
+            if stored is None:
+                assert col not in read, "a square in a tile not stored gives no run"
+            else:
+                assert read[col] == stored or (math.isnan(read[col]) and math.isnan(stored))
+        assert all(first + len(values) <= fx.COLS for first, values in runs)
+    assert rp10.row_runs(fx.ROWS, 0, fx.COLS) == [] and rp10.row_runs(-1, 0, fx.COLS) == []
+    assert rp10.row_runs(3, 10, 10) == [] and rp10.row_runs(3, 12, 11) == []
+    assert [first for first, _ in rp10.row_runs(3, 10, 20)] == [10, fx.TILE], "one run per tile, each from its first square"

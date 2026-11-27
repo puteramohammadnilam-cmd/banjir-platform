@@ -11,7 +11,9 @@ to U20), sections.json holds:
   counts: businesses, cells (every 90 m square of the depth grid whose centre is in the section, wet or dry: the
   denominator of the wet share), wet_businesses and wet_cells {"10", "20", "50"} (water at that flood size).
 A square belongs to the first section, in natural order, that holds its centre (an edge counts as inside); squares
-outside every section are left out of the section and city counts and only reported. Businesses take the section
+outside every section are left out of the section and city counts and only reported. An area whose town.json holds no
+squares (a whole state, too big to store them: cells []) is counted from the depth files by tools/outline_squares.py,
+which gives the same counts (a test checks) and leaves outside_sections null. Businesses take the section
 build_area gave them. "city" holds the same counts summed over the sections.
 
 The build stops, naming the problem, if a business has no known section, if the sections' business counts do not add
@@ -30,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from app import geo, raster  # noqa: E402
+import outline_squares  # noqa: E402
 import sections_io  # noqa: E402
 
 RPS = tuple(str(rp) for rp in raster.RETURN_PERIODS)
@@ -116,9 +119,17 @@ def check(result: dict, premises: list[dict]) -> None:
                 raise ValueError(f"{name}: a bigger flood wets fewer {key.split('_')[1]}: {values}")
 
 
+def scanned_counts(sections: list[dict], depth_set: raster.DepthSet) -> dict:
+    """{section id: counts with cells and wet_cells filled}, read from the depth files row by row."""
+    return {item["id"]: {**_zero(), **item["counts"]} for item in outline_squares.scan(depth_set, sections, pictures=False)}
+
+
 def build(premises: list[dict], town: dict, sections: list[dict], depth_set: raster.DepthSet) -> dict:
     """The sections.json content (see the module docstring)."""
-    found, outside = square_counts(town, sections, depth_set)
+    if town["cells"]:
+        found, outside = square_counts(town, sections, depth_set)
+    else:
+        found, outside = scanned_counts(sections, depth_set), None
     add_businesses(found, premises)
     rows = [{"id": s["id"], "name": s["name"], "number_label": s["number_label"],
              "bbox": [round(v, 6) for v in s["bbox"]], "zoom": section_zoom(s["bbox"]), "area_km2": s["area_km2"],
@@ -142,9 +153,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     (args.area_dir / "sections.json").write_text(json.dumps(result, separators=(",", ":"), ensure_ascii=False),
                                                  encoding="utf-8")
     city, outside = result["city"], result["outside_sections"]
+    beyond = f"{outside['cells']} squares, {outside['wet_cells']} wet" if outside else "not counted (no squares stored)"
     print(f"{len(result['sections'])} sections: {city['businesses']} businesses, {city['cells']} squares, wet "
-          f"businesses {city['wet_businesses']}, wet squares {city['wet_cells']}; outside every section "
-          f"{outside['cells']} squares, {outside['wet_cells']} wet")
+          f"businesses {city['wet_businesses']}, wet squares {city['wet_cells']}; outside every section {beyond}")
     return 0
 
 

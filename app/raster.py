@@ -348,11 +348,29 @@ class DepthFile:
         index = (row // self.tile) * self.across + col // self.tile
         if not self.counts[index]:
             return None
+        return convert(self._tile(index)[(row % self.tile) * self.tile + col % self.tile])
+
+    def row_runs(self, row: int, start: int, stop: int) -> list[tuple[int, array]]:
+        """The stored values of one row's squares from column `start` up to `stop` (cut to the grid), as (first column,
+        values) runs, one per stored tile; a tile not stored holds no water and gives no run. For tools that walk whole
+        districts (tools/outline_squares.py), where value_at square by square is too slow. As in value_at, nothing
+        outside the grid or in a partial tile's padding is read."""
+        start, stop = max(start, 0), min(stop, self.grid.cols)
+        if not 0 <= row < self.grid.rows or start >= stop:
+            return []
+        base, offset, runs = (row // self.tile) * self.across, (row % self.tile) * self.tile, []
+        for across in range(start // self.tile, (stop - 1) // self.tile + 1):
+            if not self.counts[base + across]:
+                continue
+            left = across * self.tile
+            first, last = max(start, left), min(stop, left + self.tile)
+            runs.append((first, self._tile(base + across)[offset + first - left:offset + last - left]))
+        return runs
+
+    def _tile(self, index: int) -> array:
         key = (self.path, index)
         tile = self.cache.get(key)
-        if tile is None:
-            tile = self.cache.put(key, self._decode(index))
-        return convert(tile[(row % self.tile) * self.tile + col % self.tile])
+        return self.cache.put(key, self._decode(index)) if tile is None else tile
 
     def _decode(self, index: int) -> array:
         """Read one tile with os.pread and inflate it to tile x tile float32 values."""

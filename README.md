@@ -220,6 +220,7 @@ Terms followed: Google results are shown with Google attribution. Nothing from G
 | `app/data/rasters/` | The JRC files (not in git) and `SOURCES.txt`. |
 | `app/data/indexes/` | Flash flood potential: the score file, its classes and breaks, and the map layer. |
 | `tools/build_area.py` | Builds an area's `premises.json` and `town.json` from raw OpenStreetMap answers (Overpass) and the JRC rasters, with `--area --view --pois --roads`. It rebuilds the old Taman Sri Muda build (kept in `tests/fixtures/sri_muda_built`), Kuantan, Kota Bharu and Kuala Terengganu byte for byte; with `--sections` it builds a city split into sections. The built data is committed, so you do not need to run it. |
+| `tools/outline_squares.py` | Counts and draws the river model's squares inside each of an area's outlines (a city's sections or a state's districts) straight from the JRC files, row by row: wet squares per flood size and one PNG per outline, flood size and theme in the map's depth colours. Fast enough for a whole state (Johor: 5.4 million squares in about half a minute); `tools/area_sections.py` uses it for an area that stores no squares. |
 | `tools/resample_area.py` | Re-samples an area built on the old flood sizes (1 in 10, 100, 500) at 1 in 10, 20 and 50 when its OpenStreetMap inputs were not kept (Kota Tinggi): depths read again at each business and square; each road's square found from its stored old depths and distance, and refused if that is ambiguous. Needs the old JRC files. |
 | `deploy.sh` | Cloud Run deploy with a post-deploy smoke test. |
 
