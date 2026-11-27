@@ -380,6 +380,7 @@ async function openSection(sectionId, { fit = true } = {}) {
 async function openShop(entry) {
   st.want = entry.id;
   const openTab = st.sheet?.isOpen() ? st.sheet.tab() : null;   // opening its section closes a place tab: a search made in it opens it again
+  if (openTab && !PLACE_TABS.includes(openTab)) st.sheet.close();   // an area tab goes first, so the section asks Weather for nothing
   if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
   if (!shop || st.want !== entry.id) return;
