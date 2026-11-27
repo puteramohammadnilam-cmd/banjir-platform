@@ -61,7 +61,7 @@ export const engProfile = (areaId, a, b) =>
 export const engWhatif = (payload) => call("/api/eng/whatif", payload);
 export const engUpload = (payload) => call("/api/eng/upload", payload);
 /** Today's predicted tides at the area's tide gauge (null for an area without one). */
-export const getTide = (areaId) => call(`/api/tide?area=${area(areaId)}`);
+export const getTide = (areaId, sectionId = null) => call(`/api/tide?area=${area(areaId)}${sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""}`);
 export const getPlace = (id) => call(`/api/place/${encodeURIComponent(id)}`);
 export const getNews = (payload) => call("/api/news", payload);
 export const estimate = (payload) => call("/api/estimate", payload);

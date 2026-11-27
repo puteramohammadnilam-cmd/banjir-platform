@@ -53,7 +53,7 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
     kpiBox, h("div", { class: "overview-live" }, evac, tide, outlook, history), table, list, print);
   const cards = { evacuation: createEvacuation(evac), tide: createTide(tide), outlook: createOutlook(outlook) };
   const answers = new Map();   // by area or section: {rain, evacuation, outlook, outlookAsked}
-  const tides = new Map();     // by area: /api/tide has no section
+  const tides = new Map();     // by area or section: a state's coastal districts each have their own gauge
   let shown = { key: null, kpis: null, sections: null, rp: null };
   let isOutlookInView = !("IntersectionObserver" in globalThis);   // no observer: asked at once, as the old page does
 
@@ -100,10 +100,10 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
         () => keep("rain")({ configured: true, error: true }));
     }
     settled(api.getEvacuation(now.areaId, now.sectionId), ({ centres }) => ({ data: centres })).then(keep("evacuation"));
-    if (!tides.has(now.areaId)) {
-      tides.set(now.areaId, { busy: true });
-      settled(api.getTide(now.areaId), ({ tide: found }) => ({ data: found })).then((value) => {
-        tides.set(now.areaId, value);
+    if (!tides.has(key)) {
+      tides.set(key, { busy: true });
+      settled(api.getTide(now.areaId, now.sectionId), ({ tide: found }) => ({ data: found })).then((value) => {
+        tides.set(key, value);
         on.redraw();
       });
     }
@@ -177,7 +177,7 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
         tableLead.textContent = t("sections.lead", { rp, word: dataWord(now.word, { lower: true }) });
       }
       cards.evacuation.set(got.evacuation);
-      cards.tide.set(tides.get(now.areaId));
+      cards.tide.set(tides.get(key));
       cards.outlook.set(got.outlook);
     },
   };

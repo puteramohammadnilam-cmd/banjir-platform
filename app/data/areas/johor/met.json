@@ -1,0 +1,76 @@
+{
+  "state": "Johor",
+  "sections": {
+    "batu-pahat": {
+      "location_id": "Ds084",
+      "place": "Batu Pahat",
+      "districts": [
+        "Batu Pahat"
+      ]
+    },
+    "johor-bahru": {
+      "location_id": "Ds090",
+      "place": "Johor Bahru",
+      "districts": [
+        "Johor Bahru"
+      ]
+    },
+    "kluang": {
+      "location_id": "Ds085",
+      "place": "Kluang",
+      "districts": [
+        "Kluang"
+      ]
+    },
+    "kota-tinggi": {
+      "location_id": "Ds089",
+      "place": "Kota Tinggi",
+      "districts": [
+        "Kota Tinggi"
+      ]
+    },
+    "kulai": {
+      "location_id": "Ds088",
+      "place": "Kulai",
+      "districts": [
+        "Kulai"
+      ]
+    },
+    "mersing": {
+      "location_id": "Ds086",
+      "place": "Mersing",
+      "districts": [
+        "Mersing"
+      ]
+    },
+    "muar": {
+      "location_id": "Ds083",
+      "place": "Muar",
+      "districts": [
+        "Muar"
+      ]
+    },
+    "pontian": {
+      "location_id": "Ds087",
+      "place": "Pontian",
+      "districts": [
+        "Pontian"
+      ]
+    },
+    "segamat": {
+      "location_id": "Ds082",
+      "place": "Segamat",
+      "districts": [
+        "Segamat"
+      ]
+    },
+    "tangkak": {
+      "location_id": "Ds081",
+      "place": "Tangkak",
+      "districts": [
+        "Tangkak"
+      ]
+    }
+  },
+  "about": "Each district's MetMalaysia forecast place (data.gov.my weather/forecast location_id, the district's own Ds code) and the district its warnings must name (app/outlook.py). The whole state has no one place: its card shows a warning naming any of them. Checked 28 Nov 2026."
+}

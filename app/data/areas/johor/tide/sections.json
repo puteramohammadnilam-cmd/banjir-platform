@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "tangkak": {
+      "gauge": "keling",
+      "km": 43
+    },
+    "muar": {
+      "gauge": "keling",
+      "km": 50
+    },
+    "batu-pahat": {
+      "gauge": "kukup",
+      "km": 81
+    },
+    "pontian": {
+      "gauge": "kukup",
+      "km": 19
+    },
+    "johor-bahru": {
+      "gauge": "johor-baharu",
+      "km": 3
+    },
+    "kota-tinggi": {
+      "gauge": "sedili",
+      "km": 32
+    },
+    "mersing": {
+      "gauge": "tioman",
+      "km": 54
+    }
+  },
+  "about": "Each coastal district's nearest tide gauge to its main town (its sections.json town) and how far it is. Kluang, Kulai and Segamat have no coast and no tide card; the whole state has no one tide. Gauge records and checks: 05_Raw_Data_Sources/tide_uhslc (tide_check.json). 28 Nov 2026."
+}

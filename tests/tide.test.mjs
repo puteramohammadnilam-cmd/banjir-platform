@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
+import { h } from "../app/static/js/dom.js";
 import { useLang } from "../app/static/js/i18n.js";
 import { createTide, malaysiaToday, timesText } from "../app/static/js/tide.js";
 import { installFakeDom } from "./fake_dom.mjs";
@@ -67,4 +68,15 @@ test("a big tide is said to be one, and tomorrow's next high is labelled tomorro
   assert.match(section.textContent, /pasang perbani/);
   assert.match(section.textContent, /04:12 esok/);
   assert.ok(!/\b(safe|selamat)\b/i.test(section.textContent));
+});
+
+test("a gauge far from the district's main town says so; a near one and an area's own gauge say nothing", () => {
+  const far = h("section");
+  createTide(far).set({ data: { ...TIDE, km: 50 } });
+  assert.ok(far.textContent.includes("The Gauge Town gauge is about 50 km from this district's main town"));
+  for (const km of [3, null, undefined]) {
+    const near = h("section");
+    createTide(near).set({ data: { ...TIDE, km } });
+    assert.ok(!near.textContent.includes("km from this district"), String(km));
+  }
 });

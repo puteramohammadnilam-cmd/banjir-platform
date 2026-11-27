@@ -13,7 +13,8 @@ Big tides are shown, not scored: no flood here was found to need one. A MetMalay
 day makes it high; a thunderstorm warning is shown on its day but does not set the level, since none was tested.
 
 Each area's met.json gives its MetMalaysia forecast place and the state and districts a warning must name to cover
-it; an area without one gets Google's rain and the tides only. MetMalaysia's forecast and warnings come from data.gov.my (CC BY 4.0, at most 4 requests a minute). The server keeps
+it, or, for an area split into districts (a state), each section's own under "sections": a section then gets its
+place's words and the warnings naming its districts, and the whole area no words and the warnings naming any of them; an area without one gets Google's rain and the tides only. MetMalaysia's forecast and warnings come from data.gov.my (CC BY 4.0, at most 4 requests a minute). The server keeps
 each answer for CACHE_S for every visitor, tries again RETRY_S after a failure, keeps the last good answer for
 STALE_S, and logs one line per outage. A feed that fails leaves its part of the card out. Google's rain goes through
 the free monthly cap in googlemaps.py. Standard library only.
@@ -68,22 +69,32 @@ _locks: dict[str, threading.Lock] = {}   # one per feed, held only by the reques
 _cache: dict[str, dict] = {}  # key -> {"tried", "ok", "good_at", "value"}
 
 
-@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
-def place(area_id: str) -> tuple[str, str, str, tuple[str, ...]] | None:
-    """(location id, place name, state, districts) from the area's met.json; None without one, or for one that does
-    not fit (logged)."""
+@lru_cache(maxsize=4 * areas.MAX_CACHED_AREAS)
+def place(area_id: str, section_id: str | None = None) -> tuple[str | None, str | None, str, tuple[str, ...]] | None:
+    """(location id, place name, state, districts) from the area's met.json, for one of its sections when the file
+    gives sections ("sections": {id: {location_id, place, districts}}); for the whole of such an area, no location or
+    place and every section's districts. None without a met.json, or for one that does not fit (logged)."""
     if areas.get(area_id) is None or not (areas.AREAS_DIR / area_id / MET_FILE).is_file():
         return None
     try:
         found = areas._read(area_id, MET_FILE)
-        districts = tuple(found["districts"])
-        values = (found["location_id"], found["place"], found["state"], *districts)
+        parts = found.get("sections") or {}
+        if not isinstance(parts, dict):
+            raise ValueError("sections must map section ids to places")
+        own = parts.get(section_id) if section_id else None
+        if own is not None:
+            location, name, districts = own["location_id"], own["place"], tuple(own["districts"])
+        elif parts:   # the whole of an area split into districts: no one place, a warning for any of them
+            location, name, districts = None, None, tuple(d for each in parts.values() for d in each["districts"])
+        else:
+            location, name, districts = found["location_id"], found["place"], tuple(found["districts"])
+        values = (found["state"], *districts, *((location, name) if location is not None else ()))
         if not districts or not all(isinstance(v, str) and v.strip() for v in values):
             raise ValueError("location_id, place, state and districts must be text")
     except (ValueError, KeyError, TypeError) as exc:
         log.error("%s: %s does not fit: %s", area_id, MET_FILE, exc)
         return None
-    return found["location_id"], found["place"], found["state"], districts
+    return location, name, found["state"], districts
 
 
 class FeedError(RuntimeError):
@@ -159,10 +170,12 @@ def parse_forecast(rows: Sequence, location_id: str) -> dict[str, dict]:
     return days
 
 
-def forecast_for(area_id: str, clock: Callable[[], float] = time.monotonic) -> dict[str, dict] | None:
-    found = place(area_id)
+def forecast_for(area_id: str, clock: Callable[[], float] = time.monotonic, section_id: str | None = None) -> dict[str, dict] | None:
+    found = place(area_id, section_id)
     if not found:
         return None
+    if found[0] is None:   # a whole state: no one place's words
+        return {}
     rows = _cached(f"forecast {found[0]}", lambda: _fetch_forecast(found[0]), clock)
     return None if rows is None else parse_forecast(rows, found[0])
 
@@ -208,10 +221,11 @@ def _warning(raw: Mapping) -> dict | None:
             "text": text}
 
 
-def warnings_for(area_id: str, now: datetime | None = None, clock: Callable[[], float] = time.monotonic) -> list[dict] | None:
+def warnings_for(area_id: str, now: datetime | None = None, clock: Callable[[], float] = time.monotonic,
+                 section_id: str | None = None) -> list[dict] | None:
     """The rain and thunderstorm warnings that cover the area and have not ended, without their long text, soonest
     first; [] for an area without a met.json; None when MetMalaysia gave nothing (the card says so)."""
-    where = place(area_id)
+    where = place(area_id, section_id)
     if not where:
         return []
     rows = _cached("warnings", _fetch_warnings, clock)
@@ -247,11 +261,11 @@ def _covers_day(day: str, warnings: Sequence[Mapping]) -> bool:
     return any(w["valid_from"][:10] <= day <= last(w) for w in warnings)
 
 
-def _big_tides(area_id: str, days: Sequence[str]) -> list[bool | None]:
-    found = tide.doc(area_id)
+def _big_tides(area_id: str, days: Sequence[str], section_id: str | None = None) -> list[bool | None]:
+    found = tide.doc(area_id, section_id)
     if found is None:
         return [None] * len(days)
-    ranges = tide.day_ranges(area_id)
+    ranges = tide.day_ranges(area_id, section_id)
     return [ranges[day] >= found["big_range_m"] if day in ranges else None for day in days]
 
 
@@ -283,7 +297,8 @@ def arus_link(lat: float, lon: float) -> str | None:
         return None
 
 
-def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rain_fn: Callable | None = None) -> dict:
+def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rain_fn: Callable | None = None,
+          section_id: str | None = None) -> dict:
     """What GET /api/outlook sends: the next DAYS days from today (Malaysian dates), each with Google's rain and
     chance, MetMalaysia's words, whether a warning covers it, a big-tide flag and a level; the warnings themselves; the
     trend; whether Google's rain came ("ok", "capped", "capped_day", "off" or "down"); whether MetMalaysia answered ("ok", "down",
@@ -291,13 +306,14 @@ def build(area_id: str, lat: float, lon: float, now: datetime | None = None, rai
     today = (now or datetime.now(timezone.utc)).astimezone(MYT)
     dates = [(today + timedelta(days=k)).strftime("%Y-%m-%d") for k in range(DAYS)]
     rain, rain_state = _rain(rain_fn or googlemaps.rain_days, lat, lon)
-    where, words, warnings = place(area_id), forecast_for(area_id), warnings_for(area_id, today)
+    where = place(area_id, section_id)
+    words, warnings = forecast_for(area_id, section_id=section_id), warnings_for(area_id, today, section_id=section_id)
     met_state = "none" if not where else "down" if words is None or warnings is None else "ok"
     warnings, words = warnings or [], words or {}
     rain_warnings = [w for w in warnings if w["kind"] == "rain"]
     has_levels = area_id == SET_FROM_AREA
     days = []
-    for date, big in zip(dates, _big_tides(area_id, dates)):
+    for date, big in zip(dates, _big_tides(area_id, dates, section_id)):
         found = rain.get(date)
         mm = found["mm"] if found else None
         days.append({"date": date, "rain_mm": mm, "chance_pct": found["chance_pct"] if found else None,

@@ -6,6 +6,7 @@ import { h } from "./dom.js";
 import { dateLocale, t } from "./i18n.js";
 
 /** "03:18 and 15:48" in the page's language. */
+const FAR_KM = 10;   // a state's district can be tens of km from its gauge: the card says so
 export const timesText = (times) => (times.length > 1 ? t("tide.and", { first: times.slice(0, -1).join(", "), last: times.at(-1) }) : times[0] ?? "");
 
 /** Today's date in Malaysia, "YYYY-MM-DD". */
@@ -39,6 +40,7 @@ function body(found) {
     h("p", { class: found.big ? "tide-big" : "" }, t(found.big ? "tide.big" : "tide.ordinary", { range: found.range_m })),
     outlook && h("p", {}, outlook),
     h("p", { class: "muted small" }, t("tide.why")),
+    Number.isFinite(found.km) && found.km >= FAR_KM && h("p", { class: "muted small" }, t("tide.far", { station: found.station, km: found.km })),
     h("p", { class: "fineprint" }, t("tide.source", { error: found.typical_error_m, station: found.station })),
   ].filter(Boolean);
 }

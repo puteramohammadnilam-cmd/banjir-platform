@@ -298,7 +298,7 @@ function loadOutlook(app) {
 }
 
 function loadTide(app) {
-  api.getTide(app.start.area.id).then(({ tide }) => app.store.update({ tide: { data: tide } }), () => app.store.update({ tide: { error: true } }));
+  api.getTide(app.start.area.id, app.start.section?.id).then(({ tide }) => app.store.update({ tide: { data: tide } }), () => app.store.update({ tide: { error: true } }));
 }
 
 function loadRain(app) {

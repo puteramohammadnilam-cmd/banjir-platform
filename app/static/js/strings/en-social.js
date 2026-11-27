@@ -14,6 +14,7 @@ export default Object.freeze({
   "reference.srcEvac": "JKM InfoBencana, the Department of Social Welfare Malaysia: its public list of open centres, flood centres only, counts only",
   "tide.heading": "Tide at {station}",
   "tide.headingPlain": "Tide today",
+  "tide.far": "The {station} gauge is about {km} km from this district's main town, so the tide there comes at other times and heights: read these as a guide to the day, not the clock.",
   "tide.failed": "Today's tide could not be loaded just now. Try again in a minute.",
   "tide.highs": "High tide today: {times}.",
   "tide.and": "{first} and {last}",

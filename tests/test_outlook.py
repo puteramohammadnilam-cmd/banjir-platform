@@ -231,7 +231,7 @@ def test_a_metmalaysia_outage_is_said_not_shown_as_no_warning(monkeypatch):
 
 def test_an_area_without_a_metmalaysia_place_or_tide_table_still_answers(monkeypatch):
     met(monkeypatch)
-    monkeypatch.setattr(outlook, "place", lambda area_id: None)
+    monkeypatch.setattr(outlook, "place", lambda area_id, section_id=None: None)
     found = outlook.build("shah-alam", 3.07, 101.52, now=NOW, rain_fn=lambda *a: RAIN)
     assert found["met_place"] is None and found["warnings"] == [] and all(d["met"] is None for d in found["days"])
     assert found["met"] == "none"
@@ -311,17 +311,45 @@ def test_the_endpoint_answers_for_an_area_and_a_section(monkeypatch):
     assert not math.isnan(found["data"]["outlook"]["days"][0]["rain_mm"])
 
 
-NO_MET = {"johor"}   # a whole state: one MetMalaysia place cannot stand for all its districts (not set up yet)
-
-
-def test_every_area_has_a_metmalaysia_place_that_fits():
-    from app import areas
+def test_every_area_and_every_district_of_a_state_has_a_metmalaysia_place_that_fits():
+    from app import areas, sections
     for area in areas.load_all():
         found = outlook.place(area.id)
-        if area.id in NO_MET:
-            assert found is None, area.id
+        assert found and found[2] and found[3], area.id
+        parts = areas._read(area.id, outlook.MET_FILE).get("sections") or {}
+        if not parts:
+            assert found[0][:2] in ("Tn", "Ds"), area.id
             continue
-        assert found and found[0][:2] in ("Tn", "Ds") and found[3], area.id
+        assert found[:2] == (None, None), "a whole state has no one place, only its districts' warnings"
+        assert set(parts) == {s["id"] for s in sections.listed(area.id)}, "one place per district, and no other"
+        for section_id in parts:
+            own = outlook.place(area.id, section_id)
+            assert own[0][:2] == "Ds" and own[1] and own[3] and set(own[3]) <= set(found[3]), section_id
+
+
+JOHOR_ROWS = [{"location": {"location_id": "Ds083", "location_name": "Muar"}, "date": "2026-11-28",
+               "summary_forecast": "Ribut petir", "summary_when": "Petang"}]
+
+
+def test_a_states_district_gets_its_own_forecast_and_only_warnings_naming_it(monkeypatch):
+    met(monkeypatch, rows=JOHOR_ROWS)   # PETALING names "Johor (Muar)"
+    muar = outlook.build("johor", 2.04, 102.57, now=NOW, rain_fn=lambda *a: RAIN, section_id="muar")
+    assert muar["met"] == "ok" and muar["met_place"] == "Muar" and muar["days"][2]["met"]["text"] == "Ribut petir"
+    assert [w["title_en"] for w in muar["warnings"]] == ["Thunderstorms Warning"]
+    tinggi = outlook.build("johor", 1.73, 103.9, now=NOW, rain_fn=lambda *a: RAIN, section_id="kota-tinggi")
+    assert tinggi["met_place"] == "Kota Tinggi" and tinggi["warnings"] == [], "a warning for Muar does not cover Kota Tinggi"
+    state = outlook.build("johor", 2.05, 103.5, now=NOW, rain_fn=lambda *a: RAIN)
+    assert state["met"] == "ok" and state["met_place"] is None and all(d["met"] is None for d in state["days"])
+    assert [w["title_en"] for w in state["warnings"]] == ["Thunderstorms Warning"], "the whole state: any district's"
+
+
+def test_the_outlook_endpoint_asks_a_districts_own_place(monkeypatch):
+    met(monkeypatch, rows=JOHOR_ROWS)
+    monkeypatch.setattr(outlook.googlemaps, "rain_days", lambda lat, lon, days: RAIN)
+    found = TestClient(main.app).get("/api/outlook?area=johor&section=muar").json()["data"]["outlook"]
+    assert found["met_place"] == "Muar"
+    assert TestClient(main.app).get("/api/outlook?area=kota-tinggi").json()["data"]["outlook"]["met_place"] == "Kota Tinggi", \
+        "the old town area's id is its district"
 
 
 def test_the_arus_link_is_there_only_when_set_and_https(monkeypatch):

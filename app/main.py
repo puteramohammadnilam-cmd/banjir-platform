@@ -589,8 +589,8 @@ def evacuation_centres(area: str | None = None, section: str | None = None) -> d
 @app.api_route("/api/tide", dependencies=[Depends(map_limit)], methods=GET_AND_HEAD)
 def tide_today(area: str | None = None, section: str | None = None) -> dict:
     """Today's predicted high and low tides at the area's tide gauge; `tide` is null for an area without one."""
-    found, _ = known_scope(area, section)
-    return ok({"tide": tide.today(found.id)})
+    found, part = known_scope(area, section)
+    return ok({"tide": tide.today(found.id, section_id=part["id"] if part else None)})
 
 
 @app.post("/api/ask", dependencies=[Depends(rate_limit)])
@@ -752,7 +752,7 @@ def outlook_days(area: str | None = None, section: str | None = None) -> dict:
     """The next five days at the middle of the area or of one of its sections (app/outlook.py)."""
     found, part = known_scope(area, section)
     lat, lon = sections.centre(part) if part else found.centre()
-    return ok({"outlook": outlook.build(found.id, lat, lon)})
+    return ok({"outlook": outlook.build(found.id, lat, lon, section_id=part["id"] if part else None)})
 
 
 @app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain

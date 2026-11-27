@@ -1,6 +1,7 @@
 """Build app/data/areas/<area>/tide.json: predicted high and low tides at a tide gauge, for the page's tide card.
 
     python3 tools/build_tide.py [--area shah-alam] [--gauge 140] [--station "Port Klang"] [--from 2026] [--to 2027]
+        [--out tide/keling.json]
 
 Run from 11_Platform_Draft with a Python that has utide (pip install utide; not an app dependency: the app reads the
 built file only). Input: the UHSLC research quality hourly record of the gauge in $BANJIR_RAW_DIR/tide_uhslc (see its
@@ -27,7 +28,9 @@ STEP_MIN = 6
 MYT = timedelta(hours=8)
 MIN_SWING_M = 0.1         # a low and high closer than this are a wobble of a flat (neap) tide, not a tide: dropped
 BIG_SHARE = 0.75          # a day whose tide range is bigger than 75% of days' is a big (spring) tide
-CHECK_RMS_M = {140: 0.18}   # typical error of the heights, from tide_predict.py's check on 2020-2023 readings
+# gauge: (latitude, typical error of the heights in m from tide_predict.py's check on the last held-out readings)
+GAUGES = {140: (3.05, 0.18), 321: (1.4617, 0.10), 141: (2.215, 0.12), 323: (2.8067, 0.10), 324: (1.9317, 0.12),
+          325: (1.325, 0.13)}
 
 
 def raw_dir() -> Path:
@@ -51,7 +54,8 @@ def turns(gauge: int, first_year: int, last_year: int) -> tuple[list, str, str]:
     t, h, _ = readings(gauge)
     keep = t >= t[-1] - np.timedelta64(FIT_YEARS * 365, "D")
     as_dt = lambda a: a.astype("datetime64[m]").astype(datetime)   # noqa: E731
-    coef = utide.solve(as_dt(t[keep]), h[keep], lat=3.05, method="ols", conf_int="none", verbose=False, nodal=True)
+    coef = utide.solve(as_dt(t[keep]), h[keep], lat=GAUGES[gauge][0], method="ols", conf_int="none", verbose=False,
+                       nodal=True)
     start = np.datetime64(f"{first_year}-01-01T00") - np.timedelta64(8, "h")   # Malaysian midnight, in UTC
     end = np.datetime64(f"{last_year + 1}-01-01T00") - np.timedelta64(8, "h")
     grid = np.arange(start, end, np.timedelta64(STEP_MIN, "m"))
@@ -85,17 +89,19 @@ def main(argv: list | None = None) -> int:
     parser.add_argument("--station", default="Port Klang")
     parser.add_argument("--from", dest="first", type=int, default=2026)
     parser.add_argument("--to", dest="last", type=int, default=2027)
+    parser.add_argument("--out", default="tide.json", help="the file in the area's folder (a state: tide/<gauge>.json)")
     args = parser.parse_args(argv)
-    if args.gauge not in CHECK_RMS_M:
+    if args.gauge not in GAUGES:
         parser.error(f"gauge {args.gauge} has no checked error: run 06_Report_Source_Code/src/tide_predict.py's check "
-                     "for it and add it to CHECK_RMS_M first")
+                     "for it and add it to GAUGES first")
     found, fit_from, fit_to = turns(args.gauge, args.first, args.last)
     doc = {"version": 1, "station": args.station, "gauge": args.gauge,
            "source": "University of Hawaii Sea Level Center, research quality hourly tide-gauge record (gauge run by "
                      "JUPEM); free to use and redistribute, not for legal use",
-           "fit": f"{fit_from} to {fit_to}", "typical_error_m": CHECK_RMS_M[args.gauge],
+           "fit": f"{fit_from} to {fit_to}", "typical_error_m": GAUGES[args.gauge][1],
            "big_range_m": big_range(found), "turns": found}
-    out = ROOT / "app" / "data" / "areas" / args.area / "tide.json"
+    out = ROOT / "app" / "data" / "areas" / args.area / args.out
+    out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(doc, separators=(",", ":")) + "\n", encoding="utf-8")
     print(f"{out.relative_to(ROOT)}: {len(found)} highs and lows, {found[0][0]} to {found[-1][0]}; big tide from "
           f"{doc['big_range_m']} m; {out.stat().st_size // 1024} kB")

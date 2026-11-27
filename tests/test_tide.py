@@ -14,9 +14,11 @@ BUILT = json.loads((Path(__file__).resolve().parents[1] / "app/data/areas" / CIT
 
 @pytest.fixture
 def fresh():
-    tide.doc.cache_clear()
+    for cached in (tide.doc, tide.gauges, tide.day_ranges):
+        cached.cache_clear()
     yield
-    tide.doc.cache_clear()
+    for cached in (tide.doc, tide.gauges, tide.day_ranges):
+        cached.cache_clear()
 
 
 def test_the_built_table_covers_2026_and_2027_with_about_four_turns_a_day_alternating():
@@ -101,3 +103,47 @@ def test_the_endpoint_answers_for_the_area_and_null_elsewhere():
     plain = next(a for a in areas.load_all() if a.id != CITY)
     assert client.get(f"/api/tide?area={plain.id}").json()["data"]["tide"] is None
     assert client.get("/api/tide?area=nope").status_code == 404
+
+
+STATE = "johor"
+COASTAL = {"tangkak", "muar", "batu-pahat", "pontian", "johor-bahru", "kota-tinggi", "mersing"}
+
+
+def test_each_coastal_district_of_a_state_has_its_gauges_tide_and_how_far_it_is():
+    from app import sections
+    listed = tide.gauges(STATE)
+    assert set(listed) == COASTAL and COASTAL < {s["id"] for s in sections.listed(STATE)}
+    tide.check(STATE)   # every gauge file there and well formed
+    when = datetime(2026, 12, 1, 1, 0, tzinfo=timezone.utc)
+    for section_id in COASTAL:
+        found = tide.today(STATE, when, section_id)
+        assert found["highs"] and found["km"] == listed[section_id]["km"] and 0 < found["typical_error_m"] < 0.2, section_id
+    assert tide.today(STATE, when, "muar")["station"] == "Keling" and tide.today(STATE, when, "johor-bahru")["km"] == 3
+    for nowhere in ("kluang", "kulai", "segamat", None):   # no coast, and no one tide for the whole state
+        assert tide.today(STATE, when, nowhere) is None, nowhere
+    assert tide.today(CITY, when)["km"] is None and tide.today(CITY, when, "seksyen-25")["station"] == BUILT["station"]
+
+
+def test_a_districts_gauge_list_that_does_not_fit_stops_the_server(monkeypatch, fresh):
+    real = areas._read
+    monkeypatch.setattr(areas, "_read", lambda area_id, name: {"sections": {"muar": {"gauge": "keling"}}}
+                        if name == tide.SECTIONS_FILE else real(area_id, name))
+    with pytest.raises(areas.AreaError, match="tide/sections.json"):
+        tide.gauges(STATE)
+
+
+def test_a_gauge_named_with_no_tide_file_stops_the_server(monkeypatch, fresh):
+    real = areas._read
+    monkeypatch.setattr(areas, "_read", lambda area_id, name: {"sections": {"muar": {"gauge": "nowhere", "km": 5}}}
+                        if name == tide.SECTIONS_FILE else real(area_id, name))
+    with pytest.raises(areas.AreaError, match="no tide file for muar"):
+        tide.check(STATE)
+
+
+def test_the_endpoint_answers_for_a_states_coastal_district():
+    main._hits.clear()
+    client = TestClient(main.app)
+    found = client.get(f"/api/tide?area={STATE}&section=muar").json()["data"]["tide"]
+    assert (found["station"], found["km"]) == ("Keling", 50)
+    assert client.get(f"/api/tide?area={STATE}&section=kluang").json()["data"]["tide"] is None
+    assert client.get("/api/tide?area=kota-tinggi").json()["data"]["tide"]["station"] == "Sedili", "the old town id: its district"
