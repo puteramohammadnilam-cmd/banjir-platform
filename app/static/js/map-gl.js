@@ -178,7 +178,7 @@ async function loadSection(sectionId) {
   st.loaded.add(sectionId);
   st.pages.set(sectionId, pageArea(data.area, data.section));   // My business needs the section's record and example
   keep({ cells: data.town.cells, premises: data.premises, cellDeg: data.town.cell_deg });
-  st.sheet?.refresh();   // the Area overview, open on this section, now has its businesses
+  if (st.sheet?.isOpen() && !PLACE_TABS.includes(st.sheet.tab())) st.sheet.refresh();   // the Area overview, on this section, has its businesses now
   say(hint());
 }
 
@@ -243,7 +243,7 @@ function showShop(shop, { fly = false, focus = true, move = true } = {}) {
   markPicked(shop.id);
   showCard(shopCard(shop, { rp: st.rp, sectionName: sectionName(shop.section), shelters: st.shelters, links: shopLinks(shop),
     onClose: closeCard, onShare: share }), { focus });
-  if (st.sheet?.isOpen()) openSheet();   // a shop picked while the sheet is open: the sheet shows it
+  followCard();
   st.chat?.render(cardPlace());
   writeLink();
   say(shop.name);
@@ -311,12 +311,12 @@ function showPoint(place, squares, { focus = true, move = true } = {}) {
     loadSection(sectionId).then(() => {
       if (st.point?.place !== place) return;
       say(title);
-      if (st.sheet?.isOpen()) openSheet();   // the section's own flood record and example, now it is in
+      if (st.sheet?.isOpen() && PLACE_TABS.includes(st.sheet.tab())) openSheet();   // the section's own record and example, now in
     }, (error) => say(t("mg.failed", { why: error.message }), true));
   }
   showCard(pointCard(place, { rp: st.rp, title, subline, links: pointLinks(place), onClose: closeCard, onShare: share,
     onMove: () => startPin({ at: place }) }), { focus });
-  if (st.sheet?.isOpen()) openSheet();
+  followCard();
   st.chat?.render(place);
   writeLink();
   say(title);
@@ -379,12 +379,12 @@ async function openSection(sectionId, { fit = true } = {}) {
 /** A shop picked in the search: its section loads first; a later pick or click wins over a slow load. */
 async function openShop(entry) {
   st.want = entry.id;
-  const openTab = st.sheet?.isOpen() ? st.sheet.tab() : null;   // opening its section closes the sheet: a search made in it opens it again
+  const openTab = st.sheet?.isOpen() ? st.sheet.tab() : null;   // opening its section closes a place tab: a search made in it opens it again
   if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
   if (!shop || st.want !== entry.id) return;
   showShop(shop, { fly: true });
-  if (openTab) openSheet(openTab);
+  if (PLACE_TABS.includes(openTab)) openSheet(openTab);
 }
 
 /* ---- this page's link, and the links that carry it ---- */
@@ -433,6 +433,13 @@ function cardPlace() {
   if (st.card?.kind === "point") return st.point?.place ?? null;
   const shop = st.card?.kind === "shop" && st.shops.get(st.card.id);
   return shop ? businessPlace(shop, st.area.id) : null;
+}
+
+/** A shop or point now on the card: a place tab shows it; an area tab steps aside, so the card it would cover shows. */
+function followCard() {
+  if (!st.sheet?.isOpen()) return;
+  if (PLACE_TABS.includes(st.sheet.tab())) openSheet();
+  else st.sheet.close();
 }
 
 /** Closes the sheet when it shows one of the place's tabs (the card has changed or gone). */
@@ -492,12 +499,13 @@ function wireSheet() {
     about: {
       overview: createAreaPanel({ panel: $("panel-area"), scope: areaScope, status: st.status, areas: () => st.areasList, on: {
         section: (id) => { st.sheet.close(); openSection(id); },
-        wholeArea: () => { st.section = null; writeLink(); st.sheet.refresh(); },
+        wholeArea: () => { closeCard(); st.section = null; writeLink(); st.sheet.refresh(); },
         sectionHref: (id) => `map.html${mapQuery({ section: id, place: null, tab: null })}`,
-        areaHref: (id) => `map.html${withMapView(writeUrl({ area: id, lang: langParam() }), st.base, st.tilt)}`,
+        areaHref: (id) => `map.html${withMapView(writeUrl({ area: id, tab: "overview", lang: langParam() }), st.base, st.tilt)}`,
+        pickRp: pickFloodSize,
         redraw: () => st.sheet.refresh(),
       } }),
-      reference: createReferencePanel({ panel: $("panel-reference"), scope: areaScope, goto: (tab) => openSheet(tab) }),
+      reference: createReferencePanel({ panel: $("panel-reference"), scope: areaScope }),
     },
     on: {
       pickRp: pickFloodSize,

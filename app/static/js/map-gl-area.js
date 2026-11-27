@@ -1,12 +1,13 @@
 // The Area overview's cards on the new map (map.html), in its sheet: the old interface's figures (kpis.js), relief
 // centres open now (evacuation.js), the tide (tide.js), the next 5 days (outlook.js), the flood record (history.js),
 // the table of a city's sections (section-table.js) and the printable area summary (area-report.js), the same code.
-// They are about the section on show, or the whole area. What comes from outside is asked for only while the panel is
-// on show, once per area or section for the visit: the rain and the next 5 days (Google Weather has a free monthly
-// cap), JKM's open centres and the tide.
+// They are about the section on show, or the whole area, at the flood size its own picker shows. What comes from
+// outside is asked for only while the panel is on show, once for the visit: the rain and JKM's open centres per area
+// or section, the tide per area, and the next 5 days (Google Weather has a free monthly cap) per area or section only
+// once its card comes into view, as on the old page.
 import * as api from "./api.js";
 import { buildAreaReport } from "./area-report.js";
-import { h } from "./dom.js";
+import { h, renderPicker } from "./dom.js";
 import { createEvacuation } from "./evacuation.js";
 import { renderHistory } from "./history.js";
 import { dataWord, dateLocale, t } from "./i18n.js";
@@ -24,16 +25,17 @@ const settled = (promise, shape) => promise.then(shape, () => ({ error: true }))
  *  or the section's page area), premises (with their depths), sections and word (a city's; else [] and null)}.
  *  `status` is GET /api/status's answer and areas() resolves the listed areas, for the chooser. `on`: section(id) opens
  *  a section on the map, wholeArea() goes back from a section to the whole area, sectionHref(id) and areaHref(id) are
- *  the links for them, and redraw() draws the panel again when an answer comes. */
+ *  the links for them, pickRp(rp) picks a flood size, and redraw() draws the panel again when an answer comes. */
 export function createAreaPanel({ panel, scope, status, areas, on }) {
   const title = h("h1", { class: "view-title" });
   const back = h("p", { class: "small" });
   const chooser = h("p", { class: "mg-area-pick" });
+  const picker = h("div", { class: "mg-area-rp" });
   const kpiBox = h("div", { class: "kpis", "aria-live": "polite" });
   const evac = h("section", { class: "surface evac", "aria-labelledby": "evacuation-heading", hidden: true });
   const tide = h("section", { class: "surface tide", "aria-labelledby": "tide-heading", hidden: true });
   const outlook = h("section", { class: "surface outlook", "aria-labelledby": "outlook-heading" });
-  const history = h("section", { class: "surface", "aria-labelledby": "history-heading" });
+  const history = h("section", { class: "surface", id: "history", "aria-labelledby": "history-heading" });   // views.css styles #history's folds
   const tableHeading = h("h2", { id: "sections-heading" });
   const tableLead = h("p", { class: "muted small" });
   const tableSlot = h("div", { class: "table-scroll sections-scroll" });
@@ -43,11 +45,31 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
     h("h2", { id: "area-print-heading", class: "small-heading" }, t("overview.printHeading")),
     h("p", { class: "muted small" }, t("overview.printLead")),
     h("button", { type: "button", class: "btn btn-secondary", onclick: () => printSummary() }, t("overview.printButton")));
-  panel.replaceChildren(h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("tab.overview")), title, back, chooser),
+  panel.replaceChildren(h("header", { class: "view-head" }, h("p", { class: "kicker" }, t("tab.overview")), title, back, chooser, picker),
     kpiBox, h("div", { class: "overview-live" }, evac, tide, outlook, history), table, print);
   const cards = { evacuation: createEvacuation(evac), tide: createTide(tide), outlook: createOutlook(outlook) };
-  const answers = new Map();   // by area or section: {rain, evacuation, tide, outlook}
-  let shown = { key: null, kpis: null, sections: null };
+  const answers = new Map();   // by area or section: {rain, evacuation, outlook, outlookAsked}
+  const tides = new Map();     // by area: /api/tide has no section
+  let shown = { key: null, kpis: null, sections: null, rp: null };
+  let isOutlookInView = !("IntersectionObserver" in globalThis);   // no observer: asked at once, as the old page does
+
+  /** The next 5 days for the area or section on show, asked for once, and only once its card is in view. */
+  function askOutlook() {
+    const now = scope();
+    const got = answers.get(keyOf(now));
+    if (!got || got.outlookAsked || !isOutlookInView) return;
+    got.outlookAsked = true;
+    settled(api.getOutlook(now.areaId, now.sectionId), ({ outlook: found }) => ({ data: found })).then((value) => {
+      got.outlook = value;
+      on.redraw();
+    });
+  }
+  if (!isOutlookInView) {
+    new IntersectionObserver((entries) => {
+      isOutlookInView = entries.some((entry) => entry.isIntersecting);
+      askOutlook();
+    }, { root: panel, rootMargin: "200px" }).observe(outlook);
+  }
 
   // a link in the sections table opens that section on this map, not a new page
   tableSlot.addEventListener("click", (event) => {
@@ -62,8 +84,8 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
   function load(now, key) {
     if (answers.has(key)) return answers.get(key);
     // the old page's first states (pick.js initialState): each card shows it is loading until its answer comes
-    const got = { rain: status?.maps_ready ? { configured: true, busy: true } : { configured: false }, evacuation: { busy: true }, tide: { busy: true },
-      outlook: { busy: true } };
+    const got = { rain: status?.maps_ready ? { configured: true, busy: true } : { configured: false }, evacuation: { busy: true },
+      outlook: { busy: true }, outlookAsked: false };
     answers.set(key, got);
     const keep = (name) => (value) => {
       got[name] = value;
@@ -74,8 +96,13 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
         () => keep("rain")({ configured: true, error: true }));
     }
     settled(api.getEvacuation(now.areaId, now.sectionId), ({ centres }) => ({ data: centres })).then(keep("evacuation"));
-    settled(api.getTide(now.areaId), ({ tide: found }) => ({ data: found })).then(keep("tide"));
-    settled(api.getOutlook(now.areaId, now.sectionId), ({ outlook: found }) => ({ data: found })).then(keep("outlook"));
+    if (!tides.has(now.areaId)) {
+      tides.set(now.areaId, { busy: true });
+      settled(api.getTide(now.areaId), ({ tide: found }) => ({ data: found })).then((value) => {
+        tides.set(now.areaId, value);
+        on.redraw();
+      });
+    }
     return got;
   }
 
@@ -116,10 +143,13 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
       const now = scope();
       const key = keyOf(now);
       if (key !== shown.key) {
-        shown = { ...shown, key };
+        shown = { ...shown, key, rp: null };   // the picker again too: its "bigger flood" note is the area's or section's
         drawScope(now);
       }
       const got = load(now, key);
+      askOutlook();
+      if (rp !== shown.rp) renderPicker(picker, rp, on.pickRp, now.page.bigger_flood_example);
+      shown.rp = rp;
       shown.kpis.setScenario(rp);
       shown.kpis.setRain(got.rain);
       if (shown.sections) {
@@ -127,7 +157,7 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
         tableLead.textContent = t("sections.lead", { rp, word: dataWord(now.word, { lower: true }) });
       }
       cards.evacuation.set(got.evacuation);
-      cards.tide.set(got.tide);
+      cards.tide.set(tides.get(now.areaId));
       cards.outlook.set(got.outlook);
     },
   };

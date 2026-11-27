@@ -9,7 +9,7 @@ export default Object.freeze({
   "mg.searchLabel": "Cari kedai mengikut nama",
   "mg.noMatch": "Tiada kedai dengan nama itu di sini.",
   "mg.oldUi": "Paparan lama",
-  "mg.oldUiNote": "Halaman lama, dengan 5 hari akan datang, pasang surut dan jadual bahagian bandar",
+  "mg.oldUiNote": "Halaman lama, dengan senarai semua perniagaan dan lapisan petanya",
   "mg.base.label": "Peta asas",
   "mg.base.map": "Peta",
   "mg.base.sat": "Satelit",

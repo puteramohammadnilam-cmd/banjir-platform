@@ -9,7 +9,7 @@ export default Object.freeze({
   "mg.searchLabel": "Search a shop by name",
   "mg.noMatch": "No shop by that name here.",
   "mg.oldUi": "Old interface",
-  "mg.oldUiNote": "The old page, with the next 5 days, tides and the sections table",
+  "mg.oldUiNote": "The old page, with its list of every business and its map layers",
   "mg.base.label": "Base map",
   "mg.base.map": "Map",
   "mg.base.sat": "Satellite",
