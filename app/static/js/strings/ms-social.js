@@ -13,6 +13,7 @@ export default Object.freeze({
   "reference.srcEvacLabel": "Pusat pemindahan banjir dibuka sekarang",
   "reference.srcEvac": "InfoBencana JKM, Jabatan Kebajikan Masyarakat Malaysia: senarai awam pusat yang dibuka, pusat banjir sahaja, bilangan sahaja",
   "tide.heading": "Pasang surut di {station}",
+  "tide.oldFit": "Rekod awam tolok {station} berakhir pada {year}, jadi ramalan ini mungkin lebih jauh tersasar daripada ralat yang dinyatakan di bawah.",
   "tide.far": "Tolok {station} terletak kira-kira {km} km dari bandar utama daerah ini, jadi air pasang di sana tiba pada masa dan ketinggian yang lain: jadikan ini panduan untuk hari ini, bukan jam yang tepat.",
   "tide.headingPlain": "Pasang surut hari ini",
   "tide.failed": "Pasang surut hari ini tidak dapat dimuatkan sekarang. Cuba lagi dalam seminit.",

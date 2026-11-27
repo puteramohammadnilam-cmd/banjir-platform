@@ -14,10 +14,10 @@ BUILT = json.loads((Path(__file__).resolve().parents[1] / "app/data/areas" / CIT
 
 @pytest.fixture
 def fresh():
-    for cached in (tide.doc, tide.gauges, tide.day_ranges):
+    for cached in (tide._table, tide.gauges, tide._ranges):
         cached.cache_clear()
     yield
-    for cached in (tide.doc, tide.gauges, tide.day_ranges):
+    for cached in (tide._table, tide.gauges, tide._ranges):
         cached.cache_clear()
 
 
@@ -146,4 +146,20 @@ def test_the_endpoint_answers_for_a_states_coastal_district():
     found = client.get(f"/api/tide?area={STATE}&section=muar").json()["data"]["tide"]
     assert (found["station"], found["km"]) == ("Keling", 50)
     assert client.get(f"/api/tide?area={STATE}&section=kluang").json()["data"]["tide"] is None
-    assert client.get("/api/tide?area=kota-tinggi").json()["data"]["tide"]["station"] == "Sedili", "the old town id: its district"
+    assert client.get("/api/tide?area=kota-tinggi").json()["data"]["tide"]["station"] == "Johor Baharu", \
+        "the old town id: its district, whose river meets the sea in the Johor Strait"
+
+
+def test_one_table_is_kept_however_many_sections_share_it(fresh):
+    for section_id in ("seksyen-1", "seksyen-2", "seksyen-25", None):
+        tide.today(CITY, section_id=section_id)
+    assert tide._table.cache_info().currsize == 1
+    assert tide.today(CITY)["fit"] == BUILT["fit"]
+
+
+def test_a_gauge_list_naming_a_section_the_area_does_not_have_stops_the_server(monkeypatch, fresh):
+    real = areas._read
+    monkeypatch.setattr(areas, "_read", lambda area_id, name: {"sections": {"batu_pahat": {"gauge": "kukup", "km": 81}}}
+                        if name == tide.SECTIONS_FILE else real(area_id, name))
+    with pytest.raises(areas.AreaError, match="does not have: batu_pahat"):
+        tide.check(STATE)

@@ -80,12 +80,17 @@ def _file(area_id: str, section_id: str | None) -> str | None:
     return f"tide/{own['gauge']}.json" if own else None
 
 
-@lru_cache(maxsize=4 * areas.MAX_CACHED_AREAS)
 def doc(area_id: str, section_id: str | None = None) -> Mapping | None:
     """The tide table of the area, or of one of its sections, checked; None where there is none. Raises
-    areas.AreaError, naming the area and file, for one that does not fit."""
+    areas.AreaError, naming the area and file, for one that does not fit. Kept once per file, however many sections
+    share it."""
     name = _file(area_id, section_id)
-    if name is None or not (areas.AREAS_DIR / area_id / name).is_file():
+    return _table(area_id, name) if name else None
+
+
+@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
+def _table(area_id: str, name: str) -> Mapping | None:
+    if not (areas.AREAS_DIR / area_id / name).is_file():
         return None
     try:
         found = areas._read(area_id, name)
@@ -103,11 +108,15 @@ def doc(area_id: str, section_id: str | None = None) -> Mapping | None:
     return areas._freeze(found)
 
 
-@lru_cache(maxsize=4 * areas.MAX_CACHED_AREAS)
 def day_ranges(area_id: str, section_id: str | None = None) -> dict[str, float]:
     """{Malaysian date: highest turn minus lowest} over the table."""
+    return _ranges(area_id, _file(area_id, section_id))
+
+
+@lru_cache(maxsize=areas.MAX_CACHED_AREAS)
+def _ranges(area_id: str, name: str) -> dict[str, float]:
     days: dict[str, list[float]] = {}
-    for when, _, height in doc(area_id, section_id)["turns"]:
+    for when, _, height in _table(area_id, name)["turns"]:
         days.setdefault(when[:10], []).append(height)
     return {day: max(h) - min(h) for day, h in days.items()}
 
@@ -127,6 +136,9 @@ def next_big(area_id: str, start: datetime, section_id: str | None = None) -> di
 def check(area_id: str, now: datetime | None = None) -> None:
     """At start-up: each table is there and well formed, and a warning when one runs out within WARN_DAYS."""
     listed = gauges(area_id)
+    unknown = sorted(set(listed or ()) - (areas.section_ids(area_id) or frozenset()))
+    if unknown:
+        raise areas.AreaError(f"{area_id}: {SECTIONS_FILE} names sections the area does not have: {', '.join(unknown)}.")
     for section_id in listed or [None]:
         found = doc(area_id, section_id)
         if found is None:
@@ -157,5 +169,5 @@ def today(area_id: str, now: datetime | None = None, section_id: str | None = No
             "range_m": round(max(heights) - min(heights), 1), "big": max(heights) - min(heights) >= found["big_range_m"],
             "next_high": {"time": shown(coming[0][11:]), "tomorrow": not coming[0].startswith(date)} if coming else None,
             "next_big": next_big(area_id, now, section_id),
-            "typical_error_m": found["typical_error_m"], "source": found["source"],
+            "typical_error_m": found["typical_error_m"], "source": found["source"], "fit": found.get("fit"),
             "km": (gauges(area_id) or {}).get(section_id, {}).get("km")}

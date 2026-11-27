@@ -7,6 +7,8 @@ import { dateLocale, t } from "./i18n.js";
 
 /** "03:18 and 15:48" in the page's language. */
 const FAR_KM = 10;   // a state's district can be tens of km from its gauge: the card says so
+const OLD_FIT_YEARS = 5;   // a fit ending this long before today: its error was measured nearer the fit, so the card says so
+const fitEnd = (found) => Number(/(\d{4})-\d\d-\d\d$/.exec(found.fit ?? "")?.[1]);
 export const timesText = (times) => (times.length > 1 ? t("tide.and", { first: times.slice(0, -1).join(", "), last: times.at(-1) }) : times[0] ?? "");
 
 /** Today's date in Malaysia, "YYYY-MM-DD". */
@@ -41,6 +43,8 @@ function body(found) {
     outlook && h("p", {}, outlook),
     h("p", { class: "muted small" }, t("tide.why")),
     Number.isFinite(found.km) && found.km >= FAR_KM && h("p", { class: "muted small" }, t("tide.far", { station: found.station, km: found.km })),
+    Number(found.date?.slice(0, 4)) - fitEnd(found) > OLD_FIT_YEARS
+      && h("p", { class: "muted small" }, t("tide.oldFit", { station: found.station, year: fitEnd(found) })),
     h("p", { class: "fineprint" }, t("tide.source", { error: found.typical_error_m, station: found.station })),
   ].filter(Boolean);
 }

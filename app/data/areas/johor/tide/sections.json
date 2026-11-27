@@ -21,13 +21,13 @@
       "km": 3
     },
     "kota-tinggi": {
-      "gauge": "sedili",
-      "km": 32
+      "gauge": "johor-baharu",
+      "km": 33
     },
     "mersing": {
       "gauge": "tioman",
       "km": 54
     }
   },
-  "about": "Each coastal district's nearest tide gauge to its main town (its sections.json town) and how far it is. Kluang, Kulai and Segamat have no coast and no tide card; the whole state has no one tide. Gauge records and checks: 05_Raw_Data_Sources/tide_uhslc (tide_check.json). 28 Nov 2026."
+  "about": "Each coastal district's tide gauge: the one nearest its main town (its sections.json town), except Kota Tinggi, whose town is on Sungai Johor, which meets the sea in the Johor Strait: Johor Baharu (33 km), not Sedili on the open coast (32 km). km is the distance from the main town. Kluang, Kulai and Segamat have no coast and no tide card; the whole state has no one tide. Gauge records and checks: 05_Raw_Data_Sources/tide_uhslc (tide_check.json). 28 Nov 2026."
 }

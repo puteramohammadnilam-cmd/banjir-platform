@@ -80,3 +80,14 @@ test("a gauge far from the district's main town says so; a near one and an area'
     assert.ok(!near.textContent.includes("km from this district"), String(km));
   }
 });
+
+test("a gauge whose public record ended long ago says so; a recent fit says nothing", () => {
+  const old = h("section");
+  createTide(old).set({ data: { ...TIDE, fit: "2009-01-01 to 2013-12-31" } });
+  assert.ok(old.textContent.includes("The Gauge Town gauge's public record ends in 2013"));
+  for (const fit of ["2018-01-07 to 2023-01-06", undefined, "unreadable"]) {
+    const recent = h("section");
+    createTide(recent).set({ data: { ...TIDE, fit } });
+    assert.ok(!recent.textContent.includes("public record ends"), String(fit));
+  }
+});
