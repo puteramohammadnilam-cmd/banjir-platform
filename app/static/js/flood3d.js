@@ -6,8 +6,8 @@
 // ponytail: new words in English only (the depth words are the app's own, so BM follows ?lang=).
 import * as api from "./api.js";
 import { SCENARIOS, band, depthText, depthWords, h, scenarioLabel } from "./dom.js";
-import { findShop, isBundle, readLink, scene } from "./flood3d-data.js";
-import { writeUrl } from "./place.js";
+import { backLink, findShop, isBundle, readLink, scene } from "./flood3d-data.js";
+import { isOldUi } from "./ui-choice.js";
 
 const NO_PICTURE = "There is no 3D picture for this shop yet.";
 const NO_WEBGL = "This browser cannot draw the 3D map (it needs WebGL).";
@@ -206,7 +206,7 @@ function showShop({ shop, areaId, areaName, sectionId, sectionName }, bundle) {
   $("f3d-scope").textContent = areaName ? `The 3D view is ready for shops in ${areaName} only, for now.` : "";
   $("f3d-credit").textContent = `${bundle.credit} · buildings fetched ${bundle.fetched_on}`;
   const back = document.querySelector(".f3d-back");
-  return (rp) => back.setAttribute("href", `./${writeUrl({ area: areaId, section: sectionId, place: shop.id, rp })}`);
+  return (rp) => back.setAttribute("href", backLink({ areaId, sectionId, shopId: shop.id, rp }, isOldUi()));
 }
 
 /** The shop's name and depth on a stem over its roof (so it does not hide its walls); returns the depth's slot. */

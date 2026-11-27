@@ -6,9 +6,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
-  DEFAULT_PLACE, NEAR_M, contains, decodeBuildings, depthsAt, findShop, isBundle, metresApart, metresToRing, middle,
+  DEFAULT_PLACE, NEAR_M, backLink, contains, decodeBuildings, depthsAt, findShop, isBundle, metresApart, metresToRing, middle,
   readLink, scene, shopBuilding, waterGrid,
 } from "../app/static/js/flood3d-data.js";
+import { isOldUi } from "../app/static/js/ui-choice.js";
 
 const SIZE = 0.0008333333356347339;   // town.json's cell_deg: 1/1200 of a degree, as float32 left it
 const LON0 = 101.5;
@@ -222,4 +223,13 @@ test("a smaller view keeps fewer buildings, and a shop with no building near say
   const found = scene(BUNDLE, away);
   assert.ok(!found.hasShopBuilding);
   assert.ok(found.buildings.features.every((feature) => !feature.properties.shop));
+});
+
+test("the back link opens the shop's card on the new map, or on the old interface for a browser that chose it", () => {
+  const shop = { areaId: "shah-alam", sectionId: "seksyen-7", shopId: "node-1", rp: "20" };
+  assert.equal(backLink(shop), "./map.html?area=shah-alam&section=seksyen-7&place=node-1&rp=20");
+  assert.equal(backLink(shop, true), "./?area=shah-alam&section=seksyen-7&place=node-1&rp=20");
+  assert.equal(isOldUi({ getItem: () => "old" }), true);
+  assert.equal(isOldUi({ getItem: () => null }), false);
+  assert.equal(isOldUi({ getItem: () => { throw new Error("blocked"); } }), false);
 });

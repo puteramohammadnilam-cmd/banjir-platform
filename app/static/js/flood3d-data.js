@@ -8,6 +8,7 @@
 //   cell_deg, return_periods, water [[south, west, d10, d20, d50], ...]: the flood model's wet squares, cell_deg a side
 //   credit, fetched_on
 import { SCENARIOS } from "./dom.js";
+import { writeUrl } from "./place.js";
 
 export const VIEW_RADIUS_M = 450;   // what the tilted view shows around the shop: the rest of the section is left out
 export const NEAR_M = 30;           // tools/build_flood3d.py: a shop mapped as a dot just outside its building's outline
@@ -37,6 +38,11 @@ export function readLink(search) {
 }
 
 /** Whether a string is an area's or a section's id, safe in a path: the server's are checked too, before use. */
+/** "← MyFlood": back to the shop's card at the flood size on show, on the new map, or on the old interface for a browser
+ *  that chose it (ui-choice.js). */
+export const backLink = ({ areaId, sectionId, shopId, rp }, isOld = false) =>
+  `${isOld ? "./" : "./map.html"}${writeUrl({ area: areaId, section: sectionId, place: shopId, rp })}`;
+
 export const isScopeId = (value) => typeof value === "string" && SCOPE_ID.test(value);
 
 /** A section's data (GET /api/areas/{area}/sections/{section}/data) for the link: the section it names, else the one
