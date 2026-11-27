@@ -9,6 +9,7 @@
 import * as api from "./api.js";
 import { h, s } from "./dom.js";
 import { createEngineer } from "./engineer.js";
+import { createBusinessSheet } from "./map-gl-biz.js";
 import { lang, t } from "./i18n.js";
 import { layersCard, pointCard, sectionCard, shopCard, summaryCard } from "./map-gl-card.js";
 import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sectionsGeo, shopColour, shopsGeo, squareOutline,
@@ -16,7 +17,8 @@ import { STYLE_FILES, depthRamp, readMapLink, searchIndex, sectionFill, sections
 import { glDrawer } from "./map-gl-eng.js";
 import { createPinMode } from "./map-gl-pin.js";
 import { rememberUi } from "./ui-choice.js";
-import { isWithinView, parseRef, writeUrl } from "./place.js";
+import { businessPlace, isWithinView, parseRef, writeUrl } from "./place.js";
+import { pageArea } from "./start.js";
 import { pointHeader } from "./point.js";
 
 const $ = (id) => document.getElementById(id);
@@ -38,6 +40,7 @@ const st = {
   shops: new Map(), cells: new Map(), cellDeg: 0, loaded: new Set(), picked: null, section: null, card: null, want: null,
   visible: { sections: true, squares: true, shops: true, shelters: true }, markers: [], map: null, returnFocus: null,
   point: null, pinMarker: null, pin: null, eng: null, canPin: false, isReady: false, resume: null, cardTurn: 0,
+  status: null, pages: new Map(), biz: null,
 };
 st.rp = st.link.rp;
 st.base = st.link.base;
@@ -170,6 +173,7 @@ async function loadSection(sectionId) {
   say(t("mg.sectionLoading", { name: sectionName(sectionId) || sectionId }));
   const data = await api.getSectionData(st.area.id, sectionId);
   st.loaded.add(sectionId);
+  st.pages.set(sectionId, pageArea(data.area, data.section));   // My business needs the section's record and example
   keep({ cells: data.town.cells, premises: data.premises, cellDeg: data.town.cell_deg });
   say(hint());
 }
@@ -211,7 +215,7 @@ function closeCard() {
 function shopLinks(shop) {
   const at = { section: shop.section, place: shop.id };
   return {
-    details: mainLink({ ...at, tab: "business" }), cost: mainLink({ ...at, tab: "cost" }),
+    details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openBusiness(), cost: mainLink({ ...at, tab: "cost" }),
     see3d: st.area.has_3d && shop.has_3d !== false ? `3d.html${writeUrl({ area: st.area.id, ...at, rp: st.rp })}` : null,
     directions: `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`,
   };
@@ -276,7 +280,7 @@ function clearPoint() {
 
 function pointLinks(place) {
   const at = { section: place.section?.id ?? null, place: place.id };   // writeUrl puts a point in the fragment, never the query
-  return { details: mainLink({ ...at, tab: "business" }), cost: mainLink({ ...at, tab: "cost" }),
+  return { details: `map.html${mapQuery({ ...at, tab: "business" })}`, onDetails: () => openBusiness(), cost: mainLink({ ...at, tab: "cost" }),
     directions: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}` };
 }
 
@@ -363,8 +367,9 @@ async function openShop(entry) {
 /* ---- this page's link, and the links that carry it ---- */
 
 /** The query for what is on show: the main page's fields, then the base map and the tilt. */
-const mapQuery = (extra = {}) =>
-  withMapView(writeUrl({ area: st.area?.id, section: st.section, place: st.picked, rp: st.rp, lang: langParam(), ...extra }), st.base, st.tilt);
+const sheetTab = () => (st.biz?.isOpen() ? "business" : null);
+const mapQuery = (extra = {}) => withMapView(writeUrl({ area: st.area?.id, section: st.section, tab: sheetTab(), place: st.picked,
+  rp: st.rp, lang: langParam(), ...extra }), st.base, st.tilt);
 
 /** This page's own address for what is on show, so a shared link opens the same view; the language, home and tab
  *  links follow it. */
@@ -379,10 +384,70 @@ function drawLinks() {
   $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
   $("mg-home").href = `map.html${writeUrl({ area: st.area.id, lang: langParam() })}`;   // this map's home: the whole area
   document.querySelectorAll("#mg-old, .mg-old-link").forEach((link) => { link.href = mainLink({ place: st.picked }); });
-  // the Area overview is this map; the other tabs are the old interface's
-  const tab = (key) => h("a", { href: key === "overview" ? `map.html${mapQuery()}` : mainLink({ place: st.picked, tab: key }),
-    "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
+  // the Area overview is this map and My business its sheet; the other tabs are the old interface's
+  const onMap = { overview: () => st.biz.close(), business: () => openBusiness() };
+  const href = (key) => (onMap[key] ? `map.html${mapQuery({ tab: key === "business" ? "business" : null })}` : mainLink({ place: st.picked, tab: key }));
+  const tab = (key) => h("a", { href: href(key), "aria-current": key === (sheetTab() ?? "overview") ? "page" : null,
+    onclick: onMap[key] && plainClick(onMap[key]) }, t(`tab.${key}`));
   $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
+}
+
+/** A click handler that keeps a link's own job (a new tab, a download) for a click with a key held or another button. */
+const plainClick = (act) => (event) => {
+  if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  act();
+};
+
+/* ---- My business, a sheet over the map (map-gl-biz.js) ---- */
+
+const sectionIdOf = (place) => (typeof place?.section === "string" ? place.section : place?.section?.id ?? null);
+/** The page a place is on, as the old interface makes it (start.js pageArea): its section's once loaded, else the area. */
+const pageOf = (place) => st.pages.get(sectionIdOf(place)) ?? st.area;
+
+/** The place on the card: a shop in the Place shape (place.js businessPlace), a checked point, or none. */
+function cardPlace() {
+  if (st.card?.kind === "point") return st.point?.place ?? null;
+  const shop = st.card?.kind === "shop" && st.shops.get(st.card.id);
+  return shop ? businessPlace(shop, st.area.id) : null;
+}
+
+function openBusiness(place = cardPlace(), options = {}) {
+  st.biz.open(place, pageOf(place), st.rp, options);
+}
+
+/** The sheet opened or closed: the link follows it, and focus that was in a closed sheet goes back to the card. */
+function onSheetChanged() {
+  writeLink();
+  if (st.biz.isOpen() || !(document.activeElement === document.body || $("mg-biz").contains(document.activeElement))) return;
+  ($("mg-place").hidden ? st.map.getCanvas() : $("mg-place").querySelector("h2"))?.focus({ preventScroll: true });
+}
+
+/** The old interface's chat, about the place: its link with ?tab=ask, which opens the chat over the page. */
+function askLink(place) {
+  const url = new URL(mainLink({ place: place?.id ?? null, section: sectionIdOf(place) }), window.location.href);
+  url.searchParams.set("tab", "ask");
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function wireBusiness() {
+  st.biz = createBusinessSheet({
+    sheet: $("mg-biz"), panel: $("panel-business"), back: $("mg-biz-back"), status: st.status,
+    areas: () => api.getAreas().then((list) => list.areas ?? []),
+    on: {
+      pickRp: pickFloodSize,
+      showOnMap: (place) => st.map.flyTo({ center: [place.lon, place.lat], zoom: Math.max(st.map.getZoom(), SHOP_ZOOM), duration: duration() }),
+      movePin: (place) => startPin({ at: place }),
+      goto: (tab, place) => window.location.assign(mainLink({ place: place?.id ?? null, section: sectionIdOf(place), tab })),
+      ask: (place) => window.location.assign(askLink(place)),
+      openArea: (areaId, place) => window.location.assign(`map.html${writeUrl({ area: areaId, tab: "business", place: place.id, rp: st.rp, lang: langParam() })}`),
+      find: () => $("mg-q").focus(),
+      checkPoint: () => startPin(),
+      changed: onSheetChanged,
+    },
+  });
+  $("mg-biz-back").textContent = t("mg.backToMap");
+  $("mg-biz-label").textContent = t("tab.business");
 }
 
 /* ---- the bar, the cards and their controls ---- */
@@ -397,6 +462,7 @@ function drawSummary() {
 function pickFloodSize(rp) {
   const hadFocus = $("mg-summary").contains(document.activeElement);
   st.rp = rp;
+  st.biz?.setRp(rp);
   paintFloodSize(st.map);
   drawSummary();
   if (hadFocus) $("mg-summary").querySelector(`[data-rp="${rp}"]`)?.focus();
@@ -544,8 +610,9 @@ function wireTools() {
 
 /** Escape: pin mode ends first, then the card closes; the location dialog has its own. */
 function onKey(event) {
-  if (event.key !== "Escape" || event.defaultPrevented || st.pin?.isAsking()) return;
+  if (event.key !== "Escape" || event.defaultPrevented || st.pin?.isAsking() || document.querySelector("dialog[open]")) return;
   if (st.pin?.isOn()) st.pin.cancel();
+  else if (st.biz?.isOpen()) st.biz.close();
   else closeCard();
 }
 
@@ -557,12 +624,14 @@ function showProblem(words) {
 }
 
 async function startFromLink() {
-  const { section, place } = st.link;
-  if (parseRef(place)?.kind === "point") return openLinkedPoint(place);
-  if (section && st.sections.some((known) => known.id === section)) await openSection(section);
-  const shop = place && st.shops.get(place);
-  if (shop) showShop(shop);
-  return undefined;
+  const { section, place, tab } = st.link;
+  if (parseRef(place)?.kind === "point") await openLinkedPoint(place);
+  else {
+    if (section && st.sections.some((known) => known.id === section)) await openSection(section);
+    const shop = place && st.shops.get(place);
+    if (shop) showShop(shop);
+  }
+  if (tab === "business") openBusiness(cardPlace(), { push: false });   // a link to the sheet opens it, with no step to go back to
 }
 
 /** A point the link names, checked again; a failure is said, and the map stays as it is. */
@@ -587,7 +656,8 @@ async function load() {
     const status = api.getStatus().catch(() => null);   // the pin needs the points' files (points_ready)
     const [data, satellite] = await Promise.all([st.link.area ? api.getAreaData(st.link.area) : api.getDefaultData(), satelliteTiles()]);
     Object.assign(st, { area: data.area, sections: data.sections ?? [], index: data.index ?? [], shelters: data.town?.shelters ?? [], satellite,
-      canPin: (await status)?.points_ready === true });
+      status: await status });
+    st.canPin = st.status?.points_ready === true;
     if (!st.sections.length) keep({ cells: data.town?.cells, premises: data.premises, cellDeg: data.town?.cell_deg });
     if (st.base === "sat" && !satellite) st.base = "map";
     return await baseStyle(st.base);
@@ -615,6 +685,7 @@ async function start() {
   }
   addShelters(st.map);
   wireTools();
+  wireBusiness();
   document.addEventListener("keydown", onKey);
   say(hint());
   return startFromLink();

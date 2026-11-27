@@ -7,6 +7,7 @@ import { h } from "./dom.js";
 import { createEngineer } from "./engineer.js";
 import { leafletDrawer } from "./engineer-leaflet.js";
 import { rememberUi } from "./ui-choice.js";
+import { loadOnce, readShopPhoto, shrinkPhoto } from "./place-data.js";
 import { DEFAULT_LANG, applyStatic, dateLocale, lang, t, wireLangSwitch } from "./i18n.js";
 import { createInsurance } from "./insurance.js";
 import { createNews } from "./news.js";
@@ -24,23 +25,8 @@ import { isPoint, pageLink, readUrl, writeUrl } from "./place.js";
 import { isCityView, linkedPlace, loadCityIndex, loadStart, missedWords, openLink, sectionOf } from "./start.js";
 import * as realVoice from "./voice.js";
 
-const PHOTO_MAX_EDGE = 1280;
-const PHOTO_QUALITY = 0.85;
 const SLOW_START_MS = 400;   // only a start slower than this says it is loading, so a quick one looks as it did
 const $ = (id) => document.getElementById(id);
-
-/** Shrink and re-encode in the browser: smaller upload, and location data in the file is dropped. */
-async function shrinkPhoto(file) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, PHOTO_MAX_EDGE / Math.max(bitmap.width, bitmap.height));
-  const canvas = h("canvas", { width: Math.round(bitmap.width * scale), height: Math.round(bitmap.height * scale) });
-  const context = canvas.getContext("2d");
-  context.fillStyle = "#fff";   // JPEG has no transparency
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  if (typeof bitmap.close === "function") bitmap.close();   // frees the decoded photo now, not whenever the GC gets to it
-  return canvas.toDataURL("image/jpeg", PHOTO_QUALITY);
-}
 
 /** Tabs as in the ARIA pattern: arrow keys, Home and End move between them; only the chosen one is in the tab order. */
 function wireTabs(onPick) {
@@ -182,15 +168,7 @@ async function sendPhoto(app, file) {
   const id = store.state.placeKey;
   if (!file || store.state.photos[id]?.busy) return;
   const setPhoto = (photo) => store.update({ photos: { ...store.state.photos, [id]: photo } });
-  const before = store.state.photos[id];   // kept until the new photo is read, and if reading it fails
-  setPhoto({ ...before, busy: true, error: null });
-  try {
-    const image = await shrinkPhoto(file).catch(() => { throw new Error(t("common.photoUnreadable")); });
-    setPhoto({ ...before, busy: true, error: null, preview: image });
-    setPhoto({ preview: image, ...(await api.sendPhoto({ place: id, image })) });
-  } catch (error) {
-    setPhoto({ ...before, busy: false, error: error.message });
-  }
+  await readShopPhoto(file, store.state.photos[id], setPhoto, (image) => api.sendPhoto({ place: id, image }));
   // the details were rebuilt; if focus fell to the page, put it back on the photo picker
   if (store.state.placeKey === id && document.activeElement === document.body) {
     $("panel-business").querySelector("input[type=file]")?.focus();
@@ -283,15 +261,9 @@ function estimateOnOpen(app, views, state, place) {
 /** How Google Maps lists a business. Never for a point: it is not a business, and it is not sent to Google. */
 async function loadListing(app, id) {
   const { store, start } = app;
-  const listing = store.state.listings[id];
-  if (!id || !start.status.maps_ready || isPoint(id) || (listing && !listing.error)) return;   // retry after an error
+  if (!id || !start.status.maps_ready || isPoint(id)) return;
   const setListing = (value) => store.update({ listings: { ...store.state.listings, [id]: value } });
-  setListing({ busy: true });
-  try {
-    setListing(await api.getPlace(id));
-  } catch (error) {
-    setListing({ error: error.message });
-  }
+  await loadOnce(store.state.listings[id], setListing, () => api.getPlace(id));   // asked again after an error
 }
 
 /** What the "Flood is coming" checklist is worked out from: the place on show and its flood size, the floor height a
@@ -313,15 +285,9 @@ function tideFor(app, place) {
  *  error is picked again (select, open). render asks for a place it has no answer for. */
 async function loadDrySpot(app, id) {
   const { store } = app;
-  const known = store.state.drySpots[id];
-  if (!id || (known && !known.error)) return;
+  if (!id) return;
   const setDry = (value) => store.update({ drySpots: { ...store.state.drySpots, [id]: value } });
-  setDry({ busy: true });
-  try {
-    setDry(await api.getDrySpot(id));
-  } catch (error) {
-    setDry({ error: error.message });
-  }
+  await loadOnce(store.state.drySpots[id], setDry, () => api.getDrySpot(id));
 }
 
 function loadEvacuation(app) {

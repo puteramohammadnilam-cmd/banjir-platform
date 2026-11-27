@@ -119,6 +119,43 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* day: the new map's light base map (map.html sets data-theme="light"; its dark map and photo set "dark", which keeps
+   the night above). The old interface's parts in its sheets (My business) then read as ink on a light page, matching the
+   map's own cards; the old page itself sets no theme and stays the night. Depth bands and squares do not change. */
+[data-theme="light"] {
+  color-scheme: light;
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-raised: #f8fafc;
+  --surface-sunk: #f1f5f9;
+  --glass: rgb(255 255 255 / 0.93);
+  --glass-edge: rgb(15 23 42 / 0.11);
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --field-border: #64748b;   /* 4.8:1 on white */
+  --ink: #0f172a;
+  --ink-2: #475569;
+  --ink-3: #5b6b80;          /* 5.4:1 on white */
+  --brand: #0369a1;          /* the map's accent: 5.9:1 on white */
+  --brand-ink: #075985;
+  --brand-deep: #e0f2fe;
+  --brand-wash: rgb(3 105 161 / 0.1);
+  --action-hover: #075985;
+  --on-action: #ffffff;
+  --glow: 0 0 0 1px rgb(3 105 161 / 0.35), 0 4px 12px -4px rgb(3 105 161 / 0.4);
+  --marker: #d97706;
+  --risk-normal: #15803d;
+  --risk-normal-wash: rgb(22 163 74 / 0.12);
+  --risk-alert: #ca8a04;
+  --risk-alert-ink: #854d0e;
+  --risk-alert-wash: rgb(234 179 8 / 0.16);
+  --risk-warning: #c2410c;
+  --risk-warning-wash: rgb(234 88 12 / 0.12);
+  --risk-danger: #be123c;
+  --risk-danger-wash: rgb(225 29 72 / 0.1);
+  --shadow-float: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.12);
+}
+
 /* paper: the printed flood plan and area summary are ink on white, whatever the screen shows */
 @media print {
   :root {

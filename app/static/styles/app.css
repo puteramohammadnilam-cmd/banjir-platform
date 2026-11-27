@@ -259,6 +259,7 @@ body.load-failed :is(.tabs, main > .panel, .chat-fab, .finder) { display: none !
 .drawing { display: block; margin: var(--space-2) 0 var(--space-4); }
 .drawing img { display: block; max-width: 100%; height: auto; filter: invert(1) hue-rotate(180deg) brightness(0.92); }   /* navy lines on see-through paper, turned to pale lines on the night */
 @media print { .drawing img { filter: none; } }
+[data-theme="light"] .drawing img { filter: none; }   /* on the new map's light look the lines stay navy */
 .pick-empty .drawing { margin: var(--space-4) 0 0; }   /* under the buttons, past the grid's own gap */
 .mode-content .drawing { margin: 0; }   /* the dialog spaces its parts with a gap */
 @media print { .drawing { display: none; } }

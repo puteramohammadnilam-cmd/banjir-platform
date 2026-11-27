@@ -51,6 +51,7 @@ export default Object.freeze({
   "mg.say.pointDry": "Dalam banjir 1 dalam {rp} tahun, model tidak menunjukkan air di petak ini.",
   "mg.say.pointWet": "Dalam banjir 1 dalam {rp} tahun, model menunjukkan kira-kira {m} m air di petak ini: {words}.",
   "mg.movePin": "Alihkan pin",
+  "mg.backToMap": "Kembali ke peta",
   "mg.pinTap": "Atau ketik tempat itu pada peta.",
   "mg.pointLoading": "Menyemak titik dalam pautan…",
   "mg.pointMissed": "Titik dalam pautan tidak dapat disemak.",

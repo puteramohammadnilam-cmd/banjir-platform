@@ -142,12 +142,7 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg .aim-help, .mg .aim-status { margin: 0; color: var(--mg-ink2); }
 .mg .aim-status:empty { display: none; }
 .mg .aim-actions, .mg .dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.mg .btn { padding: 8px 14px; border: 1px solid var(--mg-line); border-radius: 10px; background: var(--mg-solid); font-weight: 600; }
-.mg .btn:hover { border-color: var(--mg-line-hi); }
-.mg .btn-primary { border-color: var(--mg-accent); background: var(--mg-accent); color: var(--mg-accent-ink); }
-.mg .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.mg .btn.is-busy { opacity: 0.7; cursor: progress; }
-.mg .btn-link { padding: 0; border: 0; background: none; color: var(--mg-accent); text-decoration: underline; }
+.mg .btn.is-busy { opacity: 0.7; cursor: progress; }   /* the buttons themselves are the old interface's (app.css), in this theme */
 .mg .alert-inline { margin: 0; color: var(--mg-deep); font-weight: 600; }
 .mg dialog.dialog { max-width: min(26rem, calc(100vw - 32px)); padding: 18px 20px; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
   background: var(--mg-solid); color: var(--mg-ink); box-shadow: var(--mg-shadow); }
@@ -190,6 +185,16 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg .badge-new { display: inline-block; margin-inline-start: 6px; padding: 1px 6px; border-radius: 999px; background: #ffb14a; color: #1a1100;
   font: 800 10px/1.5 var(--mg-font); letter-spacing: 0.06em; vertical-align: middle; }
 
+/* My business, a sheet over the map (js/map-gl-biz.js), in the old interface's parts (styles/*.css, light or dark with
+   the base map); on a phone it fills the screen, under its own bar with the way back */
+.mg-sheet { position: fixed; top: 118px; left: 14px; bottom: 14px; z-index: 6; width: min(1000px, calc(100vw - 324px));
+  display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
+  background: var(--canvas); color: var(--ink); box-shadow: var(--mg-shadow); animation: mg-rise 220ms var(--mg-ease); }
+.mg-sheet-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.mg-sheet-label { color: var(--ink-3); font: 600 11px var(--mg-mono); letter-spacing: 0.05em; text-transform: uppercase; }
+.mg-sheet-body { flex: 1; overflow: auto; padding: 18px 20px 28px; font-size: 1rem; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { .mg-sheet { animation: none; } }
+
 /* the strip at the foot, problems, map pieces */
 .mg-status { position: fixed; left: 14px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px;
   color: var(--mg-ink2); font: 500 11.5px var(--mg-mono); }
@@ -205,7 +210,11 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
    to a strip, and a place card is a bottom sheet */
 @media (max-width: 700px) {
   .mg-top { top: 10px; left: 10px; right: 10px; flex-wrap: wrap; gap: 6px; padding: 6px 8px; }
-  .mg-area, .mg-spacer, .mg-tag, .mg-tabs, .mg-layers, .mg-status { display: none; }
+  .mg-area, .mg-spacer, .mg-tag, a.mg-tag, .mg-layers, .mg-status { display: none; }   /* a.mg-tag: its own rule above is the stronger one */
+  /* the site's tabs as one row of chips under the bar, scrolled sideways when they do not fit */
+  .mg-tabs { top: 108px; left: 10px; right: 10px; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .mg-tabs::-webkit-scrollbar { display: none; }
+  .mg-tabs a { flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; white-space: nowrap; }
   .mg-status.mg-alert { display: flex; top: 160px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows */
   .mg-search input { font-size: 16px; }   /* under 16px, iOS zooms the page into the box */
   .mg-seg button, .mg-seg a { padding: 6px 9px; }
@@ -221,11 +230,13 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg-side:has(.mg-place:not([hidden])) .mg-summary { display: none; }
   .mg-place { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 62vh; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   /* the tools under the bar, on the right; engineer mode's panel a sheet like the place card, which covers it (.mg-side's z-index) */
-  .mg-right { top: 108px; right: 10px; bottom: auto; width: auto; }
+  .mg-right { top: 152px; right: 10px; bottom: auto; width: auto; }
   .mg-tool { min-height: 44px; padding: 7px 10px; }
   .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   .mg:has(.mg-eng:not([hidden])) .mg-summary { display: none; }
   .mg .btn { min-height: 44px; }
+  .mg-sheet { inset: 0; width: auto; border: 0; border-radius: 0; }
+  .mg-sheet-back { min-height: 44px; }
   .mg-handle { display: block; width: 40px; height: 4px; margin: 8px auto 0; border-radius: 2px; background: var(--mg-line); }
   .mg .maplibregl-ctrl-bottom-right { bottom: 120px; }
 }

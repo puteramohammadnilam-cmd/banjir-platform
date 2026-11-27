@@ -13,6 +13,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..900&family=Martian+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <!-- the old interface's parts that the sheets show (My business), in this map's light or dark look (tokens.css) -->
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/app.css">
+  <link rel="stylesheet" href="styles/views.css">
+  <link rel="stylesheet" href="styles/business.css">
+  <link rel="stylesheet" href="styles/act.css">
   <link rel="stylesheet" href="map-preview/map-gl.css">
   <script src="vendor/maplibre-gl-csp.js"></script>
   <script type="module" src="js/map-gl.js"></script>
@@ -53,6 +59,15 @@
     <section class="mg-hud mg-card mg-eng" id="mg-eng" aria-labelledby="engineer-heading" hidden></section>
   </div>
   <div class="mg-cross" id="mg-cross" aria-hidden="true" hidden></div>
+
+  <!-- My business, a sheet over the map (js/map-gl-biz.js): the old interface's business card in this map's look -->
+  <section class="mg-sheet" id="mg-biz" aria-labelledby="mg-biz-label" hidden>
+    <div class="mg-sheet-bar">
+      <button type="button" class="mg-btn mg-sheet-back" id="mg-biz-back">Back to the map</button>
+      <span class="mg-sheet-label" id="mg-biz-label">My business</span>
+    </div>
+    <div class="mg-sheet-body" id="panel-business"></div>
+  </section>
 
   <p class="mg-status mg-hud"><b aria-hidden="true"></b><span id="mg-status">River flood model · 90 m squares</span> · <span id="mg-hint">Loading the map…</span></p>
   <p class="mg-problem mg-hud" id="mg-problem" role="alert" hidden></p>
