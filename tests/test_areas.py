@@ -252,7 +252,7 @@ def test_the_area_list_gives_each_area_with_its_counts(client):
     assert len(listed) == 5 and all(listed[i]["has_history"] for i in ("kuantan", "kota-bharu", "kuala-terengganu"))
     state = listed[OTHER]
     assert (state["counts"], state["has_history"], state["has_shelters"], state["has_sections"]) == (
-        {"businesses": 7503, "squares": 0, "shelters": 2}, False, True, True), "a state stores no squares: pictures instead"
+        {"businesses": 7503, "squares": 0, "shelters": 2}, True, True, True), "a state stores no squares: pictures instead"
     assert [alias["id"] for alias in state["aliases"]] == ["kota-tinggi"], "the old town area's id"
 
 
@@ -543,3 +543,15 @@ def test_an_area_says_whether_its_shops_have_the_3d_view():
     flags = {area.id: areas.summary(area)["has_3d"] for area in areas.load_all()}
     assert flags == {area.id: any((areas.FLOOD3D_DIR / area.id).glob("*.json")) for area in areas.load_all()}
     assert True in flags.values() and False in flags.values()   # some areas have it, some not yet
+
+
+def test_every_johor_district_has_a_sourced_flood_record():
+    johor = areas.get(OTHER)
+    whole = sections.history_for(johor)
+    assert (whole["first_year"], whole["recent_from"]) == (2006, 2019) and len(whole["floods"]) == 15
+    assert all(flood["sources"] and all(s["url"].startswith("https://") for s in flood["sources"]) for flood in whole["floods"])
+    for district in sections.listed(OTHER):
+        own = sections.history_for(johor, district["id"])["floods"]
+        assert own and all(district["id"] in flood["sections"] for flood in own), district["id"]
+    worst = next(f for f in whole["floods"] if f["id"] == "jh-2023-03")
+    assert "32,312" in worst["what"] and len(worst["sections"]) == 10

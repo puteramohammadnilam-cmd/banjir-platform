@@ -33,7 +33,7 @@
     "sections": "Districts are Johor's 10 as drawn on OpenStreetMap (fetched 27 Nov 2026; ODbL), not the state's survey lines. Outlines are simplified to within 10 m for the map. A business belongs to the district that holds it, or to the nearest one within 300 m. A district's share of wet squares is over its land and is not the risk of any one shop: a mostly dry district can still have riverside shops in deep water.",
     "shelters": "Relief centres (PPS) used in past floods, not an official list: 2 schools in Kota Tinggi town named in news reports (RTM, Harian Metro, MAIJ) and placed with OpenStreetMap. None is collected for the rest of Johor yet, and a business more than 15 km from a listed centre is shown none. A centre open in one flood may not open in the next; the relief centres open card shows JKM's own list when its service answers.",
     "depths": "Flood depths are the European Commission JRC global river flood model v2.1 (CC BY 4.0), in 90 m squares, for floods of 1 in 10, 20 and 50 years, drawn as one picture per district. It models rivers overflowing, not drains, flash floods or the sea, so read its depths as the model's, not as what to expect.",
-    "history": "No record of past floods is collected for Johor yet, so the page shows none. That does not mean the state has not flooded."
+    "history": "Johor's larger floods from 2006 to 2026 as news reports and one study give them, each opened and dated, with the state disaster committee's evacuee figures for the day reported. Smaller and flash floods are mostly missing, so it is not a complete record."
   },
   "history": null
 }
