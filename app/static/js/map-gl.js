@@ -197,6 +197,7 @@ function showCard(nodes, { focus = true } = {}) {
 
 function closeCard() {
   const wasOpen = !$("mg-place").hidden;
+  st.biz?.close();   // the sheet is the card's: it goes with it (and before the aim panel takes the card)
   st.cardTurn += 1;
   st.pin?.stop();
   clearPoint();
@@ -236,6 +237,7 @@ function showShop(shop, { fly = false, focus = true, move = true } = {}) {
   markPicked(shop.id);
   showCard(shopCard(shop, { rp: st.rp, sectionName: sectionName(shop.section), shelters: st.shelters, links: shopLinks(shop),
     onClose: closeCard, onShare: share }), { focus });
+  if (st.biz?.isOpen()) openBusiness();   // a shop picked while the sheet is open: the sheet shows it
   writeLink();
   say(shop.name);
   if (!move) return;
@@ -250,6 +252,7 @@ function showSection(sectionId, { focus = true } = {}) {
   if (!props) return;
   st.pin?.stop();
   clearPoint();
+  st.biz?.close();   // a section has no business card
   st.card = { kind: "section", id: sectionId };
   showCard(sectionCard(props, { rp: st.rp, link: mainLink({ section: sectionId }), onClose: closeCard }), { focus });
 }
@@ -295,10 +298,15 @@ function showPoint(place, squares, { focus = true, move = true } = {}) {
   const sectionId = place.section?.id;
   if (sectionId && st.sections.some((section) => section.id === sectionId)) {
     st.section = sectionId;
-    loadSection(sectionId).then(() => st.point?.place === place && say(title), (error) => say(t("mg.failed", { why: error.message }), true));
+    loadSection(sectionId).then(() => {
+      if (st.point?.place !== place) return;
+      say(title);
+      if (st.biz?.isOpen()) openBusiness();   // the section's own flood record and example, now it is in
+    }, (error) => say(t("mg.failed", { why: error.message }), true));
   }
   showCard(pointCard(place, { rp: st.rp, title, subline, links: pointLinks(place), onClose: closeCard, onShare: share,
     onMove: () => startPin({ at: place }) }), { focus });
+  if (st.biz?.isOpen()) openBusiness();
   writeLink();
   say(title);
   if (!move) return;
@@ -359,9 +367,12 @@ async function openSection(sectionId, { fit = true } = {}) {
 /** A shop picked in the search: its section loads first; a later pick or click wins over a slow load. */
 async function openShop(entry) {
   st.want = entry.id;
+  const hadSheet = st.biz?.isOpen();   // opening its section closes the sheet: a search made in it opens it again
   if (entry.section && st.sections.some((section) => section.id === entry.section)) await openSection(entry.section, { fit: false });
   const shop = st.shops.get(entry.id);
-  if (shop && st.want === entry.id) showShop(shop, { fly: true });
+  if (!shop || st.want !== entry.id) return;
+  showShop(shop, { fly: true });
+  if (hadSheet) openBusiness();
 }
 
 /* ---- this page's link, and the links that carry it ---- */
@@ -419,7 +430,13 @@ function openBusiness(place = cardPlace(), options = {}) {
 /** The sheet opened or closed: the link follows it, and focus that was in a closed sheet goes back to the card. */
 function onSheetChanged() {
   writeLink();
-  if (st.biz.isOpen() || !(document.activeElement === document.body || $("mg-biz").contains(document.activeElement))) return;
+  const isOpen = st.biz.isOpen();
+  // what the sheet covers is out of reach by keyboard and screen reader: the cards beside the map, and on a phone, where
+  // the sheet fills the screen, the bar, the tabs, the tools and the map too
+  for (const selector of [".mg-side", ".mg-top", ".mg-tabs", ".mg-right", "#mg-map"]) {
+    document.querySelector(selector).inert = isOpen && (selector === ".mg-side" || PHONE.matches);
+  }
+  if (isOpen || !(document.activeElement === document.body || $("mg-biz").contains(document.activeElement))) return;
   ($("mg-place").hidden ? st.map.getCanvas() : $("mg-place").querySelector("h2"))?.focus({ preventScroll: true });
 }
 
@@ -431,6 +448,7 @@ function askLink(place) {
 }
 
 function wireBusiness() {
+  PHONE.addEventListener("change", () => st.biz.isOpen() && onSheetChanged());   // a turn or a resize: what it covers changes
   st.biz = createBusinessSheet({
     sheet: $("mg-biz"), panel: $("panel-business"), back: $("mg-biz-back"), status: st.status,
     areas: () => api.getAreas().then((list) => list.areas ?? []),
@@ -440,9 +458,10 @@ function wireBusiness() {
       movePin: (place) => startPin({ at: place }),
       goto: (tab, place) => window.location.assign(mainLink({ place: place?.id ?? null, section: sectionIdOf(place), tab })),
       ask: (place) => window.location.assign(askLink(place)),
-      openArea: (areaId, place) => window.location.assign(`map.html${writeUrl({ area: areaId, tab: "business", place: place.id, rp: st.rp, lang: langParam() })}`),
+      // no tab, as place.js pageLink: the query of a move that carries a point is the same as any other move's
+      openArea: (areaId, place) => window.location.assign(`map.html${withMapView(writeUrl({ area: areaId, place: place.id, rp: st.rp, lang: langParam() }), st.base, st.tilt)}`),
       find: () => $("mg-q").focus(),
-      checkPoint: () => startPin(),
+      checkPoint: st.canPin ? () => startPin() : null,
       changed: onSheetChanged,
     },
   });

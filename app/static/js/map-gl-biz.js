@@ -21,7 +21,12 @@ export function createBusinessSheet({ sheet, panel, back, status, areas, on }) {
   const st = { place: null, page: null, rp: "50", view: null, viewKey: null, areas: [], pushed: false, ignorePop: false,
     photos: {}, listings: {}, drySpots: {} };
   const floodMode = createFloodMode();
-  areas().then((list) => { st.areas = list; }, () => {});   // only a point in another area needs them, for its offer
+  // only a point in another area needs them, for its offer: a card made before they came is made again
+  areas().then((list) => {
+    st.areas = list;
+    st.view = null;
+    if (!sheet.hidden) draw();
+  }, () => {});
 
   const idOf = () => st.place?.id;
   /** The setter for one place's answer, that place taken when it is asked for: an answer that comes after another
@@ -44,16 +49,17 @@ export function createBusinessSheet({ sheet, panel, back, status, areas, on }) {
       onWarning: (opener) => floodMode.open(context(), opener),
       onPhoto: (file) => {
         const id = idOf();
+        if (!file || st.photos[id]?.busy) return;   // a picker closed with no photo, or one still being read
         readShopPhoto(file, st.photos[id], store("photos", id), (image) => api.sendPhoto({ place: id, image }));
       },
       onPick: (rp) => on.pickRp(rp),
-      goto: (tab) => (tab === "overview" ? close() : on.goto(tab, st.place)),
+      goto: (tab) => on.goto(tab, st.place),   // the old interface's tabs; its overview has the flood record
       showOnMap: () => { const place = st.place; close(); on.showOnMap(place); },
       onMovePin: () => { const place = st.place; close(); on.movePin(place); },
       onAsk: () => on.ask(st.place),
       onOpenArea: (areaId) => on.openArea(areaId, st.place),
       onFind: () => { close(); on.find(); },
-      onCheckPoint: () => { close(); on.checkPoint(); },
+      onCheckPoint: on.checkPoint && (() => { close(); on.checkPoint(); }),   // none when this build cannot check points
     });
     return st.view;
   }
@@ -96,8 +102,11 @@ export function createBusinessSheet({ sheet, panel, back, status, areas, on }) {
     }
     if (!sheet.hidden) {
       st.pushed = false;
+      document.querySelectorAll?.("dialog[open]").forEach((dialog) => dialog.close());   // a swipe back with the checklist open
       hide();
+      return;
     }
+    on.changed();   // a forward or back that left the sheet as it was: the link follows what is on show
   });
   back.addEventListener("click", close);
 

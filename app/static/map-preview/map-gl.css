@@ -26,8 +26,10 @@
 html, body { margin: 0; height: 100%; }
 body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: #e2e8f0; -webkit-font-smoothing: antialiased; overflow: hidden; }
 .mg [hidden] { display: none !important; }
-.mg a { color: inherit; }
-.mg button { font: inherit; color: inherit; cursor: pointer; }
+/* :where() keeps these at an element's weight, so the old interface's .btn, .btn-primary and .btn-link (in the sheets,
+   the aim panel and the dialogs) keep their own colours and weight */
+:where(.mg) a { color: inherit; }
+:where(.mg) button { font: inherit; color: inherit; cursor: pointer; }
 .mg :focus-visible { outline: 2px solid var(--mg-accent); outline-offset: 2px; }
 .mg-map { position: fixed; inset: 0; }
 .mg-hud { background: var(--mg-hud); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--mg-line);
@@ -137,7 +139,9 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg-cross::before, .mg-cross::after { content: ""; position: absolute; background: #e11d48; box-shadow: 0 0 0 1.5px #fff; }
 .mg-cross::before { left: -15px; top: -1.5px; width: 30px; height: 3px; }
 .mg-cross::after { left: -1.5px; top: -15px; width: 3px; height: 30px; }
-.mg .aim-panel { display: grid; gap: 8px; padding: 6px 16px 16px; }
+.mg .aim-panel { position: static; display: grid; gap: 8px; width: auto; max-height: none; margin: 0; padding: 6px 16px 16px; overflow: visible;
+  border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; }   /* views.css floats it over the old map */
+.mg .aim-actions { margin-top: 0; }
 .mg .aim-heading { margin: 8px 0 0; font: 700 18px/1.2 var(--mg-font); }
 .mg .aim-help, .mg .aim-status { margin: 0; color: var(--mg-ink2); }
 .mg .aim-status:empty { display: none; }
@@ -187,13 +191,21 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 
 /* My business, a sheet over the map (js/map-gl-biz.js), in the old interface's parts (styles/*.css, light or dark with
    the base map); on a phone it fills the screen, under its own bar with the way back */
-.mg-sheet { position: fixed; top: 118px; left: 14px; bottom: 14px; z-index: 6; width: min(1000px, calc(100vw - 324px));
+.mg-sheet { position: fixed; top: 118px; left: 14px; bottom: 14px; z-index: 4; width: min(1000px, calc(100vw - 324px));
   display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--mg-line); border-radius: var(--mg-r);
   background: var(--canvas); color: var(--ink); box-shadow: var(--mg-shadow); animation: mg-rise 220ms var(--mg-ease); }
 .mg-sheet-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .mg-sheet-label { color: var(--ink-3); font: 600 11px var(--mg-mono); letter-spacing: 0.05em; text-transform: uppercase; }
 .mg-sheet-body { flex: 1; overflow: auto; padding: 18px 20px 28px; font-size: 1rem; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) { .mg-sheet { animation: none; } }
+[data-theme="light"] .mode-open { color: #1a1100; }   /* "Flood is coming": dark words on the light theme's amber (white is 3.2:1) */
+/* business.css lays My business in two columns from a 901 px screen; the sheet is narrower than the screen, so it keeps
+   one column until the sheet itself is wide enough */
+@media (max-width: 1239px) {
+  .mg #panel-business:has(> .biz-grid:not([hidden])) { display: block; }
+  .mg #panel-business > .biz-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .mg #panel-business :is(.risk, .biz-side) { grid-area: auto; }   /* business.css's named areas would add columns */
+}
 
 /* the strip at the foot, problems, map pieces */
 .mg-status { position: fixed; left: 14px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px;
@@ -214,8 +226,8 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   /* the site's tabs as one row of chips under the bar, scrolled sideways when they do not fit */
   .mg-tabs { top: 108px; left: 10px; right: 10px; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
   .mg-tabs::-webkit-scrollbar { display: none; }
-  .mg-tabs a { flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; white-space: nowrap; }
-  .mg-status.mg-alert { display: flex; top: 160px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows */
+  .mg-tabs a { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; white-space: nowrap; }
+  .mg-status.mg-alert { display: flex; top: 212px; right: 10px; bottom: auto; left: 10px; z-index: 6; }   /* a problem still shows, under the tools */
   .mg-search input { font-size: 16px; }   /* under 16px, iOS zooms the page into the box */
   .mg-seg button, .mg-seg a { padding: 6px 9px; }
   .mg-x { width: 44px; height: 44px; }
@@ -230,12 +242,12 @@ a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
   .mg-side:has(.mg-place:not([hidden])) .mg-summary { display: none; }
   .mg-place { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 62vh; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   /* the tools under the bar, on the right; engineer mode's panel a sheet like the place card, which covers it (.mg-side's z-index) */
-  .mg-right { top: 152px; right: 10px; bottom: auto; width: auto; }
+  .mg-right { top: 160px; right: 10px; bottom: auto; width: auto; }
   .mg-tool { min-height: 44px; padding: 7px 10px; }
   .mg-eng { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; max-height: 62vh; padding-top: 16px; border-radius: 16px 16px 0 0; background: var(--mg-solid); }
   .mg:has(.mg-eng:not([hidden])) .mg-summary { display: none; }
   .mg .btn { min-height: 44px; }
-  .mg-sheet { inset: 0; width: auto; border: 0; border-radius: 0; }
+  .mg-sheet { inset: 0; z-index: 7; width: auto; border: 0; border-radius: 0; }   /* over the bar and any alert: it has its own way back */
   .mg-sheet-back { min-height: 44px; }
   .mg-handle { display: block; width: 40px; height: 4px; margin: 8px auto 0; border-radius: 2px; background: var(--mg-line); }
   .mg .maplibregl-ctrl-bottom-right { bottom: 120px; }
