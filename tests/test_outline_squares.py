@@ -175,9 +175,24 @@ def test_subtract_keeps_what_is_not_taken(spans, taken, left):
 def test_an_area_with_no_stored_squares_gets_the_same_section_counts_from_the_depth_files(built):
     premises, town, depth_set = built
     stored = asec.build(premises, town, SECTIONS, depth_set)
-    scanned = asec.build(premises, {**town, "cells": []}, SECTIONS, depth_set)
+    scanned = asec.build(premises, {**town, "cells": []}, SECTIONS, depth_set, scan=True)
     assert scanned["sections"] == stored["sections"] and scanned["city"] == stored["city"]
     assert scanned["outside_sections"] is None and stored["outside_sections"]["cells"] > 0
+    dry = asec.build(premises, town, SECTIONS, depth_set)
+    assert dry["outside_sections"] == stored["outside_sections"], "without --scan, the stored squares, as before"
+
+
+def test_an_open_ring_is_named_by_its_outline(depths):
+    geometry = {"type": "Polygon", "coordinates": [[(100.1, 9.9), (104.9, 9.6), (101.3, 6.1)]]}   # not closed
+    with pytest.raises(ValueError, match="^open: .*odd number"):
+        osq.scan(depths, [{"id": "open", "name": "Open", "geometry": geometry, "bbox": geo.bbox(geometry)}])
+
+
+def test_pictures_from_an_earlier_run_that_are_no_longer_listed_are_removed(depths, tmp_path):
+    osq.write_pictures(tmp_path, osq.scan(depths, OUTLINES), depths.grids[0])
+    doc = osq.write_pictures(tmp_path, osq.scan(depths, OUTLINES[:1]), depths.grids[0])
+    listed = {f["file"] for o in doc["outlines"] for rp in o["files"].values() for f in rp.values()}
+    assert {p.name for p in tmp_path.glob("*.png")} == listed and len(listed) == 6
 
 
 RAW_SECTIONS = sections_io.default_path()

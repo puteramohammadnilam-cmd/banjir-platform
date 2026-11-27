@@ -1,7 +1,7 @@
 """The river model's squares inside each of an area's outlines (a city's sections or a state's districts), counted and
 drawn straight from the JRC flood depth files, row by row. Standard library only.
 
-    .venv/bin/python tools/outline_squares.py --sections FILE --out DIR [--rasters DIR] [--counts-only]
+    .venv/bin/python tools/outline_squares.py --sections FILE (--out DIR | --counts-only) [--rasters DIR] [--expected N]
 
 Fast enough for a whole state: Johor's box holds about 5 million squares, while app/raster.py view_cells reads at
 most 100,000 at once and tools/area_sections.py's square-by-square test is far too slow there. For each outline, in the
@@ -140,7 +140,10 @@ def claim(outlines: Sequence[dict], grid: raster.Grid) -> list[dict[int, list[Sp
     for row in sorted({row for found in edges for row in found}):
         taken: list[Span] = []
         for i, found in enumerate(edges):
-            spans = subtract(row_spans(found.get(row, ()), grid, row), taken)
+            try:
+                spans = subtract(row_spans(found.get(row, ()), grid, row), taken)
+            except ValueError as error:
+                raise ValueError(f"{outlines[i]['id']}: {error}") from None
             if spans:
                 claimed[i][row] = spans
                 taken = _merge([*taken, *spans])
@@ -194,8 +197,11 @@ def _file_entry(path: Path) -> dict:
 
 
 def write_pictures(out: Path, scanned: Sequence[dict], grid: raster.Grid) -> dict:
-    """The PNGs and flood_pictures.json (see the module docstring); returns the JSON's content."""
+    """The PNGs and flood_pictures.json (see the module docstring); returns the JSON's content. Pictures left from an
+    earlier run whose outline or flood size is gone are removed, so the folder holds what the JSON lists."""
     out.mkdir(parents=True, exist_ok=True)
+    for old in (path for rp in RPS for theme in PALETTES for path in out.glob(f"*_rp{rp}_{theme}.png")):
+        old.unlink()   # only this tool's own names: {id}_rp{rp}_{theme}.png
     rows_out = []
     for item in scanned:
         entry = {"id": item["id"], "name": item["name"], "counts": item["counts"], "bounds": None, "width": 0,
@@ -223,12 +229,15 @@ def write_pictures(out: Path, scanned: Sequence[dict], grid: raster.Grid) -> dic
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--sections", type=Path, required=True, help="the outlines' GeoJSON (tools/sections_io.py)")
-    parser.add_argument("--out", type=Path, required=True, help="the folder for the pictures and flood_pictures.json")
+    parser.add_argument("--out", type=Path, help="the folder for the pictures and flood_pictures.json")
     parser.add_argument("--rasters", type=Path, help="folder of JRC depth files (default app/data/rasters)")
     parser.add_argument("--counts-only", action="store_true", help="print the counts and write nothing")
+    parser.add_argument("--expected", type=int, help="the number of outlines there must be")
     args = parser.parse_args(argv)
+    if not args.counts_only and not args.out:
+        parser.error("--out is needed unless --counts-only")
     depth_set = raster.DepthSet.load(args.rasters or raster.raster_dir(), cache_tiles=CACHE_TILES)
-    outlines = sections_io.load_sections(args.sections)
+    outlines = sections_io.load_sections(args.sections, args.expected)
     scanned = scan(depth_set, outlines, pictures=not args.counts_only)
     if not args.counts_only:
         write_pictures(args.out, scanned, _one_grid(depth_set, outlines)[0])
