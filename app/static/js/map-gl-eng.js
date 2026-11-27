@@ -65,9 +65,10 @@ export function glDrawer({ getMap, beforeId, hasOurLayers, isAiming = () => fals
   return {
     isAiming,
     picture(key, url, bounds, opacity) {
-      shown[key] = { url, bounds, opacity };
       const map = ready();
-      if (!map) return;
+      const isSame = shown[key]?.url === url && Boolean(map?.getLayer(layerId(key)));
+      shown[key] = { url, bounds, opacity };
+      if (!map || isSame) return;   // already drawn: not loaded again, and it keeps its place among the layers
       listen(map);
       removeImage(map, layerId(key));
       addImage(map, layerId(key), shown[key], beforeId(map, key));

@@ -3,7 +3,7 @@
 // aria-sort on their column alone and say the new order in a live region; the figures follow the flood size on show.
 // Sections with `indexes` add flash flood potential and, once allowed, our score (susceptibility.js).
 import { h } from "./dom.js";
-import { dataWord, t } from "./i18n.js";
+import { dataWord, formatNumber, t } from "./i18n.js";
 import { FLASH_METRIC, SCORE_METRIC, shareClass, shareOf, shareText } from "./choropleth.js";
 import { highShare, oneDecimal, scoreOf, swatchStyle } from "./susceptibility.js";
 
@@ -44,7 +44,8 @@ const indexCells = (row, columns) => [
   columns.includes("score") && indexCell(row.score, SCORE_METRIC, oneDecimal),
 ];
 
-const businessesText = ({ wet, total }) => (total ? t("overview.wetFigure", { wet, total }) : t("sections.noneMapped"));
+const businessesText = ({ wet, total }) => (total ? t("overview.wetFigure", { wet: formatNumber(wet), total: formatNumber(total) })
+  : t("sections.noneMapped"));
 
 function rowNode(row, { hrefOf, onHighlight, columns }) {
   const share = Number(row.share.toFixed(3));

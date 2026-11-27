@@ -17361,33 +17361,6 @@
   "shelter": null
  },
  {
-  "id": "node-4142124493",
-  "name": "K Tinggi Hawker",
-  "sector": "eatery",
-  "kind": "food_court",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7276234,
-  "lon": 103.9005517,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": 1.28,
-   "20": 1.46,
-   "50": 1.7
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 20,
-   "depth_m": {
-    "10": 1.21,
-    "20": 1.39,
-    "50": 1.58
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-9835255291",
   "name": "KBH Chicken Rice (Eco Palladium)",
   "sector": "eatery",
@@ -18270,33 +18243,6 @@
    "name": "a road with no name",
    "kind": "service",
    "distance_m": 0,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-6250843928",
-  "name": "KFC",
-  "sector": "eatery",
-  "kind": "fast_food",
-  "is_chain": true,
-  "section": "kota-tinggi",
-  "lat": 1.7337073,
-  "lon": 103.906028,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "service",
-   "distance_m": 16,
    "depth_m": {
     "10": null,
     "20": null,
@@ -28080,33 +28026,6 @@
   "shelter": null
  },
  {
-  "id": "node-11292978169",
-  "name": "Local food Center",
-  "sector": "eatery",
-  "kind": "restaurant",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7368529,
-  "lon": 103.8903945,
-  "map_last_edited": "2023-10-27",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 18,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-4856821124",
   "name": "Lok Lok",
   "sector": "eatery",
@@ -37260,33 +37179,6 @@
   "shelter": null
  },
  {
-  "id": "node-6482416590",
-  "name": "OldTown White Coffee",
-  "sector": "eatery",
-  "kind": "cafe",
-  "is_chain": true,
-  "section": "kota-tinggi",
-  "lat": 1.7339952,
-  "lon": 103.9063744,
-  "map_last_edited": "2022-03-04",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 14,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-10946617913",
   "name": "OldTown White Coffee",
   "sector": "eatery",
@@ -40383,33 +40275,6 @@
    "name": "Jalan Riang 1",
    "kind": "residential",
    "distance_m": 14,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-4141087690",
-  "name": "Public Restaurant",
-  "sector": "eatery",
-  "kind": "restaurant",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7218193,
-  "lon": 103.8978823,
-  "map_last_edited": "2023-05-20",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "residential",
-   "distance_m": 23,
    "depth_m": {
     "10": null,
     "20": null,
@@ -69444,33 +69309,6 @@
   "shelter": null
  },
  {
-  "id": "node-7296262090",
-  "name": "Tadpole Cafe",
-  "sector": "eatery",
-  "kind": "restaurant",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7355937,
-  "lon": 103.8911193,
-  "map_last_edited": "2021-01-03",
-  "depth_m": {
-   "10": 1.64,
-   "20": 1.87,
-   "50": 2.11
-  },
-  "road": {
-   "name": "Jalan Mempelam",
-   "kind": "unclassified",
-   "distance_m": 12,
-   "depth_m": {
-    "10": 1.64,
-    "20": 1.87,
-    "50": 2.11
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-10803091692",
   "name": "Tah kang kopitiam",
   "sector": "eatery",
@@ -79672,33 +79510,6 @@
     "10": null,
     "20": null,
     "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-4980414221",
-  "name": "VR Kota Tinggi Parxian",
-  "sector": "eatery",
-  "kind": "restaurant",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7358961,
-  "lon": 103.8908594,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": 1.64,
-   "20": 1.87,
-   "50": 2.11
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "service",
-   "distance_m": 17,
-   "depth_m": {
-    "10": 1.64,
-    "20": 1.87,
-    "50": 2.11
    }
   },
   "shelter": null
@@ -102519,33 +102330,6 @@
   "shelter": null
  },
  {
-  "id": "node-6482424689",
-  "name": "Al-ihksan",
-  "sector": "shop",
-  "kind": "sports",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7345643,
-  "lon": 103.9071525,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": 0.64
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 14,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-10796247008",
   "name": "Alameen",
   "sector": "shop",
@@ -118152,33 +117936,6 @@
   "shelter": null
  },
  {
-  "id": "node-4741044001",
-  "name": "Foot massage",
-  "sector": "shop",
-  "kind": "massage",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7316615,
-  "lon": 103.9018777,
-  "map_last_edited": "2017-03-18",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": 0.62
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 8,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": 0.62
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-7265675898",
   "name": "Foot reflexology",
   "sector": "shop",
@@ -120339,33 +120096,6 @@
   "shelter": null
  },
  {
-  "id": "node-4741043998",
-  "name": "Guardian",
-  "sector": "shop",
-  "kind": "pharmacy",
-  "is_chain": true,
-  "section": "kota-tinggi",
-  "lat": 1.7303097,
-  "lon": 103.9017989,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": 0.3
-  },
-  "road": {
-   "name": "Jalan Niaga 1",
-   "kind": "unclassified",
-   "distance_m": 9,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": 0.3
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-5093984022",
   "name": "Guardian",
   "sector": "shop",
@@ -122224,33 +121954,6 @@
     "10": null,
     "20": null,
     "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "way-523621478",
-  "name": "Heritage Square",
-  "sector": "shop",
-  "kind": "mall",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7345195,
-  "lon": 103.9047048,
-  "map_last_edited": "2022-06-25",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": 0.93
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "service",
-   "distance_m": 33,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": 4.23
    }
   },
   "shelter": null
@@ -126135,33 +125838,6 @@
    "name": "a road with no name",
    "kind": "service",
    "distance_m": 56,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "way-290545975",
-  "name": "KIPMall",
-  "sector": "shop",
-  "kind": "supermarket",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7331159,
-  "lon": 103.9060166,
-  "map_last_edited": "2022-06-25",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "service",
-   "distance_m": 39,
    "depth_m": {
     "10": null,
     "20": null,
@@ -148203,33 +147879,6 @@
   "shelter": null
  },
  {
-  "id": "node-7296262089",
-  "name": "Nananeo Laundry Service",
-  "sector": "shop",
-  "kind": "laundry",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7380679,
-  "lon": 103.8907836,
-  "map_last_edited": "2020-09-21",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "service",
-   "distance_m": 19,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-12968605443",
   "name": "Nawab Tayar Services",
   "sector": "shop",
@@ -157347,33 +156996,6 @@
    "name": "a road with no name",
    "kind": "service",
    "distance_m": 49,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-12400056634",
-  "name": "Plaza kota tinggi- main entrance",
-  "sector": "shop",
-  "kind": "supermarket",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7309645,
-  "lon": 103.9025607,
-  "map_last_edited": "2024-12-06",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": null
-  },
-  "road": {
-   "name": "Jalan Niaga 1",
-   "kind": "unclassified",
-   "distance_m": 10,
    "depth_m": {
     "10": null,
     "20": null,
@@ -176013,33 +175635,6 @@
   "shelter": null
  },
  {
-  "id": "node-4161152995",
-  "name": "Tyre Shop",
-  "sector": "shop",
-  "kind": "tyres",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7364943,
-  "lon": 103.9097412,
-  "map_last_edited": "2016-05-02",
-  "depth_m": {
-   "10": null,
-   "20": null,
-   "50": 2.8
-  },
-  "road": {
-   "name": "Jalan Bendahara",
-   "kind": "residential",
-   "distance_m": 4,
-   "depth_m": {
-    "10": null,
-    "20": null,
-    "50": 2.8
-   }
-  },
-  "shelter": null
- },
- {
   "id": "node-4161150203",
   "name": "Tyre shop",
   "sector": "shop",
@@ -178384,33 +177979,6 @@
     "10": null,
     "20": null,
     "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-4741036992",
-  "name": "Unnamed (no name on the map)",
-  "sector": "shop",
-  "kind": "pharmacy",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7293193,
-  "lon": 103.9011395,
-  "map_last_edited": "2020-12-17",
-  "depth_m": {
-   "10": 0.18,
-   "20": 0.36,
-   "50": 0.6
-  },
-  "road": {
-   "name": "Jalan Niaga 2",
-   "kind": "unclassified",
-   "distance_m": 10,
-   "depth_m": {
-    "10": 0.18,
-    "20": 0.36,
-    "50": 0.6
    }
   },
   "shelter": null
@@ -193828,33 +193396,6 @@
     "10": null,
     "20": null,
     "50": null
-   }
-  },
-  "shelter": null
- },
- {
-  "id": "node-4142908089",
-  "name": "Wet Market",
-  "sector": "shop",
-  "kind": "butcher",
-  "is_chain": false,
-  "section": "kota-tinggi",
-  "lat": 1.7278757,
-  "lon": 103.9023938,
-  "map_last_edited": "2016-04-23",
-  "depth_m": {
-   "10": null,
-   "20": 0.13,
-   "50": 0.32
-  },
-  "road": {
-   "name": "a road with no name",
-   "kind": "unclassified",
-   "distance_m": 20,
-   "depth_m": {
-    "10": null,
-    "20": 0.14,
-    "50": 0.34
    }
   },
   "shelter": null

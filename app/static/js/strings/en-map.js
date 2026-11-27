@@ -27,6 +27,7 @@ export default Object.freeze({
   "mg.layers": "Layers",
   "mg.layer.sections": "Shading by {word}",
   "mg.sectionWord": "Section",
+  "mg.floodPictureError": "The flood water of one {word} did not load. Reload the page to try again.",
   "mg.layer.squares": "Flood squares",
   "mg.layer.shops": "Shops",
   "mg.layer.shelters": "Relief centres",

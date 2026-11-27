@@ -9,7 +9,8 @@ import { SQUARE_RAMP } from "../app/static/js/cells.js";
 import { BANDS, h } from "../app/static/js/dom.js";
 import { DEPTH_METRIC, FLASH_METRIC } from "../app/static/js/choropleth.js";
 import {
-  createCityDirectory, createDirectory, createIndexControls, indexMetrics, lossWords, renderAreaLabels, renderLegend, renderMethod,
+  createCityDirectory, createDepthPictures, createDirectory, createIndexControls, indexMetrics, lossWords, renderAreaLabels, renderLegend,
+  renderMethod,
 } from "../app/static/js/overview.js";
 import { FLASH_RAMP, swatchStyle } from "../app/static/js/susceptibility.js";
 import { pageArea } from "../app/static/js/start.js";
@@ -443,4 +444,35 @@ test("losses are said in millions from RM 10 million, with separators", () => {
   assert.match(lossWords(9999), /^RM\s?9,999,000$/);
   assert.equal(lossWords(10000), "RM 10.0 million");
   assert.equal(lossWords(1234567), "RM 1,234.6 million");
+});
+
+test("a list of thousands shows its first rows by name and says how many more a filter can narrow", () => {
+  const many = Array.from({ length: 450 }, (_, i) => dobi(`m-${i}`, `Kedai ${String(i).padStart(3, "0")}`));
+  const parts = { list: h("ol"), filter: h("input"), status: h("p"), next: h("div"), head: h("div") };
+  const directory = createDirectory(parts, many, { area: HOME, onOpen() {} });
+  assert.equal(parts.list.children.length, 300);
+  assert.equal(parts.list.children[0].querySelector(".name").textContent, "Kedai 000");
+  assert.equal(parts.status.textContent, "Showing the first 300 of 450 matches. Type more of the name to narrow them.");
+  directory.showMatches("kedai 44");
+  assert.deepEqual(shownNames(parts.list), Array.from({ length: 10 }, (_, i) => `Kedai 44${i}`));
+});
+
+test("a state's district page draws its own depth picture at the flood size on show; the whole state draws them all", () => {
+  const area = { layers: { flood_depth: { url: "/f/{section}/{rp}/{theme}.png",
+    pictures: [{ section: "muar", bounds: [102.4, 1.9, 102.8, 2.2] }, { section: "segamat", bounds: [102.6, 2.2, 103.2, 2.8] }] } } };
+  const district = fakeMap();
+  const one = createDepthPictures(district.map, area, { section: { id: "muar" } });
+  one.show("50");
+  one.show("50");
+  assert.deepEqual(district.drawn.map((o) => [o.url, o.onMap]), [["/f/muar/50/dark.png", true]], "once, in the page's dark look");
+  assert.deepEqual(district.drawn[0].bounds, [[1.9, 102.4], [2.2, 102.8]]);
+  assert.equal(district.drawn[0].options.className, "depth-overlay");
+  one.show("10");
+  assert.deepEqual(district.drawn.map((o) => [o.url, o.onMap]), [["/f/muar/50/dark.png", false], ["/f/muar/10/dark.png", true]]);
+  const state = fakeMap();
+  createDepthPictures(state.map, area, { section: null }).show("20");
+  assert.deepEqual(state.drawn.map((o) => o.url), ["/f/muar/20/dark.png", "/f/segamat/20/dark.png"]);
+  const plain = fakeMap();
+  createDepthPictures(plain.map, { layers: { flood_depth: null } }, null).show("50");
+  assert.equal(plain.drawn.length, 0, "an area with squares of its own has no pictures");
 });

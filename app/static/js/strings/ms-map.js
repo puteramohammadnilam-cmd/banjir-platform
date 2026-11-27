@@ -27,6 +27,7 @@ export default Object.freeze({
   "mg.layers": "Lapisan",
   "mg.layer.sections": "Lorekan {word}",
   "mg.sectionWord": "Bahagian bandar",
+  "mg.floodPictureError": "Air banjir bagi satu {word} tidak dimuatkan. Muat semula halaman untuk cuba lagi.",
   "mg.layer.squares": "Petak banjir",
   "mg.layer.shops": "Kedai",
   "mg.layer.shelters": "Pusat pemindahan",

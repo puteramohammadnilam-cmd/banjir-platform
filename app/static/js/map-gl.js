@@ -295,7 +295,8 @@ function showSection(sectionId, { focus = true } = {}) {
 
 function pointSquaresData() {
   const { place, squares } = st.point ?? {};
-  if (!place || !squares?.cells?.length || isWithinView(place.lat, place.lon, st.area.view)) return EMPTY;   // the area's own
+  // the area's own squares or pictures cover a point it holds; one in its box but not in it (off a state's districts) has none
+  if (!place || !squares?.cells?.length || (place.area_id === st.area.id && isWithinView(place.lat, place.lon, st.area.view))) return EMPTY;
   const [west, south, east, north] = place.cell.bounds;
   return squaresGeo(squares.cells, east - west, north - south);
 }
@@ -580,7 +581,7 @@ function drawLayers() {
     beforeId: (map, key) => (key === "low" && map.getLayer("mg-layer-flash") ? "mg-layer-flash" : "mg-section-fill"),   // low ground under flash
     onError: (key) => st.layers?.failed(key) });
   if (st.area.layers?.flood_depth) st.flood ??= glDrawer({ getMap: () => st.map, hasOurLayers: (map) => Boolean(map.getSource("mg-sections")),
-    prefix: "mg-flood", beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line" });
+    prefix: "mg-flood", beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line", onError: () => say(t("mg.floodPictureError", words()), true) });
   st.layers ??= createMapLayers({ area: st.area, sections: st.sections, drawer: st.pictures, onMetric: () => {
     if (!st.visible.sections) $("mg-layers").querySelector('input[value="sections"]')?.click();   // a shading shows on the sections
     paintSections();

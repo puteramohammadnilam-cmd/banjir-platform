@@ -25,6 +25,8 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_SIZE = SCENARIOS.at(-1);   // the biggest flood size shown, as pick.js DEFAULT_RP
+const DEPTH_OPACITY = 0.8;               // a state's depth pictures, about as strong as the squares they stand for
+const DEPTH_Z = 380;                     // over the flash flood and low ground pictures (350), under the squares and dots (400)
 
 /** One group of the key: a heading over what it explains. */
 const legendGroup = (heading, content) => h("li", { class: "legend-group" }, h("p", { class: "legend-heading" }, heading), content);
@@ -202,6 +204,29 @@ function createIndexParts(map, area, { city, cityParts, hasShelters }) {
  *  cannot check points. showMatches(text) is the list, filtered by a search that could mean several businesses or none.
  *  `city` is null for a plain area; for a city split into sections it is {sections, word, section (null on the whole
  *  city), index (the whole city's lean list), wholeCity, onSection(id | null), hrefOf(id), cityHref(), cityName}. */
+/** An area that sends no squares (a state's districts, area.layers.flood_depth): the river model's depths as one picture
+ *  per section, the section's own on its page and every one on the whole area's, at the flood size on show, in the
+ *  dark colours of this page's look, between the other pictures and the dots. Gives show(rp). */
+export function createDepthPictures(map, area, city) {
+  const depth = area.layers?.flood_depth;
+  const own = (depth?.pictures ?? []).filter((picture) => !city?.section || picture.section === city.section.id);
+  const made = new Map();   // by flood size, made once each
+  let shownRp = null;
+  const url = (section, rp) => depth.url.replace("{section}", section).replace("{rp}", rp).replace("{theme}", "dark");
+  return {
+    show(rp) {
+      if (!own.length || rp === shownRp) return;
+      made.get(shownRp)?.forEach((picture) => picture.show(false));
+      if (!made.has(rp)) {
+        made.set(rp, own.map(({ section, bounds }) => map.addOverlay(({ map: leaflet }) => createPictureLayer(leaflet, { url: url(section, rp), bounds },
+          { opacity: DEPTH_OPACITY, className: "depth-overlay", pane: "depth", zIndex: DEPTH_Z }))));
+      }
+      made.get(rp).forEach((picture) => picture.show(true));
+      shownRp = rp;
+    },
+  };
+}
+
 export function createOverview({ area, areas, premises, town, onSelect, onOpen, onPick, onArea, onCheckPoint = null, city = null }) {
   const isWholeCity = Boolean(city && !city.section);
   const scope = createScopeBar($("scope"), { areas, areaId: area.id, onArea, ...cityScope(city) });
@@ -225,6 +250,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
   const tideCard = createTide($("tide"));
   const outlookCard = createOutlook($("outlook"));
   createIndexParts(map, area, { city, cityParts, hasShelters: town.shelters.length > 0 });
+  const depthPictures = createDepthPictures(map, area, city);
   let shown = {};
 
   return {
@@ -239,6 +265,7 @@ export function createOverview({ area, areas, premises, town, onSelect, onOpen, 
         $("scenario-sentence").textContent = scenarioSentence(rp);
         renderPicker(document.querySelector("[data-scenario]"), rp, onPick, area.bigger_flood_example);
         cityParts?.show(rp);
+        depthPictures.show(rp);
         scope.refresh();   // "All of {city}" carries the flood size, as the table's links do
       }
       if (rain !== shown.rain) kpis.setRain(rain);

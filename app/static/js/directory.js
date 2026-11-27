@@ -1,9 +1,10 @@
 // The list of every business in an area or a city, with each one's water at the three flood sizes and a filter by name
 // or kind: the old interface's Area overview list (overview.js) and the new map's (map-gl-area.js), the same code.
 import { SCENARIOS, band, depthText, h, icon, kindText, roadName } from "./dom.js";
-import { t } from "./i18n.js";
+import { formatNumber, t } from "./i18n.js";
 
 const CITY_LIST_MAX = 100;   // rows the whole city's list shows for one filter; typing more narrows them
+const LIST_MAX = 300;        // rows of its own a list shows at once (a state's district can hold thousands); typing narrows
 
 const depthChip = (depth, rp) => {
   const level = band(depth);
@@ -47,7 +48,7 @@ const nextSteps = ({ onCheckPoint, onOtherArea }) => [
 /** What the list says over its rows: none mapped here, more matches than it shows, or statusText's words. */
 function listStatus({ text, shown, found, isSearch, area, hasRows }) {
   if (!hasRows) return t("city.noneMapped", { area: area.name });
-  if (found > shown) return t("city.directoryMore", { shown, count: found });
+  if (found > shown) return t("city.directoryMore", { shown: formatNumber(shown), count: formatNumber(found) });
   return statusText({ text: text.trim(), shown, isSearch, area });
 }
 
@@ -65,27 +66,27 @@ export function createDirectory({ list, filter, status, next, head }, premises,
   let more = [];     // the rows of the rest of the city on show
   let selected = null;
   const mark = () => { for (const row of [...rows, ...more]) row.button.setAttribute("aria-current", String(row.id === selected)); };
-  list.replaceChildren(...rows.map((row) => row.item));
+  list.replaceChildren(...rows.slice(0, LIST_MAX).map((row) => row.item));
   next.replaceChildren(...nextSteps({ onCheckPoint, onOtherArea }));
   const apply = (text, isSearch) => {
     const needle = text.trim().toLowerCase();
-    for (const row of rows) row.item.hidden = Boolean(needle) && !row.text.includes(needle);
-    const own = rows.filter((row) => !row.item.hidden).length;
+    const matches = needle ? rows.filter((row) => row.text.includes(needle)) : rows;
+    const own = Math.min(matches.length, LIST_MAX);
     const found = city && needle ? city.entries.filter((entry) => entry.text.includes(needle)) : [];
     more = found.slice(0, CITY_LIST_MAX).map(({ p }) => directoryRow(p, onOpen, city.names.get(p.section)));
-    if (city) list.replaceChildren(...rows.map((row) => row.item), ...more.map((row) => row.item));
+    list.replaceChildren(...matches.slice(0, LIST_MAX).map((row) => row.item), ...more.map((row) => row.item));
     mark();
     const shown = own + more.length;
     const isCitywide = Boolean(city && needle);   // the city was searched, so none found names it
     const isHint = Boolean(hint) && !needle;
     status.textContent = isHint ? hint : listStatus({
-      text, shown, found: own + found.length, isSearch, area: isCitywide ? city.area : area, hasRows: rows.length > 0 || isCitywide,
+      text, shown, found: matches.length + found.length, isSearch, area: isCitywide ? city.area : area, hasRows: rows.length > 0 || isCitywide,
     });
     head.hidden = shown === 0;
     next.hidden = shown > 0 || isHint || next.children.length === 0;
   };
   filter.addEventListener("input", () => apply(filter.value, false));
-  if (!rows.length) apply("", false);   // a section with no businesses mapped says so at once
+  if (!rows.length || rows.length > LIST_MAX) apply("", false);   // none mapped, or more than it shows: it says so at once
   return {
     markSelected: (selectedId) => { selected = selectedId; mark(); },
     showMatches: (text) => { filter.value = text; apply(text, true); },

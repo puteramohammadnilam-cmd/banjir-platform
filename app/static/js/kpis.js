@@ -3,7 +3,7 @@
 import { band, icon, h } from "./dom.js";
 import { floodCounts, isSearched } from "./history.js";
 import { miniGauge } from "./gauge.js";
-import { t } from "./i18n.js";
+import { formatNumber, t } from "./i18n.js";
 
 const RAIN_HOURS = 12;   // what GET /api/rain sums, said while it is asked
 const COUNT_MS = 1600;   // as long as the map's water takes to come in (--duration-rise in tokens.css)
@@ -100,9 +100,9 @@ export function createKpis(container, { history, areaName, premises }) {
       const wet = premises.filter((p) => band(p.depth_m[rp]));
       const typical = wet.length ? median(wet.map((p) => p.depth_m[rp])) : null;
       if (!premises.length) tiles.wet.set("–", t("overview.wetLabel", { area: areaName }), t("city.noneMappedTile"), 0);   // a section with none mapped
-      else tiles.wet.set(t("overview.wetFigure", { wet: wet.length, total: premises.length }), t("overview.wetLabel", { area: areaName }), t("overview.wetNote", { rp }), wet.length / premises.length);
+      else tiles.wet.set(t("overview.wetFigure", { wet: formatNumber(wet.length), total: formatNumber(premises.length) }), t("overview.wetLabel", { area: areaName }), t("overview.wetNote", { rp }), wet.length / premises.length);
       if (shownRp === null && wet.length && motionOk()) {
-        countUp(container, (n) => tiles.wet.setFigure(t("overview.wetFigure", { wet: n, total: premises.length })), wet.length, () => shownRp === rp);
+        countUp(container, (n) => tiles.wet.setFigure(t("overview.wetFigure", { wet: formatNumber(n), total: formatNumber(premises.length) })), wet.length, () => shownRp === rp);
       }
       shownRp = rp;
       tiles.depth.set(typical === null ? "–" : t("common.metres", { m: typical.toFixed(1) }), t("overview.typical"), t("overview.typicalNote"), 0);

@@ -139,3 +139,18 @@ test("engineer mode draws its rain pools through the map's drawer, and a tool ta
   assert.deepEqual(calls.filter(([kind]) => kind === "tool").at(-1), ["tool", false]);
   assert.ok(calls.some(([kind, key]) => kind === "drop" && key === "pools"));
 });
+
+test("a picture already drawn at the same address is not loaded again; a new address or a lost layer is", () => {
+  const layers = new Set();
+  const added = [];
+  const map = { getLayer: (id) => layers.has(id), getSource: (id) => layers.has(id), removeLayer: (id) => layers.delete(id),
+    removeSource() {}, addSource() {}, addLayer: (layer) => { layers.add(layer.id); added.push(layer.id); }, on() {} };
+  const drawer = glDrawer({ getMap: () => map, beforeId: () => undefined, hasOurLayers: () => true, prefix: "mg-flood" });
+  drawer.picture("muar", "/muar-50-light.png", LAYER.bounds, 0.8);
+  drawer.picture("muar", "/muar-50-light.png", LAYER.bounds, 0.8);
+  assert.deepEqual(added, ["mg-flood-muar"], "the same picture again: left as it is");
+  drawer.picture("muar", "/muar-10-light.png", LAYER.bounds, 0.8);
+  layers.clear();   // a new base map drops every layer
+  drawer.picture("muar", "/muar-10-light.png", LAYER.bounds, 0.8);
+  assert.deepEqual(added, ["mg-flood-muar", "mg-flood-muar", "mg-flood-muar"]);
+});

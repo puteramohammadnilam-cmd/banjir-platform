@@ -368,12 +368,12 @@ def test_parity_each_premise_point_returns_its_depth(monkeypatch):
             west, south, east, north = area.view
             lat, lon = data["place"]["lat"], data["place"]["lon"]
             inside = west <= lon <= east and south <= lat <= north
-            # a smaller area's view can hold it too (the Kota Tinggi town centre in Johor's): that one has it
+            # a square whose centre is in a smaller area's view (the Kota Tinggi town centre's, inside Johor's) is that one's
             owner = sections.listed_area_at(lat, lon)[0]
             assert data["place"]["area_id"] == (owner.id if owner else None), premise["id"]
-            assert owner in ((area, areas.get("kota-tinggi"), None) if inside else (None,)), premise["id"]
+            assert owner == (area if inside else None) or (area.id == "johor" and owner.id == "kota-tinggi"), premise["id"]
             checked += 1
-    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 2445 + 7476 + 27 + 300 + 491 + 158
+    assert checked == sum(len(areas.premises(area.id)) for area in areas.load_all()) == 2445 + 7459 + 27 + 300 + 491 + 158
     example = post_point(client, 3.0297599, 101.5364982).json()["data"]["place"]   # the plan's checklist point
     assert example["id"] == "pt:3.02998,101.53667" and example["depth_m"]["50"] == 1.76
 

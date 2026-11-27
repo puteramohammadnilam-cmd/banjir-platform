@@ -19,8 +19,9 @@ Inputs, read only:
     every section stops the build, naming it. Without it there is no `section` key, so older builds stay byte for byte.
   - --replaces, optional and repeatable: an installed area whose businesses this build takes over, so its ids are not
     a clash (a city build that holds a smaller area's businesses, before the smaller one is removed).
-  - --skip-taken, optional: a business another installed area already holds is left out of this build (it stays in
-    that area) instead of stopping it; the run says how many.
+  - --skip-taken, optional: a business another installed area already holds, or whose point is inside another
+    installed area's view (a town inside a state: a pin there goes to the town, app/areas.py nearest_first), is left
+    out of this build instead of stopping it; the run says how many.
   - --no-cells, optional: town.json holds no squares (cells []), for a whole state whose view is far beyond what
     app/raster.py view_cells reads; tools/outline_squares.py counts and draws its squares per district instead.
 
@@ -337,7 +338,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     sections = sections_io.load_sections(args.sections) if args.sections else None
     taken, businesses = installed_ids(args.area, args.replaces), load_businesses(args.pois)
     if args.skip_taken:
-        kept = [row for row in businesses if row["id"] not in taken]
+        others = [area for area in areas.load_all() if area.id not in {args.area, *args.replaces}]
+        kept = [row for row in businesses
+                if row["id"] not in taken and not any(area.contains(row["lat"], row["lon"]) for area in others)]
         print(f"left out {len(businesses) - len(kept)} businesses another area holds")
         businesses = kept
     premises, town = build(view, businesses, load_roads(args.roads, proj), load_shelters(args.shelters), depth_set,

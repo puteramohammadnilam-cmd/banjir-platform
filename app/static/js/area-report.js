@@ -3,7 +3,7 @@
 import { CHANCE_YEARS, SCENARIOS, UNNAMED_ROAD, chanceWithin, h } from "./dom.js";
 import { shareOf, shareText } from "./choropleth.js";
 import { isSearched } from "./history.js";
-import { dataWord, t } from "./i18n.js";
+import { dataWord, formatNumber, t } from "./i18n.js";
 import { DEFAULT_RP } from "./pick.js";
 import { highShare, oneDecimal, scoreOf, showsScore } from "./susceptibility.js";
 
@@ -71,7 +71,7 @@ function sectionsPart(sections, word) {
     rows.length ? h("div", { class: "table-scroll" }, h("table", { class: "loss-table" },
       h("thead", {}, h("tr", {}, [dataWord(word), t("sections.colBusinesses"), t("sections.colSquares")].map((text) => h("th", { scope: "col" }, text)))),
       h("tbody", {}, rows.map((row) => h("tr", {}, h("th", { scope: "row" }, row.name),
-        h("td", {}, t("overview.wetFigure", { wet: row.wet, total: row.total })), h("td", {}, shareText(row.share)))))))
+        h("td", {}, t("overview.wetFigure", { wet: formatNumber(row.wet), total: formatNumber(row.total) })), h("td", {}, shareText(row.share)))))))
       : h("p", {}, t("report.noStreets"))];
 }
 
