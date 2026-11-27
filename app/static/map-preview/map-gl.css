@@ -52,7 +52,8 @@ body.mg { font: 400 14px/1.45 var(--mg-font); color: var(--mg-ink); background: 
 .mg-spacer { flex: 1; }
 .mg-tag { padding: 4px 7px; border: 1px solid #f59e0b; border-radius: 6px; color: #b45309; font: 600 11px var(--mg-mono); letter-spacing: 0.06em; text-transform: uppercase; }
 [data-theme="dark"] .mg-tag { color: #fbbf24; }
-a.mg-tag { text-decoration: none; transition: background-color 150ms; }
+a.mg-tag { display: inline-flex; align-items: center; min-height: 32px; text-decoration: none; transition: background-color 150ms; }
+@media (pointer: coarse) { a.mg-tag { min-height: 44px; } }   /* a full tap on a touch tablet */
 a.mg-tag:hover { background: rgb(245 158 11 / 0.12); }
 .mg-old-link { margin-top: 8px; color: var(--mg-ink2); font-size: 12px; }
 .mg-seg { display: inline-flex; padding: 3px; border: 1px solid var(--mg-line); border-radius: 10px; background: var(--mg-well); }

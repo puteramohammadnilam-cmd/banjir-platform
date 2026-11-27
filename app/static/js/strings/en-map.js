@@ -42,7 +42,7 @@ export default Object.freeze({
   "mg.loading": "Loading the map…",
   "mg.failed": "The map could not be loaded just now: {why}",
   "mg.noWebgl": "This browser cannot draw this map (it needs WebGL).",
-  "mg.toMain": "Open the main page",
+  "mg.toMain": "Open the old interface",
   "mg.sectionLoading": "Loading {name}…",
   "mg.close": "Close",
   "mg.badge.dry": "Dry in the model",
@@ -68,7 +68,7 @@ export default Object.freeze({
   "mg.wetShare": "{pct}% of squares wet",
   "mg.wetShareUnder": "Under 1% of squares wet",
   "mg.sectionSay": "In a 1 in {rp} years flood, {wet} of its {n} businesses get water in the model.",
-  "mg.openSection": "Open on the main page",
+  "mg.openSection": "Open in the old interface",
   "mg.shelterTitle": "Flood relief centre",
   "mg.credit": "Flood depths: JRC v2.1 (CC BY 4.0) · map style after Arus (MIT)",
 });

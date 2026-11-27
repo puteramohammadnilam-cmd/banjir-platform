@@ -4,7 +4,7 @@ export default Object.freeze({
   "mg.title": "Peta banjir · MyFlood",
   "header.newMap": "Versi baharu",   // the old page's switch to this map (index.html)
   "mg.mapLabel": "Peta banjir dalam model: bahagian bandar, petak banjir dan kedai",
-  "mg.back": "Halaman utama MyFlood",
+  "mg.back": "Laman utama MyFlood",
   "mg.search": "Cari kedai anda",
   "mg.searchLabel": "Cari kedai mengikut nama",
   "mg.noMatch": "Tiada kedai dengan nama itu di sini.",
@@ -42,7 +42,7 @@ export default Object.freeze({
   "mg.loading": "Memuatkan peta…",
   "mg.failed": "Peta tidak dapat dimuatkan sekarang: {why}",
   "mg.noWebgl": "Pelayar ini tidak dapat melukis peta ini (perlu WebGL).",
-  "mg.toMain": "Buka halaman utama",
+  "mg.toMain": "Buka paparan lama",
   "mg.sectionLoading": "Memuatkan {name}…",
   "mg.close": "Tutup",
   "mg.badge.dry": "Kering dalam model",
@@ -68,7 +68,7 @@ export default Object.freeze({
   "mg.wetShare": "{pct}% petak berair",
   "mg.wetShareUnder": "Kurang 1% petak berair",
   "mg.sectionSay": "Dalam banjir 1 dalam {rp} tahun, {wet} daripada {n} perniagaannya dimasuki air dalam model.",
-  "mg.openSection": "Buka di halaman utama",
+  "mg.openSection": "Buka dalam paparan lama",
   "mg.shelterTitle": "Pusat pemindahan banjir",
   "mg.credit": "Kedalaman banjir: JRC v2.1 (CC BY 4.0) · gaya peta ikut Arus (MIT)",
 });

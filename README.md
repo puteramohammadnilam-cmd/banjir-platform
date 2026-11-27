@@ -172,7 +172,7 @@ These are the claims this app makes about your location, and what backs each one
 - Rain: for a point outside the listed areas, Google Weather gets the square's centre rounded to 0.01 degrees, about 1 km. Inside an area, it gets the area's centre.
 - Google Places is asked only about mapped businesses, by OpenStreetMap name and coordinates. It is never asked about a point.
 - The map tiles come from OpenStreetMap's servers, which see the map area you view. After a GPS fix the map opens at street level (zoom 17), where one tile is about 300 m wide.
-- On the new map preview (`/map.html`) the base map's tiles, fonts and icons come from OpenFreeMap (`tiles.openfreemap.org`), which sees the map area you view and this site's address.
+- On the new map (`/map.html`) the base map's tiles, fonts and icons come from OpenFreeMap (`tiles.openfreemap.org`), which sees the map area you view and this site's address.
 - On the 3D page the satellite photo's tiles come from Esri's servers (`ibasemaps-api.arcgis.com`), which see the map area you view and this site's address.
 - A photo you upload (of the shop front, or of the stock inside) is sent to Gemini to be read. This app does not save it. Google's Gemini API terms apply to it.
 - A voice question is recorded only while the Speak button is on, sent to Gemini as audio to write down the words, and not saved or logged by this app (`tests/test_voice.py`). Answers to spoken questions are read aloud by your browser's own speech voice (some browsers use an online voice for this).
@@ -310,13 +310,13 @@ A switch in the footer ("Engineer mode", or `?engineer=1`, remembered in the bro
 
 ## New map (the front door)
 
-`/map.html` is the Area overview on a new map, in the style of Farhan Syah's Arus (MIT, `app/static/vendor/LICENSE-arus.txt`). It is the site's front door: a bare address (`/`, nothing in the query or fragment) opens it (`js/front-door.js`, a plain script at the top of `index.html`'s head). Its "Old interface" button opens the old page on the same view, and that page's "New version" button comes back; each browser remembers the last choice (`localStorage` key `myflood-ui`, `js/ui-choice.js`), so someone who picked the old interface lands there. A link that names a view, a tab or a place still opens the old page, as every link it made before does.
+`/map.html` is the Area overview on a new map, in the style of Farhan Syah's Arus (MIT, `app/static/vendor/LICENSE-arus.txt`). It is the site's front door: an address that names no view (`/`, or `/?lang=ms`, or a share's `/?fbclid=…`) opens it, with that query (`js/front-door.js`, a plain script at the top of `index.html`'s head). Its "Old interface" button opens the old page on the same view, and that page's "New version" button comes back; each browser remembers the last choice (`localStorage` key `myflood-ui`, `js/ui-choice.js`), so someone who picked the old interface lands there. A link that names a view, a tab or a place still opens the old page, as every link it made before does.
 
 - MapLibre (already vendored for the 3D page) on OpenFreeMap's free vector maps: light (Positron) and dark, plus Esri's satellite photo through our key. The styles are copies in `app/static/vendor/openfreemap/`, so the flood water always goes under the streets and names; see its README.txt.
-- Floating cards: search, the main page's tabs, the flood size, the layers, and a place card (a bottom sheet on phones) for a shop or a section, with links back to the main page's details, cost and 3D. English and Bahasa Melayu (`strings/*-map.js`).
+- Floating cards: search, the main page's tabs, the flood size, the layers, and a place card (a bottom sheet on phones) for a shop or a section, with links to the old interface's details, cost and 3D. English and Bahasa Melayu (`strings/*-map.js`).
 - Sections are shaded at once; a section's squares and shops load when it is opened, one request each. A link holds the view: `map.html?area=shah-alam&section=seksyen-25&place=node-13414432501&rp=50`, plus `&base=dark` or `&base=sat` and `&tilt=1`.
-- Check a point: the pin button (or Move the pin on a point's card) puts a cross over the map; tap a spot, or move the map and press Check this spot. As on the main page, only the 90 m square's centre is sent, in the body of `POST /api/point`, and a point stays in the link's fragment (`#place=pt:…`). The main page's New map link carries it too.
-- Engineer mode: the main page's panel (`engineer.js`), drawn on this map by `map-gl-eng.js` (the main page's by `engineer-leaflet.js`). The switch is remembered in the same browser for both pages.
+- Check a point: the pin button (or Move the pin on a point's card) puts a cross over the map; tap a spot, or move the map and press Check this spot. As on the old interface, only the 90 m square's centre is sent, in the body of `POST /api/point`, and a point stays in the link's fragment (`#place=pt:…`). The old interface's New version link carries it too.
+- Engineer mode: the old interface's panel (`engineer.js`), drawn on this map by `map-gl-eng.js` (the old interface's by `engineer-leaflet.js`). The switch is remembered in the same browser for both pages.
 - Not yet: keyboard access to single shops on the map (the search reaches every shop).
 
 ## Satellite photo on the 3D page

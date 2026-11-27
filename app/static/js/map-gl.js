@@ -378,8 +378,10 @@ function drawLinks() {
   const langLink = (code, label) => h("a", { href: `map.html${mapQuery({ lang: code })}`, "aria-current": code === lang ? "true" : null }, label);
   $("mg-lang").replaceChildren(langLink("ms", "BM"), langLink("en", "EN"));
   $("mg-home").href = `map.html${writeUrl({ area: st.area.id, lang: langParam() })}`;   // this map's home: the whole area
-  $("mg-old").href = mainLink({ place: st.picked });
-  const tab = (key) => h("a", { href: mainLink({ place: st.picked, tab: key === "overview" ? null : key }), "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
+  document.querySelectorAll("#mg-old, .mg-old-link").forEach((link) => { link.href = mainLink({ place: st.picked }); });
+  // the Area overview is this map; the other tabs are the old interface's
+  const tab = (key) => h("a", { href: key === "overview" ? `map.html${mapQuery()}` : mainLink({ place: st.picked, tab: key }),
+    "aria-current": key === "overview" ? "page" : null }, t(`tab.${key}`));
   $("mg-tabs").replaceChildren(...["overview", "business", "cost", "insurance", "reference"].map(tab));
 }
 
@@ -388,10 +390,8 @@ function drawLinks() {
 function drawSummary() {
   const wet = st.sections.length ? wetTotals(st.sections, st.rp).wet : wetShops([...st.shops.values()], st.rp);
   const all = st.area.counts?.businesses ?? st.shops.size;
-  $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize, onOld: (event) => {
-    rememberUi("old");
-    event.currentTarget.href = mainLink({ place: st.picked });   // the view now, as the click follows it
-  } }));
+  $("mg-summary").replaceChildren(...summaryCard({ wet, all, rp: st.rp, onPick: pickFloodSize,
+    oldUi: { href: mainLink({ place: st.picked }), onClick: () => rememberUi("old") } }));
 }
 
 function pickFloodSize(rp) {
@@ -550,7 +550,8 @@ function onKey(event) {
 }
 
 function showProblem(words) {
-  $("mg-problem").replaceChildren(words, " ", h("a", { href: "./" }, t("mg.toMain")));
+  // a query, so the front door does not send the person back here, and remembered, so the next visit does not either
+  $("mg-problem").replaceChildren(words, " ", h("a", { href: mainLink(), onclick: () => rememberUi("old") }, t("mg.toMain")));
   $("mg-problem").hidden = false;
   say(words, true);
 }

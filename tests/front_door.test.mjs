@@ -20,7 +20,7 @@ const MAP = read("../app/static/map.html");
 function goesTo(search, hash, stored = null, { blocked = false } = {}) {
   let to = null;
   const localStorage = { getItem: (key) => { if (blocked) throw new Error("blocked"); return key === UI_KEY ? stored : null; } };
-  vm.runInNewContext(SOURCE, { location: { search, hash, replace: (url) => { to = url; } }, localStorage });
+  vm.runInNewContext(SOURCE, { location: { search, hash, replace: (url) => { to = url; } }, localStorage, URLSearchParams });
   return to;
 }
 
@@ -36,10 +36,17 @@ test("a bare address opens the new map, unless this browser chose the old interf
   assert.equal(goesTo("", "", null, { blocked: true }), "./map.html");
 });
 
-test("a link that names a view, a tab or a point still opens the old page", () => {
-  for (const [search, hash] of [["?tab=business", ""], ["?section=sec-1&rp=20", ""], ["", "#place=pt:3.00042,101.50042"]]) {
+test("a link that names a view, a tab, a place or a point still opens the old page", () => {
+  for (const [search, hash] of [["?tab=business", ""], ["?section=sec-1&rp=20", ""], ["?rp=20", ""], ["?shop=node-1", ""],
+    ["?area=kota-tinggi", ""], ["", "#place=pt:3.00042,101.50042"]]) {
     assert.equal(goesTo(search, hash), null, search + hash);
   }
+});
+
+test("a query that names no view goes along to the new map: a language, a share's tracking", () => {
+  assert.equal(goesTo("?lang=ms", ""), "./map.html?lang=ms");
+  assert.equal(goesTo("?fbclid=abc&utm_source=wa", ""), "./map.html?fbclid=abc&utm_source=wa");
+  assert.equal(goesTo("?lang=ms", "", "old"), null);
 });
 
 test("the switch remembers under the key the front door reads, and the script runs first in the head", () => {
@@ -55,9 +62,11 @@ test("the switch remembers under the key the front door reads, and the script ru
 
 test("the new map is the front door: no noindex, and its way to the old interface", () => {
   assert.doesNotMatch(MAP, /noindex/);
+  assert.match(MAP, /<link rel="canonical" href="map\.html">/);
   assert.match(MAP, /id="mg-old" href="\.\/\?rp=50"/);   // a query, so the front door never sends it back
-  const nodes = summaryCard({ wet: 1, all: 2, rp: "50", onPick() {}, onOld() {} });
+  const nodes = summaryCard({ wet: 1, all: 2, rp: "50", onPick() {}, oldUi: { href: "./?section=sec-1&rp=20", onClick() {} } });
   const old = nodes.find((node) => node.getAttribute?.("class")?.includes("mg-old-link"));
   assert.equal(old.textContent, "Old interface");
+  assert.equal(old.getAttribute("href"), "./?section=sec-1&rp=20");   // the view on show, for a long press or a new tab too
   assert.equal(summaryCard({ wet: 1, all: 2, rp: "50", onPick() {} }).some((node) => node.getAttribute?.("class")?.includes("mg-old-link")), false);
 });
