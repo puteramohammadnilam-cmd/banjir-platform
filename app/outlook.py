@@ -38,8 +38,8 @@ from functools import lru_cache
 
 from . import areas, googlemaps, tide
 
-FORECAST = "https://api.data.gov.my/weather/forecast"
-WARNINGS = "https://api.data.gov.my/weather/warning"
+FORECAST = "https://api.data.gov.my/weather/forecast/"   # with the slash: without it data.gov.my answers 301 first,
+WARNINGS = "https://api.data.gov.my/weather/warning/"    # a second request against its 4 a minute
 SOURCE = "https://www.met.gov.my/"
 DAYS = 5
 ASK_DAYS = 6                  # Google's day runs 07:00 to 07:00: before 7 am its first day is yesterday's
@@ -57,6 +57,7 @@ TIMEOUT_S = 5
 MAX_BYTES = 1_000_000
 ALL_DISTRICTS = "Ds"          # MetMalaysia's district places (Ds001 ...): one request gives all of them, about 400 KB
 ALL_LIMIT = "2000"            # rows: 168 districts x 7 days on 28 Nov 2026, with room
+ROW_KEYS = ("date", "summary_forecast", "summary_when")   # what parse_forecast reads, besides the location id
 CHUNK = 65_536
 MAX_TEXT = 80
 MAX_WARNINGS = 3
@@ -135,9 +136,13 @@ def _get_list(url: str, params: Mapping[str, str]) -> list:
 def _fetch_forecast(location_id: str) -> list:
     """One place's rows; for ALL_DISTRICTS, every district's in one request (data.gov.my allows 4 a minute, and a
     state's districts each asked on their own would pass that as a visitor goes round them)."""
-    if location_id == ALL_DISTRICTS:
-        return _get_list(FORECAST, {"contains": f"{ALL_DISTRICTS}@location__location_id", "limit": ALL_LIMIT})
-    return _get_list(FORECAST, {"filter": f"{location_id}@location__location_id", "limit": "10"})
+    if location_id != ALL_DISTRICTS:
+        return _get_list(FORECAST, {"filter": f"{location_id}@location__location_id", "limit": "10"})
+    rows = _get_list(FORECAST, {"contains": f"{ALL_DISTRICTS}@location__location_id", "limit": ALL_LIMIT})
+    if len(rows) >= int(ALL_LIMIT):   # newest dates come first: a cut answer would lose today, for every district
+        raise FeedError(f"data.gov.my gave {len(rows)} district rows, the most asked for: raise ALL_LIMIT")
+    return [{"location": {"location_id": (row.get("location") or {}).get("location_id")}, **{key: row.get(key)
+             for key in ROW_KEYS}} for row in rows if isinstance(row, Mapping)]   # kept small: 168 districts' rows
 
 
 def _fetch_warnings() -> list:

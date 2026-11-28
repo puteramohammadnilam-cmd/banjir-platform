@@ -275,7 +275,8 @@ def area_summary(section: str = "") -> dict:
 
 def _shelters_for(area: areas.Area, part: Mapping | None) -> list[dict]:
     """The area's listed relief centres; for one section, those within places.SHELTER_REACH_M of its middle (its main
-    town in a state), since a state lists only a town's few."""
+    town in a state), since a state lists only a town's few. Its page's map pins reach further (sections.shelters_near,
+    15 km from its edge): a pin shows where a centre is; a name here would be taken as the district's own."""
     listed = areas.town(area.id)["shelters"]
     if part is None:
         return listed
@@ -588,8 +589,7 @@ def rain_forecast() -> dict:
         return {"error": MAPS_CAPPED}
     except googlemaps.UpstreamError:
         return {"error": MAPS_DOWN}
-    area, section = current_area(), current_section()
-    town = area.weather_at["name"] if area is not None and area.weather_at and section is None else None
+    town = areas.weather_town(current_area(), current_section())
     return {**{key: outlook[key] for key in RAIN_FIELDS if key in outlook}, **({"town": town} if town else {}),
             "note": "Weather forecast only. For flood warnings check JPS Public Infobanjir."}
 

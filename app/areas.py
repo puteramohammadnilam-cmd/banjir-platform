@@ -123,6 +123,12 @@ class Area:
         return (east - west) * (north - south)
 
 
+def weather_town(area: Area | None, section: Mapping | None) -> str | None:
+    """The town an area's whole weather is asked at (weather_at), for the page and the chat to name; None for a
+    section (asked at its own town or middle), for an area asked at its middle, and for no area."""
+    return area.weather_at["name"] if area is not None and area.weather_at and section is None else None
+
+
 def nearest_first() -> list[Area]:
     """Every area, the smallest view first (the default first among equals): a point a town's view and its state's
     both hold goes to the town, with its own squares and relief centres."""

@@ -394,3 +394,17 @@ def test_every_district_s_words_come_from_one_request_and_a_town_s_from_its_own(
     assert outlook.forecast_for("shah-alam", clock)["2026-11-26"]["text"] == "Hujan di Tn070"
     assert asked == [{"contains": "Ds@location__location_id", "limit": outlook.ALL_LIMIT},
                      {"filter": "Tn070@location__location_id", "limit": "10"}]
+
+
+def test_a_district_answer_cut_at_the_limit_is_a_failure_and_kept_rows_are_small(monkeypatch):
+    row = {"location": {"location_id": "Ds083", "location_name": "Muar"}, "date": "2026-11-26",
+           "summary_forecast": "Hujan", "summary_when": "Petang", "min_temp": 24, "max_temp": 33}
+    monkeypatch.setattr(outlook, "_get_list", lambda url, params: [row] * int(outlook.ALL_LIMIT))
+    with pytest.raises(outlook.FeedError, match="raise ALL_LIMIT"):
+        outlook._fetch_forecast(outlook.ALL_DISTRICTS)
+    monkeypatch.setattr(outlook, "_get_list", lambda url, params: [row, "junk"])
+    kept = outlook._fetch_forecast(outlook.ALL_DISTRICTS)
+    assert kept == [{"location": {"location_id": "Ds083"}, "date": "2026-11-26", "summary_forecast": "Hujan",
+                     "summary_when": "Petang"}]
+    assert outlook.parse_forecast(kept, "Ds083") == {"2026-11-26": {"text": "Hujan", "when": "Petang"}}
+    assert outlook.FORECAST.endswith("/") and outlook.WARNINGS.endswith("/"), "no 301 first"

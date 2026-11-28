@@ -216,6 +216,7 @@ function fitSection(sectionId) {
 
 function showCard(nodes, { focus = true } = {}) {
   const card = $("mg-place");
+  $("mg-layers-btn")?.setAttribute("aria-expanded", "false");   // phones: the layers sheet hides the card (map-gl.css)
   st.cardTurn += 1;
   if (card.hidden && !card.contains(document.activeElement)) st.returnFocus = document.activeElement;
   card.replaceChildren(...nodes);
@@ -697,16 +698,20 @@ function wireTools() {
   st.eng = glDrawer({ getMap: () => st.map, beforeId: (map) => underRoads(map.getStyle().layers) ?? "mg-section-line",
     hasOurLayers: (map) => Boolean(map.getSource("mg-sections")), isAiming: () => st.pin.isOn(), onToolChange: () => syncCursor() });
   createEngineer({ section: $("mg-eng"), button: $("mg-eng-btn"), area: st.area, drawer: st.eng });
+  $("mg-eng-btn").addEventListener("click", () => layersButton.setAttribute("aria-expanded", "false"));   // its panel shows
   st.map.getCanvas().addEventListener("keydown", (event) => {
     if (event.key === "Enter" && st.pin.isOn()) st.pin.checkCentre();
   });
 }
 
-/** Escape: pin mode ends first, then the card closes; the location dialog has its own. */
+/** Escape: pin mode ends first, then a sheet, then the phone's layers sheet, then the card; the location dialog has
+ *  its own. */
 function onKey(event) {
   if (event.key !== "Escape" || event.defaultPrevented || st.pin?.isAsking() || document.querySelector("dialog[open]")) return;
+  const layers = $("mg-layers-btn");
   if (st.pin?.isOn()) st.pin.cancel();
   else if (st.sheet?.isOpen()) st.sheet.close();
+  else if (layers?.getAttribute("aria-expanded") === "true") layers.setAttribute("aria-expanded", "false");
   else closeCard();
 }
 

@@ -741,18 +741,13 @@ def rain(area: str | None = None, section: str | None = None) -> dict:
     lat, lon = sections.centre(part) if part else found.centre()
     if not googlemaps.is_configured():
         return ok({"configured": False, "rain": None})
-    at = weather_place(found, part)
+    at = areas.weather_town(found, part)
     try:
         return ok({"configured": True, "rain": call_maps(googlemaps.rain_outlook, lat, lon, floodtools.RAIN_HOURS),
                    "at": at})
     except googlemaps.FreeLimitReached as exc:   # the page says when it is back
         return ok({"configured": True, "rain": None, "capped": True, "until": capped_until(exc), "at": at})
 
-
-def weather_place(area: areas.Area, section: Mapping | None) -> str | None:
-    """The town the whole area's weather is asked at, for the page to say (area.json weather_at); None for a section
-    (its own town or middle) or an area asked at its middle."""
-    return area.weather_at["name"] if area.weather_at and section is None else None
 
 
 @app.get("/api/outlook", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain: one Google Weather call
@@ -761,7 +756,7 @@ def outlook_days(area: str | None = None, section: str | None = None) -> dict:
     found, part = known_scope(area, section)
     lat, lon = sections.centre(part) if part else found.centre()
     return ok({"outlook": {**outlook.build(found.id, lat, lon, section_id=part["id"] if part else None),
-                           "at": weather_place(found, part)}})
+                           "at": areas.weather_town(found, part)}})
 
 
 @app.get("/api/place/{place_id}", dependencies=[Depends(maps_limit)])   # GET only, as /api/rain
