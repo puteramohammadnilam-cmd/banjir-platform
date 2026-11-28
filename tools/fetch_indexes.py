@@ -1,4 +1,4 @@
-"""Download the inputs of the two Shah Alam indexes (plan Phase 3, gates G-P3-1 to G-P3-5), one subcommand per gate.
+"""Download the inputs of an area's two indexes (plan Phase 3, gates G-P3-1 to G-P3-5), one subcommand per gate.
 
     .venv/bin/python tools/fetch_indexes.py worldcover   # G-P3-1 ESA WorldCover 2021 v200 land cover: byte ranges
     .venv/bin/python tools/fetch_indexes.py ndvi         # G-P3-3 WorldCover Sentinel-2 NDVI composite: byte ranges
@@ -8,7 +8,10 @@
                                                          #        ditches
     .venv/bin/python tools/fetch_indexes.py sources      # rewrite SOURCES.md from fetch_log.json
 
-Run from 11_Platform_Draft. Everything lands in $BANJIR_RAW_DIR/shah_alam/indexes (else ../05_Raw_Data_Sources/...):
+--area picks the area (index_inputs.PLACES; shah-alam by default). A state's drains and roads are too big for one
+Overpass question: tools/fetch_state_osm.py asks for them tile by tile and logs them here.
+
+Run from 11_Platform_Draft. Everything lands in $BANJIR_RAW_DIR/<area>/indexes (else ../05_Raw_Data_Sources/...):
 worldcover/<file stem>/ and vegetation/<file stem>/ hold the byte ranges read (tools/tiff_read.PieceSource: one file a
 range and pieces.json with each range's SHA-256), soilgrids/, worldpop/ and osm_drains/ whole answers. fetch_log.json
 records each download (what, URL, file, bytes, SHA-256, date, licence, credit) and SOURCES.md is written from it.
@@ -62,12 +65,13 @@ LICENCES = {
     "worldpop": ("CC BY 4.0", "WorldPop (www.worldpop.org) 2020 constrained population counts, Malaysia, "
                  "doi:10.5258/SOTON/WP00660"),
     "drains": ("ODbL 1.0", "(c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright"),
+    "roads": ("ODbL 1.0", "(c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright"),
 }
 
 
-def fetch_box() -> tuple[float, float, float, float]:
+def fetch_box(place: ii.Place = ii.SHAH_ALAM) -> tuple[float, float, float, float]:
     """(west, south, east, north) of the grid's outer edges, PAD_DEG wider on each side."""
-    west, south, east, north = ii.grid_window().bounds()
+    west, south, east, north = ii.grid_window(place).bounds()
     return west - PAD_DEG, south - PAD_DEG, east + PAD_DEG, north + PAD_DEG
 
 
@@ -119,17 +123,17 @@ def remote_size(url: str) -> int:
 
 # --- the log and SOURCES.md ---
 
-def raw_dir() -> Path:
-    return ii.raw_root() / "indexes"
+def raw_dir(place: ii.Place = ii.SHAH_ALAM) -> Path:
+    return ii.raw_root(place) / "indexes"
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def log_download(what: str, url: str, path: Path, note: str = "") -> dict:
+def log_download(what: str, url: str, path: Path, note: str = "", place: ii.Place = ii.SHAH_ALAM) -> dict:
     """Add one download to fetch_log.json (replacing an older entry for the same file) and rewrite SOURCES.md."""
-    root = raw_dir()
+    root = raw_dir(place)
     log_path = root / "fetch_log.json"
     log = json.loads(log_path.read_text(encoding="utf-8")) if log_path.exists() else []
     stored = path.relative_to(root).as_posix()
@@ -137,13 +141,13 @@ def log_download(what: str, url: str, path: Path, note: str = "") -> dict:
              "date": dt.date.today().isoformat(), "note": note}
     log = [e for e in log if e["file"] != stored] + [entry]
     log_path.write_text(json.dumps(log, indent=1) + "\n", encoding="utf-8")
-    write_sources(log)
+    write_sources(log, place)
     print(f"{stored}: {entry['bytes']} bytes, SHA-256 {entry['sha256']}")
     return entry
 
 
-def write_sources(log: list[dict]) -> None:
-    lines = ["# Inputs of the Shah Alam flash flood potential index and section score", "",
+def write_sources(log: list[dict], place: ii.Place = ii.SHAH_ALAM) -> None:
+    lines = [f"# Inputs of the {place.name} flash flood potential index and section score", "",
              "Fetched by tools/fetch_indexes.py (User-Agent: " + USER_AGENT + "). One entry per file; for a remote",
              "file read in byte ranges the file is its pieces.json, which lists each range with its own SHA-256.", ""]
     for what in LICENCES:
@@ -156,7 +160,7 @@ def write_sources(log: list[dict]) -> None:
             lines += [f"- {e['file']}: {e['bytes']} bytes, SHA-256 {e['sha256']}, fetched {e['date']}",
                       f"  - URL: {e['url']}"] + ([f"  - {e['note']}"] if e["note"] else [])
         lines.append("")
-    (raw_dir() / "SOURCES.md").write_text("\n".join(lines), encoding="utf-8")
+    (raw_dir(place) / "SOURCES.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 # --- one subcommand per gate ---
@@ -172,25 +176,25 @@ def fetch_ranges(url: str, folder: Path, box: Sequence[float], band: int = 0) ->
     return folder / "pieces.json", f"{len(blocks)} blocks of {image.block_w} px; {fetched} bytes of {source.size}"
 
 
-def fetch_worldcover(box: Sequence[float]) -> None:
+def fetch_worldcover(box: Sequence[float], place: ii.Place) -> None:
     for tile in worldcover_tiles(box):
         url = WORLDCOVER_URL.format(tile=tile)
-        manifest, note = fetch_ranges(url, raw_dir() / "worldcover" / Path(url).stem, box)
-        log_download("worldcover", url, manifest, note)
+        manifest, note = fetch_ranges(url, raw_dir(place) / "worldcover" / Path(url).stem, box)
+        log_download("worldcover", url, manifest, note, place)
 
 
-def fetch_ndvi(box: Sequence[float]) -> None:
+def fetch_ndvi(box: Sequence[float], place: ii.Place) -> None:
     for folder, tile in ndvi_tiles(box):
         url = NDVI_URL.format(lat=folder, tile=tile)
-        manifest, note = fetch_ranges(url, raw_dir() / "vegetation" / Path(url).stem, box)
-        log_download("ndvi", url, manifest, note)
+        manifest, note = fetch_ranges(url, raw_dir(place) / "vegetation" / Path(url).stem, box, band=ii.NDVI_BAND)
+        log_download("ndvi", url, manifest, note, place)
 
 
-def fetch_soilgrids(box: Sequence[float]) -> None:
+def fetch_soilgrids(box: Sequence[float], place: ii.Place) -> None:
     west, south, east, north = box
     for prop in SOIL_PROPERTIES:
         for depth in SOIL_DEPTHS:
-            path = raw_dir() / "soilgrids" / f"{prop}_{depth}_mean.tif"
+            path = raw_dir(place) / "soilgrids" / f"{prop}_{depth}_mean.tif"
             url = SOIL_URL.format(prop=prop, depth=depth, west=west, south=south, east=east, north=north)
             if not path.exists():
                 data = get(url)
@@ -198,19 +202,19 @@ def fetch_soilgrids(box: Sequence[float]) -> None:
                     raise SystemExit(f"{path.name}: the server did not send a GeoTIFF: {data[:200]!r}")
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(data)
-            log_download("soilgrids", url, path)
+            log_download("soilgrids", url, path, place=place)
 
 
-def fetch_worldpop() -> None:
-    path = raw_dir() / "worldpop" / Path(WORLDPOP_URL).name
+def fetch_worldpop(place: ii.Place) -> None:
+    path = raw_dir(place) / "worldpop" / Path(WORLDPOP_URL).name
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(get(WORLDPOP_URL))
-    log_download("worldpop", WORLDPOP_URL, path)
+    log_download("worldpop", WORLDPOP_URL, path, place=place)
 
 
-def fetch_drains(box: Sequence[float]) -> None:
-    path = raw_dir() / "osm_drains" / "drains_shah-alam.json"
+def fetch_drains(box: Sequence[float], place: ii.Place) -> None:
+    path = raw_dir(place) / "osm_drains" / f"drains_{place.name}.json"
     query = drains_query(box)
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -218,19 +222,22 @@ def fetch_drains(box: Sequence[float]) -> None:
     answer = json.loads(path.read_text(encoding="utf-8"))
     kinds = {k: sum(e.get("tags", {}).get("waterway") == k for e in answer["elements"]) for k in DRAIN_TYPES}
     note = f"Overpass query: {query} OSM data as of {answer.get('osm3s', {}).get('timestamp_osm_base')}; ways: {kinds}"
-    log_download("drains", OVERPASS_URL, path, note)
+    log_download("drains", OVERPASS_URL, path, note, place)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("what", choices=("worldcover", "ndvi", "soilgrids", "worldpop", "drains", "sources"))
+    parser.add_argument("--area", choices=sorted(ii.PLACES), default=ii.SHAH_ALAM.name)
     args = parser.parse_args(argv)
-    raw_dir().mkdir(parents=True, exist_ok=True)
-    box = fetch_box()
-    actions = {"worldcover": lambda: fetch_worldcover(box), "ndvi": lambda: fetch_ndvi(box),
-               "soilgrids": lambda: fetch_soilgrids(box), "worldpop": fetch_worldpop,
-               "drains": lambda: fetch_drains(box),
-               "sources": lambda: write_sources(json.loads((raw_dir() / "fetch_log.json").read_text("utf-8")))}
+    place = ii.PLACES[args.area]
+    raw_dir(place).mkdir(parents=True, exist_ok=True)
+    box = fetch_box(place)
+    actions = {"worldcover": lambda: fetch_worldcover(box, place), "ndvi": lambda: fetch_ndvi(box, place),
+               "soilgrids": lambda: fetch_soilgrids(box, place), "worldpop": lambda: fetch_worldpop(place),
+               "drains": lambda: fetch_drains(box, place),
+               "sources": lambda: write_sources(json.loads((raw_dir(place) / "fetch_log.json").read_text("utf-8")),
+                                                place)}
     actions[args.what]()
     return 0
 

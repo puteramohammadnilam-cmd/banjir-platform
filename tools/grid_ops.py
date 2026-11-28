@@ -115,10 +115,11 @@ def _rings_of(geometry: dict) -> list[list[list[tuple[float, float]]]]:
     return [[[(p[0], p[1]) for p in ring] for ring in polygon] for polygon in polygons]
 
 
-def polygon_mask(grid: Grid, geometry: dict) -> bytearray:
+def polygon_mask(grid: Grid, geometry: dict, into: bytearray | None = None) -> bytearray:
     """1 at each square whose centre lies inside the geometry (each polygon even-odd over its rings, so holes stay
-    out; polygons joined), else 0. A centre exactly on an edge may fall either way."""
-    mask = bytearray(grid.size)
+    out; polygons joined), else 0. A centre exactly on an edge may fall either way. With `into` (a mask of the grid)
+    the squares are marked in it, in place, and it is given back: many small shapes cost their own rows only."""
+    mask = into if into is not None else bytearray(grid.size)
     for rings in _rings_of(geometry):
         edges = [(grid.pixel(*a), grid.pixel(*b)) for ring in rings for a, b in zip(ring, ring[1:])]
         edges = [(a, b) for a, b in edges if a[1] != b[1]]
@@ -231,14 +232,16 @@ def disc_sum(values: Sequence[float], grid: Grid, rows_spec: Sequence[tuple[int,
 # --- other rasters onto the grid ---
 
 def fractions_from(grid: Grid, values: Sequence[int], src: tuple[float, float, float, float, int],
-                   classes: Sequence[int]) -> dict[int, array]:
+                   classes: Sequence[int], into: dict[int, array] | None = None) -> dict[int, array]:
     """{class: count of the source pixels of that class whose centres fall in each square}. `src` is the source
-    window's (west edge, north edge, px, py, cols); `values` its pixels row by row. Other values are not counted."""
+    window's (west edge, north edge, px, py, cols); `values` its pixels row by row. Other values are not counted.
+    With `into` (such counts, from another part of the source) the pixels are added to it, in place, and it is given
+    back."""
     west, north, spx, spy, scols = src
     srows = len(values) // scols
     to_col = [math.floor((west + (j + 0.5) * spx - grid.west) / grid.px) for j in range(scols)]
     to_row = [math.floor((grid.north - (north - (i + 0.5) * spy)) / grid.py) for i in range(srows)]
-    counts = {k: array("H", [0]) * grid.size for k in classes}
+    counts = into if into is not None else {k: array("H", [0]) * grid.size for k in classes}
     for i, row in enumerate(to_row):
         if not 0 <= row < grid.rows:
             continue

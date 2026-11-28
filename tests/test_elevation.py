@@ -129,20 +129,21 @@ def test_a_point_carries_the_height_at_its_squares_centre(dem, tmp_path, monkeyp
 # --- the committed crops ---
 
 def shipped() -> dict[str, tuple[int, str]]:
-    """{file: (bytes, SHA-256)} as app/data/dem/SOURCES.txt lists them."""
-    text = (DEM / "SOURCES.txt").read_text(encoding="utf-8")
+    """{file: (bytes, SHA-256)} as app/data/dem/SOURCES.txt (Shah Alam's) and SOURCES-johor.txt list them."""
+    text = "\n".join((DEM / name).read_text(encoding="utf-8") for name in ("SOURCES.txt", "SOURCES-johor.txt"))
     return {name: (int(size), digest) for name, size, digest in
             re.findall(r"File:\s+(\S+\.tif)\nBytes:\s+(\d+)\nSHA-256:\s+([0-9a-f]{64})", text)}
 
 
 def test_the_committed_crops_are_the_ones_sources_lists():
     listed = shipped()
-    assert sorted(listed) == sorted(p.name for p in DEM.glob("*.tif")) == ["shah-alam_above_river.tif",
-                                                                          "shah-alam_surface.tif"]
+    assert sorted(listed) == sorted(p.name for p in DEM.glob("*.tif")) == [
+        "johor_above_river.tif", "johor_surface.tif", "shah-alam_above_river.tif", "shah-alam_surface.tif"]
     for name, (size, digest) in listed.items():
         data = (DEM / name).read_bytes()
         assert (len(data), hashlib.sha256(data).hexdigest()) == (size, digest), name
-    assert sum(size for size, _ in listed.values()) < 4_000_000   # small enough to keep in git
+    assert sum(size for name, (size, _) in listed.items() if name.startswith("shah-alam")) < 4_000_000
+    assert sum(size for name, (size, _) in listed.items() if name.startswith("johor")) < 10_000_000   # for git
 
 
 @pytest.fixture
@@ -162,7 +163,7 @@ def real_dem(monkeypatch):
 def test_known_spots_in_shah_alam(real_dem, spot, lat, lon, top, ground, river):
     """`top` is the surface in the spot's own square (the decoding check: hills against their mapped height, trees
     adding a few metres); the answer is the lowest of the 3 x 3 squares, well below a hill's top."""
-    crop = elevation.crops()[0]
+    crop = next(found for found in elevation.crops() if found.name == "shah-alam")
     assert crop.surface.value_at(*crop.surface.grid.cell(lon, lat), elevation.height_value) == top, spot
     assert elevation.at(lat, lon) == {"ground_m": ground, "above_river_m": river}, spot
 
@@ -181,3 +182,13 @@ def test_premises_carry_elevation_where_it_is_loaded_and_null_elsewhere(real_dem
     assert all(p["elevation"] is None for p in areas.premises("kuantan"))
     found = places.resolve(sri_muda[0]["id"])
     assert found["elevation"] == sri_muda[0]["elevation"]
+
+
+@pytest.mark.parametrize(("spot", "lat", "lon"), [
+    ("Gunung Pulai, 654 m on OpenStreetMap", 1.6033, 103.5464),
+    ("Johor Bahru, Jalan Wong Ah Fook", 1.4627, 103.7614),
+])
+def test_known_spots_in_johor_read_their_own_92_m_square(real_dem, spot, lat, lon):
+    crop = next(found for found in elevation.crops() if found.name == "johor")
+    own = crop.surface.value_at(*crop.surface.grid.cell(lon, lat), elevation.height_value)
+    assert elevation.at(lat, lon)["ground_m"] == own, spot

@@ -41,7 +41,7 @@ export function renderMethod(details, body, area, { word = null } = {}) {
   const method = area.index_method ?? null;
   const layer = area.layers?.flash_flood ?? null;
   details.hidden = !method && !layer;
-  body.replaceChildren(...(details.hidden ? [] : methodBody(method, { showScore: showsScore(method), word, credit: layer?.credit ?? null })));
+  body.replaceChildren(...(details.hidden ? [] : methodBody(method, { showScore: showsScore(method), word, credit: layer?.credit ?? null, squareM: layer?.square_m ?? 30 })));
 }
 
 

@@ -225,16 +225,19 @@ def test_the_area_details_carry_the_layer_and_others_null(city, tmp_path, monkey
 
 # --- the committed pictures ---
 
-def test_the_committed_pngs_are_the_ones_their_json_and_sources_list():
-    doc = json.loads((DEM / "shah-alam_lowground.json").read_text(encoding="utf-8"))
-    sources = (DEM / "SOURCES.txt").read_text(encoding="utf-8")
-    assert doc["levels"] == [1, 2, 3, 5] and sorted(p.name for p in DEM.glob("*_lowground_*m.png")) == \
-        [f"shah-alam_lowground_{level}m.png" for level in (1, 2, 3, 5)]
+@pytest.mark.parametrize(("name", "sources_file", "budget"), [
+    ("shah-alam", "SOURCES.txt", 150_000), ("johor", "SOURCES-johor.txt", 350_000)])
+def test_the_committed_pngs_are_the_ones_their_json_and_sources_list(name, sources_file, budget):
+    doc = json.loads((DEM / f"{name}_lowground.json").read_text(encoding="utf-8"))
+    sources = (DEM / sources_file).read_text(encoding="utf-8")
+    assert doc["levels"] == [1, 2, 3, 5] and sorted(p.name for p in DEM.glob(f"{name}_lowground_*m.png")) == \
+        [f"{name}_lowground_{level}m.png" for level in (1, 2, 3, 5)]
+    assert sorted({p.name.split("_lowground_")[0] for p in DEM.glob("*_lowground_*m.png")}) == ["johor", "shah-alam"]
     for entry in doc["files"].values():
         data = (DEM / entry["file"]).read_bytes()
         assert (entry["bytes"], entry["sha256"]) == (len(data), hashlib.sha256(data).hexdigest()), entry["file"]
         assert f"File:     {entry['file']}\nBytes:    {entry['bytes']}\nSHA-256:  {entry['sha256']}" in sources
-        assert len(data) < 150_000, "small enough to keep in git"
+        assert len(data) < budget, "small enough to keep in git"
     source = DEM / doc["source"]["file"]
     assert doc["source"]["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
 

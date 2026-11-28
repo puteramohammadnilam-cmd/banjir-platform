@@ -115,9 +115,11 @@ def test_a_damaged_file_logs_its_name_and_tile_but_never_the_point(tmp_path, mon
 # --- the map layer ---
 
 def test_the_layer_gives_its_url_bounds_breaks_and_credit(folder):
-    assert indexes.layer("test-area") == {"url": "/api/areas/test-area/layers/flash-flood.png",
-                                          "bounds": [100.0, 5.0, 106.0, 10.0], "breaks": [3.5, 6.0, 8.0],
-                                          "credit": ix.CREDIT}
+    found = indexes.layer("test-area")
+    assert {key: value for key, value in found.items() if key != "square_m"} == {
+        "url": "/api/areas/test-area/layers/flash-flood.png", "bounds": [100.0, 5.0, 106.0, 10.0],
+        "breaks": [3.5, 6.0, 8.0], "credit": ix.CREDIT}
+    assert isinstance(found["square_m"], int)
     assert indexes.png_path("test-area") == folder / "test-area_ffpi.png"
     assert indexes.flash_method("test-area") == {key: ix.FLASH_METHOD[key] for key in indexes.METHOD_KEYS}
     assert "factors" not in indexes.flash_method("test-area") and indexes.breaks("test-area") == (3.5, 6.0, 8.0)

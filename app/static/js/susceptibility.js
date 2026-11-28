@@ -122,9 +122,9 @@ const both = (method, key, showScore) => [...(method?.flash?.[key] ?? []), ...((
 
 /** "How these are worked out", from the area's `index_method` {flash, score, validation} (null: our words only): the
  *  layer's credit, and the score's own (WorldPop, OpenStreetMap) while the score shows. */
-export function methodBody(method, { showScore, word = null, credit = null }) {
+export function methodBody(method, { showScore, word = null, credit = null, squareM = 30 }) {
   return [
-    h("p", {}, t("flash.method"), " ", comparedNote(method?.validation, "flash", word) ?? ""),
+    h("p", {}, t("flash.method", { m: squareM }), " ", comparedNote(method?.validation, "flash", word) ?? ""),
     showScore && h("p", {}, t("score.method", { word: dataWord(word, { lower: true }) }), " ",
       comparedNote(method?.validation, "score", word) ?? "", " ", textOf(method?.validation?.wording ?? "")),
     ...listPart(t("flash.deviations"), both(method, "deviations", showScore), (text) => h("li", {}, textOf(text))),

@@ -1,0 +1,60 @@
+Johor elevation crops in this folder
+====================================
+
+johor_surface.tif and johor_above_river.tif, made by tools/build_elevation.py (from 11_Platform_Draft):
+
+  .venv/bin/python tools/fetch_state_osm.py --area johor rivers
+  .venv/bin/python tools/build_elevation.py build --name johor --bbox 102.46 1.26 104.55 2.84 \
+      --raw ../05_Raw_Data_Sources/copernicus_glo30 --step 3
+
+Box: Johor's 102.46-104.55 E, 1.26-2.84 N plus 2 km. Squares of 3 arc seconds (about 92 m), 1,939 rows by 2,551
+columns: each holds the LOWEST of the nine Copernicus GLO-30 heights inside it, so most roofs and trees drop out, as the
+3 x 3 window does on Shah Alam's 1 arc second crops (app/elevation.py reads a square of these on its own). Heights to
+0.1 m, float32, no data -9999, read back byte for byte when written. above_river is that surface minus the level of the
+nearest mapped OpenStreetMap river or canal square within 3 km (the 10th percentile of the river squares' surface within
+150 m), no data beyond, negatives kept. A surface model, not bare earth, and good to a few metres at best.
+
+File:     johor_surface.tif
+Bytes:    4839076
+SHA-256:  61d27f4a1ed2bde15ef4095d2efb393408dc18b6288f1d501cf164a5c683e1d0
+
+File:     johor_above_river.tif
+Bytes:    3388164
+SHA-256:  b165d3e9a4f136aa7e5661dc9e40c1ebff7e639104fd436fe230999109f38179
+
+Inputs (in ../05_Raw_Data_Sources/copernicus_glo30, listed in its SOURCES.md): the six GLO-30 tiles
+Copernicus_DSM_COG_10_N0{1,2}_00_E10{2,3,4}_00_DEM.tif (fetched 28 Nov 2026 from the AWS open bucket
+copernicus-dem-30m), and rivers_johor.json (OpenStreetMap rivers, canals and river water areas, OSM data as of
+2026-11-27T22:55:51Z, asked in 9 parts by tools/fetch_state_osm.py; SHA-256
+50ad08a5fc8f2898e431dde79e9aaf44d642cad9fe9c68036d0736b372cfad03).
+
+Credit: (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the
+European Union and ESA; rivers (c) OpenStreetMap contributors, ODbL.
+
+Low ground map layer
+====================
+
+tools/build_lowground.py reads the above_river crop above and writes one indexed PNG per level (1, 2, 3
+and 5 m) on its squares, with a JSON of the levels, tones, bounds and these hashes. Each square takes the
+height above the river of its own 92 m square, already the lowest of the nine GLO-30 heights in it; a
+square at or below the level is shaded in four tones (up to 1 m darkest, then 1-2, 2-3 and 3-5 m), the
+rest and no data (beyond 3 km of a mapped river) are transparent. app/lowground.py serves them for the
+map. Not a flood forecast or extent: banks, bunds, drains and pumps are left out.
+Source:    johor_above_river.tif, SHA-256 b165d3e9a4f136aa7e5661dc9e40c1ebff7e639104fd436fe230999109f38179
+Credit:    Ground height: Copernicus GLO-30; rivers © OpenStreetMap contributors
+
+File:     johor_lowground_1m.png
+Bytes:    106961
+SHA-256:  1b7f4a58f0c81ddf4356786a192a6b455c6d35855b73c999a6b389a67b026409
+
+File:     johor_lowground_2m.png
+Bytes:    157375
+SHA-256:  b1970c5f6d8ba458549c5923d2762993883e9b7824ba1b846d8750e804d03ce3
+
+File:     johor_lowground_3m.png
+Bytes:    203007
+SHA-256:  247dabfc8bfc365083f61117d32a2f1dadf4c0ebb9e1fbfa06af5779b6ca16f1
+
+File:     johor_lowground_5m.png
+Bytes:    265179
+SHA-256:  77088d121a745b693699df613840f711e37ce0f2635ad2179599ea4465f16084

@@ -1,8 +1,12 @@
-"""The index tools' inputs, read onto one grid: the GLO-30 crop of app/data/dem (the city box plus 2 km, 1 arc second
-squares, about 31 m). Standard library only; everything is read from files fetched earlier (tools/fetch_indexes.py),
-never from the network.
+"""The index tools' inputs, read onto one grid: the GLO-30 crop of app/data/dem (the area's box plus 2 km). Standard
+library only; everything is read from files fetched earlier (tools/fetch_indexes.py), never from the network.
 
-    grid = grid_window()
+Each area the tools build for is a Place (PLACES, picked with --area): Shah Alam on GLO-30's own 1 arc second squares
+(about 31 m), and Johor, a whole state, on 3 arc second squares (about 92 m) that each hold the lowest of the nine
+GLO-30 heights inside them (tools/build_elevation.py --step 3), so a state's files stay small enough for the repo and
+for these tools. The functions below default to Shah Alam.
+
+    grid = grid_window()                            # or grid_window(PLACES["johor"])
     surface = load_surface(grid)                    # metres, from app/data/dem/shah-alam_surface.tif
     cover = load_worldcover(grid, raw)              # {WorldCover class: pixel count per square}
     vegetation = load_vegetation(grid, raw)         # mean fractional vegetation cover per square, 0 to 1
@@ -30,30 +34,66 @@ import grid_ops as go  # noqa: E402
 import tiff_read as tr  # noqa: E402
 from rawpaths import RAW_SOURCES  # noqa: E402
 
-NAME = "shah-alam"
-CITY_BBOX = (101.43, 2.95, 101.59, 3.23)     # west, south, east, north: tools/build_elevation.py's --bbox
 MARGIN_KM = be.MARGIN_KM
 ARC_SECOND = 1 / 3600
-DEM_FILE = ROOT / "app" / "data" / "dem" / f"{NAME}_surface.tif"
+DEM_DIR = ROOT / "app" / "data" / "dem"
+
+
+@dataclass(frozen=True)
+class Place:
+    """One area the index tools build for. Paths are inside its raw folder."""
+
+    name: str                 # the area id, and the stem of its files
+    raw_folder: str           # its folder in the raw sources
+    bbox: tuple               # west, south, east, north: tools/build_elevation.py's --bbox
+    step: int                 # arc seconds per square: 1 (GLO-30's own) or 3 (each the lowest of 3 x 3 GLO-30 squares)
+    outline: str              # GeoJSON of what the pictures are cut to: every feature's outline
+    roads: str                # Overpass answer of the vehicle roads (tools/build_section_scores.py)
+    sections: str | None = None   # GeoJSON of the sections, None for tools/sections_io.py's default (Shah Alam's)
+    expected: int | None = None   # how many sections it must hold
+    hotspots: tuple = ()      # sections named as flood hotspots, for the score's comparison
+
+    @property
+    def window(self) -> int:
+        """Squares on each side for "the lowest height of the 3 x 3 squares" (about 90 m): 1 on GLO-30's own squares,
+        0 on 3 arc second squares, which already hold the lowest of the nine GLO-30 heights inside them."""
+        return 1 if self.step == 1 else 0
+
+    def dem_file(self, layer: str = "surface") -> Path:
+        return DEM_DIR / f"{self.name}_{layer}.tif"
+
+
+PLACES = {place.name: place for place in (
+    Place("shah-alam", "shah_alam", (101.43, 2.95, 101.59, 3.23), 1, "mbsa_sections/city_outline.geojson",
+          "city_osm/roads.json", hotspots=("seksyen-16", "seksyen-17", "seksyen-18", "seksyen-36", "seksyen-25")),
+    Place("johor", "johor", (102.46, 1.26, 104.55, 2.84), 3, "districts/districts.geojson",
+          "indexes/osm_roads/roads_johor.json", sections="districts/districts.geojson", expected=10),
+)}
+SHAH_ALAM = PLACES["shah-alam"]
+NAME = SHAH_ALAM.name
+CITY_BBOX = SHAH_ALAM.bbox
+DEM_FILE = SHAH_ALAM.dem_file()
 WORLDCOVER_CLASSES = (10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100)
 NDVI_BAND = 1                 # the composite's bands are NDVI p90, p50, p10
 NDVI_NODATA = 255
 SOIL_DEPTHS = (("0-5cm", 5.0), ("5-15cm", 10.0))   # (layer, thickness in cm): weights of the 0-15 cm mean
 SOIL_PROPERTIES = ("sand", "silt", "clay")
 WORLDPOP_FILE = "mys_ppp_2020_constrained.tif"
+BAND_ROWS = 4096              # 10 m source rows read at a time: a state's window would not fit in memory at once
 
 
-def raw_root() -> Path:
-    """$BANJIR_RAW_DIR/shah_alam when set, else ../05_Raw_Data_Sources/shah_alam."""
+def raw_root(place: Place = SHAH_ALAM) -> Path:
+    """$BANJIR_RAW_DIR/<raw folder> when set, else ../05_Raw_Data_Sources/<raw folder> (shah_alam by default)."""
     raw = Path(os.environ["BANJIR_RAW_DIR"]) if os.environ.get("BANJIR_RAW_DIR") else RAW_SOURCES
-    return raw / "shah_alam"
+    return raw / place.raw_folder
 
 
-def grid_window() -> go.Grid:
+def grid_window(place: Place = SHAH_ALAM) -> go.Grid:
     """The grid of app/data/dem's crop, worked out the way tools/build_elevation.py does."""
-    part = be.Window.around(be.expand(CITY_BBOX, MARGIN_KM * 1000), ARC_SECOND, ARC_SECOND)
+    size = place.step * ARC_SECOND
+    part = be.Window.around(be.expand(place.bbox, MARGIN_KM * 1000), size, size)
     west, north = part.origin()
-    return go.Grid(west, north, ARC_SECOND, ARC_SECOND, part.rows, part.cols)
+    return go.Grid(west, north, size, size, part.rows, part.cols)
 
 
 def _keep_height(value: float) -> float | None:
@@ -76,6 +116,13 @@ def _window_of(image: tr.Image, grid: go.Grid) -> tuple[tuple[int, int, int, int
                                      image.py, cols)
 
 
+def _bands(window: tuple[int, int, int, int], src: tuple) -> list[tuple[tuple[int, int, int, int], tuple]]:
+    """The window (and its src) cut into parts of up to BAND_ROWS rows, north first."""
+    (top, left, rows, cols), (west, north, px, py, scols) = window, src
+    return [((top + k, left, min(BAND_ROWS, rows - k), cols), (west, north - k * py, px, py, scols))
+            for k in range(0, rows, BAND_ROWS)]
+
+
 def _piece_sources(folder: Path) -> list[tr.PieceSource]:
     found = sorted(p.parent for p in folder.glob("*/pieces.json"))
     if not found:
@@ -91,9 +138,8 @@ def load_worldcover(grid: go.Grid, raw: Path) -> dict[int, array]:
         window, src = _window_of(image, grid)
         if window[2] <= 0 or window[3] <= 0:
             continue
-        found = go.fractions_from(grid, tr.read_window(source, image, *window), src, WORLDCOVER_CLASSES)
-        for k in WORLDCOVER_CLASSES:
-            counts[k] = array("H", (a + b for a, b in zip(counts[k], found[k])))
+        for part, part_src in _bands(window, src):
+            go.fractions_from(grid, tr.read_window(source, image, *part), part_src, WORLDCOVER_CLASSES, into=counts)
     return counts
 
 
@@ -124,8 +170,8 @@ def load_vegetation(grid: go.Grid, raw: Path, ndvi_lo: float, ndvi_hi: float) ->
         window, src = _window_of(image, grid)
         if window[2] <= 0 or window[3] <= 0:
             continue
-        values = tr.read_window(source, image, *window, band=NDVI_BAND)
-        go.add_means(grid, values, src, table, total, count)
+        for part, part_src in _bands(window, src):
+            go.add_means(grid, tr.read_window(source, image, *part, band=NDVI_BAND), part_src, table, total, count)
     cover = array("d", (t / n if n else go.NODATA for t, n in zip(total, count)))
     return Vegetation(cover, ndvi_lo, ndvi_hi)
 
@@ -135,10 +181,11 @@ def ndvi_histogram(grid: go.Grid, raw: Path) -> list[int]:
     counts = [0] * 256
     for source in _piece_sources(raw / "indexes" / "vegetation"):
         image = tr.open_image(source)
-        window, _ = _window_of(image, grid)
+        window, src = _window_of(image, grid)
         if window[2] > 0 and window[3] > 0:
-            for dn in tr.read_window(source, image, *window, band=NDVI_BAND):
-                counts[dn] += 1
+            for part, _ in _bands(window, src):
+                for dn in tr.read_window(source, image, *part, band=NDVI_BAND):
+                    counts[dn] += 1
     return counts
 
 

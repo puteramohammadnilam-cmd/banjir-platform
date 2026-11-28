@@ -1,7 +1,7 @@
 """Build the "low ground" map layer: land within 1, 2, 3 or 5 m of the level of the nearest mapped river, from the
 height-above-river crop tools/build_elevation.py made (Copernicus GLO-30 and OpenStreetMap rivers). Standard library only.
 
-    .venv/bin/python tools/build_lowground.py [--name shah-alam] [--dem DIR]
+    .venv/bin/python tools/build_lowground.py [--name shah-alam] [--dem DIR] [--outline GEOJSON]
 
 Run from 11_Platform_Draft. Reads {name}_above_river.tif in app/data/dem (or --dem) and writes beside it:
   {name}_lowground_{level}m.png   one indexed PNG per level (1, 2, 3 and 5 m) on the tif's own squares: a square at or
@@ -17,6 +17,10 @@ app/elevation.py uses), since the satellite surface holds roofs and trees; a squ
 without shading. A square below the river's level (a negative
 height) is in the lowest tone. Heights are compared as stored (0.1 m steps). The same input gives the same bytes.
 
+A crop on 3 arc second squares (about 92 m, a whole state's: tools/build_elevation.py --step 3) already holds in each
+square the lowest of the nine GLO-30 heights inside it, so there each square's own height is used, and the sources go
+to SOURCES-{name}.txt instead (its part, after whatever is written above it, rewritten the same way).
+
 What it is not: a flood forecast or a flood extent. It ignores banks, bunds, drains, pumps and how much water a river
 can carry, and land that is not shaded can still flood from rain or blocked drains.
 """
@@ -25,6 +29,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import sys
 from array import array
 from collections.abc import Sequence
@@ -46,6 +51,7 @@ EDGE_SLACK = 1e-4                   # stored float32 tenths (2.0 holds as 2.0, 1
 TONES_OKLCH = ((0.38, 0.055, 175), (0.52, 0.06, 175), (0.66, 0.055, 175), (0.80, 0.045, 175))   # teal-grey, lowest first
 CREDIT = "Ground height: Copernicus GLO-30; rivers © OpenStreetMap contributors"
 SOURCES_HEADING = "Low ground map layer"
+COARSE_PX = 3 / 3600                # degrees: 3 arc second squares (build_elevation.py --step 3) hold the 3 x 3 lowest
 
 
 def tones() -> list[dict]:
@@ -71,9 +77,16 @@ def read_heights(path: Path) -> tuple[go.Grid, array]:
     return go.Grid(g.x0, g.y0, g.px, g.py, g.rows, g.cols), values
 
 
+def is_coarse(grid: go.Grid) -> bool:
+    """Whether the squares are 3 arc seconds (a state's), each already the lowest of its nine GLO-30 heights."""
+    return math.isclose(grid.px, COARSE_PX, rel_tol=1e-6)
+
+
 def lowest_heights(heights: Sequence[float], grid: go.Grid) -> array:
-    """Each square's lowest height in the 3 x 3 squares around it; no data where the square itself has none, so the
-    shading stops where the crop's heights above a river do."""
+    """Each square's lowest height in the 3 x 3 squares around it (its own on a coarse grid); no data where the square
+    itself has none, so the shading stops where the crop's heights above a river do."""
+    if is_coarse(grid):
+        return array("d", heights)
     lowest = go.min_filter3(heights, grid.rows, grid.cols)
     return array("d", (go.NODATA if own <= go.NODATA_BELOW else low for own, low in zip(heights, lowest)))
 
@@ -94,12 +107,24 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def doc_of(name: str, grid: go.Grid, source: Path, pngs: Sequence[Path]) -> dict:
+def outline_mask(grid: go.Grid, path: Path) -> bytearray:
+    """1 at each square inside any feature of the GeoJSON at `path` (a state's districts), else 0."""
+    found = json.loads(path.read_text(encoding="utf-8"))
+    mask = bytearray(grid.size)
+    for feature in found["features"] if "features" in found else [found]:
+        go.polygon_mask(grid, feature.get("geometry", feature), into=mask)
+    return mask
+
+
+def doc_of(name: str, grid: go.Grid, source: Path, pngs: Sequence[Path], outline: Path | None = None) -> dict:
     """{name}_lowground.json."""
     return {
         "version": 1, "area": name, "layer": "low_ground", "levels": list(LEVELS), "tones": tones(),
-        "rule": "A square is shaded on a level's layer when the lowest height above the nearest mapped river of the "
-                "3 x 3 squares around it is at or below that level; the tone says how high it sits.",
+        "rule": ("A square (about 92 m) is shaded on a level's layer when its height above the nearest mapped river, "
+                 "from the lowest of the nine GLO-30 heights inside it, is at or below that level; the tone says how "
+                 "high it sits." if is_coarse(grid) else
+                 "A square is shaded on a level's layer when the lowest height above the nearest mapped river of the "
+                 "3 x 3 squares around it is at or below that level; the tone says how high it sits."),
         "source": {"file": source.name, "bytes": source.stat().st_size, "sha256": sha256(source)},
         "files": {str(level): {"file": p.name, "bytes": p.stat().st_size, "sha256": sha256(p)}
                   for level, p in zip(LEVELS, pngs)},
@@ -107,7 +132,8 @@ def doc_of(name: str, grid: go.Grid, source: Path, pngs: Sequence[Path]) -> dict
                  "cols": grid.cols},
         "bounds": list(grid.bounds()),
         "png": {"width": grid.cols, "height": grid.rows, "transparent_index": 0,
-                "masked": "Transparent above the level and beyond 3 km of a mapped river (no data)."},
+                "masked": "Transparent above the level and beyond 3 km of a mapped river (no data)."
+                          + (f" Cut to the outline of {outline.name}: transparent outside it." if outline else "")},
         "credit": CREDIT,
         "not": "Not a flood forecast or extent: banks, bunds, drains and pumps are left out, and land that is not "
                "shaded can still flood from rain or drains.",
@@ -118,7 +144,9 @@ def sources_part(doc: dict) -> str:
     lines = [SOURCES_HEADING, "=" * len(SOURCES_HEADING), "",
              "tools/build_lowground.py reads the above_river crop above and writes one indexed PNG per level (1, 2, 3",
              "and 5 m) on its squares, with a JSON of the levels, tones, bounds and these hashes. Each square takes the",
-             "lowest height above the river of the 3 x 3 squares around it (about 90 m, as app/elevation.py does); a",
+             *(["height above the river of its own 92 m square, already the lowest of the nine GLO-30 heights in it; a"]
+               if math.isclose(doc["grid"]["px"], COARSE_PX, rel_tol=1e-6) else
+               ["lowest height above the river of the 3 x 3 squares around it (about 90 m, as app/elevation.py does); a"]),
              "square at or below the level is shaded in four tones (up to 1 m darkest, then 1-2, 2-3 and 3-5 m), the",
              "rest and no data (beyond 3 km of a mapped river) are transparent. app/lowground.py serves them for the",
              "map. Not a flood forecast or extent: banks, bunds, drains and pumps are left out.",
@@ -130,21 +158,27 @@ def sources_part(doc: dict) -> str:
 
 
 def write_sources(out: Path, doc: dict) -> Path:
-    """SOURCES.txt with its low ground part (re)written at the end; the text before that part is kept."""
-    path = out / "SOURCES.txt"
+    """SOURCES.txt (SOURCES-{name}.txt for a coarse crop) with its low ground part (re)written at the end; the text
+    before that part is kept."""
+    path = out / (f"SOURCES-{doc['area']}.txt" if math.isclose(doc["grid"]["px"], COARSE_PX, rel_tol=1e-6)
+                  else "SOURCES.txt")
     before = path.read_text(encoding="utf-8") if path.is_file() else ""
     kept = before.split("\n" + SOURCES_HEADING + "\n", 1)[0].rstrip("\n")
     path.write_text((kept + "\n\n" if kept else "") + sources_part(doc), encoding="utf-8")
     return path
 
 
-def build(dem: Path, name: str = NAME) -> dict:
-    """Write the PNGs, the JSON and SOURCES.txt's part; returns what the run made, for the report and the tests."""
+def build(dem: Path, name: str = NAME, outline: Path | None = None) -> dict:
+    """Write the PNGs, the JSON and SOURCES.txt's part; returns what the run made, for the report and the tests. With
+    `outline` (a GeoJSON: a state's districts) nothing outside its features is shaded."""
     source = dem / f"{name}_above_river.tif"
     grid, heights = read_heights(source)
     lowest = lowest_heights(heights, grid)
+    if outline is not None:
+        inside = outline_mask(grid, outline)
+        lowest = array("d", (v if inside[i] else go.NODATA for i, v in enumerate(lowest)))
     pngs = write_pngs(dem, name, grid, lowest)
-    doc = doc_of(name, grid, source, pngs)
+    doc = doc_of(name, grid, source, pngs, outline)
     json_path = dem / f"{name}_lowground.json"
     json_path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return {"grid": grid, "lowest": lowest, "pngs": pngs, "json": json_path, "sources": write_sources(dem, doc)}
@@ -154,8 +188,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--name", default=NAME)
     parser.add_argument("--dem", type=Path, default=DEM_DIR)
+    parser.add_argument("--outline", type=Path, help="GeoJSON to cut the shading to (a state's districts)")
     args = parser.parse_args(argv)
-    found = build(args.dem, args.name)
+    found = build(args.dem, args.name, args.outline)
     held = [v for v in found["lowest"] if v > go.NODATA_BELOW]
     for level, path in zip(LEVELS, found["pngs"]):
         shaded = sum(v <= level + EDGE_SLACK for v in held)

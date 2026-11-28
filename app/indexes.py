@@ -1,8 +1,8 @@
 """Flash flood potential at a business or a picked square, from the index files in app/data/indexes.
 
 What the figure is: the Flash Flood Potential Index (Smith 2003, in the form of Yassin and others 2023) of a square of
-about 30 m, from its slope, land cover, soil texture and vegetation, each rated 1 to 10 and combined to one score from 1
-to 10. It says how easily rain runs off and pools there: a susceptibility class, never a water depth or a chance of
+about 30 m (about 90 m in a whole state's files), from its slope, land cover, soil texture and vegetation, each rated 1
+to 10 and combined to one score from 1 to 10. It says how easily rain runs off and pools there: a susceptibility class, never a water depth or a chance of
 flooding, and flash floods are not in the river flood model (app/raster.py).
 
 Each area that has it has files named after its id, made by tools/build_ffpi.py:
@@ -53,6 +53,7 @@ BOUNDS_DECIMALS = 6
 BOUNDS_TOLERANCE = 1e-6       # degrees: the json's bounds and the tif's grid are the same edges to this
 METHOD_KEYS = ("name", "formula", "summary", "citations", "deviations", "not")   # what the page is told of the method
 CACHE_TILES = 16              # decoded 256 px tiles kept: the city's file holds 15
+M_PER_DEG_LAT = 110_574.0
 
 
 @dataclass(frozen=True, eq=False)
@@ -83,7 +84,11 @@ class Ffpi:
             return None
         bounds = [round(edge, BOUNDS_DECIMALS) for edge in self.file.grid.as_json()["bounds"]]
         return {"url": LAYER_URL.format(id=self.name), "bounds": bounds, "breaks": list(self.breaks),
-                "credit": self.credit}
+                "credit": self.credit, "square_m": self.square_m()}
+
+    def square_m(self) -> int:
+        """The squares' size to the nearest 10 m, north to south: 30 on 1 arc second squares, 90 on a state's 3."""
+        return round(self.file.grid.py * M_PER_DEG_LAT / 10) * 10
 
 
 def score_value(value: float) -> float | None:

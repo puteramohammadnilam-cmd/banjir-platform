@@ -1,7 +1,11 @@
 """Build the Shah Alam Flash Flood Potential Index (FFPI): a 1 to 10 rating of each 30 m square's susceptibility to
 flash floods, after Smith (2003) as used by Mohd Yassin et al. (2023, Planning Malaysia 21(2)) for Shah Alam.
 
-    .venv/bin/python tools/build_ffpi.py [--raw DIR] [--out DIR] [--qa]
+    .venv/bin/python tools/build_ffpi.py [--area johor] [--raw DIR] [--out DIR] [--qa]
+
+--area builds another area of index_inputs.PLACES (Johor: a whole state, on 3 arc second squares of about 92 m that
+each hold the lowest of the nine GLO-30 heights inside them, so the slope is taken from those as they are, cut to the
+outline of all its districts, its sources in SOURCES-johor.txt). What follows is Shah Alam's.
 
 Run from 11_Platform_Draft after tools/fetch_indexes.py. Reads only saved files (index_inputs.py) and writes, in
 app/data/indexes (or --out):
@@ -193,9 +197,10 @@ class Layers:
     vegetation: ii.Vegetation
 
 
-def load_layers(raw: Path) -> Layers:
-    grid = ii.grid_window()
-    ground = go.min_filter3(ii.load_surface(grid), grid.rows, grid.cols)
+def load_layers(raw: Path, place: ii.Place = ii.SHAH_ALAM) -> Layers:
+    grid = ii.grid_window(place)
+    surface = ii.load_surface(grid, place.dem_file())
+    ground = go.min_filter3(surface, grid.rows, grid.cols) if place.window else surface
     slope = go.slope_percent(ground, grid.rows, grid.cols, *grid.metres())
     cover = ii.load_worldcover(grid, raw)
     built, land = array("d", [go.NODATA]) * grid.size, array("d", [go.NODATA]) * grid.size
@@ -289,36 +294,41 @@ def write_png(path: Path, grid: go.Grid, values: Sequence[float], shown: Sequenc
                                    palette, alpha, depth=4)
 
 
-def ffpi_doc(grid: go.Grid, credit: str) -> dict:
-    """shah-alam_ffpi.json (tests/fixtures/index_contract.json, ffpi_json)."""
+def ffpi_doc(grid: go.Grid, credit: str, place: ii.Place = ii.SHAH_ALAM) -> dict:
+    """{name}_ffpi.json (tests/fixtures/index_contract.json, ffpi_json)."""
+    outline = "city outline" if place is ii.SHAH_ALAM else "outline of its districts"
     return {
-        "version": 1, "area": ii.NAME, "index": "ffpi",
+        "version": 1, "area": place.name, "index": "ffpi",
         "scale": {"min": SCALE[0], "max": SCALE[1], "decimals": DECIMALS},
         "classes": list(CLASSES), "breaks": list(BREAKS),
         "break_rule": "A score at or above a break belongs to the class above it.",
         "legend": legend(),
-        "files": {"tif": f"{ii.NAME}_ffpi.tif", "png": f"{ii.NAME}_ffpi.png"},
+        "files": {"tif": f"{place.name}_ffpi.tif", "png": f"{place.name}_ffpi.png"},
         "grid": {"west": grid.west, "north": grid.north, "px": grid.px, "py": grid.py, "rows": grid.rows,
                  "cols": grid.cols},
         "bounds": list(grid.bounds()), "nodata": int(go.NODATA),
         "png": {"width": grid.cols, "height": grid.rows, "transparent_index": 0,
                 "index_of_class": {name: i + 1 for i, name in enumerate(CLASSES)},
-                "masked": "Transparent outside the city outline and over permanent water."},
-        "credit": credit, "method": ffpi_text.method(),
+                "masked": f"Transparent outside the {outline} and over permanent water."},
+        "credit": credit, "method": ffpi_text.method(place.step),
     }
 
 
-def city_mask(grid: go.Grid, raw: Path) -> bytearray:
-    outline = json.loads((raw / "mbsa_sections" / "city_outline.geojson").read_text(encoding="utf-8"))
-    geometry = outline["features"][0]["geometry"] if "features" in outline else outline.get("geometry", outline)
-    return go.polygon_mask(grid, geometry)
+def city_mask(grid: go.Grid, raw: Path, place: ii.Place = ii.SHAH_ALAM) -> bytearray:
+    """The squares inside the outline file: inside any of its features (a state's: any of its districts)."""
+    outline = json.loads((raw / place.outline).read_text(encoding="utf-8"))
+    features = outline["features"] if "features" in outline else [{"geometry": outline.get("geometry", outline)}]
+    mask = bytearray(grid.size)
+    for feature in features:
+        go.polygon_mask(grid, feature["geometry"], into=mask)
+    return mask
 
 
-def write_qa(raw: Path, grid: go.Grid, f: Factors) -> None:
+def write_qa(raw: Path, grid: go.Grid, f: Factors, place: ii.Place = ii.SHAH_ALAM) -> None:
     folder = raw / "indexes" / "built"
     folder.mkdir(parents=True, exist_ok=True)
     for name in ("m", "l", "s", "v"):
-        geotiff_write.write_tiff(folder / f"{ii.NAME}_ffpi_{name}.tif", rows_of(getattr(f, name), grid), tile=TILE,
+        geotiff_write.write_tiff(folder / f"{place.name}_ffpi_{name}.tif", rows_of(getattr(f, name), grid), tile=TILE,
                                  origin=(grid.west, grid.north), pixel=(grid.px, grid.py), padding=go.NODATA, level=9)
 
 
@@ -338,40 +348,44 @@ def ndvi_accessed(log: Sequence[dict]) -> str:
     return max(dates)
 
 
-def write_sources(out: Path, log: Sequence[dict], written: Sequence[Path], credit: str) -> Path:
-    text = ffpi_text.sources_text(log, [file_line(p) for p in written], max(e["date"] for e in log), credit)
-    path = out / "SOURCES.txt"
+def write_sources(out: Path, log: Sequence[dict], written: Sequence[Path], credit: str,
+                  place: ii.Place = ii.SHAH_ALAM) -> Path:
+    area = None if place is ii.SHAH_ALAM else (place.name, place.raw_folder, place.outline)
+    text = ffpi_text.sources_text(log, [file_line(p) for p in written], max(e["date"] for e in log), credit, area)
+    path = out / ("SOURCES.txt" if area is None else f"SOURCES-{place.name}.txt")
     path.write_text(text, encoding="utf-8")
     return path
 
 
-def build(raw: Path, out: Path, qa: bool = False) -> dict:
+def build(raw: Path, out: Path, qa: bool = False, place: ii.Place = ii.SHAH_ALAM) -> dict:
     """Write the four files; returns what the run found, for the report and the tests."""
-    layers = load_layers(raw)
+    layers = load_layers(raw, place)
     f = factors(layers, ii.load_soil(raw))
     grid = layers.grid
-    city = city_mask(grid, raw)
+    city = city_mask(grid, raw, place)
     values = inside(scores(f), city)
     out.mkdir(parents=True, exist_ok=True)
-    tif, _ = write_tif(out / f"{ii.NAME}_ffpi.tif", grid, values)
-    png = write_png(out / f"{ii.NAME}_ffpi.png", grid, values, city)
-    doc = out / f"{ii.NAME}_ffpi.json"
+    tif, _ = write_tif(out / f"{place.name}_ffpi.tif", grid, values)
+    png = write_png(out / f"{place.name}_ffpi.png", grid, values, city)
+    doc = out / f"{place.name}_ffpi.json"
     log = fetch_log(raw)
     credit = ffpi_text.credit(ndvi_accessed(log))
-    doc.write_text(json.dumps(ffpi_doc(grid, credit), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    sources = write_sources(out, log, [tif, png, doc], credit)
+    doc.write_text(json.dumps(ffpi_doc(grid, credit, place), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    sources = write_sources(out, log, [tif, png, doc], credit, place)
     if qa:
-        write_qa(raw, grid, f)
+        write_qa(raw, grid, f, place)
     return {"layers": layers, "factors": f, "scores": values, "files": [tif, png, doc, sources]}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--raw", type=Path, default=ii.raw_root(), help="the raw shah_alam folder")
+    parser.add_argument("--area", choices=sorted(ii.PLACES), default=ii.SHAH_ALAM.name)
+    parser.add_argument("--raw", type=Path, help="the area's raw folder (default: index_inputs.raw_root)")
     parser.add_argument("--out", type=Path, default=OUT_DIR)
     parser.add_argument("--qa", action="store_true", help="also write the factor ratings to <raw>/indexes/built")
     args = parser.parse_args(argv)
-    found = build(args.raw, args.out, args.qa)
+    place = ii.PLACES[args.area]
+    found = build(args.raw or ii.raw_root(place), args.out, args.qa, place)
     held = [v for v in found["scores"] if v > go.NODATA_BELOW]
     shares = {name: sum(class_of(v) == name for v in held) / len(held) for name in CLASSES}
     print(f"{len(held)} squares scored of {len(found['scores'])}; classes over the city: "

@@ -67,28 +67,46 @@ DEVIATIONS = [
 ]
 
 
-def method() -> dict:
-    """shah-alam_ffpi.json `method`."""
+COARSE_SLOPE = ("Slope: from the Copernicus GLO-30 surface, each 92 m square taking the lowest of the nine GLO-30 "
+                "heights inside it to drop most roofs and trees. 3 % or less rates 1, each further 3 % one more, above "
+                "27 % rates 10 (the paper's table leaves 27-30 % out; its 3 % steps are continued).")
+COARSE_ROOFS = ("The surface model includes roofs and trees; taking the lowest of the nine heights in each 92 m square "
+                "before the slope removes most of them, not all.")
+COARSE_SQUARES = ("A whole state is worked out on 92 m squares (3 arc seconds), three times the paper's 30 m, so its "
+                  "files stay small: slopes are measured across 92 m and come out gentler on short steep ground, and "
+                  "land cover, soil and vegetation are averaged over the bigger square.")
+
+
+def method(step: int = 1) -> dict:
+    """{name}_ffpi.json `method`; `step` is the squares' size in arc seconds (3: a state's 92 m squares)."""
+    coarse = step != 1
+    factors = {**FACTORS, "M": COARSE_SLOPE} if coarse else dict(FACTORS)
+    deviations = ([COARSE_SQUARES] + [COARSE_ROOFS if d.startswith("The surface model") else d for d in DEVIATIONS]
+                  if coarse else list(DEVIATIONS))
     return {
         "name": "Flash Flood Potential Index (FFPI)",
         "formula": "(1.5 M + L + S + 0.5 V) / 4",
-        "summary": "Each 30 m square is rated 1 to 10 for slope (M), land cover (L), soil (S) and bare ground (V); the "
+        "summary": f"Each {92 if coarse else 30} m square is rated 1 to 10 for slope (M), land cover (L), soil (S) and bare ground (V); the "
                    "four are weighted as in the paper's Scenario 2 and rounded to 0.1. Higher means water runs off "
                    "faster and gathers sooner after heavy rain. Classes follow the paper's reading of 5 to 6 as "
                    "medium: low under 4.5, high from 6.5, extreme from 8.5.",
-        "factors": dict(FACTORS),
+        "factors": factors,
         "classes": "Four classes, as the paper names them; it gives no limits but reads Scenario 2 scores of 5 to 6 "
                    "as medium, so medium runs from 4.5 to under 6.5 (5 and 6 once rounded): low below 4.5, medium "
                    "from 4.5, high from 6.5, extreme from 8.5. A score on a limit is in the class above.",
         "citations": list(CITATIONS),
-        "deviations": list(DEVIATIONS),
+        "deviations": deviations,
         "not": "A susceptibility to flash floods, not a water depth and not a chance of flooding. Drains, their size "
                "and upkeep, which decide most town flash floods, are not in it.",
     }
 
 
-def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str, credit_line: str) -> str:
-    """app/data/indexes/SOURCES.txt from the fetch log and the output lines (name, bytes, SHA-256)."""
+def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str, credit_line: str,
+                 area: tuple[str, str, str] | None = None) -> str:
+    """app/data/indexes/SOURCES.txt (Shah Alam's) from the fetch log and the output lines (name, bytes, SHA-256);
+    `area` (name, raw folder, outline file in it) for another area's, SOURCES-{name}.txt."""
+    if area is not None:
+        return _area_sources(log, outputs, date, credit_line, *area)
     lines = [
         "Flash flood potential index (FFPI) in this folder", "=" * 50, "",
         "app/indexes.py reads these files. They are small, so they are kept in git. To make them again, from",
@@ -103,6 +121,32 @@ def sources_text(log: Sequence[dict], outputs: Sequence[str], date: str, credit_
         "Other inputs: app/data/dem/shah-alam_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the",
         "city outline, shah_alam/mbsa_sections/city_outline.geojson ((c) OpenStreetMap contributors, ODbL).", "",
         "Downloaded inputs (in ../05_Raw_Data_Sources/shah_alam/indexes, listed in its SOURCES.md)", "-" * 60,
+    ]
+    for entry in log:
+        lines += [f"{entry['file']}: {entry['bytes']} bytes, SHA-256 {entry['sha256']}, fetched {entry['date']}",
+                  f"  {entry['url']}"]
+    lines += ["", "Credit", "------", credit_line, "",
+              "Licences: ESA WorldCover map and NDVI composite CC BY 4.0; SoilGrids 2.0 CC BY 4.0; WorldPop CC BY 4.0;",
+              "OpenStreetMap ODbL 1.0; Copernicus DEM GLO-30 under the Copernicus DEM licence (any use, with the credit).",
+              "The rating tables are the published method's; no text or figure of the papers is copied.", ""]
+    return "\n".join(lines)
+
+
+def _area_sources(log: Sequence[dict], outputs: Sequence[str], date: str, credit_line: str, name: str, raw: str,
+                  outline: str) -> str:
+    lines = [
+        f"Flash flood potential index (FFPI) of {name} in this folder", "=" * 60, "",
+        "app/indexes.py reads these files. To make them again, from 11_Platform_Draft:", "",
+        f"  .venv/bin/python tools/fetch_indexes.py worldcover --area {name}   # and ndvi, soilgrids, worldpop",
+        f"  .venv/bin/python tools/fetch_state_osm.py --area {name}            # rivers, drains, roads",
+        f"  .venv/bin/python tools/build_ffpi.py --area {name}",
+        f"  .venv/bin/python tools/build_section_scores.py --area {name}", "",
+        "The fetch steps are needed once; the build reads only the saved files listed below and gives the same bytes",
+        f"each time (inputs fetched {date}). The method is in tools/build_ffpi.py's docstring and in {name}_ffpi.json.",
+        "", "Outputs", "-------", *outputs, "",
+        f"Other inputs: app/data/dem/{name}_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the",
+        f"outline, {raw}/{outline} ((c) OpenStreetMap contributors, ODbL).", "",
+        f"Downloaded inputs (in ../05_Raw_Data_Sources/{raw}/indexes, listed in its SOURCES.md)", "-" * 60,
     ]
     for entry in log:
         lines += [f"{entry['file']}: {entry['bytes']} bytes, SHA-256 {entry['sha256']}, fetched {entry['date']}",

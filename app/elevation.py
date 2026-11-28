@@ -11,7 +11,9 @@ at(lat, lon) gives {"ground_m", "above_river_m"} in metres to 1 decimal, or None
 says "not loaded for this spot yet". Each is the LOWEST value of its file in the 3 x 3 squares around the spot (the
 square holding it and the 8 around that, about 90 m across: every square centre within about 45 m of the spot's
 square's centre), because a satellite surface at a shop's own point is mostly its roof. The two minimums are taken
-separately, so they may come from different squares. Squares past the crop's edge and no-data squares are left out;
+separately, so they may come from different squares. A crop on 3 arc second squares (about 92 m, a state's:
+tools/build_elevation.py --step 3) already holds in each square the lowest of the nine GLO-30 heights inside it, so
+there the spot's own square is read alone. Squares past the crop's edge and no-data squares are left out;
 above_river_m is null when no square of the window has a river within 3 km, and the whole answer None when none has a
 surface. A business is looked up at its own point, a picked square at its centre (places.py), so the same spot always
 gives the same answer.
@@ -38,6 +40,7 @@ FILE_NAME = re.compile(r"^(?P<name>[a-z0-9]+(?:-[a-z0-9]+)*)_(?P<layer>surface|a
 LAYERS = ("surface", "above_river")
 DECIMALS = 1
 WINDOW = 1                    # squares each side of the spot's square: the 3 x 3 window
+COARSE_PX = 3 / 3600          # degrees: 3 arc second squares (tools/build_elevation.py --step 3) hold the lowest of 3 x 3
 CACHE_TILES = 32              # decoded 256 px tiles kept: 32 x 256 KB, about 8 MB; one area's two files hold 30
 
 
@@ -62,7 +65,8 @@ class Crop:
         if cell is None:
             return None
         row, col = cell
-        window = [(row + dr, col + dc) for dr in range(-WINDOW, WINDOW + 1) for dc in range(-WINDOW, WINDOW + 1)]
+        reach = 0 if math.isclose(self.surface.grid.px, COARSE_PX, rel_tol=1e-6) else WINDOW
+        window = [(row + dr, col + dc) for dr in range(-reach, reach + 1) for dc in range(-reach, reach + 1)]
         ground = lowest(self.surface, window)
         if ground is None:
             return None

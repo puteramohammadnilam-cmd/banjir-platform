@@ -1,7 +1,10 @@
 """Build app/data/areas/shah-alam/indexes.json: per section, the flash flood potential (from shah-alam_ffpi.tif) and our
 multi-criteria flood risk score, with how the score compares with past floods and the river model.
 
-    .venv/bin/python tools/build_section_scores.py [--raw DIR] [--ffpi app/data/indexes/shah-alam_ffpi.tif] [--out PATH]
+    .venv/bin/python tools/build_section_scores.py [--area johor] [--raw DIR] [--ffpi PATH] [--out PATH]
+
+--area builds another area of index_inputs.PLACES (Johor: its ten districts as sections, on its 92 m squares, roads
+from tools/fetch_state_osm.py, no named hotspots). What follows is Shah Alam's.
 
 Run from 11_Platform_Draft after tools/build_ffpi.py. Reads only saved files. The shape is tests/fixtures/
 index_contract.json (indexes_json).
@@ -57,6 +60,9 @@ import sections_io  # noqa: E402
 
 AREA_DIR = ROOT / "app" / "data" / "areas" / ii.NAME
 FFPI_TIF = bf.OUT_DIR / f"{ii.NAME}_ffpi.tif"
+COARSE_NOTE = ("A whole state is worked out on 92 m squares, each holding the lowest of the nine GLO-30 heights inside "
+               "it, with its districts as sections: a district holds far more people than the paper's top class, so "
+               "population rates 5 in every one and tells them apart not at all.")
 WEIGHTS_TOTAL = 74
 SCORE_CLASSES = ("very_low", "low", "moderate", "high", "very_high")
 SCORE_BREAKS = (1.5, 2.5, 3.5, 4.5)
@@ -66,7 +72,7 @@ DRAIN_KINDS = {"river", "canal", "stream", "drain", "ditch"}
 ROAD_KINDS = {"living_street", "motorway", "motorway_link", "primary", "primary_link", "residential", "secondary",
               "secondary_link", "tertiary", "tertiary_link", "trunk", "trunk_link", "unclassified"}
 LAND_SCORES = {10: 1, 20: 2, 30: 3, 40: 3, 50: 5, 60: 4, 70: 4, 80: 5, 90: 4, 95: 4, 100: 4}
-HOTSPOTS = ("seksyen-16", "seksyen-17", "seksyen-18", "seksyen-36", "seksyen-25")
+HOTSPOTS = ii.SHAH_ALAM.hotspots
 
 
 @dataclass(frozen=True)
@@ -109,18 +115,17 @@ def score_class(value: float) -> str:
 
 # --- the criteria on the grid ---
 
-def river_mask(grid: go.Grid, raw_dem: Path) -> bytearray:
-    lines, areas = be.river_shapes(json.loads((raw_dem / f"rivers_{ii.NAME}.json").read_text(encoding="utf-8")))
+def river_mask(grid: go.Grid, raw_dem: Path, name: str = ii.NAME) -> bytearray:
+    lines, areas = be.river_shapes(json.loads((raw_dem / f"rivers_{name}.json").read_text(encoding="utf-8")))
     mask = go.draw_lines(grid, lines)
     for rings in areas:
-        filled = go.polygon_mask(grid, {"type": "Polygon", "coordinates": [r for r in rings if len(r) > 2]})
-        mask = bytearray(a | b for a, b in zip(mask, filled))
+        go.polygon_mask(grid, {"type": "Polygon", "coordinates": [r for r in rings if len(r) > 2]}, into=mask)
     return mask
 
 
-def drainage_density(grid: go.Grid, raw: Path, land: Sequence[float]) -> array:
+def drainage_density(grid: go.Grid, raw: Path, land: Sequence[float], name: str = ii.NAME) -> array:
     """km of drainage line within DRAIN_RADIUS_M of each land square, per km2 of the squares counted."""
-    lines = ii.osm_lines(raw / "indexes" / "osm_drains" / f"drains_{ii.NAME}.json", DRAIN_KINDS, "waterway")
+    lines = ii.osm_lines(raw / "indexes" / "osm_drains" / f"drains_{name}.json", DRAIN_KINDS, "waterway")
     dx, dy = grid.metres()
     spec = go.disc_rows(DRAIN_RADIUS_M, dx, dy)
     disc_km2 = sum(2 * half + 1 for _, half in spec) * dx * dy / 1e6
@@ -142,17 +147,18 @@ def by_section(totals: Sequence[float], holder: Sequence[int]) -> array:
     return array("d", (totals[k] if k >= 0 else go.NODATA for k in holder))
 
 
-def criterion_values(layers: bf.Layers, raw: Path, holder: Sequence[int], count: int) -> dict[str, array]:
+def criterion_values(layers: bf.Layers, raw: Path, holder: Sequence[int], count: int,
+                     place: ii.Place = ii.SHAH_ALAM) -> dict[str, array]:
     """The raw value of each criterion per square (land cover is already a 1-5 rating; population is the people of
     the square's section)."""
     grid = layers.grid
-    roads = ii.osm_lines(raw / "city_osm" / "roads.json", ROAD_KINDS, "highway")
+    roads = ii.osm_lines(raw / place.roads, ROAD_KINDS, "highway")
     land = array("d", (go.NODATA if layers.land[i] <= go.NODATA_BELOW else
                        land_cover_rating({k: layers.cover[k][i] for k in layers.cover if layers.cover[k][i]})
                        for i in range(grid.size)))
     return {
-        "river_distance": go.distance_to(river_mask(grid, raw.parent / "copernicus_glo30"), grid, CAP_M),
-        "drainage_density": drainage_density(grid, raw, layers.land),
+        "river_distance": go.distance_to(river_mask(grid, raw.parent / "copernicus_glo30", place.name), grid, CAP_M),
+        "drainage_density": drainage_density(grid, raw, layers.land, place.name),
         "elevation": layers.ground,
         "land_cover": land,
         "slope": layers.slope,
@@ -248,10 +254,12 @@ def history_counts(events: Sequence[dict], ids: Sequence[str]) -> list[int]:
     return [sum(i in e.get("sections", []) for e in events) for i in ids]
 
 
-def validation(ids: Sequence[str], values: Sequence[float | None], flash: Sequence[dict | None]) -> dict:
-    history = json.loads((AREA_DIR / "history.json").read_text(encoding="utf-8"))
+def validation(ids: Sequence[str], values: Sequence[float | None], flash: Sequence[dict | None],
+               place: ii.Place = ii.SHAH_ALAM) -> dict:
+    area_dir = ROOT / "app" / "data" / "areas" / place.name
+    history = json.loads((area_dir / "history.json").read_text(encoding="utf-8"))
     counts = history_counts(history["events"], ids)
-    rows = {s["id"]: s["counts"] for s in json.loads((AREA_DIR / "sections.json").read_text("utf-8"))["sections"]}
+    rows = {s["id"]: s["counts"] for s in json.loads((area_dir / "sections.json").read_text("utf-8"))["sections"]}
     wet = [rows[i]["wet_cells"]["50"] / rows[i]["cells"] if rows[i]["cells"] else 0.0 for i in ids]
     held = [k for k in range(len(ids)) if values[k] is not None and flash[k] is not None]
     score = [values[k] for k in held]
@@ -264,7 +272,7 @@ def validation(ids: Sequence[str], values: Sequence[float | None], flash: Sequen
         spearman={"score_vs_history": rho(score, pick(counts)), "score_vs_wet_share_50": rho(score, pick(wet)),
                   "flash_vs_history": rho(high, pick(counts)), "flash_vs_wet_share_50": rho(high, pick(wet))},
         hotspots=[{"id": h, "history_events": counts[ids.index(h)], "score_rank": score_rank[held.index(ids.index(h))],
-                   "flash_rank": flash_rank[held.index(ids.index(h))]} for h in HOTSPOTS])
+                   "flash_rank": flash_rank[held.index(ids.index(h))]} for h in place.hotspots])
 
 
 # --- the document ---
@@ -277,38 +285,40 @@ def score_of(ratings: dict[str, float | None]) -> dict | None:
             "ratings": {c.id: round(ratings[c.id], 2) for c in CRITERIA}}
 
 
-def method_doc() -> dict:
+def method_doc(place: ii.Place = ii.SHAH_ALAM) -> dict:
     score = score_text.score_method()
+    if place.step != 1:
+        score["deviations"] = [COARSE_NOTE, *score["deviations"]]
     score["criteria"] = [{"id": c.id, "weight": c.weight, "unit": c.unit, "breaks": list(c.breaks),
                           "ratings": list(c.ratings), **score_text.criterion_extra(c.id, LAND_SCORES)}
                          for c in CRITERIA]
     score.update({"weights_total": WEIGHTS_TOTAL, "weights_used": weights_used(), "classes": list(SCORE_CLASSES),
                   "breaks": list(SCORE_BREAKS),
                   "break_rule": "A value at or above a break belongs to the class above it."})
-    return {"flash": {"source": f"{ii.NAME}_ffpi.json", "classes": list(bf.CLASSES), "breaks": list(bf.BREAKS),
+    return {"flash": {"source": f"{place.name}_ffpi.json", "classes": list(bf.CLASSES), "breaks": list(bf.BREAKS),
                       "per_section": "Mean score and share of the section's land squares in each class; permanent "
                                      "water left out."},
             "score": score}
 
 
 def indexes_doc(ids: Sequence[str], flash: Sequence[dict | None], ratings: dict[str, Sequence[float | None]],
-                city: dict, checks: dict) -> dict:
+                city: dict, checks: dict, place: ii.Place = ii.SHAH_ALAM) -> dict:
     sections = {}
     for k, sid in enumerate(ids):
         score = score_of({c.id: ratings[c.id][k] for c in CRITERIA})
         sections[sid] = {"flash": flash[k], "score": score if flash[k] is not None else None}
-    return {"version": 1, "area": ii.NAME, "method": method_doc(), "sections": sections, "city": city,
+    return {"version": 1, "area": place.name, "method": method_doc(place), "sections": sections, "city": city,
             "validation": checks}
 
 
-def build(raw: Path, ffpi_path: Path, out: Path) -> dict:
-    layers = bf.load_layers(raw)
+def build(raw: Path, ffpi_path: Path, out: Path, place: ii.Place = ii.SHAH_ALAM) -> dict:
+    layers = bf.load_layers(raw, place)
     grid = layers.grid
-    sections = sections_io.load_sections()
+    sections = sections_io.load_sections(raw / place.sections if place.sections else None, place.expected)
     ids = [s["id"] for s in sections]
     holder = go.first_holder(grid, [s["geometry"] for s in sections])
     city_holder = array("i", (0 if h >= 0 else -1 for h in holder))
-    ratings = square_ratings(criterion_values(layers, raw, holder, len(ids)), layers.land)
+    ratings = square_ratings(criterion_values(layers, raw, holder, len(ids), place), layers.land)
     means = {c.id: section_means(ratings[c.id], holder, grid, len(ids)) for c in CRITERIA}
     city_means = {c.id: section_means(ratings[c.id], city_holder, grid, 1)[0] for c in CRITERIA}
     scores = read_ffpi(ffpi_path, grid)
@@ -316,18 +326,21 @@ def build(raw: Path, ffpi_path: Path, out: Path) -> dict:
     city = {"flash": flash_summary(scores, city_holder, grid, 1)[0], "score": score_of(city_means)}
     values = [None if (s := score_of({c.id: means[c.id][k] for c in CRITERIA})) is None else s["value"]
               for k in range(len(ids))]
-    doc = indexes_doc(ids, flash, means, city, validation(ids, values, flash))
+    doc = indexes_doc(ids, flash, means, city, validation(ids, values, flash, place), place)
     out.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
     return doc
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--raw", type=Path, default=ii.raw_root(), help="the raw shah_alam folder")
-    parser.add_argument("--ffpi", type=Path, default=FFPI_TIF)
-    parser.add_argument("--out", type=Path, default=AREA_DIR / "indexes.json")
+    parser.add_argument("--area", choices=sorted(ii.PLACES), default=ii.SHAH_ALAM.name)
+    parser.add_argument("--raw", type=Path, help="the area's raw folder (default: index_inputs.raw_root)")
+    parser.add_argument("--ffpi", type=Path, help="default: app/data/indexes/<area>_ffpi.tif")
+    parser.add_argument("--out", type=Path, help="default: app/data/areas/<area>/indexes.json")
     args = parser.parse_args(argv)
-    doc = build(args.raw, args.ffpi, args.out)
+    place = ii.PLACES[args.area]
+    doc = build(args.raw or ii.raw_root(place), args.ffpi or bf.OUT_DIR / f"{place.name}_ffpi.tif",
+                args.out or ROOT / "app" / "data" / "areas" / place.name / "indexes.json", place)
     print(score_text.report(doc))
     return 0
 

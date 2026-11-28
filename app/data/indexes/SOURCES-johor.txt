@@ -1,0 +1,64 @@
+Flash flood potential index (FFPI) of johor in this folder
+============================================================
+
+app/indexes.py reads these files. To make them again, from 11_Platform_Draft:
+
+  .venv/bin/python tools/fetch_indexes.py worldcover --area johor   # and ndvi, soilgrids, worldpop
+  .venv/bin/python tools/fetch_state_osm.py --area johor            # rivers, drains, roads
+  .venv/bin/python tools/build_ffpi.py --area johor
+  .venv/bin/python tools/build_section_scores.py --area johor
+
+The fetch steps are needed once; the build reads only the saved files listed below and gives the same bytes
+each time (inputs fetched 2026-11-28). The method is in tools/build_ffpi.py's docstring and in johor_ffpi.json.
+
+Outputs
+-------
+johor_ffpi.tif: 1815850 bytes, SHA-256 96088ddf477038ead7611c3da241275338d7fcf3687fab266de81b78b4df67c0
+johor_ffpi.png: 298895 bytes, SHA-256 399b43eb0ea7042a2eae06573ccabb7add221b642d3d7ae383cd6f6842b1dbd0
+johor_ffpi.json: 6083 bytes, SHA-256 b0c1f41dc80fb0db326296a02fd741bdbba0dab58c0863007b77213a7a59c4bb
+
+Other inputs: app/data/dem/johor_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the
+outline, johor/districts/districts.geojson ((c) OpenStreetMap contributors, ODbL).
+
+Downloaded inputs (in ../05_Raw_Data_Sources/johor/indexes, listed in its SOURCES.md)
+------------------------------------------------------------
+worldpop/mys_ppp_2020_constrained.tif: 16774969 bytes, SHA-256 f599fb5a914b3e6b6a1ca223c8fc9827ae9376252f2e235c98098a6ca661b05f, fetched 2026-11-28
+  https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/MYS/mys_ppp_2020_constrained.tif
+soilgrids/sand_0-5cm_mean.tif: 361499 bytes, SHA-256 fc8404431f4793d07826a502dffe0044c113ec52315930d82dbae827980547dc, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/sand.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=sand_0-5cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+soilgrids/sand_5-15cm_mean.tif: 362339 bytes, SHA-256 87fbb3ca1cf44ff070a3e8bcc24841791a147d3f6ff497afc0a0e9638de9286b, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/sand.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=sand_5-15cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+soilgrids/silt_0-5cm_mean.tif: 366952 bytes, SHA-256 bdcfa4fdd1f764ba2bccc8f28b64ac38ff7e7960707c6d21a5f4b311f9456697, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/silt.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=silt_0-5cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+soilgrids/silt_5-15cm_mean.tif: 366910 bytes, SHA-256 66777b7fb597589ae73188235151a30c6e19989bbd6ce70fec04a2b58f06d2a6, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/silt.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=silt_5-15cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+soilgrids/clay_0-5cm_mean.tif: 367975 bytes, SHA-256 c84d1b72625aea9d56bba2bdd278aabaae7ab819ffd2100f728bc61f449469f2, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/clay.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=clay_0-5cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+soilgrids/clay_5-15cm_mean.tif: 367985 bytes, SHA-256 76f75bd48fcf0cdbe742c244d8b32a8912e8adbf013d47bb8724d306b31f0f16, fetched 2026-11-28
+  https://maps.isric.org/mapserv?map=/map/clay.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=clay_5-15cm_mean&FORMAT=image/tiff&SUBSET=long(102.4371,104.5729)&SUBSET=lat(1.2371,2.8629)&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&OUTPUTCRS=http://www.opengis.net/def/crs/EPSG/0/4326
+worldcover/ESA_WorldCover_10m_2021_v200_N00E102_Map/pieces.json: 68672 bytes, SHA-256 550e1fed92831db11a625635638cd432a53a937578b7cc5784058dae93759e09, fetched 2026-11-28
+  https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N00E102_Map.tif
+osm_drains/drains_johor.json: 10328181 bytes, SHA-256 30108261fb22584f436f0f00d9064b9320a0e835c8d1df06cc50bc940aa8a647, fetched 2026-11-28
+  https://overpass-api.de/api/interpreter
+osm_roads/roads_johor.json: 107425485 bytes, SHA-256 d5df4f5acf56f08adf96e7062bb07d315ea729517d8271cbe6be37c602152931, fetched 2026-11-28
+  https://overpass-api.de/api/interpreter
+vegetation/ESA_WorldCover_10m_2021_v200_N02E102_NDVI/pieces.json: 10675 bytes, SHA-256 22edd7f28a318e93623c7862d507f632358c7994a981a3da8e0fe8d3edb58707, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N02/ESA_WorldCover_10m_2021_v200_N02E102_NDVI.tif
+vegetation/ESA_WorldCover_10m_2021_v200_N02E103_NDVI/pieces.json: 18042 bytes, SHA-256 07cf97fafb97e4fe6e897422f4eb4523d5898f0b8f0897f25493ed5c2059fa43, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N02/ESA_WorldCover_10m_2021_v200_N02E103_NDVI.tif
+vegetation/ESA_WorldCover_10m_2021_v200_N02E104_NDVI/pieces.json: 10469 bytes, SHA-256 8a273254c27a6725e7b86c100cb26bac1e37a2f94f1ed28c210ba5f4dbe3e9cf, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N02/ESA_WorldCover_10m_2021_v200_N02E104_NDVI.tif
+vegetation/ESA_WorldCover_10m_2021_v200_N01E102_NDVI/pieces.json: 8620 bytes, SHA-256 73bae1e86e5554611c1bc02c47256abfce86f69f1f9ea6fa1d2c8c78b72f141c, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N01/ESA_WorldCover_10m_2021_v200_N01E102_NDVI.tif
+vegetation/ESA_WorldCover_10m_2021_v200_N01E103_NDVI/pieces.json: 14794 bytes, SHA-256 6a3ac8e83bb06e923f620fb9e1fc5800a2939676a43cf91aa5ac04c3c3dd32db, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N01/ESA_WorldCover_10m_2021_v200_N01E103_NDVI.tif
+vegetation/ESA_WorldCover_10m_2021_v200_N01E104_NDVI/pieces.json: 8647 bytes, SHA-256 e58ee8dc09ae4619a77e4d758e10560fc553d919a40514edc66affc919f299bf, fetched 2026-11-28
+  https://esa-worldcover-s2.s3.eu-central-1.amazonaws.com/ndvi/2021/N01/ESA_WorldCover_10m_2021_v200_N01E104_NDVI.tif
+
+Credit
+------
+Flash flood potential: ESA WorldCover 2021 (ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium, CC BY 4.0); ESA WorldCover Sentinel-1 and Sentinel-2 10m Annual Composites accessed on 28 November 2026 from https://registry.opendata.aws/esa-worldcover-vito-composites (CC BY 4.0); SoilGrids 2.0 (ISRIC, CC BY 4.0); Copernicus DEM GLO-30 ((c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA); method after Smith (2003) as used by Mohd Yassin et al. (2023).
+
+Licences: ESA WorldCover map and NDVI composite CC BY 4.0; SoilGrids 2.0 CC BY 4.0; WorldPop CC BY 4.0;
+OpenStreetMap ODbL 1.0; Copernicus DEM GLO-30 under the Copernicus DEM licence (any use, with the credit).
+The rating tables are the published method's; no text or figure of the papers is copied.

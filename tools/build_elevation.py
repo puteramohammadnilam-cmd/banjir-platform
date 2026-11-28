@@ -10,6 +10,11 @@ Run from 11_Platform_Draft. `fetch` downloads the GLO-30 tiles the box needs tha
 writes app/data/dem/{name}_surface.tif and {name}_above_river.tif (or into --out), reads every value back through
 app/raster.py and stops unless each one is byte for byte what was written. Standard library only.
 
+A whole state (Johor) is built with --step 3: its squares are 3 arc seconds (about 92 m) and each holds the LOWEST of
+the nine GLO-30 heights inside it, the same 90 m window the app and the index tools take on 1 arc second squares, so
+roofs and trees drop out as they do there, the files stay a few MB and the tools run in minutes. A state too big for
+one Overpass question gets its rivers from tools/fetch_state_osm.py instead of `fetch`.
+
 The two files cover the box plus MARGIN_KM on each side, on the GLO-30 grid (1 arc second, about 31 m), as float32
 256 px deflate tiles in the layout app/raster.py reads (tools/geotiff_write.py), with no data -9999:
   - surface:     the GLO-30 height, metres above the EGM2008 geoid (about mean sea level). It is a surface model:
@@ -254,6 +259,33 @@ def mosaic(cogs: Sequence[Cog], window: Window) -> array:
     return out
 
 
+def block_lowest(values: Sequence[float], fine: Window, step: int) -> array:
+    """Each step x step block's lowest height, row by row, for the window of blocks `fine` holds (fine.rows and
+    fine.cols are whole numbers of blocks); no data is left out, and a block with nothing else is NODATA."""
+    rows, cols = fine.rows // step, fine.cols // step
+    out = array("f", [NODATA]) * (rows * cols)
+    for r in range(rows):
+        best = [math.inf] * cols
+        for k in range(step):
+            start = (r * step + k) * fine.cols
+            line = values[start:start + fine.cols]
+            for c in range(cols):
+                for value in line[c * step:(c + 1) * step]:
+                    if raster.NODATA_BELOW < value < best[c]:
+                        best[c] = value
+        out[r * cols:(r + 1) * cols] = array("f", (b if b < math.inf else NODATA for b in best))
+    return out
+
+
+def surface_for(cogs: Sequence[Cog], work: Window, step: int) -> array:
+    """The work window's heights: the tiles' own squares at step 1, else each step x step block's lowest."""
+    if step == 1:
+        return mosaic(cogs, work)
+    fine = Window(work.gx0 * step - step // 2, work.gy0 * step + step // 2, work.rows * step, work.cols * step,
+                  cogs[0].px, cogs[0].py)
+    return block_lowest(mosaic(cogs, fine), fine, step)
+
+
 def _copy_tiles(cog: Cog, window: Window, shift: tuple[int, int], rows: range, cols: range, out: array) -> None:
     """Copy the image's squares at window rows x cols into `out`, decoding each tile they touch once."""
     to_r, to_c, size = *shift, cog.tile
@@ -453,9 +485,10 @@ def build(args: argparse.Namespace) -> dict:
     raw, out = Path(args.raw), Path(args.out)
     work_box = expand(args.bbox, (args.margin_km * 1000) + CAP_M + LEVEL_RADIUS_M)
     cogs = [Cog.open(raw / f"{name}.tif") for name in tiles_for(work_box)]
-    work, part = (Window.around(box, cogs[0].px, cogs[0].py)
+    step = getattr(args, "step", 1)
+    work, part = (Window.around(box, cogs[0].px * step, cogs[0].py * step)
                   for box in (work_box, expand(args.bbox, args.margin_km * 1000)))
-    surface = mosaic(cogs, work)
+    surface = surface_for(cogs, work, step)
     lines, areas = river_shapes(json.loads((raw / f"rivers_{args.name}.json").read_text(encoding="utf-8")))
     mask = draw_rivers(work, lines, areas)
     dx_m, dy_m = work.metres()
@@ -481,6 +514,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--raw", required=True, help="folder for the GLO-30 tiles and the rivers answer")
     parser.add_argument("--out", default=str(DEM_DIR), help="where build writes (default app/data/dem)")
     parser.add_argument("--margin-km", type=float, default=MARGIN_KM)
+    parser.add_argument("--step", type=int, choices=(1, 3), default=1,
+                        help="arc seconds per square: 1, GLO-30's own; 3, each the lowest of its 3 x 3 (a state)")
     args = parser.parse_args(argv)
     west, south, east, north = args.bbox
     if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
