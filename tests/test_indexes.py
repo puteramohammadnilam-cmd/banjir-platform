@@ -211,7 +211,9 @@ def test_the_held_back_score_is_never_sent(city, city_indexes):
     assert first["indexes"] == {"flash": {"mean": 6.0, "share": ix.SHARE}}
     method = sections.details(area)["index_method"]
     assert set(method) == {"flash", "validation", "show_score"} and method["show_score"] is False
-    assert method["validation"]["spearman"] == {"flash_vs_history": None}
+    assert method["validation"]["spearman"] == {}, "the fixture's few sections are too few to compare"
+    assert sections._without_score({"spearman": {"score_vs_history": 0.12, "flash_vs_history": 0.3}})["spearman"] \
+        == {"flash_vs_history": 0.3}
     assert method["validation"]["hotspots"] == [{"id": "zon-1", "history_events": 9, "flash_rank": 5}]
     sent = json.dumps([sections.city_data(area), sections.section_data(area, sections.get(area, "zon-2"))])
     assert "score_" not in sent and '"score": {"value"' not in sent and "Leeonis" not in sent

@@ -50,6 +50,7 @@ INDEX_KEYS = ("id", "name", "kind", "sector", "section")
 SCORE_METHOD_KEYS = ("name", "summary", "weights_used", "weights_total", "classes", "breaks", "break_rule", "citations",
                      "deviations", "credit")
 MAX_CACHED = 128
+MIN_COMPARED = 20         # sections: rank correlations over fewer are not sent (see _comparable)
 WORD = re.compile(r"\w+")
 
 
@@ -250,11 +251,21 @@ def index_method(area_id: str) -> dict | None:
     if doc is None:
         return None
     shown = areas.get(area_id).show_index_score   # the page shows the score only when this is true
-    validation = areas._thaw(doc["validation"])
+    validation = _comparable(areas._thaw(doc["validation"]))
     if not shown:
         return {"flash": indexes.flash_method(area_id), "validation": _without_score(validation), "show_score": False}
     score = {key: areas._thaw(value) for key, value in doc["method"]["score"].items() if key in SCORE_METHOD_KEYS}
     return {"flash": indexes.flash_method(area_id), "score": score, "validation": validation, "show_score": True}
+
+
+def _comparable(validation: dict) -> dict:
+    """The validation, less its rank correlations when they were worked out over fewer than MIN_COMPARED sections:
+    over a state's 10 districts a correlation as large as 0.6 can come by chance, so the page would show noise as a
+    finding. The page says nothing of the comparison then."""
+    n = validation.get("n")
+    if isinstance(n, int) and not isinstance(n, bool) and n >= MIN_COMPARED:
+        return validation
+    return {**validation, "spearman": {}}
 
 
 def _without_score(validation: dict) -> dict:

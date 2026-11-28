@@ -1,5 +1,6 @@
-// Height of the ground at a business or a picked square: the lowest satellite surface height within about 45 m and the
-// lowest height above the nearest mapped river there, said in bands with what the numbers cannot tell. The server sends
+// Height of the ground at a business or a picked square: the lowest satellite surface height in the 90 m or so around
+// it (the 3 x 3 squares of a city's 30 m crop, or the 92 m square of a state's) and the lowest height above the nearest
+// mapped river there, said in bands with what the numbers cannot tell. The server sends
 // place.elevation (app/elevation.py): {ground_m, above_river_m}, above_river_m null with no mapped river within 3 km,
 // or null where none is loaded.
 import { h } from "./dom.js";

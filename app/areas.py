@@ -57,6 +57,7 @@ FLOOD3D_DIR = Path(__file__).parent / "static" / "flood3d"   # the 3D page's bun
 AREA_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MAX_ID_CHARS = 40
 MAX_ZOOM = 19
+LOOKUP_BANDS_PER_DEG = 3600 / 256   # premises are looked up in bands one 256-square tile of 1 arc second high
 TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
 OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
@@ -319,11 +320,15 @@ def premises(area_id: str) -> tuple[dict, ...]:
     has `has_3d`: true. Raises KeyError for an unknown id."""
     listed = _read(area_id, "premises.json")   # first: it checks the id before the id names a folder
     baked = {path.stem for path in (FLOOD3D_DIR / area_id).glob("*.json")}   # the area's folder, listed once
-    return tuple({**premise, "elevation": elevation.at(premise["lat"], premise["lon"]),
-                  "flash_flood": indexes.flash_at(premise["lat"], premise["lon"]),
-                  "gauge": gauges.nearest(premise["lat"], premise["lon"]),
+    # Looked up band by band, west to east, so the raster files' few kept tiles are reused (a state's businesses in
+    # file order would decode each tile again and again); given back in file order.
+    order = sorted(range(len(listed)), key=lambda i: (math.floor(listed[i]["lat"] * LOOKUP_BANDS_PER_DEG),
+                                                      listed[i]["lon"]))
+    looked = {i: (elevation.at(listed[i]["lat"], listed[i]["lon"]), indexes.flash_at(listed[i]["lat"], listed[i]["lon"]),
+                  gauges.nearest(listed[i]["lat"], listed[i]["lon"])) for i in order}
+    return tuple({**premise, "elevation": looked[i][0], "flash_flood": looked[i][1], "gauge": looked[i][2],
                   **({"has_3d": True} if premise.get("section") in baked else {})}
-                 for premise in listed)
+                 for i, premise in enumerate(listed))
 
 
 @lru_cache(maxsize=MAX_CACHED_AREAS)

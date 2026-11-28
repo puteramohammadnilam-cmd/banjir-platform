@@ -13,6 +13,8 @@ columns: each holds the LOWEST of the nine Copernicus GLO-30 heights inside it, 
 0.1 m, float32, no data -9999, read back byte for byte when written. above_river is that surface minus the level of the
 nearest mapped OpenStreetMap river or canal square within 3 km (the 10th percentile of the river squares' surface within
 150 m), no data beyond, negatives kept. A surface model, not bare earth, and good to a few metres at best.
+The low ground pictures below cover the whole state in one picture each, on squares even in latitude: a web map draws
+them between their corners, so they sit up to about 23 m off (a quarter of a square) at their middle row.
 
 File:     johor_surface.tif
 Bytes:    4839076

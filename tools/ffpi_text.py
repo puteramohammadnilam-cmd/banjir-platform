@@ -144,8 +144,10 @@ def _area_sources(log: Sequence[dict], outputs: Sequence[str], date: str, credit
         "The fetch steps are needed once; the build reads only the saved files listed below and gives the same bytes",
         f"each time (inputs fetched {date}). The method is in tools/build_ffpi.py's docstring and in {name}_ffpi.json.",
         "", "Outputs", "-------", *outputs, "",
-        f"Other inputs: app/data/dem/{name}_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the",
-        f"outline, {raw}/{outline} ((c) OpenStreetMap contributors, ODbL).", "",
+        f"Other inputs: app/data/dem/{name}_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES-{name}.txt) and",
+        f"the outline, {raw}/{outline} ((c) OpenStreetMap contributors, ODbL).", "",
+        f"The map layer {name}_ffpi.png is one picture of the whole state, on squares even in latitude; a web map draws",
+        "it between its corners, so it sits up to about 23 m off (a quarter of a square) at its middle row.", "",
         f"Downloaded inputs (in ../05_Raw_Data_Sources/{raw}/indexes, listed in its SOURCES.md)", "-" * 60,
     ]
     for entry in log:

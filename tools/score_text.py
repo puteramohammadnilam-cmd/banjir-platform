@@ -41,28 +41,45 @@ CITATIONS = [
 ]
 
 
-def score_method() -> dict:
+COARSE_WORDS = (("30 m squares", "92 m squares"), ("in metres for a city", "in metres for a city, kept for the state"),
+                ("one rain record covers the whole city", "no rain record gives rain square by square"),
+                ("the city's drainage", "the state's drainage"),
+                ("averaging into the 1 arc-second grid", "averaging into the 3 arc-second grid"))
+COARSE_ELEVATION = ("Copernicus DEM GLO-30, the lowest of the nine GLO-30 heights in each 92 m square (3 arc "
+                    "seconds).")
+
+
+def _coarse(text: str) -> str:
+    for old, new in COARSE_WORDS:
+        text = text.replace(old, new)
+    return text
+
+
+def score_method(step: int = 1) -> dict:
+    """indexes.json `method.score` in words; `step` the squares' size in arc seconds (3: a state's 92 m squares)."""
+    words = _coarse if step != 1 else (lambda text: text)
     return {
         "name": "Flood risk score (multi-criteria)",
-        "summary": "Each 30 m square of land is rated 1 to 5 on seven criteria (distance to a river, drainage "
+        "summary": f"Each {92 if step != 1 else 30} m square of land is rated 1 to 5 on seven criteria (distance to a river, drainage "
                    "density, elevation, land cover, slope, distance to a road, population density); the ratings are "
                    "weighted as in Leeonis et al. (2024) and averaged over the section by area. 1 is the least "
                    "exposed, 5 the most.",
         "citations": list(CITATIONS),
-        "deviations": list(DEVIATIONS),
+        "deviations": [words(d) for d in DEVIATIONS],
         "credit": CREDIT,
     }
 
 
-def criterion_extra(criterion: str, land_scores: dict[int, int]) -> dict:
-    extra = {"source": SOURCES[criterion]}
+def criterion_extra(criterion: str, land_scores: dict[int, int], step: int = 1) -> dict:
+    extra = {"source": COARSE_ELEVATION if step != 1 and criterion == "elevation" else SOURCES[criterion]}
     if criterion == "land_cover":
         extra["table"] = {LAND_NAMES[k]: v for k, v in land_scores.items()}
     return extra
 
 
 def validation_doc(n: int, spearman: dict, hotspots: list[dict]) -> dict:
-    return {
+    """The comparison's figures and words; no hotspot source when no hotspots were named (a state's districts)."""
+    found = {
         "wording": "Compared with past flood records and the river model; this does not validate either index.",
         "n": n,
         "history_counts": "Events in history.json naming the section (an event naming several sections counts for "
@@ -75,6 +92,9 @@ def validation_doc(n: int, spearman: dict, hotspots: list[dict]) -> dict:
                           "Taman Seri Muda (Seksyen 25).",
         "rank_rule": "1 = highest of the n sections; ties share the best rank.",
     }
+    if not hotspots:
+        del found["hotspot_source"]
+    return found
 
 
 def report(doc: dict) -> str:

@@ -286,11 +286,11 @@ def score_of(ratings: dict[str, float | None]) -> dict | None:
 
 
 def method_doc(place: ii.Place = ii.SHAH_ALAM) -> dict:
-    score = score_text.score_method()
+    score = score_text.score_method(place.step)
     if place.step != 1:
         score["deviations"] = [COARSE_NOTE, *score["deviations"]]
     score["criteria"] = [{"id": c.id, "weight": c.weight, "unit": c.unit, "breaks": list(c.breaks),
-                          "ratings": list(c.ratings), **score_text.criterion_extra(c.id, LAND_SCORES)}
+                          "ratings": list(c.ratings), **score_text.criterion_extra(c.id, LAND_SCORES, place.step)}
                          for c in CRITERIA]
     score.update({"weights_total": WEIGHTS_TOTAL, "weights_used": weights_used(), "classes": list(SCORE_CLASSES),
                   "breaks": list(SCORE_BREAKS),

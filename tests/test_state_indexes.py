@@ -239,3 +239,67 @@ def test_johor_s_indexes_json_has_every_district_and_its_score_stays_held_back()
     sent = sections.index_method("johor")
     assert sent["show_score"] is False and "score" not in sent
     assert all("score" not in sections.public(s, "johor")["indexes"] for s in sections.listed("johor"))
+
+
+# --- after the review ---
+
+def test_rank_comparisons_over_too_few_sections_are_not_sent():
+    from app import sections
+    johor, shah_alam = sections.index_method("johor"), sections.index_method("shah-alam")
+    assert johor["validation"]["n"] == 10 and johor["validation"]["spearman"] == {}
+    assert shah_alam["validation"]["n"] == 56 and "flash_vs_history" in shah_alam["validation"]["spearman"]
+    assert sections._comparable({"n": 19, "spearman": {"x": 0.9}})["spearman"] == {}
+    assert sections._comparable({"n": 20, "spearman": {"x": 0.9}})["spearman"] == {"x": 0.9}
+
+
+def test_a_state_s_score_words_say_92_m_and_name_no_city_s_hotspots():
+    import build_section_scores as bs
+    import score_text
+    johor = bs.method_doc(ii.PLACES["johor"])["score"]
+    assert johor["summary"].startswith("Each 92 m square") and bs.method_doc()["score"]["summary"].startswith("Each 30 m")
+    assert all("city" not in d or "kept for the state" in d for d in johor["deviations"])
+    elevation = next(c for c in johor["criteria"] if c["id"] == "elevation")
+    assert elevation["source"] == score_text.COARSE_ELEVATION
+    assert "hotspot_source" not in score_text.validation_doc(10, {}, [])
+    assert "hotspot_source" in score_text.validation_doc(56, {}, [{"id": "seksyen-25"}])
+    doc = json.loads((ROOT / "app" / "data" / "areas" / "johor" / "indexes.json").read_text(encoding="utf-8"))
+    assert doc["method"] == bs.method_doc(ii.PLACES["johor"]) and "hotspot_source" not in doc["validation"]
+
+
+def busy(code: int = 502):
+    import urllib.error
+    return urllib.error.HTTPError("https://overpass.example/api", code, "busy", {}, None)
+
+
+def test_a_busy_server_is_asked_again_after_a_wait_and_other_errors_are_not():
+    calls = []
+
+    def post(query):
+        calls.append(query)
+        if len(calls) < 3:
+            raise busy()
+        return {"elements": []}
+
+    assert fs.patient(post, wait_s=0, rounds=5)("q") == {"elements": []} and len(calls) == 3
+    with pytest.raises(Exception) as error:
+        fs.patient(lambda query: (_ for _ in ()).throw(busy(400)), wait_s=0)("q")
+    assert error.value.code == 400
+    tries = []
+    with pytest.raises(Exception):
+        fs.patient(lambda query: tries.append(query) or (_ for _ in ()).throw(busy()), wait_s=0, rounds=2)("q")
+    assert len(tries) == 2
+
+
+def test_kept_parts_are_named_by_their_question(tmp_path):
+    asked = []
+
+    def post(query):
+        asked.append(query)
+        return {"elements": [{"type": "way", "id": len(asked)}], "osm3s": {"timestamp_osm_base": "2026-11-28T00:00:00Z"}}
+
+    box = (100.0, 1.0, 102.0, 3.0)
+    fs.fetch(fs.roads_query, box, 2, tmp_path, post)
+    fs.fetch(fs.roads_query, box, 2, tmp_path, post)
+    assert len(asked) == 4, "the second run reuses the kept parts"
+    fs.fetch(fs.drains_query, box, 2, tmp_path, post)
+    assert len(asked) == 8, "another question does not take the roads' parts"

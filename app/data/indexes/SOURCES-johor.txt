@@ -17,8 +17,11 @@ johor_ffpi.tif: 1815850 bytes, SHA-256 96088ddf477038ead7611c3da241275338d7fcf36
 johor_ffpi.png: 298895 bytes, SHA-256 399b43eb0ea7042a2eae06573ccabb7add221b642d3d7ae383cd6f6842b1dbd0
 johor_ffpi.json: 6083 bytes, SHA-256 b0c1f41dc80fb0db326296a02fd741bdbba0dab58c0863007b77213a7a59c4bb
 
-Other inputs: app/data/dem/johor_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES.txt) and the
-outline, johor/districts/districts.geojson ((c) OpenStreetMap contributors, ODbL).
+Other inputs: app/data/dem/johor_surface.tif (Copernicus GLO-30, see app/data/dem/SOURCES-johor.txt) and
+the outline, johor/districts/districts.geojson ((c) OpenStreetMap contributors, ODbL).
+
+The map layer johor_ffpi.png is one picture of the whole state, on squares even in latitude; a web map draws
+it between its corners, so it sits up to about 23 m off (a quarter of a square) at its middle row.
 
 Downloaded inputs (in ../05_Raw_Data_Sources/johor/indexes, listed in its SOURCES.md)
 ------------------------------------------------------------

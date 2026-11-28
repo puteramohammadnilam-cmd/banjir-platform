@@ -2,7 +2,10 @@
 tools/build_lowground.py from the elevation crops in app/data/dem (app/elevation.py reads the same folder).
 
 What it is: a picture per level of the squares (about 31 m) whose lowest height above the nearest mapped OpenStreetMap
-river, over the 3 x 3 squares around them, is at or below that level, shaded darker the lower they sit. It is never a
+river, over the 3 x 3 squares around them, is at or below that level, shaded darker the lower they sit (a state's
+squares, about 92 m, each already the lowest of the nine 30 m heights in them, go by their own height). A state's
+picture spans about 1.6 degrees of latitude, so drawn between its corners on a web map it sits up to about 23 m off at
+its middle row (a quarter of a square); a city's, under 2 m. It is never a
 flood forecast or extent: banks, drains and pumps are left out, and land that is not shaded can still flood. Beyond 3 km
 of a mapped river there is no height above a river, so no shading.
 

@@ -22,6 +22,7 @@ Data (c) OpenStreetMap contributors, ODbL 1.0.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import sys
@@ -103,7 +104,8 @@ def fetch(query_of: Callable[[Box], str], box: Box, n: int, parts: Path, post: f
     parts.mkdir(parents=True, exist_ok=True)
     answers = []
     for k, part in enumerate(tiles(box, n), 1):
-        kept = parts / f"{n}x{n}_{k}.json"
+        query = query_of(part)
+        kept = parts / f"{n}x{n}_{k}_{hashlib.sha256(query.encode()).hexdigest()[:12]}.json"   # changed: asked anew
         if not kept.exists():
             print(f"  part {k} of {n * n}", flush=True)
             kept.write_text(json.dumps(ask_box(query_of, part, patient(post)), separators=(",", ":")), encoding="utf-8")
