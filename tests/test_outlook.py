@@ -65,7 +65,7 @@ def fresh(monkeypatch):
 
 
 def met(monkeypatch, rows=MET_ROWS, warnings=(HULU_ONLY, SEA, PETALING, STATE_WIDE)):
-    monkeypatch.setattr(outlook, "_fetch_forecast", lambda location_id: [r for r in rows if r["location"]["location_id"] == location_id])
+    monkeypatch.setattr(outlook, "_fetch_forecast", lambda location_id: [r for r in rows if r["location"]["location_id"].startswith(location_id)])
     monkeypatch.setattr(outlook, "_fetch_warnings", lambda: list(warnings))
 
 
@@ -311,6 +311,22 @@ def test_the_endpoint_answers_for_an_area_and_a_section(monkeypatch):
     assert not math.isnan(found["data"]["outlook"]["days"][0]["rain_mm"])
 
 
+def test_a_whole_state_s_weather_is_asked_at_its_main_town_and_says_so(monkeypatch):
+    from app import areas
+    met(monkeypatch)
+    asked = []
+    monkeypatch.setattr(googlemaps, "rain_days", lambda lat, lon, days: asked.append((lat, lon)) or RAIN)
+    client = TestClient(main.app)
+    state = client.get("/api/outlook?area=johor").json()["data"]["outlook"]
+    district = client.get("/api/outlook?area=johor&section=muar").json()["data"]["outlook"]
+    city = client.get("/api/outlook?area=shah-alam").json()["data"]["outlook"]
+    assert (state["at"], district["at"], city["at"]) == ("Johor Bahru", None, None)
+    johor = areas.get("johor")
+    lon, lat = johor.weather_at["point"]
+    assert asked[0] == (lat, lon) == johor.centre() and johor.contains(lat, lon)
+    assert areas.get("shah-alam").weather_at is None
+
+
 def test_every_area_and_every_district_of_a_state_has_a_metmalaysia_place_that_fits():
     from app import areas, sections
     for area in areas.load_all():
@@ -362,3 +378,19 @@ def test_the_arus_link_is_there_only_when_set_and_https(monkeypatch):
     for bad in ("http://arus.example/", "https://arus.example/{city}", "javascript:alert(1)"):
         monkeypatch.setenv("ARUS_URL", bad)
         assert build()["arus"] is None, bad
+
+
+def test_every_district_s_words_come_from_one_request_and_a_town_s_from_its_own(monkeypatch):
+    asked = []
+    rows = [{"location": {"location_id": loc}, "date": "2026-11-26", "summary_forecast": f"Hujan di {loc}",
+             "summary_when": ""} for loc in ("Ds083", "Ds084", "Ds090", "Tn070")]
+    monkeypatch.setattr(outlook, "_get_list", lambda url, params: asked.append(params) or [
+        r for r in rows if r["location"]["location_id"].startswith(params.get("contains", params.get("filter", "")).split("@")[0])])
+    monkeypatch.setattr(outlook, "_cache", {})
+    clock = lambda: 0.0  # noqa: E731
+    assert outlook.forecast_for("johor", clock, "muar")["2026-11-26"]["text"] == "Hujan di Ds083"
+    assert outlook.forecast_for("johor", clock, "batu-pahat")["2026-11-26"]["text"] == "Hujan di Ds084"
+    assert outlook.forecast_for("johor", clock, "johor-bahru")["2026-11-26"]["text"] == "Hujan di Ds090"
+    assert outlook.forecast_for("shah-alam", clock)["2026-11-26"]["text"] == "Hujan di Tn070"
+    assert asked == [{"contains": "Ds@location__location_id", "limit": outlook.ALL_LIMIT},
+                     {"filter": "Tn070@location__location_id", "limit": "10"}]

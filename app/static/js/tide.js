@@ -17,6 +17,14 @@ export const malaysiaToday = (now = new Date()) => now.toLocaleDateString("en-CA
 /** The tide answer when it is still today's, else null: a page left open past midnight must not show yesterday's tides. */
 export const current = (found, now = new Date()) => (found && found.date === malaysiaToday(now) ? found : null);
 
+/** Today's tide for the flood checklist of `place`, from the page's own answer `found`: only for a place in the page's
+ *  area (page {areaId}) and, when the gauge was picked for one district (found.section), in that district. */
+export function tideForPlace(found, place, page, now = new Date()) {
+  const section = typeof place?.section === "string" ? place.section : place?.section?.id ?? null;
+  const isHere = place?.area_id === page.areaId && (!found?.section || section === found.section);
+  return isHere ? current(found, now) : null;
+}
+
 /** "9 Oct": a Malaysian date, as the page's language writes it. */
 export const dayText = (iso, locale = dateLocale()) =>
   new Date(`${iso}T12:00:00+08:00`).toLocaleDateString(locale, { day: "numeric", month: "short", timeZone: "Asia/Kuala_Lumpur" });

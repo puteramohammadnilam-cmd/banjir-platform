@@ -141,7 +141,7 @@ Every answer is JSON in one envelope: `{success, data, error}`. Responses of 1 K
 | POST `/api/voice` | `{audio, place, area_id, section_id, history}`. A spoken question as 16 kHz mono WAV (30 s, 1 MB at most). Gemini writes down the words, which are then asked like a typed question. Returns `{question, language, answer}`. |
 | POST `/api/estimate` | `{place, …the owner's figures}`. The ringgit estimate, no AI. |
 | POST `/api/news` | `{area_id, section_id}`. Gemini grounded on Google Search: the latest flood news for the area, with sources. The question is fixed in code. |
-| GET `/api/rain?area=&section=` | Rain expected in the next 12 hours, from Google Weather, at the centre of the area or of one of its sections |
+| GET `/api/rain?area=&section=` | Rain expected in the next 12 hours, from Google Weather, at the centre of the area or of one of its sections (a district's main town). An area whose middle is no real place (a state) names a town in `area.json` `weather_at`, asked for the whole area and named in the answer's `at` (Johor: Johor Bahru); the 5-day outlook does the same |
 | GET `/api/outlook?area=&section=` | The "Next 5 days" card: each day's rain from Google Weather (one call, inside the free cap), MetMalaysia's forecast words and any rain or thunderstorm warning covering the area (data.gov.my, kept an hour for everyone), big-tide days, and a level (low, watch, high) from fixed rules set on past floods; `app/outlook.py` says how. The page asks only when the card scrolls into view. Not a flood warning. |
 | GET `/api/place/{id}` | How Google Maps lists a mapped business. 404 for a point id. |
 

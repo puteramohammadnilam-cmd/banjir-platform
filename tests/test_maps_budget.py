@@ -130,7 +130,7 @@ def test_the_page_and_the_chat_say_the_free_allowance_is_used_up(monkeypatch):
     monkeypatch.setenv("MAPS_PLACES_MONTHLY_LIMIT", "0")
     posts, gets = fake_places(monkeypatch), fake_weather(monkeypatch)
     client = TestClient(main.app)
-    assert client.get("/api/rain").json()["data"] == {"configured": True, "rain": None, "capped": True, "until": "month"}
+    assert client.get("/api/rain").json()["data"] == {"configured": True, "rain": None, "capped": True, "until": "month", "at": None}
     assert client.get(f"/api/place/{KNOWN['id']}").json()["data"] == {"configured": True, "place": None, "capped": True,
                                                                        "until": "month"}
     assert floodtools.rain_forecast() == {"error": floodtools.MAPS_CAPPED}
@@ -198,7 +198,7 @@ def test_the_page_and_the_chat_say_todays_share_is_back_tomorrow(monkeypatch):
         raise googlemaps.DailyShareReached("weather: today's share")
     monkeypatch.setattr(googlemaps, "_spend", share_used)
     client = TestClient(main.app)
-    assert client.get("/api/rain").json()["data"] == {"configured": True, "rain": None, "capped": True, "until": "tomorrow"}
+    assert client.get("/api/rain").json()["data"] == {"configured": True, "rain": None, "capped": True, "until": "tomorrow", "at": None}
     assert client.get(f"/api/place/{KNOWN['id']}").json()["data"]["until"] == "tomorrow"
     assert floodtools.rain_forecast() == {"error": floodtools.MAPS_CAPPED_DAY}
     from app import outlook

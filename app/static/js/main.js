@@ -17,7 +17,7 @@ import { createPlanCard, planFigures } from "./plan.js";
 import { syncReferenceNav, wireReferenceNav } from "./reference.js";
 import { MAX_PHOTOS } from "./stock.js";
 import { createFloodMode } from "./floodmode.js";
-import { current } from "./tide.js";
+import { tideForPlace } from "./tide.js";
 import { buildAreaReport } from "./area-report.js";
 import { addCompared, createCompareCard, readCompared, saveCompared } from "./compare.js";
 import { initialState, rememberPlace, sectionFinder, wireFinder } from "./pick.js";
@@ -261,10 +261,8 @@ function floodContext(app) {
     stock: state.stocks[id], dry: state.drySpots[id], tide: tideFor(app, placeOf(app, state)) };
 }
 
-/** The tide for the checklist: only for a place in the area on show (its gauge is that area's), and only today's. */
-function tideFor(app, place) {
-  return place?.area_id === app.start.area.id ? current(app.store.state.tide?.data) : null;
-}
+/** The tide for the checklist: only for a place the page's gauge is for (tide.js tideForPlace), and only today's. */
+const tideFor = (app, place) => tideForPlace(app.store.state.tide?.data, place, pageOf(app));
 
 /** Where to move the car, for a business or a point: asked once per place, and again when a place whose answer was an
  *  error is picked again (select, open). render asks for a place it has no answer for. */
@@ -305,7 +303,7 @@ function loadRain(app) {
   if (!app.start.status.maps_ready) return;
   app.store.update({ rain: { configured: true, busy: true } });   // the tile is in the grid ("…") from the start, so nothing jumps when the answer comes
   api.getRain(app.start.area.id, app.start.section?.id).then(
-    ({ configured, rain, capped, until }) => app.store.update({ rain: { configured, data: rain, capped: Boolean(capped), until } }),
+    ({ configured, rain, capped, until, at }) => app.store.update({ rain: { configured, data: rain, capped: Boolean(capped), until, at } }),
     () => app.store.update({ rain: { configured: true, error: true } }));
 }
 

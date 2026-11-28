@@ -27,6 +27,9 @@ area.json fields:
                 named (optional, null)
   show_index_score  whether the page and the assistant may show the multi-criteria score of indexes.json, which is
                 held back until someone has looked at how it compares with the recorded floods (optional, false)
+  weather_at    where rain and the next five days are asked for over the whole area, {"name": text, "point": [lon,
+                lat]} inside the view (a state's main town, as the middle of a state can be forest), or null for the middle
+                of the view; the page says the name (optional, null)
   losses        flood losses to business premises as an official source counted them, for the Reference tab:
                 {"places": [names], "years": [{"year": YYYY, "rm_thousand": [one number per place, 0 for none]}],
                 "note": text, "source": text}, or null (optional, null)
@@ -62,7 +65,7 @@ TEXT_FIELDS = ("name", "display_name", "ai_name", "news_place", "news_region")
 REQUIRED = frozenset({"id", "view", "zoom", *TEXT_FIELDS})
 OPTIONAL = {"default": False, "council": None, "notes": {}, "history": None, "bigger_flood_example": None,
             "aliases": [], "section_word": None, "default_section": None, "flash_flood_example": None,
-            "show_index_score": False, "losses": None}
+            "show_index_score": False, "losses": None, "weather_at": None}
 ALIAS_FIELDS = frozenset({"id", "section", "names"})
 LANGUAGES = frozenset({"en", "ms"})
 SECTIONS_FILE = "sections.json"
@@ -100,13 +103,17 @@ class Area:
     flash_flood_example: str | None = None
     show_index_score: bool = False
     losses: Mapping | None = field(default=None, hash=False, repr=False)   # read-only, as _freeze leaves it
+    weather_at: Mapping | None = field(default=None, hash=False)   # {"name", "point": (lon, lat)}, read-only
 
     def contains(self, lat: float, lon: float) -> bool:
         west, south, east, north = self.view
         return west <= lon <= east and south <= lat <= north
 
     def centre(self) -> tuple[float, float]:
-        """(lat, lon) of the middle of the view."""
+        """(lat, lon) where the whole area's weather is asked for: weather_at's point, else the middle of the view."""
+        if self.weather_at:
+            lon, lat = self.weather_at["point"]
+            return lat, lon
         west, south, east, north = self.view
         return (south + north) / 2, (west + east) / 2
 
@@ -167,7 +174,7 @@ def _load(folder: Path) -> Area:
                 bigger_flood_example=config["bigger_flood_example"], aliases=_freeze(config["aliases"]),
                 section_word=_freeze(config["section_word"]), default_section=config["default_section"],
                 flash_flood_example=config["flash_flood_example"], show_index_score=config["show_index_score"],
-                losses=_freeze(config["losses"]))
+                losses=_freeze(config["losses"]), weather_at=_freeze(config["weather_at"]))
 
 
 def _freeze(value):
@@ -226,6 +233,8 @@ def _problems(raw: dict, folder: str) -> list[str]:
         'losses must be null or {"places", "years", "note", "source"}: different names, and years oldest first, each with a '
         'number per place':
             config["losses"] is None or _is_losses(config["losses"]),
+        'weather_at must be null or {"name": text, "point": [lon, lat]} inside the view':
+            config["weather_at"] is None or _is_weather_at(config["weather_at"], config.get("view")),
     }
     return [problem for problem, passed in checks.items() if not passed]
 
@@ -275,6 +284,14 @@ def _is_history(history) -> bool:
 
 
 LOSS_FIELDS = frozenset({"places", "years", "note", "source"})
+
+
+def _is_weather_at(found, view) -> bool:
+    point = found.get("point") if isinstance(found, dict) else None
+    return (isinstance(found, dict) and found.keys() == {"name", "point"} and _is_text(found["name"])
+            and isinstance(point, list) and len(point) == 2 and all(_is_number(v) for v in point)
+            and isinstance(view, list) and len(view) == 4 and all(_is_number(v) for v in view)
+            and view[0] <= point[0] <= view[2] and view[1] <= point[1] <= view[3])
 
 
 def _is_losses(losses) -> bool:

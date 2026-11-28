@@ -16,6 +16,7 @@ MAX_TEXT = 80
 MAX_KM = 10                   # a gauge further away says little about this place: none is given
 SAME_SITE_M = 200             # an "(F2)" station this close to an older one is the same site: the older one is kept
 M_PER_DEG = 111_320
+CELL_DEG = 0.1                # gauges are kept by cells this wide, so a lookup reads the few cells within MAX_KM
 
 
 @lru_cache(maxsize=1)
@@ -44,13 +45,36 @@ def _metres(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return math.hypot(dx, (lat2 - lat1) * M_PER_DEG)
 
 
+_by_cell: dict = {}   # {"of": the listed() tuple they were made from, "cells": ...}: made again when that changes
+
+
+def _cells() -> dict[tuple[int, int], tuple[dict, ...]]:
+    """Every gauge by its CELL_DEG cell (lat, lon), in file order; made once for each listed() (tests reload it)."""
+    gauges = listed()
+    if _by_cell.get("of") is not gauges:
+        found: dict[tuple[int, int], list[dict]] = {}
+        for g in gauges:
+            found.setdefault((math.floor(g["lat"] / CELL_DEG), math.floor(g["lon"] / CELL_DEG)), []).append(g)
+        _by_cell.update(of=gauges, cells={cell: tuple(gs) for cell, gs in found.items()})
+    return _by_cell["cells"]
+
+
+def _candidates(lat: float, lon: float, pad_lat: float, pad_lon: float) -> list[dict]:
+    """The gauges in the cells the box of pad_lat by pad_lon degrees around the spot touches."""
+    cells = _cells()
+    rows = range(math.floor((lat - pad_lat) / CELL_DEG), math.floor((lat + pad_lat) / CELL_DEG) + 1)
+    cols = range(math.floor((lon - pad_lon) / CELL_DEG), math.floor((lon + pad_lon) / CELL_DEG) + 1)
+    return [g for r in rows for c in cols for g in cells.get((r, c), ())]
+
+
 def nearest(lat: float, lon: float) -> dict | None:
     """{id, name, river, distance_m} of the nearest gauge within MAX_KM (the page links to JPS's graph by the id),
     preferring an older station to an
     "(F2)" one at the same site; None when none is that close."""
     pad = MAX_KM * 1000 / M_PER_DEG
-    near = sorted(((_metres(lat, lon, g["lat"], g["lon"]), g) for g in listed()
-                   if abs(g["lat"] - lat) <= pad and abs(g["lon"] - lon) <= pad / max(math.cos(math.radians(lat)), 0.1)),
+    pad_lon = pad / max(math.cos(math.radians(lat)), 0.1)
+    near = sorted(((_metres(lat, lon, g["lat"], g["lon"]), g) for g in _candidates(lat, lon, pad, pad_lon)
+                   if abs(g["lat"] - lat) <= pad and abs(g["lon"] - lon) <= pad_lon),
                   key=lambda pair: (pair[0], pair[1]["id"]))
     near = [(d, g) for d, g in near if d <= MAX_KM * 1000]
     if not near:

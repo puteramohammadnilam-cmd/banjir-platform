@@ -71,3 +71,27 @@ def test_the_tide_outlook_gives_the_next_run_of_big_tides_or_until_when():
     assert ahead["next_big"] == {"from": "2026-10-09", "to": "2026-10-13"}
     during = tide.today("shah-alam", datetime(2026, 10, 10, 4, tzinfo=timezone.utc))
     assert during["next_big"]["from"] == during["date"] and during["big"] is True
+
+
+def test_the_nearest_gauge_read_by_cells_is_the_one_a_full_search_finds():
+    import math
+    import random
+
+    def full(lat, lon):
+        within = sorted(((gauges._metres(lat, lon, g["lat"], g["lon"]), g) for g in gauges.listed()),
+                        key=lambda pair: (pair[0], pair[1]["id"]))
+        within = [(d, g) for d, g in within if d <= gauges.MAX_KM * 1000]
+        if not within:
+            return None
+        best_d, best = within[0]
+        if "(F2)" in best["name"]:
+            best_d, best = next(((d, g) for d, g in within if "(F2)" not in g["name"] and d - best_d <= gauges.SAME_SITE_M),
+                                (best_d, best))
+        return {"id": best["id"], "name": best["name"], "river": best.get("river") or None, "distance_m": round(best_d)}
+
+    gauges.listed.cache_clear()
+    picked = random.Random(7)
+    spots = [(picked.uniform(0.8, 7.5), picked.uniform(99.5, 119.5)) for _ in range(1500)]
+    spots += [(g["lat"] + picked.uniform(-0.1, 0.1), g["lon"] + picked.uniform(-0.1, 0.1)) for g in gauges.listed()[::3]]
+    assert all(gauges.nearest(lat, lon) == full(lat, lon) for lat, lon in spots)
+    assert any(gauges.nearest(lat, lon) for lat, lon in spots) and not math.isnan(spots[0][0])

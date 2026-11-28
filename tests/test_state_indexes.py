@@ -303,3 +303,33 @@ def test_kept_parts_are_named_by_their_question(tmp_path):
     assert len(asked) == 4, "the second run reuses the kept parts"
     fs.fetch(fs.drains_query, box, 2, tmp_path, post)
     assert len(asked) == 8, "another question does not take the roads' parts"
+
+
+# --- Johor polish ---
+
+def test_a_district_page_sends_the_relief_centres_in_reach_and_every_shop_s_own():
+    from app import areas, sections
+    johor = areas.get("johor")
+    counts = {}
+    for section in sections.listed("johor"):
+        sent = sections.section_data(johor, section)["town"]["shelters"]
+        counts[section["id"]] = len(sent)
+        names = {s["name"] for s in sent}
+        assert all(p["shelter"]["name"] in names for p in sections.section_premises("johor", section["id"]) if p.get("shelter"))
+    assert counts["tangkak"] == 0 and counts["johor-bahru"] > 0 and max(counts.values()) < len(areas.town("johor")["shelters"])
+    assert sections.city_data(johor)["town"]["shelters"] == areas.town("johor")["shelters"], "the whole state keeps all"
+
+
+def test_the_chat_s_rain_for_a_whole_state_names_its_town(monkeypatch):
+    from app import areas, floodtools, googlemaps, sections
+    seen = []
+    monkeypatch.setattr(googlemaps, "rain_outlook", lambda lat, lon, hours: seen.append((lat, lon)) or {"total_mm": 3})
+    johor = areas.get("johor")
+    for section, town in ((None, "Johor Bahru"), (sections.get(johor, "muar"), None)):
+        token = floodtools.start_question(johor, None, section)
+        try:
+            found = floodtools.rain_forecast()
+        finally:
+            floodtools.end_question(token)
+        assert found["total_mm"] == 3 and found.get("town") == town
+    assert seen[0] == johor.centre() and seen[1] == sections.centre(sections.get(johor, "muar"))

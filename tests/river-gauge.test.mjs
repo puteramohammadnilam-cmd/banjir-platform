@@ -5,7 +5,7 @@ import { beforeEach, test } from "node:test";
 import { checklist } from "../app/static/js/floodmode.js";
 import { useLang } from "../app/static/js/i18n.js";
 import { gaugeFact, gaugeLine, graphLink } from "../app/static/js/river-gauge.js";
-import { current, dayText, malaysiaToday, outlookText, tideLine } from "../app/static/js/tide.js";
+import { current, dayText, malaysiaToday, outlookText, tideForPlace, tideLine } from "../app/static/js/tide.js";
 import { installFakeDom } from "./fake_dom.mjs";
 import { shop } from "./point_fixtures.mjs";
 
@@ -56,4 +56,19 @@ test("the big tide outlook reads as dates, in both languages", () => {
   assert.match(outlookText(TIDE), /^Air pasang besar seterusnya: 9 Okt hingga 13 Okt\.$/);
   assert.match(gaugeLine({ gauge: GAUGE }).textContent, /Pantau sungai di Sg\. Test/);
   assert.ok(!/\b(safe|selamat)\b/i.test(gaugeFact({ gauge: GAUGE }).textContent + outlookText(TIDE)));
+});
+
+test("a district's tide is given only to places in that district; a city's one gauge to all its places", () => {
+  const now = new Date("2026-11-28T04:00:00Z");
+  const district = { date: "2026-11-28", station: "Keling", section: "muar", highs: ["10:05"] };
+  const city = { ...district, station: "Port Klang", section: null };
+  const page = { areaId: "johor", sectionId: "muar" };
+  assert.equal(tideForPlace(district, { area_id: "johor", section: "muar" }, page, now), district);
+  assert.equal(tideForPlace(district, { area_id: "johor", section: { id: "muar", name: "Muar" } }, page, now), district);
+  assert.equal(tideForPlace(district, { area_id: "johor", section: "kluang" }, page, now), null, "inland Kluang is not Muar's gauge");
+  assert.equal(tideForPlace(district, { area_id: "johor", section: null }, page, now), null);
+  const cityPage = { areaId: "shah-alam", sectionId: "seksyen-13" };
+  assert.equal(tideForPlace(city, { area_id: "shah-alam", section: "seksyen-25" }, cityPage, now), city);
+  assert.equal(tideForPlace(city, { area_id: "johor", section: "muar" }, cityPage, now), null, "another area");
+  assert.equal(tideForPlace({ ...district, date: "2026-11-27" }, { area_id: "johor", section: "muar" }, page, now), null, "not today's");
 });

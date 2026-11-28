@@ -118,10 +118,12 @@ def test_each_coastal_district_of_a_state_has_its_gauges_tide_and_how_far_it_is(
     for section_id in COASTAL:
         found = tide.today(STATE, when, section_id)
         assert found["highs"] and found["km"] == listed[section_id]["km"] and 0 < found["typical_error_m"] < 0.2, section_id
+        assert found["section"] == section_id, "the page gives it only to places in that district"
     assert tide.today(STATE, when, "muar")["station"] == "Keling" and tide.today(STATE, when, "johor-bahru")["km"] == 3
     for nowhere in ("kluang", "kulai", "segamat", None):   # no coast, and no one tide for the whole state
         assert tide.today(STATE, when, nowhere) is None, nowhere
     assert tide.today(CITY, when)["km"] is None and tide.today(CITY, when, "seksyen-25")["station"] == BUILT["station"]
+    assert tide.today(CITY, when)["section"] is None and tide.today(CITY, when, "seksyen-25")["section"] is None
 
 
 def test_a_districts_gauge_list_that_does_not_fit_stops_the_server(monkeypatch, fresh):

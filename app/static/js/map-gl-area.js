@@ -96,7 +96,7 @@ export function createAreaPanel({ panel, scope, status, areas, on }) {
       on.redraw();
     };
     if (status?.maps_ready) {
-      api.getRain(now.areaId, now.sectionId).then(({ configured, rain, capped, until }) => keep("rain")({ configured, data: rain, capped: Boolean(capped), until }),
+      api.getRain(now.areaId, now.sectionId).then(({ configured, rain, capped, until, at }) => keep("rain")({ configured, data: rain, capped: Boolean(capped), until, at }),
         () => keep("rain")({ configured: true, error: true }));
     }
     settled(api.getEvacuation(now.areaId, now.sectionId), ({ centres }) => ({ data: centres })).then(keep("evacuation"));

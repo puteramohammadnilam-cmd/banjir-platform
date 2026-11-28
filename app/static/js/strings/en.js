@@ -95,6 +95,7 @@ export default Object.freeze({
 
   // ---------- Area overview: overview.js ----------
   "overview.rainDue": "Rain due in the next {hours} hours",
+  "overview.rainDueAt": "Rain due in {place} in the next {hours} hours",
   "overview.rainChecking": "Checking Google Weather",
   "overview.rainNoAnswer": "Google Weather did not answer just now",
   "overview.rainCapped": "This month's free Google Weather checks are used up. Back on the 1st",

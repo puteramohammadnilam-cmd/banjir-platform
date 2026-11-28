@@ -571,7 +571,7 @@ def rain_forecast() -> dict:
 
     Returns:
         Total rain in millimetres, the wettest hour, the highest chance of rain and the current
-        condition, or an error. Not a flood warning: heavy rain makes local floods likelier, but it
+        condition (for a whole state, `town`: the town it is for), or an error. Not a flood warning: heavy rain makes local floods likelier, but it
         cannot tell if a shop will flood.
     """
     # The model may repeat the caveat above word for word, so it stays well under chatguard.COPIED_RUN_WORDS (24);
@@ -588,7 +588,9 @@ def rain_forecast() -> dict:
         return {"error": MAPS_CAPPED}
     except googlemaps.UpstreamError:
         return {"error": MAPS_DOWN}
-    return {**{key: outlook[key] for key in RAIN_FIELDS if key in outlook},
+    area, section = current_area(), current_section()
+    town = area.weather_at["name"] if area is not None and area.weather_at and section is None else None
+    return {**{key: outlook[key] for key in RAIN_FIELDS if key in outlook}, **({"town": town} if town else {}),
             "note": "Weather forecast only. For flood warnings check JPS Public Infobanjir."}
 
 

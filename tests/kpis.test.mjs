@@ -45,6 +45,14 @@ test("the rain tile shows its figure when Google Weather is configured", () => {
   assert.match(rain.textContent, /60%/);
 });
 
+test("a whole state's rain tile says the town it is for", () => {
+  const { kpis, rain } = mount();
+  kpis.setRain({ ...RAIN, at: "Johor Bahru" });
+  assert.match(rain.textContent, /Rain due in Johor Bahru in the next/);
+  kpis.setRain({ ...RAIN, at: null });
+  assert.doesNotMatch(rain.textContent, /Johor Bahru/);
+});
+
 test("the rain tile shows while it is asked, and with a dash when the answer failed", () => {
   const { kpis, rain } = mount();
   kpis.setRain({ configured: true, busy: true });

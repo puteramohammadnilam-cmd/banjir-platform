@@ -36,6 +36,7 @@ the city or to one section.
 """
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Mapping
 from functools import lru_cache
@@ -450,10 +451,22 @@ def section_cells(area_id: str, section_id: str) -> tuple[list, ...]:
     return tuple(cell for cell in built["cells"] if overlaps_view(section["bbox"], cell[0], cell[1], size, size))
 
 
+def shelters_near(area_id: str, section: Mapping) -> list[dict]:
+    """The area's relief centres a business or point in the section can be sent to: those within the reach of a
+    nearest centre (places.SHELTER_REACH_M) of the section's box. A state lists a few towns' centres; a district far
+    from all of them gets none, and its page says nothing of relief centres."""
+    from . import places   # places reads this module: asked here, not at import
+    west, south, east, north = section["bbox"]
+    margin = places.SHELTER_REACH_M / (geo.M_PER_DEG * math.cos(math.radians(max(abs(south), abs(north)))))
+    return [s for s in areas.town(area_id)["shelters"] if geo.in_bbox(s["lon"], s["lat"], section["bbox"], margin)]
+
+
 def section_data(area: areas.Area, section: Mapping) -> dict:
-    """GET /api/areas/{id}/sections/{sid}/data, less the limits main.py adds."""
+    """GET /api/areas/{id}/sections/{sid}/data, less the limits main.py adds; its town's relief centres are those near
+    it (shelters_near)."""
     built = areas.town(area.id)
-    town = {**built, "view": list(section["bbox"]), "cells": section_cells(area.id, section["id"])}
+    town = {**built, "view": list(section["bbox"]), "cells": section_cells(area.id, section["id"]),
+            "shelters": shelters_near(area.id, section)}
     return {"area": details(area, section["id"]), "section": public(section, area.id),
             "sections": [{"id": item["id"], "name": item["name"]} for item in listed(area.id)],
             "town": town, "premises": section_premises(area.id, section["id"])}

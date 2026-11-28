@@ -153,7 +153,8 @@ def check(area_id: str, now: datetime | None = None) -> None:
 def today(area_id: str, now: datetime | None = None, section_id: str | None = None) -> dict | None:
     """What GET /api/tide sends: today's highs and lows (Malaysian time), the day's range and whether it is a big tide,
     the next high tide from now, the next run of big-tide days within two weeks, and for a state's district the
-    gauge's distance from its main town (`km`); None without a table or outside the dates it covers."""
+    gauge's distance from its main town (`km`) and the district it was picked for (`section`: null for a city's one
+    gauge); None without a table or outside the dates it covers."""
     found = doc(area_id, section_id)
     if found is None:
         return None
@@ -170,4 +171,5 @@ def today(area_id: str, now: datetime | None = None, section_id: str | None = No
             "next_high": {"time": shown(coming[0][11:]), "tomorrow": not coming[0].startswith(date)} if coming else None,
             "next_big": next_big(area_id, now, section_id),
             "typical_error_m": found["typical_error_m"], "source": found["source"], "fit": found.get("fit"),
-            "km": (gauges(area_id) or {}).get(section_id, {}).get("km")}
+            "km": (gauges(area_id) or {}).get(section_id, {}).get("km"),
+            "section": section_id if section_id in (gauges(area_id) or {}) else None}

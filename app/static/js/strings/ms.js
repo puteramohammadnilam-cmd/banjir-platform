@@ -96,6 +96,7 @@ export default Object.freeze({
 
   // ---------- Area overview: overview.js ----------
   "overview.rainDue": "Hujan dijangka dalam {hours} jam akan datang",
+  "overview.rainDueAt": "Hujan dijangka di {place} dalam {hours} jam akan datang",
   "overview.rainChecking": "Menyemak Google Weather",
   "overview.rainNoAnswer": "Google Weather tidak menjawab buat masa ini",
   "overview.rainCapped": "Semakan percuma Google Weather bulan ini sudah habis. Ada semula pada 1 haribulan",

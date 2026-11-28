@@ -510,6 +510,27 @@ def test_malformed_losses_are_rejected(tmp_path, bad):
         areas.load_all(tmp_path)
 
 
+@pytest.mark.parametrize("bad", [
+    {"name": "Town", "point": [200.0, 3.0]},          # outside the view
+    {"name": "", "point": [101.5, 3.0]},
+    {"name": "Town", "point": [101.5]},
+    {"name": "Town", "point": [101.5, 3.0], "extra": 1},
+    "Town",
+])
+def test_a_weather_point_must_be_named_and_inside_the_view(tmp_path, bad):
+    write_area(tmp_path, "test-town", {**GOOD, "weather_at": bad})
+    with pytest.raises(areas.AreaError, match="weather_at must be"):
+        areas.load_all(tmp_path)
+
+
+def test_a_weather_point_is_where_the_whole_area_s_weather_is_asked(tmp_path):
+    west, south, east, north = GOOD["view"]
+    point = [west + (east - west) / 4, south + (north - south) / 4]
+    write_area(tmp_path, "test-town", {**GOOD, "weather_at": {"name": "Town", "point": point}})
+    (area,) = areas.load_all(tmp_path)
+    assert area.centre() == (point[1], point[0]) and area.weather_at["name"] == "Town"
+
+
 def test_a_business_whose_section_has_a_3d_bundle_says_so_and_no_other_does():
     for area in areas.load_all():
         baked = {path.stem for path in (areas.FLOOD3D_DIR / area.id).glob("*.json")}

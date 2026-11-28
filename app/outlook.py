@@ -55,6 +55,8 @@ RETRY_S = 300
 STALE_S = 86_400
 TIMEOUT_S = 5
 MAX_BYTES = 1_000_000
+ALL_DISTRICTS = "Ds"          # MetMalaysia's district places (Ds001 ...): one request gives all of them, about 400 KB
+ALL_LIMIT = "2000"            # rows: 168 districts x 7 days on 28 Nov 2026, with room
 CHUNK = 65_536
 MAX_TEXT = 80
 MAX_WARNINGS = 3
@@ -131,6 +133,10 @@ def _get_list(url: str, params: Mapping[str, str]) -> list:
 
 
 def _fetch_forecast(location_id: str) -> list:
+    """One place's rows; for ALL_DISTRICTS, every district's in one request (data.gov.my allows 4 a minute, and a
+    state's districts each asked on their own would pass that as a visitor goes round them)."""
+    if location_id == ALL_DISTRICTS:
+        return _get_list(FORECAST, {"contains": f"{ALL_DISTRICTS}@location__location_id", "limit": ALL_LIMIT})
     return _get_list(FORECAST, {"filter": f"{location_id}@location__location_id", "limit": "10"})
 
 
@@ -176,7 +182,8 @@ def forecast_for(area_id: str, clock: Callable[[], float] = time.monotonic, sect
         return None
     if found[0] is None:   # a whole state: no one place's words
         return {}
-    rows = _cached(f"forecast {found[0]}", lambda: _fetch_forecast(found[0]), clock)
+    asked = ALL_DISTRICTS if found[0].startswith(ALL_DISTRICTS) else found[0]
+    rows = _cached(f"forecast {asked}", lambda: _fetch_forecast(asked), clock)
     return None if rows is None else parse_forecast(rows, found[0])
 
 

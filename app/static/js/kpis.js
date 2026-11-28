@@ -49,7 +49,7 @@ function kpiTile(iconName, { hero = false, bar = false, art = false, name = "" }
 export const rainShown = (rain) => Boolean(rain?.configured || rain?.busy);
 
 function rainText(rain) {
-  const due = (hours) => t("overview.rainDue", { hours });
+  const due = (hours) => (rain?.at ? t("overview.rainDueAt", { hours, place: rain.at }) : t("overview.rainDue", { hours }));
   if (!rain || rain.busy) return ["…", due(RAIN_HOURS), t("overview.rainChecking")];
   if (rain.capped) return ["–", due(RAIN_HOURS), t(rain.until === "tomorrow" ? "overview.rainCappedDay" : "overview.rainCapped")];
   if (rain.error || !rain.data) return ["–", due(RAIN_HOURS), t("overview.rainNoAnswer")];
